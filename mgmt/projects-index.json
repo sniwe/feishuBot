@@ -1,13 +1,13 @@
 ﻿{
     "id":  "projects-index",
-    "root":  "C:\\Users\\Qub",
-    "updated":  "2026-03-10T16:32:46.2918316+08:00",
+    "root":  "C:\\Users\\rhyse\\codex_harness",
+    "updated":  "2026-03-10T16:38:16.6388423+08:00",
     "projects":  [
                      {
                          "id":  "toDo-test",
                          "name":  "toDo-test",
-                         "projectRoot":  "C:\\Users\\Qub\\toDo-test",
-                         "mapPath":  "C:\\Users\\Qub\\toDo-test\\mgmt\\projMap\\map.json",
+                         "projectRoot":  "C:\\Users\\rhyse\\toDo-test",
+                         "mapPath":  "C:\\Users\\rhyse\\toDo-test\\mgmt\\projMap\\map.json",
                          "status":  "active",
                          "updated":  "2026-03-10T08:24:04.6402361+08:00",
                          "projectType":  "application",
@@ -30,8 +30,8 @@
                      {
                          "id":  "audioTest",
                          "name":  "audioTest",
-                         "projectRoot":  "C:\\Users\\Qub\\audioTest",
-                         "mapPath":  "C:\\Users\\Qub\\audioTest\\mgmt\\projMap\\map.json",
+                         "projectRoot":  "C:\\Users\\rhyse\\audioTest",
+                         "mapPath":  "C:\\Users\\rhyse\\audioTest\\mgmt\\projMap\\map.json",
                          "status":  "active",
                          "updated":  "2026-03-10T08:24:04.7514225+08:00",
                          "projectType":  "application",
