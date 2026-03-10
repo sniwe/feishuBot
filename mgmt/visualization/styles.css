@@ -1,0 +1,132 @@
+:root {
+  --bg: #f7f7fb;
+  --panel: #ffffff;
+  --ink: #1f2430;
+  --subtle: #6b7280;
+  --line: #d1d7e0;
+  --accent: #2f80ed;
+  --cross: #e67e22;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at 20% 10%, #ffffff 0%, var(--bg) 70%);
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 0.2px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.meta button {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: calc(100vh - 57px);
+  transition: grid-template-columns 140ms ease;
+}
+
+.layout.collapsed {
+  grid-template-columns: 0 1fr;
+}
+
+.panel {
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+  padding: 14px;
+  overflow: hidden;
+}
+
+.layout.collapsed .panel {
+  padding: 0;
+  border-right: 0;
+}
+
+.panel h2 {
+  margin: 2px 0 12px;
+  font-size: 16px;
+}
+
+.navTools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.navTools button {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.panel label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 14px;
+}
+
+.hint {
+  color: var(--subtle);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.canvasWrap {
+  padding: 10px;
+  overflow: auto;
+}
+
+#mapCanvas {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(10, 20, 40, 0.04);
+  cursor: grab;
+}
+
+#mapCanvas.panning {
+  cursor: grabbing;
+}
+
+dialog {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+}

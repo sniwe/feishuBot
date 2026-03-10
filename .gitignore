@@ -1,0 +1,50 @@
+﻿# Root privacy/safety ignores for home-directory repo
+
+# OS / shell
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# User-private directories
+.ssh/
+.codex/sessions/
+.conda/
+.cache/
+.config/
+.local/
+.vscode/
+
+# Common heavy personal folders
+AppData/
+Desktop/
+Documents/
+Downloads/
+Music/
+Pictures/
+Videos/
+Contacts/
+Saved Games/
+Searches/
+
+# Tool caches / deps
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Generated global reports/artifacts
+mgmt/meta-map.json
+mgmt/propagation-report.json
+mgmt/refactor-global-report.json
+mgmt/visualization/graph-data.json
+mgmt/visualization/graph-data.js
+
+# Keep project runtime state out of git
+**/mgmt/projMap/threads/current-thread.json
+**/mgmt/projMap/state/thread-map-deltas.json

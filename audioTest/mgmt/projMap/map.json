@@ -1,0 +1,115 @@
+﻿{
+    "id":  "map:audioTest",
+    "type":  "project-map",
+    "name":  "audioTest",
+    "summary":  "Toy browser audio checkpoint player with keyboard controls",
+    "root":  "C:\\Users\\Qub\\audioTest",
+    "updated":  "2026-03-10T09:15:30.2730736+08:00",
+    "nodes":  [
+                  {
+                      "id":  "control:ui",
+                      "type":  "control",
+                      "name":  "src/public/index.html",
+                      "summary":  "Audio picker with streamlined progress bar UI, checkpoint tags, and custom playhead",
+                      "features":  [
+                                       {
+                                           "summary":  "Render upload/player interface with checkpoint overlays and playhead timestamp",
+                                           "flow":  [
+                                                        "e1"
+                                                    ]
+                                       }
+                                   ],
+                      "edges":  [
+                                    "e1"
+                                ],
+                      "critical":  true,
+                      "files":  [
+                                    "src/public/index.html",
+                                    "src/frontend/style.css"
+                                ],
+                      "children":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "module:audio-control",
+                      "type":  "module",
+                      "name":  "src/frontend/app.js",
+                      "summary":  "Loads selected audio, handles keyboard playback/seek, checkpoint drops, segment selection, loop playback, and saved-session restore",
+                      "features":  [
+                                       {
+                                           "summary":  "Space toggles play-pause, arrows seek +/-5s, Ctrl+arrows cycle spans, Ctrl+S saves full session state, and next launch restores from IndexedDB",
+                                           "flow":  [
+                                                        "e2",
+                                                        "e3",
+                                                        "e4"
+                                                    ]
+                                       }
+                                   ],
+                      "edges":  [
+                                    "e2",
+                                    "e3",
+                                    "e4"
+                                ],
+                      "critical":  true,
+                      "files":  [
+                                    "src/frontend/app.js"
+                                ],
+                      "children":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "io:file-url",
+                      "type":  "io",
+                      "name":  "URL.createObjectURL",
+                      "summary":  "In-memory object URL used for selected local audio file",
+                      "features":  [
+
+                                   ],
+                      "edges":  [
+
+                                ],
+                      "critical":  false,
+                      "files":  [
+
+                                ],
+                      "children":  [
+
+                                   ]
+                  }
+              ],
+    "edges":  [
+                  {
+                      "id":  "e1",
+                      "kind":  "control",
+                      "from":  "control:ui",
+                      "to":  "module:audio-control",
+                      "note":  "UI loads audio behavior module"
+                  },
+                  {
+                      "id":  "e2",
+                      "kind":  "io",
+                      "from":  "module:audio-control",
+                      "to":  "io:file-url",
+                      "via":  "handleFileChange"
+                  },
+                  {
+                      "id":  "e3",
+                      "kind":  "control",
+                      "from":  "module:audio-control",
+                      "to":  "module:audio-control",
+                      "note":  "Space toggles playback and arrows perform relative seeking"
+                  },
+                  {
+                      "id":  "e4",
+                      "kind":  "control",
+                      "from":  "module:audio-control",
+                      "to":  "module:audio-control",
+                      "note":  "Shift+Space creates checkpoints while Ctrl+arrows cycle spans that become active playback loops"
+                  }
+              ],
+    "children":  [
+
+                 ]
+}

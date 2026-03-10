@@ -1,0 +1,116 @@
+﻿:root {
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --accent: #0f766e;
+  --accent-2: #0b5f59;
+  --border: #e5e7eb;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: linear-gradient(160deg, #eef6ff 0%, var(--bg) 45%, #f4fff7 100%);
+  color: var(--text);
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.app {
+  width: 100%;
+  max-width: 560px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+h1 { margin: 0 0 16px; font-size: 1.5rem; }
+.row { display: flex; gap: 8px; }
+input {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 1rem;
+}
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  background: var(--accent);
+  color: white;
+}
+button:hover { background: var(--accent-2); }
+
+#todo-list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.edit-input {
+  min-width: 0;
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 0.95rem;
+}
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.done .label {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.edit { background: #2563eb; }
+.edit:hover { background: #1d4ed8; }
+
+.save { background: #15803d; }
+.save:hover { background: #166534; }
+
+.cancel {
+  background: #9ca3af;
+  color: #111827;
+}
+.cancel:hover { background: #6b7280; color: #ffffff; }
+
+.delete { background: #ef4444; }
+.delete:hover { background: #dc2626; }

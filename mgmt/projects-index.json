@@ -1,0 +1,55 @@
+﻿{
+    "id":  "projects-index",
+    "root":  "C:\\Users\\Qub",
+    "updated":  "2026-03-10T12:33:20.6620686+08:00",
+    "projects":  [
+                     {
+                         "id":  "toDo-test",
+                         "name":  "toDo-test",
+                         "projectRoot":  "C:\\Users\\Qub\\toDo-test",
+                         "mapPath":  "C:\\Users\\Qub\\toDo-test\\mgmt\\projMap\\map.json",
+                         "status":  "active",
+                         "updated":  "2026-03-10T08:24:04.6402361+08:00",
+                         "projectType":  "application",
+                         "extraction":  {
+                                            "mode":  "native",
+                                            "sourceProjects":  [
+
+                                                               ],
+                                            "extractedAt":  null
+                                        },
+                         "sharing":  {
+                                         "exports":  [
+
+                                                     ],
+                                         "consumers":  [
+
+                                                       ]
+                                     }
+                     },
+                     {
+                         "id":  "audioTest",
+                         "name":  "audioTest",
+                         "projectRoot":  "C:\\Users\\Qub\\audioTest",
+                         "mapPath":  "C:\\Users\\Qub\\audioTest\\mgmt\\projMap\\map.json",
+                         "status":  "active",
+                         "updated":  "2026-03-10T08:24:04.7514225+08:00",
+                         "projectType":  "application",
+                         "extraction":  {
+                                            "mode":  "native",
+                                            "sourceProjects":  [
+
+                                                               ],
+                                            "extractedAt":  null
+                                        },
+                         "sharing":  {
+                                         "exports":  [
+
+                                                     ],
+                                         "consumers":  [
+
+                                                       ]
+                                     }
+                     }
+                 ]
+}

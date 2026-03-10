@@ -1,0 +1,16 @@
+# codex-governed:start
+mgmt/projMap/threads/current-thread.json
+mgmt/projMap/state/thread-map-deltas.json
+.env
+.env.*
+*.local
+*.tmp
+*.temp
+*.log
+.cache/
+tmp/
+coverage/
+node_modules/
+dist/
+build/
+# codex-governed:end

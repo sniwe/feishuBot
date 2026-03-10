@@ -1,0 +1,39 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>audioTest</title>
+  <link rel="stylesheet" href="../frontend/style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <h1>audioTest</h1>
+    </header>
+
+    <section class="picker">
+      <label for="audio-file">Audio file</label>
+      <input id="audio-file" type="file" accept="audio/*" />
+      <p id="file-name" class="file-name">No file selected</p>
+    </section>
+
+    <section class="player" aria-live="polite">
+      <audio id="audio" preload="metadata"></audio>
+      <div class="progress-wrap" role="group" aria-label="Playback progress">
+        <div class="progress-track">
+          <input id="progress" type="range" min="0" max="1000" value="0" disabled />
+          <div id="selected-span-overlay" class="selected-span-overlay" aria-hidden="true"></div>
+          <div id="checkpoint-markers" class="checkpoint-markers" aria-hidden="true"></div>
+          <div id="playhead" class="playhead" aria-hidden="true">
+            <span class="playhead-arrow"></span>
+            <span id="playhead-time" class="playhead-time">00:00</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../frontend/app.js"></script>
+</body>
+</html>

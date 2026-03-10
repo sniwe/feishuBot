@@ -1,0 +1,12 @@
+﻿{
+  "name": "toy-map-app",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node app.js",
+    "map": "powershell -ExecutionPolicy Bypass -File ./mgmt/projMap/scripts/generate-map.ps1"
+  }
+}
+
+

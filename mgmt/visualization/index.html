@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Workspace Project Map Canvas</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Workspace Map</h1>
+    <div class="meta">
+      <button id="sidebarToggleBtn" type="button">Hide Sidebar</button>
+      <span id="metaStamp">loading...</span>
+      <button id="regenHintBtn" type="button">Regenerate Data Hint</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel" id="sidebarPanel">
+      <h2>Projects</h2>
+      <div class="navTools">
+        <button id="zoomInBtn" type="button">+</button>
+        <button id="zoomOutBtn" type="button">-</button>
+        <button id="fitBtn" type="button">Fit</button>
+        <button id="resetBtn" type="button">Reset</button>
+      </div>
+      <p class="hint">Drag canvas to pan. Mouse wheel to zoom.</p>
+      <div id="projectFilters"></div>
+      <hr />
+      <p class="hint">
+        Generates Mermaid-style grouped flowchart rendering on HTML canvas.
+      </p>
+      <p class="hint">
+        Source: <code>graph-data.json</code>
+      </p>
+    </aside>
+    <section class="canvasWrap">
+      <canvas id="mapCanvas" width="1800" height="1000"></canvas>
+    </section>
+  </main>
+
+  <dialog id="hintDialog">
+    <h3>Regenerate graph-data.json</h3>
+    <pre>cd &lt;global-mgmt&gt;\visualization
+& .\generate-graph-data.ps1</pre>
+    <form method="dialog">
+      <button>Close</button>
+    </form>
+  </dialog>
+
+  <script src="./graph-data.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
