@@ -9,6 +9,8 @@ This directory contains global governance, indexing, initialization, propagation
 - `scripts\map-sync.ps1`: regenerate `meta-map.json` from active projects
 - `scripts\init-project.ps1`: initialize project mgmt/bootstrap package
 - `scripts\refactor-global.ps1`: global `::refactor` dry-run/apply orchestration
+- `scripts\sync-pull.ps1`: pull latest + run bootstrap refresh
+- `scripts\sync-push.ps1`: pull/rebase + bootstrap + commit + push
 
 ## First Run On A New Machine
 
@@ -16,6 +18,12 @@ From the cloned global `mgmt` directory:
 
 ```powershell
 & .\scripts\bootstrap-machine.ps1
+```
+
+Recommended one-shot gate (bootstrap + auto-sync setup + machine-local flag):
+
+```powershell
+& .\scripts\ensure-machine-setup.ps1
 ```
 
 Optional (if old root is known and differs):
@@ -39,3 +47,44 @@ Generate and view local graph payloads:
 & .\visualization\generate-graph-data.ps1
 Start-Process (Join-Path (Resolve-Path .\visualization).Path 'index.html')
 ```
+
+## Daily Multi-Machine Sync
+
+On a machine before editing:
+
+```powershell
+& .\scripts\sync-pull.ps1
+```
+
+After edits on that machine:
+
+```powershell
+& .\scripts\sync-push.ps1 -Message "describe your changes"
+```
+
+## Auto Sync Every 5 Minutes
+
+### Option A (Requested): AutoHotkey loop (both machines)
+
+Install and start now:
+
+```powershell
+& .\scripts\install-auto-sync-ahk.ps1 -StartNow
+```
+
+This installs startup auto-run of:
+- `mgmt\automation\repo-auto-sync.ahk`
+- which executes `mgmt\scripts\auto-sync-tick.ps1` every 5 minutes.
+
+### Option B (Recommended): Windows Task Scheduler
+
+Install scheduled task:
+
+```powershell
+& .\scripts\install-auto-sync-task.ps1
+```
+
+Reason recommended:
+- survives user-session edge cases better than an AHK loop
+- no dependency on AHK runtime process stability
+- simpler operational visibility in Task Scheduler

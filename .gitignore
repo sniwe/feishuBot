@@ -44,6 +44,7 @@ mgmt/propagation-report.json
 mgmt/refactor-global-report.json
 mgmt/visualization/graph-data.json
 mgmt/visualization/graph-data.js
+mgmt/state/
 
 # Keep project runtime state out of git
 **/mgmt/projMap/threads/current-thread.json

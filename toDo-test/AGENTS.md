@@ -178,6 +178,18 @@ On user command `::refactor`:
   - side effects routed through `ctx.deps`
   - project file placement constraints under `${SRC_DIR}` (except `${MGMT_DIR}` and `${WORKSPACE_ROOT}\AGENTS.md`)
 - After refactor edits, update `${PROJMAP_DIR}\map.json` and refresh top-level `updated` timestamp.
+### 6) Automatic Sync Governance
+
+After each successful file edit, trigger non-blocking project-level background sync.
+
+- Trigger scope:
+  - apply to edits under ${SRC_DIR}, ${MGMT_DIR}, ${WORKSPACE_ROOT}\AGENTS.md, and ${WORKSPACE_ROOT}\.gitignore.
+- Sync entrypoint:
+  - use canonical ${GLOBAL_MGMT_DIR}\scripts\sync-push.ps1 (or a project-local wrapper if explicitly configured).
+- Runtime behavior:
+  - run in background and do not block current task execution.
+  - avoid launching duplicate concurrent sync jobs for the same project workspace.
+  - on sync failure, continue local workflow and surface concise failure state for the next retry.
 ## Operational Precedence
 
 When instructions overlap, apply in this order:
@@ -210,5 +222,6 @@ $PUBLIC_DIR = Join-Path $SRC_DIR 'public'
 $GLOBAL_MGMT_DIR = Join-Path $USER_ROOT 'mgmt'
 $SESSIONS_ROOT = Join-Path $USER_ROOT '.codex\sessions'
 ```
+
 
 

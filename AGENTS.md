@@ -17,6 +17,17 @@ Use dynamic roots so instructions are portable.
 
 Resolve paths from these variables first, then from explicit user-provided absolute paths.
 
+## Machine Setup Gate
+
+Before executing any other workflow instructions, verify machine setup state and auto-sync installation.
+
+- Required preflight command:
+  - `${GLOBAL_MGMT_DIR}\scripts\ensure-machine-setup.ps1`
+- Default policy:
+  - if setup flag is missing/invalid for current machine, run setup automatically before continuing.
+  - persist machine-local setup state in `${GLOBAL_MGMT_DIR}\state\machine-setup.<COMPUTERNAME>.json`.
+- Default auto-sync mode for setup gate is `task` (Task Scheduler). `ahk` remains supported when explicitly requested.
+
 ## Default Project AGENTS Generation
 
 For every new project, generate a project-scoped `AGENTS.md` at:
@@ -273,6 +284,19 @@ On user command `::refactor`:
   - run `${GLOBAL_MGMT_DIR}\scripts\map-sync.ps1` once at end of successful apply sequence.
 - After refactor edits, update `${PROJMAP_DIR}\map.json` and refresh top-level `updated` timestamp.
 
+### 8) Automatic Sync Governance
+
+After each successful file edit, trigger non-blocking background sync.
+
+- Global scope (${USER_ROOT} context):
+  - invoke ${GLOBAL_MGMT_DIR}\scripts\sync-push.ps1 in background after edits to governed files.
+  - default should be non-blocking and not interrupt current task flow.
+- Project scope (${WORKSPACE_ROOT} context):
+  - trigger project-level background sync after edits to project files (${SRC_DIR}, ${MGMT_DIR}, ${WORKSPACE_ROOT}\AGENTS.md, ${WORKSPACE_ROOT}\.gitignore).
+  - use canonical sync entrypoint ${GLOBAL_MGMT_DIR}\scripts\sync-push.ps1 (or project-local wrapper when present).
+- Safety constraints:
+  - preserve idempotency and avoid duplicate concurrent sync jobs for the same workspace.
+  - if background sync fails, continue local task and record concise failure reason for next sync attempt.
 ## Operational Precedence
 
 When instructions overlap, apply in this order:
@@ -305,3 +329,4 @@ $PUBLIC_DIR = Join-Path $SRC_DIR 'public'
 $GLOBAL_MGMT_DIR = Join-Path $USER_ROOT 'mgmt'
 $SESSIONS_ROOT = Join-Path $USER_ROOT '.codex\sessions'
 ```
+
