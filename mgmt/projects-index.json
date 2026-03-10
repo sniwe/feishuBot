@@ -1,7 +1,7 @@
-﻿{
+{
     "id":  "projects-index",
-    "root":  "C:\\Users\\rhyse\\codex_harness",
-    "updated":  "2026-03-10T16:38:16.6388423+08:00",
+    "root":  "C:\\Users\\rhyse",
+    "updated":  "2026-03-10T16:40:52.5719988+08:00",
     "projects":  [
                      {
                          "id":  "toDo-test",

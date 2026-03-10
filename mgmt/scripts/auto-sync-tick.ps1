@@ -25,7 +25,7 @@ if (!(Test-Path -LiteralPath (Join-Path $REPO_ROOT ".git"))) {
 
 $stateDir = Join-Path $GLOBAL_MGMT_DIR "state"
 New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
-$lockPath = Join-Path $stateDir "auto-sync.lock"
+$lockPath = Join-Path $env:TEMP ("codex-auto-sync-{0}.lock" -f $env:USERNAME)
 $now = Get-Date
 
 if (Test-Path -LiteralPath $lockPath) {
@@ -55,7 +55,35 @@ function Invoke-Git {
     }
 }
 
+function Get-ManagedAddPaths {
+    $paths = @("mgmt/scripts", "mgmt/automation")
+    $indexPath = Join-Path $GLOBAL_MGMT_DIR "projects-index.json"
+    if (Test-Path -LiteralPath $indexPath) {
+        try {
+            $index = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json
+            foreach ($p in @($index.projects)) {
+                if ([string]::Equals([string]$p.status, "active", [System.StringComparison]::OrdinalIgnoreCase) -and
+                    -not [string]::IsNullOrWhiteSpace([string]$p.projectRoot)) {
+                    $projectRoot = [IO.Path]::GetFullPath([string]$p.projectRoot)
+                    if ($projectRoot.StartsWith($REPO_ROOT, [System.StringComparison]::OrdinalIgnoreCase)) {
+                        $rel = $projectRoot.Substring($REPO_ROOT.Length).TrimStart('\','/')
+                        if (-not [string]::IsNullOrWhiteSpace($rel)) {
+                            $paths += $rel.Replace('\','/')
+                        }
+                    }
+                }
+            }
+        } catch {
+            # Keep auto-sync resilient even if index parse fails.
+        }
+    }
+    return @($paths | Sort-Object -Unique)
+}
+
 try {
+    # Rebase first to avoid creating local commits that immediately conflict.
+    Invoke-Git -Args @("pull", "--rebase", "--autostash")
+
     Push-Location $REPO_ROOT
     $status = (& git status --porcelain)
     Pop-Location
@@ -64,7 +92,17 @@ try {
         exit 0
     }
 
-    Invoke-Git -Args @("add", "-A")
+    # Stage tracked edits first. This avoids permission failures from unrelated
+    # unreadable files under a home-directory git root.
+    Invoke-Git -Args @("add", "-u")
+
+    # Stage untracked files only from governed/managed roots.
+    foreach ($pathSpec in (Get-ManagedAddPaths)) {
+        $full = Join-Path $REPO_ROOT ($pathSpec -replace '/', '\')
+        if (Test-Path -LiteralPath $full) {
+            Invoke-Git -Args @("add", "--all", "--", $pathSpec)
+        }
+    }
 
     Push-Location $REPO_ROOT
     & git diff --cached --quiet
@@ -77,8 +115,6 @@ try {
         Invoke-Git -Args @("commit", "-m", $msg)
     }
 
-    # Rebase with autostash to absorb remote updates, then push.
-    Invoke-Git -Args @("pull", "--rebase", "--autostash")
     Invoke-Git -Args @("push")
 }
 finally {

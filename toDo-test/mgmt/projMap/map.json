@@ -1,124 +1,121 @@
 {
-    "id":  "map:toDo-test",
-    "type":  "project-map",
-    "name":  "toDo-test",
-    "summary":  "Minimal browser to-do app with localStorage persistence",
-    "root":  "C:\\Users\\Qub\\toDo-test",
-    "updated":  "2026-03-10T09:17:48.0076737+08:00",
-    "nodes":  [
-                  {
-                      "id":  "control:ui",
-                      "type":  "control",
-                      "name":  "src/public/index.html",
-                      "summary":  "To-do page shell",
-                      "features":  [
-                                       {
-                                           "summary":  "Render UI",
-                                           "flow":  [
-                                                        "e1"
-                                                    ]
-                                       }
-                                   ],
-                      "edges":  [
-                                    "e1"
-                                ],
-                      "critical":  true,
-                      "files":  [
-                                    "src/public/index.html",
-                                    "src/frontend/style.css"
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "module:app",
-                      "type":  "module",
-                      "name":  "src/frontend/app.js",
-                      "summary":  "Handles add, edit, toggle, delete, and session persistence with Ctrl+S",
-                      "features":  [
-                                       {
-                                           "summary":  "Manage tasks with inline editing and restorable session state",
-                                           "flow":  [
-                                                        "e2",
-                                                        "e3",
-                                                        "e5",
-                                                        "e4"
-                                                    ]
-                                       }
-                                   ],
-                      "edges":  [
-                                    "e2",
-                                    "e3",
-                                    "e4",
-                                    "e5"
-                                ],
-                      "critical":  true,
-                      "files":  [
-                                    "src/frontend/app.js"
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "io:storage",
-                      "type":  "io",
-                      "name":  "localStorage",
-                      "summary":  "Persistent storage for tasks",
-                      "features":  [
-
-                                   ],
-                      "edges":  [
-
-                                ],
-                      "critical":  false,
-                      "files":  [
-
-                                ],
-                      "children":  [
-
-                                   ]
-                  }
-              ],
-    "edges":  [
-                  {
-                      "id":  "e1",
-                      "kind":  "control",
-                      "from":  "control:ui",
-                      "to":  "module:app",
-                      "note":  "UI loads app logic"
-                  },
-                  {
-                      "id":  "e2",
-                      "kind":  "io",
-                      "from":  "module:app",
-                      "to":  "io:storage",
-                      "via":  "loadItems"
-                  },
-                  {
-                      "id":  "e3",
-                      "kind":  "io",
-                      "from":  "module:app",
-                      "to":  "io:storage",
-                      "via":  "saveItems"
-                  },
-                  {
-                      "id":  "e4",
-                      "kind":  "control",
-                      "from":  "module:app",
-                      "to":  "module:app",
-                      "note":  "add/edit/toggle/delete transitions"
-                  },
-                  {
-                      "id":  "e5",
-                      "kind":  "io",
-                      "from":  "module:app",
-                      "to":  "io:storage",
-                      "via":  "saveSessionState"
-                  }
-              ],
-    "children":  [
-
-                 ]
+  "id": "map:toDo-test",
+  "type": "project-map",
+  "name": "toDo-test",
+  "summary": "To-do app with backend file persistence and automatic API sync",
+  "root": "C:\\Users\\rhyse\\toDo-test",
+  "updated": "2026-03-10T16:57:51.5634709+08:00",
+  "nodes": [
+    {
+      "id": "control:ui",
+      "type": "control",
+      "name": "src/public/index.html",
+      "summary": "To-do UI shell",
+      "features": [
+        {
+          "summary": "Render the app interface",
+          "flow": ["e1"]
+        }
+      ],
+      "edges": ["e1"],
+      "critical": true,
+      "files": ["src/public/index.html", "src/frontend/style.css"],
+      "children": []
+    },
+    {
+      "id": "module:frontend-app",
+      "type": "module",
+      "name": "src/frontend/app.js",
+      "summary": "Task CRUD with automatic backend persistence",
+      "features": [
+        {
+          "summary": "Load and save tasks with GET/PUT /api/tasks",
+          "flow": ["e2", "e3", "e4"]
+        }
+      ],
+      "edges": ["e2", "e3", "e4"],
+      "critical": true,
+      "files": ["src/frontend/app.js"],
+      "children": []
+    },
+    {
+      "id": "module:backend-server",
+      "type": "module",
+      "name": "src/backend/server.js",
+      "summary": "Local server for static files and task API",
+      "features": [
+        {
+          "summary": "Persist tasks to backend data file",
+          "flow": ["e5", "e6", "e7"]
+        }
+      ],
+      "edges": ["e5", "e6", "e7"],
+      "critical": true,
+      "files": ["src/backend/server.js"],
+      "children": []
+    },
+    {
+      "id": "io:tasks-file",
+      "type": "io",
+      "name": "src/backend/data/tasks.json",
+      "summary": "Project-tracked JSON file for task data",
+      "features": [],
+      "edges": [],
+      "critical": false,
+      "files": ["src/backend/data/tasks.json"],
+      "children": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "kind": "control",
+      "from": "control:ui",
+      "to": "module:frontend-app",
+      "note": "UI loads frontend logic"
+    },
+    {
+      "id": "e2",
+      "kind": "io",
+      "from": "module:frontend-app",
+      "to": "module:backend-server",
+      "via": "GET /api/tasks"
+    },
+    {
+      "id": "e3",
+      "kind": "io",
+      "from": "module:frontend-app",
+      "to": "module:backend-server",
+      "via": "PUT /api/tasks"
+    },
+    {
+      "id": "e4",
+      "kind": "control",
+      "from": "module:frontend-app",
+      "to": "module:frontend-app",
+      "note": "add/edit/toggle/delete transitions"
+    },
+    {
+      "id": "e5",
+      "kind": "control",
+      "from": "module:backend-server",
+      "to": "control:ui",
+      "note": "Serve static app files"
+    },
+    {
+      "id": "e6",
+      "kind": "io",
+      "from": "module:backend-server",
+      "to": "io:tasks-file",
+      "via": "loadItems"
+    },
+    {
+      "id": "e7",
+      "kind": "io",
+      "from": "module:backend-server",
+      "to": "io:tasks-file",
+      "via": "saveItems"
+    }
+  ],
+  "children": []
 }

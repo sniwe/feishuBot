@@ -1,25 +1,14 @@
 (function () {
-  const STORAGE_KEY = "todo-test-items";
-  const SESSION_STORAGE_KEY = "todo-test-session";
+  const TASKS_ENDPOINT = "/api/tasks";
   const form = document.getElementById("todo-form");
   const input = document.getElementById("todo-input");
   const list = document.getElementById("todo-list");
 
-  const session = loadSession();
-  let items = session.items;
-  let editingId = session.editingId;
-  let editingText = session.editingText;
-  input.value = session.inputText;
-  render();
+  let items = [];
+  let editingId = null;
+  let editingText = "";
 
-  document.addEventListener("keydown", function (event) {
-    if (!(event.ctrlKey || event.metaKey)) return;
-    if (String(event.key).toLowerCase() !== "s") return;
-    event.preventDefault();
-    persistSessionState();
-  });
-
-  window.addEventListener("beforeunload", persistSessionState);
+  void init();
 
   form.addEventListener("submit", function (event) {
     event.preventDefault();
@@ -28,77 +17,58 @@
 
     items.push({ id: crypto.randomUUID(), text: text, done: false });
     input.value = "";
-    persistSessionState();
-    render();
+    void persistAndRender();
   });
 
-  input.addEventListener("input", saveSessionState);
+  async function init() {
+    items = await fetchItems();
+    render();
+  }
 
-  function loadItems() {
+  async function fetchItems() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed : [];
+      const response = await fetch(TASKS_ENDPOINT, { method: "GET" });
+      if (!response.ok) return [];
+      const payload = await response.json();
+      return Array.isArray(payload.items) ? payload.items : [];
     } catch {
       return [];
     }
   }
 
-  function saveItems() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  async function saveItems() {
+    const response = await fetch(TASKS_ENDPOINT, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items: items })
+    });
+
+    if (!response.ok) {
+      throw new Error("Unable to save tasks");
+    }
+
+    const payload = await response.json();
+    items = Array.isArray(payload.items) ? payload.items : items;
   }
 
-  function loadSession() {
+  async function persistAndRender() {
     try {
-      const raw = localStorage.getItem(SESSION_STORAGE_KEY);
-      const parsed = raw ? JSON.parse(raw) : null;
-      if (!parsed || typeof parsed !== "object") {
-        return { items: loadItems(), editingId: null, editingText: "", inputText: "" };
-      }
-
-      const nextItems = Array.isArray(parsed.items) ? parsed.items : loadItems();
-      const nextEditingId = typeof parsed.editingId === "string" ? parsed.editingId : null;
-      const hasEditingTarget = nextItems.some(function (item) {
-        return item.id === nextEditingId;
-      });
-
-      return {
-        items: nextItems,
-        editingId: hasEditingTarget ? nextEditingId : null,
-        editingText: hasEditingTarget && typeof parsed.editingText === "string" ? parsed.editingText : "",
-        inputText: typeof parsed.inputText === "string" ? parsed.inputText : ""
-      };
-    } catch {
-      return { items: loadItems(), editingId: null, editingText: "", inputText: "" };
+      await saveItems();
+      render();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to save tasks. Keep the server running and try again.");
     }
   }
 
-  function saveSessionState() {
-    localStorage.setItem(
-      SESSION_STORAGE_KEY,
-      JSON.stringify({
-        items: items,
-        editingId: editingId,
-        editingText: editingText,
-        inputText: input.value
-      })
-    );
-  }
-
-  function persistSessionState() {
-    saveItems();
-    saveSessionState();
-  }
-
-  function toggleItem(id) {
+  async function toggleItem(id) {
     items = items.map(function (item) {
       return item.id === id ? { id: item.id, text: item.text, done: !item.done } : item;
     });
-    persistSessionState();
-    render();
+    await persistAndRender();
   }
 
-  function removeItem(id) {
+  async function removeItem(id) {
     items = items.filter(function (item) {
       return item.id !== id;
     });
@@ -106,25 +76,22 @@
       editingId = null;
       editingText = "";
     }
-    persistSessionState();
-    render();
+    await persistAndRender();
   }
 
   function startEdit(item) {
     editingId = item.id;
     editingText = item.text;
-    saveSessionState();
     render();
   }
 
   function cancelEdit() {
     editingId = null;
     editingText = "";
-    saveSessionState();
     render();
   }
 
-  function commitEdit(id) {
+  async function commitEdit(id) {
     const nextText = editingText.trim();
     if (!nextText) return;
 
@@ -134,8 +101,7 @@
 
     editingId = null;
     editingText = "";
-    persistSessionState();
-    render();
+    await persistAndRender();
   }
 
   function render() {
@@ -151,7 +117,7 @@
       checkbox.type = "checkbox";
       checkbox.checked = item.done;
       checkbox.setAttribute("aria-label", "Mark task complete");
-      checkbox.addEventListener("change", function () { toggleItem(item.id); });
+      checkbox.addEventListener("change", function () { void toggleItem(item.id); });
       left.appendChild(checkbox);
 
       if (editingId === item.id) {
@@ -162,12 +128,11 @@
         editInput.setAttribute("aria-label", "Edit task name");
         editInput.addEventListener("input", function (event) {
           editingText = event.target.value;
-          saveSessionState();
         });
         editInput.addEventListener("keydown", function (event) {
           if (event.key === "Enter") {
             event.preventDefault();
-            commitEdit(item.id);
+            void commitEdit(item.id);
           }
           if (event.key === "Escape") {
             event.preventDefault();
@@ -183,7 +148,7 @@
         save.type = "button";
         save.className = "save";
         save.textContent = "Save";
-        save.addEventListener("click", function () { commitEdit(item.id); });
+        save.addEventListener("click", function () { void commitEdit(item.id); });
 
         const cancel = document.createElement("button");
         cancel.type = "button";
@@ -221,7 +186,7 @@
       del.type = "button";
       del.className = "delete";
       del.textContent = "Delete";
-      del.addEventListener("click", function () { removeItem(item.id); });
+      del.addEventListener("click", function () { void removeItem(item.id); });
 
       left.appendChild(label);
       actions.appendChild(edit);
