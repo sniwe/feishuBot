@@ -36,7 +36,7 @@ For every new project, generate a project-scoped `AGENTS.md` at:
 
 This project-scoped file must be created by default as a modified derivative of this global file, with project-specific path bindings and instructions adjusted to `${WORKSPACE_ROOT}` and `${MGMT_DIR}` while preserving global standards and precedence.
 
-When generating project-scoped `${WORKSPACE_ROOT}\AGENTS.md` files, do not include global bootstrap command guidance. Omit global-only command sections/references (including `::mapSync`, `::propUpd`, and any `${USER_ROOT}`-scope behavior under `::refactor`) from the generated project-scoped derivative.
+When generating project-scoped `${WORKSPACE_ROOT}\AGENTS.md` files, do not include global bootstrap command guidance. Omit global-only command sections/references (including `::mapSync`, `::propUpd`, `::gitSync`, and any `${USER_ROOT}`-scope behavior under `::refactor`) from the generated project-scoped derivative.
 
 Default project packaging under `${MGMT_DIR}`:
 
@@ -297,6 +297,26 @@ After each successful file edit, trigger non-blocking background sync.
 - Safety constraints:
   - preserve idempotency and avoid duplicate concurrent sync jobs for the same workspace.
   - if background sync fails, continue local task and record concise failure reason for next sync attempt.
+
+### 9) Global Git Sync Bootstrap (`::gitSync`)
+
+On user command `::gitSync`:
+
+- Run canonical bidirectional sync entrypoint `${GLOBAL_MGMT_DIR}\scripts\auto-sync-tick.ps1`.
+- Behavior must be pull-first to ingest remote updates before local publish:
+  - `git pull --rebase --autostash`
+  - detect local managed changes
+  - stage/commit managed changes only
+  - `git push`
+- Managed scope must be constrained to governed paths:
+  - `${USER_ROOT}\AGENTS.md`
+  - `${USER_ROOT}\.gitignore`
+  - `${GLOBAL_MGMT_DIR}\`
+  - active project roots from `${GLOBAL_MGMT_DIR}\projects-index.json`
+- Must use lock-guarding to avoid overlapping runs on the same machine/session.
+- `::gitSync` should be safe to run repeatedly and should perform no mutations when there are no managed changes.
+- If pull encounters conflicts, preserve local changes safely (stash/autostash), emit concise conflict diagnostics, and do not discard user edits.
+
 ## Operational Precedence
 
 When instructions overlap, apply in this order:
