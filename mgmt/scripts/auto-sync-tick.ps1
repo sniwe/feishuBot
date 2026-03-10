@@ -55,6 +55,7 @@ function Invoke-Git {
     }
 }
 
+<<<<<<< Updated upstream
 function Get-ManagedAddPaths {
     $paths = @("mgmt/scripts", "mgmt/automation")
     $indexPath = Join-Path $GLOBAL_MGMT_DIR "projects-index.json"
@@ -87,11 +88,39 @@ try {
     Push-Location $REPO_ROOT
     $status = (& git status --porcelain)
     Pop-Location
+=======
+function Get-ManagedPathspecs {
+    $specs = @("AGENTS.md", ".gitignore", "mgmt")
+    $indexPath = Join-Path $GLOBAL_MGMT_DIR "projects-index.json"
+    if (Test-Path -LiteralPath $indexPath) {
+        try {
+            $idx = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json
+            foreach ($p in @($idx.projects | Where-Object { $_.status -eq "active" })) {
+                $root = [string]$p.projectRoot
+                if ([string]::IsNullOrWhiteSpace($root)) { continue }
+                $leaf = Split-Path -Leaf $root
+                if (-not [string]::IsNullOrWhiteSpace($leaf)) { $specs += $leaf }
+            }
+        } catch {}
+    }
+    return @($specs | Select-Object -Unique)
+}
+>>>>>>> Stashed changes
 
-    if ([string]::IsNullOrWhiteSpace(($status | Out-String))) {
-        exit 0
+try {
+    $pathspecs = Get-ManagedPathspecs
+
+    # Bidirectional sync: always pull first to ingest remote updates.
+    Invoke-Git -Args @("pull", "--rebase", "--autostash")
+
+    Push-Location $REPO_ROOT
+    try {
+        $status = & git status --porcelain -- @pathspecs
+    } finally {
+        Pop-Location
     }
 
+<<<<<<< Updated upstream
     # Stage tracked edits first. This avoids permission failures from unrelated
     # unreadable files under a home-directory git root.
     Invoke-Git -Args @("add", "-u")
@@ -103,11 +132,19 @@ try {
             Invoke-Git -Args @("add", "--all", "--", $pathSpec)
         }
     }
+=======
+    if ([string]::IsNullOrWhiteSpace(($status | Out-String))) { exit 0 }
+
+    Invoke-Git -Args (@("add", "-A", "--") + $pathspecs)
+>>>>>>> Stashed changes
 
     Push-Location $REPO_ROOT
-    & git diff --cached --quiet
-    $hasStaged = ($LASTEXITCODE -ne 0)
-    Pop-Location
+    try {
+        & git diff --cached --quiet -- @pathspecs
+        $hasStaged = ($LASTEXITCODE -ne 0)
+    } finally {
+        Pop-Location
+    }
 
     if ($hasStaged) {
         $hostName = $env:COMPUTERNAME
@@ -115,6 +152,10 @@ try {
         Invoke-Git -Args @("commit", "-m", $msg)
     }
 
+<<<<<<< Updated upstream
+=======
+    # Push local commit(s) after successful pull/merge.
+>>>>>>> Stashed changes
     Invoke-Git -Args @("push")
 }
 finally {
