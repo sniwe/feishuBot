@@ -8,6 +8,7 @@ This directory contains global governance, indexing, initialization, propagation
 - `scripts\registry-upsert.ps1`: project registry upsert/update
 - `scripts\map-sync.ps1`: regenerate `meta-map.json` from active projects
 - `scripts\init-project.ps1`: initialize project mgmt/bootstrap package
+- `scripts\ingest-project.ps1`: ingest an untracked external project into a new governed project boundary
 - `scripts\refactor-global.ps1`: global `::refactor` dry-run/apply orchestration
 - `scripts\sync-pull.ps1`: pull latest + run bootstrap refresh
 - `scripts\sync-push.ps1`: pull/rebase + bootstrap + commit + push
@@ -60,6 +61,20 @@ After edits on that machine:
 
 ```powershell
 & .\scripts\sync-push.ps1 -Message "describe your changes"
+```
+
+## Global Project Ingest (`::ingest`)
+
+When a user provides a directory path for a project that is not yet tracked, run:
+
+```powershell
+& .\scripts\ingest-project.ps1 -SourceProjectPath 'C:\path\to\external-project'
+```
+
+Dry-run analysis (no mutations):
+
+```powershell
+& .\scripts\ingest-project.ps1 -SourceProjectPath 'C:\path\to\external-project' -DryRun
 ```
 
 ## Auto Sync Every 5 Minutes

@@ -36,7 +36,7 @@ For every new project, generate a project-scoped `AGENTS.md` at:
 
 This project-scoped file must be created by default as a modified derivative of this global file, with project-specific path bindings and instructions adjusted to `${WORKSPACE_ROOT}` and `${MGMT_DIR}` while preserving global standards and precedence.
 
-When generating project-scoped `${WORKSPACE_ROOT}\AGENTS.md` files, do not include global bootstrap command guidance. Omit global-only command sections/references (including `::mapSync`, `::propUpd`, `::gitSync`, and any `${USER_ROOT}`-scope behavior under `::refactor`) from the generated project-scoped derivative.
+When generating project-scoped `${WORKSPACE_ROOT}\AGENTS.md` files, do not include global bootstrap command guidance. Omit global-only command sections/references (including `::mapSync`, `::propUpd`, `::gitSync`, `::ingest`, and any `${USER_ROOT}`-scope behavior under `::refactor`) from the generated project-scoped derivative.
 
 Default project packaging under `${MGMT_DIR}`:
 
@@ -316,6 +316,22 @@ On user command `::gitSync`:
 - Must use lock-guarding to avoid overlapping runs on the same machine/session.
 - `::gitSync` should be safe to run repeatedly and should perform no mutations when there are no managed changes.
 - If pull encounters conflicts, preserve local changes safely (stash/autostash), emit concise conflict diagnostics, and do not discard user edits.
+
+### 10) Global Project Ingest Bootstrap (`::ingest`)
+
+On user command `::ingest`:
+
+- Require an explicit source directory path that points to a project not currently tracked in `${GLOBAL_MGMT_DIR}\projects-index.json`.
+- Resolve and validate the source path as absolute; fail with a clear error if missing/invalid or already tracked.
+- Build a project-understanding snapshot before mutation:
+  - recursive file inventory (with common heavy/build/cache directories excluded)
+  - extension/language distribution
+  - bucketed target plan across `${BACKEND_DIR}`, `${FRONTEND_DIR}`, `${PUBLIC_DIR}`
+- Initialize a new governed project boundary using `${GLOBAL_MGMT_DIR}\scripts\init-project.ps1` so the result conforms to current project initialization and tracking rules.
+- Ingest source files into the initialized project under `${SRC_DIR}` only, preserving relative structure under bucketed ingest paths.
+- Write ingest report artifacts under project management state (for example `${PROJMAP_DIR}\state\ingest-report.json`) summarizing source analysis and copied file counts.
+- Ensure the new project is upserted into `${GLOBAL_MGMT_DIR}\projects-index.json` and included in `${GLOBAL_MGMT_DIR}\meta-map.json` through normal init/map-sync flow.
+- Scope: global-only bootstrap command; do not include `::ingest` sections in project-scoped generated `AGENTS.md`.
 
 ## Operational Precedence
 
