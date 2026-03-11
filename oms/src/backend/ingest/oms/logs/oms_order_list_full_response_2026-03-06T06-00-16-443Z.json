@@ -1,0 +1,170 @@
+{
+  "capturedAt": "2026-03-06T06:00:16.287Z",
+  "request": {
+    "url": "https://oms.xlwms.com/gateway/woms/platform/order/list",
+    "method": "POST",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIlN0IlMjJidXNpbmVzc1R5cGUlMjIlM0ElMjJvbXMlMjIlMkMlMjJsb2dpbkFjY291bnQlMjIlM0ElMjJMTTYwNyUyMiUyQyUyMnVzZXJOYW1lQ24lMjIlM0ElMjIlMjIlMkMlMjJ1c2VyTmFtZUVuJTIyJTNBJTIyJTIyJTJDJTIyY3VzdG9tZXJDb2RlJTIyJTNBJTIyMzI4NzA1MSUyMiUyQyUyMnRlbmFudENvZGUlMjIlM0FudWxsJTJDJTIydGVybWluYWxUeXBlJTIyJTNBbnVsbCU3RCIsImlzcyI6InhpbmdsaWFuLnNlY3VyaXR5IiwiYnVzaW5lc3NUeXBlIjoib21zIiwiZXhwIjoxNzcxMDM4MDk1LCJpYXQiOjE3NzA5NTE2OTUsImp0aSI6IjBlNjlhNmFjLWVjZDAtNDE3Ny04MmY2LTY0ZWRkYWIyZGUxZiJ9.buFbckOCiIwp9uhLMYssN5CvIKenU1LMXu9uojz9aw8",
+      "lang": "zh",
+      "Referer": "https://oms.xlwms.com/platform/order/list",
+      "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+      "sec-ch-ua-mobile": "?0",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+      "Accept": "application/json, text/plain, */*",
+      "Content-Type": "application/json",
+      "version": "prod"
+    },
+    "postData": "{\"current\":1,\"size\":2000,\"status\":\"0\",\"subStatus\":\"\",\"platformCodes\":\"\",\"receiptCountries\":\"\",\"siteCodes\":\"\",\"storeCodes\":\"\",\"sendWarehouses\":\"\",\"logisticsChannels\":\"\",\"markShipmentStatus\":\"\",\"countKind\":\"orderCount\",\"cancelWay\":\"\",\"deliveryOptionTypes\":\"\",\"printingStatus\":\"\"}"
+  },
+  "response": {
+    "status": 200,
+    "mimeType": "application/json",
+    "headers": {
+      "content-encoding": "gzip",
+      "xl-region": "master",
+      "access-control-allow-credentials": "true, true",
+      "access-control-allow-origin": "https://oms.xlwms.com, https://oms.xlwms.com",
+      "date": "Fri, 06 Mar 2026 06:00:27 GMT",
+      "content-type": "application/json;charset=UTF-8",
+      "vary": "Accept-Encoding, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Origin, Access-Control-Request-Method, Access-Control-Request-Headers",
+      "version": "prod",
+      "server": "APISIX"
+    },
+    "bodyText": "{\"code\":200,\"data\":{\"records\":[{\"orderNo\":\"SO051260306000127\",\"platformOrderNo\":\"576489405819820029\",\"platformCode\":\"tiktok\",\"platformSkuList\":[{\"sku\":\"LC1171-1\",\"qty\":1,\"productName\":\"22.4-Inch Black to Fuscia Pink Ombré Wavy Synthetic Wig | 【Heat Resistant】【Cap Included】 | #21*41@41 FSGC\"}],\"skuList\":[{\"sku\":\"LC1171-1\",\"qty\":1,\"productName\":\"假发\"}],\"buyerName\":\"Corina Perez\",\"buyerEmail\":\"v4bDYU6EZK4KHT5CHTPUHPGQLTW24@scs.tiktokw.us\",\"receiver\":\"Corina Perez\",\"telephone\":\"(+1)3466054015\",\"receiptCountryCode\":\"US\",\"receiptCountryName\":\"United States of America (USA)\",\"provinceCode\":\"CA\",\"provinceName\":\"California\",\"city\":\"\",\"postCode\":\"91977\",\"houseNum\":\"\",\"addressOne\":\"3404 Helix St Apt 7\",\"addressTwo\":\"\",\"addressThi\":\"\",\"storeCode\":\"USLCREE2BFUS\",\"storeName\":\"403-Lady Grayy Wigs USA_US\",\"site\":\"Non-LOCAL-US\",\"siteNameCn\":\"US-本土店铺\",\"siteNameEn\":\"Non-LOCAL-US\",\"sendWhCode\":\"USW01\",\"sendWhName\":\"ZOO WAREHOUSE ⑥\",\"trackNo\":\"\",\"logisticsCarrier\":\"usps\",\"logisticsCarrierName\":\"USPS\",\"logisticsChannelCode\":\"USPS_PICKUP_C\",\"logisticsChannelName\":\"USPS自提\",\"orderTime\":\"2026-03-06 12:27:25\",\"payTime\":\"2026-03-06 12:27:46\",\"source\":\"线上订单\",\"createTime\":\"2026-03-06 13:35:08\",\"auditTime\":\"\",\"shipTime\":\"\",\"cancelTime\":\"\",\"status\":0,\"exceptionCause\":\" \",\"auditCause\":\"\",\"subStatus\":0,\"cancelWay\":2,\"markShipmentStatus\":5,\"markShipmentTime\":\"\",\"markShipmentFailReason\":\"\",\"deliveryOptionType\":2,\"platformOrderType\":\"\",\"printingStatus\":0,\"storeShipmentBook\":0},{\"orderNo\":\"SO051260305000041\",\"platformOrderNo\":\"LG3131\",\"platformCode\":\"shopify\",\"platformSkuList\":[{\"sku\":\"LC8191-1\",\"qty\":1,\"productName\":\"25-Inch Platinum Blonde Ombre (Dark Roots, Pink Underlights) Straight Synthetic Wig\"}],\"skuList\":[],\"buyerName\":\"Misty Kelley\",\"buyerEmail\":\"missdlynn48@gmail.com\",\"receiver\":\"Misty Kelley\",\"telephone\":\"+18632205643\",\"receiptCountryCode\":\"US\",\"receiptCountryName\":\"United States of America (USA)\",\"provinceCode\":\"KY\",\"provinceName\":\"Kentucky\",\"city\":\"\",\"postCode\":\"41653\",\"houseNum\":\"\",\"addressOne\":\"421 S. ROBERTS DR Apt. 89\",\"addressTwo\":\"89\",\"addressThi\":\"\",\"storeCode\":\"1\",\"storeName\":\"LadyGrayy Shopify 1\",\"site\":\"\",\"siteNameCn\":\"\",\"siteNameEn\":\"\",\"sendWhCode\":\"USW01\",\"sendWhName\":\"ZOO WAREHOUSE ⑥\",\"trackNo\":\"\",\"logisticsCarrier\":\"usps\",\"logisticsCarrierName\":\"USPS\",\"logisticsChannelCode\":\"USPS_PICKUP_C\",\"logisticsChannelName\":\"USPS自提\",\"orderTime\":\"2026-03-04 13:32:31\",\"payTime\":\"\",\"source\":\"线上订单\",\"createTime\":\"2026-03-05 05:43:38\",\"auditTime\":\"2026-03-06 12:51:34\",\"shipTime\":\"\",\"cancelTime\":\"\",\"status\":0,\"exceptionCause\":\" \",\"auditCause\":\"平台sku[LC8191-1]未绑定系统sku\",\"subStatus\":0,\"cancelWay\":2,\"markShipmentStatus\":5,\"markShipmentTime\":\"\",\"markShipmentFailReason\":\"\",\"deliveryOptionType\":1,\"platformOrderType\":\"\",\"printingStatus\":0,\"storeShipmentBook\":0}],\"total\":2,\"size\":2000,\"current\":1,\"pages\":1},\"msg\":\"操作成功\"}",
+    "bodyJson": {
+      "code": 200,
+      "data": {
+        "records": [
+          {
+            "orderNo": "SO051260306000127",
+            "platformOrderNo": "576489405819820029",
+            "platformCode": "tiktok",
+            "platformSkuList": [
+              {
+                "sku": "LC1171-1",
+                "qty": 1,
+                "productName": "22.4-Inch Black to Fuscia Pink Ombré Wavy Synthetic Wig | 【Heat Resistant】【Cap Included】 | #21*41@41 FSGC"
+              }
+            ],
+            "skuList": [
+              {
+                "sku": "LC1171-1",
+                "qty": 1,
+                "productName": "假发"
+              }
+            ],
+            "buyerName": "Corina Perez",
+            "buyerEmail": "v4bDYU6EZK4KHT5CHTPUHPGQLTW24@scs.tiktokw.us",
+            "receiver": "Corina Perez",
+            "telephone": "(+1)3466054015",
+            "receiptCountryCode": "US",
+            "receiptCountryName": "United States of America (USA)",
+            "provinceCode": "CA",
+            "provinceName": "California",
+            "city": "",
+            "postCode": "91977",
+            "houseNum": "",
+            "addressOne": "3404 Helix St Apt 7",
+            "addressTwo": "",
+            "addressThi": "",
+            "storeCode": "USLCREE2BFUS",
+            "storeName": "403-Lady Grayy Wigs USA_US",
+            "site": "Non-LOCAL-US",
+            "siteNameCn": "US-本土店铺",
+            "siteNameEn": "Non-LOCAL-US",
+            "sendWhCode": "USW01",
+            "sendWhName": "ZOO WAREHOUSE ⑥",
+            "trackNo": "",
+            "logisticsCarrier": "usps",
+            "logisticsCarrierName": "USPS",
+            "logisticsChannelCode": "USPS_PICKUP_C",
+            "logisticsChannelName": "USPS自提",
+            "orderTime": "2026-03-06 12:27:25",
+            "payTime": "2026-03-06 12:27:46",
+            "source": "线上订单",
+            "createTime": "2026-03-06 13:35:08",
+            "auditTime": "",
+            "shipTime": "",
+            "cancelTime": "",
+            "status": 0,
+            "exceptionCause": " ",
+            "auditCause": "",
+            "subStatus": 0,
+            "cancelWay": 2,
+            "markShipmentStatus": 5,
+            "markShipmentTime": "",
+            "markShipmentFailReason": "",
+            "deliveryOptionType": 2,
+            "platformOrderType": "",
+            "printingStatus": 0,
+            "storeShipmentBook": 0
+          },
+          {
+            "orderNo": "SO051260305000041",
+            "platformOrderNo": "LG3131",
+            "platformCode": "shopify",
+            "platformSkuList": [
+              {
+                "sku": "LC8191-1",
+                "qty": 1,
+                "productName": "25-Inch Platinum Blonde Ombre (Dark Roots, Pink Underlights) Straight Synthetic Wig"
+              }
+            ],
+            "skuList": [],
+            "buyerName": "Misty Kelley",
+            "buyerEmail": "missdlynn48@gmail.com",
+            "receiver": "Misty Kelley",
+            "telephone": "+18632205643",
+            "receiptCountryCode": "US",
+            "receiptCountryName": "United States of America (USA)",
+            "provinceCode": "KY",
+            "provinceName": "Kentucky",
+            "city": "",
+            "postCode": "41653",
+            "houseNum": "",
+            "addressOne": "421 S. ROBERTS DR Apt. 89",
+            "addressTwo": "89",
+            "addressThi": "",
+            "storeCode": "1",
+            "storeName": "LadyGrayy Shopify 1",
+            "site": "",
+            "siteNameCn": "",
+            "siteNameEn": "",
+            "sendWhCode": "USW01",
+            "sendWhName": "ZOO WAREHOUSE ⑥",
+            "trackNo": "",
+            "logisticsCarrier": "usps",
+            "logisticsCarrierName": "USPS",
+            "logisticsChannelCode": "USPS_PICKUP_C",
+            "logisticsChannelName": "USPS自提",
+            "orderTime": "2026-03-04 13:32:31",
+            "payTime": "",
+            "source": "线上订单",
+            "createTime": "2026-03-05 05:43:38",
+            "auditTime": "2026-03-06 12:51:34",
+            "shipTime": "",
+            "cancelTime": "",
+            "status": 0,
+            "exceptionCause": " ",
+            "auditCause": "平台sku[LC8191-1]未绑定系统sku",
+            "subStatus": 0,
+            "cancelWay": 2,
+            "markShipmentStatus": 5,
+            "markShipmentTime": "",
+            "markShipmentFailReason": "",
+            "deliveryOptionType": 1,
+            "platformOrderType": "",
+            "printingStatus": 0,
+            "storeShipmentBook": 0
+          }
+        ],
+        "total": 2,
+        "size": 2000,
+        "current": 1,
+        "pages": 1
+      },
+      "msg": "操作成功"
+    }
+  }
+}

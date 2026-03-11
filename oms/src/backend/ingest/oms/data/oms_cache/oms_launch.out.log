@@ -1,0 +1,57 @@
+
+> stealth-launcher-oms@1.0.0 launch:oms
+> node launch_oms_stealth.js
+
+OMS launched in stealth mode. Keep this terminal open.
+DevTools remote debugging: http://127.0.0.1:9223
+Profile mode: temporary (C:\Users\rhyse\AppData\Local\Temp\oms-stealth-mmk9cfn0)
+GUI visibility: visible
+OMS login URL: https://oms.xlwms.com/login
+OMS orders URL: https://oms.xlwms.com/platform/order/list
+Current page URL: https://oms.xlwms.com/platform/order/list
+Cookies path: C:\orderBot\mgmt\data\oms\cookies.json
+Storage path: C:\orderBot\mgmt\data\oms\cookies.storage.json
+Cookies preloaded: yes
+Storage preloaded: yes
+Session state: likely logged in
+Launch page size target: 2000
+Launch page size result: warning (Waiting failed: 10000ms exceeded)
+Close the browser window to end the session.
+
+> stealth-launcher-oms@1.0.0 launch:oms
+> node launch_oms_stealth.js
+
+OMS launched in stealth mode. Keep this terminal open.
+DevTools remote debugging: http://127.0.0.1:9223
+Profile mode: temporary (C:\Users\rhyse\AppData\Local\Temp\oms-stealth-mmk9eh9u)
+GUI visibility: visible
+OMS login URL: https://oms.xlwms.com/login
+OMS orders URL: https://oms.xlwms.com/platform/order/list
+Current page URL: https://oms.xlwms.com/platform/order/list
+Cookies path: C:\orderBot\mgmt\data\oms\cookies.json
+Storage path: C:\orderBot\mgmt\data\oms\cookies.storage.json
+Cookies preloaded: yes
+Storage preloaded: yes
+Session state: likely logged in
+Launch page size target: 2000
+Launch page size result: warning (Failed to click pagination size trigger.)
+Close the browser window to end the session.
+
+> stealth-launcher-oms@1.0.0 launch:oms
+> node launch_oms_stealth.js
+
+OMS launched in stealth mode. Keep this terminal open.
+DevTools remote debugging: http://127.0.0.1:9223
+Profile mode: temporary (C:\Users\rhyse\AppData\Local\Temp\oms-stealth-mmk9fzw1)
+GUI visibility: visible
+OMS login URL: https://oms.xlwms.com/login
+OMS orders URL: https://oms.xlwms.com/platform/order/list
+Current page URL: https://oms.xlwms.com/platform/order/list
+Cookies path: C:\orderBot\mgmt\data\oms\cookies.json
+Storage path: C:\orderBot\mgmt\data\oms\cookies.storage.json
+Cookies preloaded: yes
+Storage preloaded: yes
+Session state: likely logged in
+Launch page size target: 2000
+Launch page size result: ok (changed=1, current=2000)
+Close the browser window to end the session.

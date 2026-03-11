@@ -1,0 +1,181 @@
+{
+  "capturedAt": "2026-03-06T04:29:39.310Z",
+  "endpoint": "https://oms.xlwms.com/gateway/woms/platform/order/list",
+  "method": "POST",
+  "requestPayload": {
+    "current": 1,
+    "size": 2000,
+    "status": "0",
+    "subStatus": "",
+    "platformCodes": "",
+    "receiptCountries": "",
+    "siteCodes": "",
+    "storeCodes": "",
+    "sendWarehouses": "",
+    "logisticsChannels": "",
+    "markShipmentStatus": "",
+    "countKind": "orderCount",
+    "cancelWay": "",
+    "deliveryOptionTypes": "",
+    "printingStatus": ""
+  },
+  "responseMeta": {
+    "status": 200,
+    "total": 65,
+    "size": 2000,
+    "current": 1,
+    "recordCount": 65
+  },
+  "firstRow": {
+    "orderNo": "SO051260306000069",
+    "platformOrderNo": "576488867139720956",
+    "platformCode": "tiktok",
+    "platformSkuList": [
+      {
+        "sku": "LB1057-3",
+        "qty": 1,
+        "productName": "'UP-GRAYYD'  Lady Grayy Deluxe 10-Piece Wig Apprentice Accessory Set with Wig Bag (remake)"
+      },
+      {
+        "sku": "LC2102-1",
+        "qty": 1,
+        "productName": "26-Inch Blonde Ombré Loose Wave Synthetic Wig | 【Heat Resistant】【Cap Included】 | #36 FSGB"
+      },
+      {
+        "sku": "LC2029-1",
+        "qty": 1,
+        "productName": "30-Inch Brown Golden Auburn Ombré Wavy Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #20 FSGB"
+      },
+      {
+        "sku": "LC2074-7",
+        "qty": 1,
+        "productName": "27-Inch Dark Cherry Wine (Frontal Highlights) Undone Waves Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #14 FSGB"
+      }
+    ],
+    "skuList": [
+      {
+        "sku": "LB1057-3",
+        "qty": 1,
+        "productName": "大礼包"
+      },
+      {
+        "sku": "LC2074-7",
+        "qty": 1,
+        "productName": "假发"
+      },
+      {
+        "sku": "LC2029-1",
+        "qty": 1,
+        "productName": "假发"
+      },
+      {
+        "sku": "LC2102-1",
+        "qty": 1,
+        "productName": "假发"
+      }
+    ],
+    "buyerName": "alexandria castoreno",
+    "buyerEmail": "v4bD3USEZMVGIMNCPXJ4P4ECTNN3Q@scs.tiktokw.us",
+    "receiver": "alexandria castoreno",
+    "telephone": "(+1)2102733762",
+    "receiptCountryCode": "US",
+    "receiptCountryName": "United States of America (USA)",
+    "provinceCode": "TX",
+    "provinceName": "Texas",
+    "city": "",
+    "postCode": "78242",
+    "houseNum": "",
+    "addressOne": "5335 BERYL CV",
+    "addressTwo": "",
+    "addressThi": "",
+    "storeCode": "USLCEAE2TRUS",
+    "storeName": "402-Lady Grayy USA_US",
+    "site": "Non-LOCAL-US",
+    "siteNameCn": "US-本土店铺",
+    "siteNameEn": "Non-LOCAL-US",
+    "sendWhCode": "USW01",
+    "sendWhName": "ZOO WAREHOUSE ⑥",
+    "trackNo": "",
+    "logisticsCarrier": "usps",
+    "logisticsCarrierName": "USPS",
+    "logisticsChannelCode": "USPS_PICKUP_C",
+    "logisticsChannelName": "USPS自提",
+    "orderTime": "2026-03-06 04:14:24",
+    "payTime": "2026-03-06 04:14:26",
+    "source": "线上订单",
+    "createTime": "2026-03-06 05:37:15",
+    "auditTime": "",
+    "shipTime": "",
+    "cancelTime": "",
+    "status": 0,
+    "exceptionCause": " ",
+    "auditCause": "",
+    "subStatus": 0,
+    "cancelWay": 2,
+    "markShipmentStatus": 5,
+    "markShipmentTime": "",
+    "markShipmentFailReason": "",
+    "deliveryOptionType": 2,
+    "platformOrderType": "",
+    "printingStatus": 0,
+    "storeShipmentBook": 0
+  },
+  "lastRow": {
+    "orderNo": "SO051260305000041",
+    "platformOrderNo": "LG3131",
+    "platformCode": "shopify",
+    "platformSkuList": [
+      {
+        "sku": "LC8191-1",
+        "qty": 1,
+        "productName": "25-Inch Platinum Blonde Ombre (Dark Roots, Pink Underlights) Straight Synthetic Wig"
+      }
+    ],
+    "skuList": [],
+    "buyerName": "Misty Kelley",
+    "buyerEmail": "missdlynn48@gmail.com",
+    "receiver": "Misty Kelley",
+    "telephone": "+18632205643",
+    "receiptCountryCode": "US",
+    "receiptCountryName": "United States of America (USA)",
+    "provinceCode": "KY",
+    "provinceName": "Kentucky",
+    "city": "",
+    "postCode": "41653",
+    "houseNum": "",
+    "addressOne": "421 S. ROBERTS DR Apt. 89",
+    "addressTwo": "89",
+    "addressThi": "",
+    "storeCode": "1",
+    "storeName": "LadyGrayy Shopify 1",
+    "site": "",
+    "siteNameCn": "",
+    "siteNameEn": "",
+    "sendWhCode": "USW01",
+    "sendWhName": "ZOO WAREHOUSE ⑥",
+    "trackNo": "",
+    "logisticsCarrier": "usps",
+    "logisticsCarrierName": "USPS",
+    "logisticsChannelCode": "USPS_PICKUP_C",
+    "logisticsChannelName": "USPS自提",
+    "orderTime": "2026-03-04 13:32:31",
+    "payTime": "",
+    "source": "线上订单",
+    "createTime": "2026-03-05 05:43:38",
+    "auditTime": "",
+    "shipTime": "",
+    "cancelTime": "",
+    "status": 0,
+    "exceptionCause": " ",
+    "auditCause": "",
+    "subStatus": 0,
+    "cancelWay": 2,
+    "markShipmentStatus": 5,
+    "markShipmentTime": "",
+    "markShipmentFailReason": "",
+    "deliveryOptionType": 1,
+    "platformOrderType": "",
+    "printingStatus": 0,
+    "storeShipmentBook": 0
+  }
+}
