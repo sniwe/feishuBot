@@ -63,6 +63,12 @@ Project `.gitignore` governance:
 - The maintained `.gitignore` must cover project-scope unwieldy, generated, and private/sensitive artifacts (for example local caches, large transient outputs, machine-local secrets, and runtime state files) while preserving intentional tracked source and management files.
 - During initialization and propagation, update `.gitignore` idempotently (no duplicate entries, preserve project-specific rules outside governed sections).
 
+Project-root task runner governance:
+
+- Maintain `${WORKSPACE_ROOT}\package.json` as a workspace command entrypoint when the project uses nested npm packages.
+- Provide forwarding scripts at project root for operational commands so they work from `${WORKSPACE_ROOT}` (example: map `launch:oms` to `${SRC_DIR}\backend\ingest\oms` when that package and script exist).
+- Keep forwarding scripts idempotent during initialization/refactor/propagation and avoid duplicate script keys.
+
 Project-scope management bootstrap under `${PROJMAP_DIR}` must include:
 
 - `threads\README.md`
@@ -186,6 +192,7 @@ On user command `::init`:
   - `turn_index` initialized (typically `0` for bootstrap)
   - timestamp and selected source file metadata
 - Use `${PROJMAP_DIR}\threads\resolve-init-thread.ps1` as default resolver script location.
+- After thread bootstrap, verify workspace-root run-script forwarding is present for discovered nested launch packages so root-level commands remain valid (including `launch:oms` when `${SRC_DIR}\backend\ingest\oms\package.json` exposes that script).
 
 ### 5) Global Map Sync Bootstrap (`::mapSync`)
 
@@ -269,6 +276,7 @@ On user command `::refactor`:
   - Context Object Pattern function contracts from `context_obj_pattern.md`
   - side effects routed through `ctx.deps`
   - project file placement constraints under `${SRC_DIR}` (except `${MGMT_DIR}` and `${WORKSPACE_ROOT}\AGENTS.md`)
+- Preserve and/or regenerate `${WORKSPACE_ROOT}\package.json` forwarding scripts for nested operational entrypoints so commands stay runnable from project root after structural changes (including `launch:oms` when applicable).
 - Global `::refactor` orchestration should use `${GLOBAL_MGMT_DIR}\scripts\refactor-global.ps1`.
 - Default execution mode is assessment-only (dry-run) and must emit `${GLOBAL_MGMT_DIR}\refactor-global-report.json` without mutating project files.
 - Apply mode is explicit and plan-driven (via `-Apply` with optional `-PlanPath`); plan entries should include extraction targets and migration details (`sourceProjectId`, `targetProjectId`, `targetProjectRoot`, optional `exports`, optional `consumers`, optional `modulePaths`).

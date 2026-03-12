@@ -4,7 +4,7 @@
     "name":  "audioTest",
     "summary":  "Toy browser audio checkpoint player with keyboard controls",
     "root":  "C:\\Users\\Qub\\audioTest",
-    "updated":  "2026-03-10T09:15:30.2730736+08:00",
+    "updated":  "2026-03-12T08:21:46.0080454+08:00",
     "nodes":  [
                   {
                       "id":  "control:ui",
@@ -35,21 +35,23 @@
                       "id":  "module:audio-control",
                       "type":  "module",
                       "name":  "src/frontend/app.js",
-                      "summary":  "Loads selected audio, handles keyboard playback/seek, checkpoint drops, segment selection, loop playback, and saved-session restore",
+                      "summary":  "Refactored audio controller with centralized state/UI updates, session save/restore via backend API, and reduced rerender churn",
                       "features":  [
                                        {
-                                           "summary":  "Space toggles play-pause, arrows seek +/-5s, Ctrl+arrows cycle spans, Ctrl+S saves full session state, and next launch restores from IndexedDB",
+                                           "summary":  "Keyboard controls and looping are preserved while Ctrl+S persists session to backend and startup restores state through GET /api/session",
                                            "flow":  [
                                                         "e2",
                                                         "e3",
-                                                        "e4"
+                                                        "e4",
+                                                        "e5"
                                                     ]
                                        }
                                    ],
                       "edges":  [
                                     "e2",
                                     "e3",
-                                    "e4"
+                                    "e4",
+                                    "e5"
                                 ],
                       "critical":  true,
                       "files":  [
@@ -73,6 +75,52 @@
                       "critical":  false,
                       "files":  [
 
+                                ],
+                      "children":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "module:session-backend",
+                      "type":  "module",
+                      "name":  "src/backend/server.js",
+                      "summary":  "Refactored Node HTTP server with route normalization, payload validation, and hardened static path resolution",
+                      "features":  [
+                                       {
+                                           "summary":  "GET/POST /api/session reads and writes latest session JSON under project data directory",
+                                           "flow":  [
+                                                        "e5",
+                                                        "e6"
+                                                    ]
+                                       }
+                                   ],
+                      "edges":  [
+                                    "e5",
+                                    "e6"
+                                ],
+                      "critical":  true,
+                      "files":  [
+                                    "src/backend/server.js",
+                                    "package.json"
+                                ],
+                      "children":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "io:session-file",
+                      "type":  "io",
+                      "name":  "data/session-latest.json",
+                      "summary":  "Project-local persisted session record including audio payload and playback state",
+                      "features":  [
+
+                                   ],
+                      "edges":  [
+
+                                ],
+                      "critical":  false,
+                      "files":  [
+                                    "data/session-latest.json"
                                 ],
                       "children":  [
 
@@ -107,6 +155,20 @@
                       "from":  "module:audio-control",
                       "to":  "module:audio-control",
                       "note":  "Shift+Space creates checkpoints while Ctrl+arrows cycle spans that become active playback loops"
+                  },
+                  {
+                      "id":  "e5",
+                      "kind":  "control",
+                      "from":  "module:audio-control",
+                      "to":  "module:session-backend",
+                      "note":  "Frontend persists and restores session via /api/session"
+                  },
+                  {
+                      "id":  "e6",
+                      "kind":  "io",
+                      "from":  "module:session-backend",
+                      "to":  "io:session-file",
+                      "via":  "SESSION_PATH"
                   }
               ],
     "children":  [

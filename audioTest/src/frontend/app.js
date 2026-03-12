@@ -8,19 +8,18 @@
   const playhead = document.getElementById("playhead");
   const playheadTime = document.getElementById("playhead-time");
 
-  const SESSION_DB_NAME = "audioTestSessions";
-  const SESSION_STORE = "sessions";
-  const SESSION_KEY = "latest";
-
-  let objectUrl = null;
-  let currentFile = null;
-  let checkpoints = [];
-  let selectedSpanIndex = -1;
+  const state = {
+    objectUrl: null,
+    currentFile: null,
+    checkpoints: [],
+    selectedSpanIndex: -1,
+    markerSignature: ""
+  };
 
   input.addEventListener("change", handleFileChange);
-  audio.addEventListener("loadedmetadata", refreshProgressVisuals);
-  audio.addEventListener("timeupdate", refreshProgressVisuals);
-  audio.addEventListener("durationchange", refreshProgressVisuals);
+  audio.addEventListener("loadedmetadata", updateUi);
+  audio.addEventListener("timeupdate", updateUi);
+  audio.addEventListener("durationchange", updateUi);
   document.addEventListener("keydown", handleKeyDown);
 
   restoreSessionOnLaunch();
@@ -31,18 +30,10 @@
       return;
     }
 
-    if (objectUrl) {
-      URL.revokeObjectURL(objectUrl);
-    }
-
-    currentFile = file;
-    objectUrl = URL.createObjectURL(file);
-    audio.src = objectUrl;
-    fileName.textContent = file.name;
-    checkpoints = [];
-    selectedSpanIndex = -1;
-    renderCheckpointMarkers();
-    refreshProgressVisuals();
+    setAudioSource({ data: { file, displayName: file.name }, deps: {} });
+    state.checkpoints = [];
+    state.selectedSpanIndex = -1;
+    updateUi();
   }
 
   function handleKeyDown(event) {
@@ -95,11 +86,11 @@
 
   function dropCheckpoint() {
     const seconds = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
-    checkpoints.push(seconds);
-    checkpoints.sort(function (a, b) { return a - b; });
-    selectedSpanIndex = -1;
-    renderCheckpointMarkers();
-    renderSelectedSpanOverlay();
+    state.checkpoints.push(seconds);
+    state.checkpoints.sort(function (a, b) { return a - b; });
+    state.selectedSpanIndex = -1;
+    state.markerSignature = "";
+    updateUi();
   }
 
   function cycleSpanSelection(step) {
@@ -109,16 +100,14 @@
       return;
     }
 
-    if (selectedSpanIndex < 0 || selectedSpanIndex >= spanCount) {
-      selectedSpanIndex = step > 0 ? 0 : spanCount - 1;
+    if (state.selectedSpanIndex < 0 || state.selectedSpanIndex >= spanCount) {
+      state.selectedSpanIndex = step > 0 ? 0 : spanCount - 1;
     } else {
-      selectedSpanIndex = (selectedSpanIndex + step + spanCount) % spanCount;
+      state.selectedSpanIndex = (state.selectedSpanIndex + step + spanCount) % spanCount;
     }
 
-    audio.currentTime = allCheckpoints[selectedSpanIndex];
-    refreshProgressVisuals();
-    renderCheckpointMarkers();
-    renderSelectedSpanOverlay();
+    audio.currentTime = allCheckpoints[state.selectedSpanIndex];
+    updateUi();
   }
 
   function seekBy(deltaSeconds) {
@@ -127,9 +116,9 @@
     const allCheckpoints = getCheckpointSeries();
     const spanCount = allCheckpoints.length - 1;
 
-    if (selectedSpanIndex >= 0 && selectedSpanIndex < spanCount) {
-      const spanStart = allCheckpoints[selectedSpanIndex];
-      const spanEnd = allCheckpoints[selectedSpanIndex + 1];
+    if (state.selectedSpanIndex >= 0 && state.selectedSpanIndex < spanCount) {
+      const spanStart = allCheckpoints[state.selectedSpanIndex];
+      const spanEnd = allCheckpoints[state.selectedSpanIndex + 1];
       const spanLength = spanEnd - spanStart;
 
       if (spanLength > 0) {
@@ -142,19 +131,68 @@
       audio.currentTime = next;
     }
 
-    refreshProgressVisuals();
+    updateUi();
+  }
+
+  function updateUi() {
+    const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+    const current = clampCurrentTimeWithinSelectedSpan({ data: { duration }, deps: {} });
+
+    progress.value = duration > 0
+      ? Math.min(1000, Math.round((current / duration) * 1000))
+      : 0;
+
+    const percent = duration > 0 ? Math.max(0, Math.min(100, (current / duration) * 100)) : 0;
+    progress.style.setProperty("--progress-pct", String(percent) + "%");
+    playhead.style.left = String(percent) + "%";
+    playheadTime.textContent = formatTime(current);
+
     renderCheckpointMarkers();
     renderSelectedSpanOverlay();
   }
 
+  function clampCurrentTimeWithinSelectedSpan(ctx) {
+    const { data } = ctx;
+    const { duration } = data;
+    let current = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+
+    const allCheckpoints = getCheckpointSeries();
+    const spanCount = allCheckpoints.length - 1;
+    if (state.selectedSpanIndex >= 0 && state.selectedSpanIndex < spanCount) {
+      const spanStart = allCheckpoints[state.selectedSpanIndex];
+      const spanEnd = allCheckpoints[state.selectedSpanIndex + 1];
+      if (spanEnd > spanStart && (current < spanStart || current >= spanEnd)) {
+        const epsilon = Math.min(0.02, (spanEnd - spanStart) / 4);
+        const loopTime = current < spanStart ? Math.max(spanStart, spanEnd - epsilon) : spanStart;
+        audio.currentTime = loopTime;
+        current = loopTime;
+      }
+    }
+
+    if (duration <= 0) {
+      return 0;
+    }
+
+    return Math.max(0, Math.min(duration, current));
+  }
+
   function renderCheckpointMarkers() {
-    checkpointMarkers.innerHTML = "";
     const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+    const series = getCheckpointSeries();
+    const signature = duration.toFixed(3) + "|" + series.map(function (v) { return v.toFixed(3); }).join(",");
+
+    if (signature === state.markerSignature) {
+      return;
+    }
+
+    state.markerSignature = signature;
+    checkpointMarkers.innerHTML = "";
+
     if (duration <= 0) {
       return;
     }
 
-    getCheckpointSeries().forEach(function (seconds) {
+    series.forEach(function (seconds) {
       const marker = document.createElement("span");
       marker.className = "checkpoint-marker";
       const percent = Math.max(0, Math.min(100, (seconds / duration) * 100));
@@ -173,51 +211,19 @@
     const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
     const allCheckpoints = getCheckpointSeries();
     const spanCount = allCheckpoints.length - 1;
-    if (duration <= 0 || selectedSpanIndex < 0 || selectedSpanIndex >= spanCount) {
+    if (duration <= 0 || state.selectedSpanIndex < 0 || state.selectedSpanIndex >= spanCount) {
       selectedSpanOverlay.style.display = "none";
       return;
     }
 
-    const start = allCheckpoints[selectedSpanIndex];
-    const end = allCheckpoints[selectedSpanIndex + 1];
+    const start = allCheckpoints[state.selectedSpanIndex];
+    const end = allCheckpoints[state.selectedSpanIndex + 1];
     const startPercent = Math.max(0, Math.min(100, (start / duration) * 100));
     const endPercent = Math.max(0, Math.min(100, (end / duration) * 100));
 
     selectedSpanOverlay.style.display = "block";
     selectedSpanOverlay.style.left = String(startPercent) + "%";
     selectedSpanOverlay.style.width = String(Math.max(0, endPercent - startPercent)) + "%";
-  }
-
-  function refreshProgressVisuals() {
-    const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
-    let current = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
-
-    const allCheckpoints = getCheckpointSeries();
-    const spanCount = allCheckpoints.length - 1;
-    if (selectedSpanIndex >= 0 && selectedSpanIndex < spanCount) {
-      const spanStart = allCheckpoints[selectedSpanIndex];
-      const spanEnd = allCheckpoints[selectedSpanIndex + 1];
-      if (spanEnd > spanStart && (current < spanStart || current >= spanEnd)) {
-        const epsilon = Math.min(0.02, (spanEnd - spanStart) / 4);
-        const loopTime = current < spanStart ? Math.max(spanStart, spanEnd - epsilon) : spanStart;
-        audio.currentTime = loopTime;
-        current = loopTime;
-      }
-    }
-
-    if (duration > 0) {
-      progress.value = Math.min(1000, Math.round((current / duration) * 1000));
-    } else {
-      progress.value = 0;
-    }
-
-    const percent = duration > 0 ? Math.max(0, Math.min(100, (current / duration) * 100)) : 0;
-    progress.style.setProperty("--progress-pct", String(percent) + "%");
-    playhead.style.left = String(percent) + "%";
-    playheadTime.textContent = formatTime(current);
-
-    renderCheckpointMarkers();
-    renderSelectedSpanOverlay();
   }
 
   function formatTime(totalSeconds) {
@@ -233,7 +239,7 @@
       return [];
     }
 
-    const points = [0].concat(checkpoints).concat([duration]).sort(function (a, b) { return a - b; });
+    const points = [0].concat(state.checkpoints).concat([duration]).sort(function (a, b) { return a - b; });
     const deduped = [];
     points.forEach(function (point) {
       if (!deduped.length || Math.abs(point - deduped[deduped.length - 1]) > 0.01) {
@@ -244,125 +250,152 @@
   }
 
   async function saveSessionState() {
-    if (!window.indexedDB || !audio.src || !currentFile) {
+    if (!audio.src || !state.currentFile) {
       return;
     }
 
-    const db = await openSessionDb();
     const payload = {
-      id: SESSION_KEY,
-      savedAt: new Date().toISOString(),
       file: {
-        name: currentFile.name,
-        type: currentFile.type,
-        size: currentFile.size,
-        lastModified: currentFile.lastModified
+        name: state.currentFile.name,
+        type: state.currentFile.type,
+        size: state.currentFile.size,
+        lastModified: state.currentFile.lastModified
       },
       playback: {
-        checkpoints: checkpoints.slice(),
-        selectedSpanIndex: selectedSpanIndex,
+        checkpoints: state.checkpoints.slice(),
+        selectedSpanIndex: state.selectedSpanIndex,
         currentTime: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
         wasPlaying: !audio.paused
       },
-      audioBlob: currentFile
+      audioBase64: await blobToBase64({ data: { blob: state.currentFile }, deps: {} })
     };
 
-    await putSessionRecord(db, payload);
+    const response = await fetch("/api/session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error("session_save_failed");
+    }
   }
 
   async function restoreSessionOnLaunch() {
-    if (!window.indexedDB) {
-      return;
-    }
-
     try {
-      const db = await openSessionDb();
-      const saved = await getSessionRecord(db, SESSION_KEY);
-      if (!saved || !saved.audioBlob) {
+      const response = await fetch("/api/session", {
+        method: "GET",
+        cache: "no-store"
+      });
+
+      if (response.status === 404) {
         return;
       }
+
+      if (!response.ok) {
+        throw new Error("session_load_failed");
+      }
+
+      const saved = await response.json();
+      if (!saved || !saved.audioBase64) {
+        return;
+      }
+
       applySavedSession(saved);
     } catch {
-      // Ignore corrupted or unavailable stored session.
+      // Ignore unavailable local backend or malformed saved state.
     }
   }
 
   function applySavedSession(saved) {
-    if (objectUrl) {
-      URL.revokeObjectURL(objectUrl);
-    }
-
     const savedFile = saved.file || {};
     const savedPlayback = saved.playback || {};
-    const blobType = savedFile.type || saved.audioBlob.type || "audio/*";
+    const blobType = savedFile.type || "audio/*";
+    const audioBlob = base64ToBlob({ data: { base64: saved.audioBase64, mimeType: blobType }, deps: {} });
 
-    currentFile = new File([saved.audioBlob], savedFile.name || "restored-audio", {
+    setAudioSource({ data: { file: audioBlob, displayName: savedFile.name || "Restored audio" }, deps: {} });
+
+    state.currentFile = new File([audioBlob], savedFile.name || "restored-audio", {
       type: blobType,
       lastModified: savedFile.lastModified || Date.now()
     });
 
-    objectUrl = URL.createObjectURL(saved.audioBlob);
-    audio.src = objectUrl;
-    fileName.textContent = savedFile.name || "Restored audio";
-
-    checkpoints = Array.isArray(savedPlayback.checkpoints)
+    state.checkpoints = Array.isArray(savedPlayback.checkpoints)
       ? savedPlayback.checkpoints.filter(function (v) { return Number.isFinite(v) && v >= 0; }).sort(function (a, b) { return a - b; })
       : [];
 
-    selectedSpanIndex = Number.isInteger(savedPlayback.selectedSpanIndex) ? savedPlayback.selectedSpanIndex : -1;
+    state.selectedSpanIndex = Number.isInteger(savedPlayback.selectedSpanIndex) ? savedPlayback.selectedSpanIndex : -1;
+    state.markerSignature = "";
+
     const resumeTime = Number.isFinite(savedPlayback.currentTime) ? savedPlayback.currentTime : 0;
     const shouldResumePlayback = Boolean(savedPlayback.wasPlaying);
 
     audio.addEventListener("loadedmetadata", function handleRestoreMetadata() {
       const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
       audio.currentTime = Math.max(0, Math.min(duration || resumeTime, resumeTime));
-      refreshProgressVisuals();
+      updateUi();
       if (shouldResumePlayback) {
         audio.play().catch(function () {});
       }
     }, { once: true });
 
-    renderCheckpointMarkers();
-    renderSelectedSpanOverlay();
-    refreshProgressVisuals();
+    updateUi();
   }
 
-  function openSessionDb() {
-    return new Promise(function (resolve, reject) {
-      const request = indexedDB.open(SESSION_DB_NAME, 1);
-      request.onupgradeneeded = function () {
-        const db = request.result;
-        if (!db.objectStoreNames.contains(SESSION_STORE)) {
-          db.createObjectStore(SESSION_STORE, { keyPath: "id" });
-        }
-      };
-      request.onsuccess = function () { resolve(request.result); };
-      request.onerror = function () { reject(request.error); };
-    });
+  function setAudioSource(ctx) {
+    const { data } = ctx;
+    const { file, displayName } = data;
+
+    revokeObjectUrl();
+
+    state.currentFile = file instanceof File
+      ? file
+      : new File([file], String(displayName || "audio.bin"), { type: file.type || "application/octet-stream", lastModified: Date.now() });
+
+    state.objectUrl = URL.createObjectURL(file);
+    audio.src = state.objectUrl;
+    fileName.textContent = displayName || state.currentFile.name || "No file selected";
+    state.markerSignature = "";
   }
 
-  function getSessionRecord(db, id) {
-    return new Promise(function (resolve, reject) {
-      const tx = db.transaction(SESSION_STORE, "readonly");
-      const store = tx.objectStore(SESSION_STORE);
-      const request = store.get(id);
-      request.onsuccess = function () { resolve(request.result || null); };
-      request.onerror = function () { reject(request.error); };
-    });
-  }
-
-  function putSessionRecord(db, record) {
-    return new Promise(function (resolve, reject) {
-      const tx = db.transaction(SESSION_STORE, "readwrite");
-      tx.oncomplete = function () { resolve(); };
-      tx.onerror = function () { reject(tx.error); };
-      tx.objectStore(SESSION_STORE).put(record);
-    });
-  }
-
-  window.addEventListener("beforeunload", function () {
-    if (objectUrl) {
-      URL.revokeObjectURL(objectUrl);
+  function revokeObjectUrl() {
+    if (state.objectUrl) {
+      URL.revokeObjectURL(state.objectUrl);
+      state.objectUrl = null;
     }
-  });
+  }
+
+  function blobToBase64(ctx) {
+    const { data } = ctx;
+    const { blob } = data;
+
+    return new Promise(function (resolve, reject) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        const result = String(reader.result || "");
+        const marker = "base64,";
+        const idx = result.indexOf(marker);
+        resolve(idx >= 0 ? result.slice(idx + marker.length) : "");
+      };
+      reader.onerror = function () { reject(reader.error); };
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  function base64ToBlob(ctx) {
+    const { data } = ctx;
+    const { base64, mimeType } = data;
+
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+
+    return new Blob([bytes], { type: mimeType || "application/octet-stream" });
+  }
+
+  window.addEventListener("beforeunload", revokeObjectUrl);
 })();
