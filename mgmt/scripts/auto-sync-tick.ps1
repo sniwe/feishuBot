@@ -8,6 +8,121 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+function Initialize-FocusInterop {
+    if ("Codex.NativeFocus" -as [type]) { return }
+    Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+
+public static class Codex
+{
+    public static class NativeFocus
+    {
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool IsWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool IsIconic(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+
+        [DllImport("kernel32.dll")]
+        public static extern uint GetCurrentThreadId();
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool BringWindowToTop(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
+    }
+}
+"@
+}
+
+function Get-FocusSnapshot {
+    if (-not [Environment]::UserInteractive) { return $null }
+    try {
+        Initialize-FocusInterop
+        $handle = [Codex.NativeFocus]::GetForegroundWindow()
+        if ($handle -eq [IntPtr]::Zero) { return $null }
+        return [pscustomobject]@{
+            Handle = $handle
+        }
+    } catch {
+        return $null
+    }
+}
+
+function Restore-Focus {
+    param(
+        [Parameter()][object]$Snapshot
+    )
+
+    if (-not $Snapshot) { return }
+
+    try {
+        Initialize-FocusInterop
+        $targetHandle = [IntPtr]$Snapshot.Handle
+        if ($targetHandle -eq [IntPtr]::Zero -or -not [Codex.NativeFocus]::IsWindow($targetHandle)) {
+            return
+        }
+
+        $currentHandle = [Codex.NativeFocus]::GetForegroundWindow()
+        if ($currentHandle -eq $targetHandle) { return }
+
+        $targetPid = [uint32]0
+        $targetThreadId = [Codex.NativeFocus]::GetWindowThreadProcessId($targetHandle, [ref]$targetPid)
+        $currentPid = [uint32]0
+        $currentThreadId = if ($currentHandle -ne [IntPtr]::Zero) {
+            [Codex.NativeFocus]::GetWindowThreadProcessId($currentHandle, [ref]$currentPid)
+        } else {
+            [uint32]0
+        }
+        $thisThreadId = [Codex.NativeFocus]::GetCurrentThreadId()
+        $attachedToTarget = $false
+        $attachedToCurrent = $false
+
+        try {
+            if ($targetThreadId -ne 0 -and $targetThreadId -ne $thisThreadId) {
+                $attachedToTarget = [Codex.NativeFocus]::AttachThreadInput($thisThreadId, $targetThreadId, $true)
+            }
+            if ($currentThreadId -ne 0 -and $currentThreadId -ne $thisThreadId -and $currentThreadId -ne $targetThreadId) {
+                $attachedToCurrent = [Codex.NativeFocus]::AttachThreadInput($thisThreadId, $currentThreadId, $true)
+            }
+
+            if ([Codex.NativeFocus]::IsIconic($targetHandle)) {
+                [Codex.NativeFocus]::ShowWindowAsync($targetHandle, 9) | Out-Null
+            }
+
+            [Codex.NativeFocus]::BringWindowToTop($targetHandle) | Out-Null
+            [Codex.NativeFocus]::SetForegroundWindow($targetHandle) | Out-Null
+        } finally {
+            if ($attachedToCurrent) {
+                [Codex.NativeFocus]::AttachThreadInput($thisThreadId, $currentThreadId, $false) | Out-Null
+            }
+            if ($attachedToTarget) {
+                [Codex.NativeFocus]::AttachThreadInput($thisThreadId, $targetThreadId, $false) | Out-Null
+            }
+        }
+    } catch {}
+}
+
 $GLOBAL_MGMT_DIR = if ([string]::IsNullOrWhiteSpace($GlobalMgmtDir)) {
     Split-Path -Parent $PSScriptRoot
 } else {
@@ -27,6 +142,7 @@ $stateDir = Join-Path $GLOBAL_MGMT_DIR "state"
 New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
 $lockPath = Join-Path $env:TEMP ("codex-auto-sync-{0}.lock" -f $env:USERNAME)
 $now = Get-Date
+$focusSnapshot = Get-FocusSnapshot
 
 if (Test-Path -LiteralPath $lockPath) {
     try {
@@ -108,6 +224,7 @@ try {
     Invoke-Git -Args @("push")
 }
 finally {
+    Restore-Focus -Snapshot $focusSnapshot
     if (Test-Path -LiteralPath $lockPath) {
         Remove-Item -LiteralPath $lockPath -Force -ErrorAction SilentlyContinue
     }
