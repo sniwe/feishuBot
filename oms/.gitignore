@@ -1,6 +1,7 @@
 ﻿# codex-governed:start
 mgmt/projMap/threads/current-thread.json
 mgmt/projMap/state/thread-map-deltas.json
+mgmt/oms.config.json
 .env
 .env.*
 *.local
