@@ -6,6 +6,7 @@ Current scope:
 - Launch browser with stealth plugin.
 - Reuse existing OMS cookies/storage from `C:\orderBot\mgmt\data\oms`.
 - Open OMS orders page and keep the browser session alive ("hang").
+- Load runtime settings from project config at `C:\Users\Qub\oms\mgmt\oms.config.json`.
 
 ## Files
 - `launch_oms_stealth.js`: launcher entry point.
@@ -32,10 +33,12 @@ npm run launch:oms:hidden
 ```
 
 ## Optional environment variables
+- `OMS_CONFIG_PATH` (default `C:\Users\Qub\oms\mgmt\oms.config.json`)
 - `OMS_COOKIES_PATH` (default `C:\orderBot\mgmt\data\oms\cookies.json`)
 - `OMS_STORAGE_PATH` (default `C:\orderBot\mgmt\data\oms\cookies.storage.json`)
 - `OMS_LOGIN_URL` (default `https://oms.xlwms.com/login`)
 - `OMS_ORDERS_URL` (default `https://oms.xlwms.com/platform/order/list`)
+- `OMS_USERNAME` / `OMS_PASSWORD` (override config file credentials)
 - `OMS_HIDDEN=1` for hidden/headless mode
 - `DEBUG_PORT` preferred CDP port (defaults to `9222`, auto-increments if busy)
 - `CHROME_PATH` / `PUPPETEER_EXECUTABLE_PATH` / `BROWSER_PATH` to force browser binary

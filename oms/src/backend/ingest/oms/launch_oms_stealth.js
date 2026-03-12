@@ -15,6 +15,7 @@ const DEFAULT_OMS_STORAGE_PATH = 'C:\\orderBot\\mgmt\\data\\oms\\cookies.storage
 const DEFAULT_WINDOW_WIDTH = 1440;
 const DEFAULT_WINDOW_HEIGHT = 900;
 const DEFAULT_LAUNCH_PAGE_SIZE = 2000;
+const DEFAULT_PROJECT_CONFIG_PATH = path.resolve(__dirname, '..', '..', '..', '..', 'mgmt', 'oms.config.json');
 
 function isTruthy(value) {
   return /^(1|true|yes|on)$/i.test(String(value || '').trim());
@@ -26,6 +27,20 @@ async function fileExists(filePath) {
     return true;
   } catch {
     return false;
+  }
+}
+
+async function loadProjectConfig(configPath) {
+  if (!(await fileExists(configPath))) {
+    return { loaded: false, path: configPath, data: {} };
+  }
+  try {
+    const raw = await fs.readFile(configPath, 'utf8');
+    const parsed = JSON.parse(raw);
+    return { loaded: true, path: configPath, data: parsed && typeof parsed === 'object' ? parsed : {} };
+  } catch (error) {
+    console.warn(`Failed to load OMS config from ${configPath}: ${error.message}`);
+    return { loaded: false, path: configPath, data: {} };
   }
 }
 
@@ -281,18 +296,95 @@ async function ensurePageSize(page, desiredSize) {
   return { changed: true, current: finalSize };
 }
 
-async function main() {
-  const loginUrl = process.env.OMS_LOGIN_URL || DEFAULT_OMS_LOGIN_URL;
-  const ordersUrl = process.env.OMS_ORDERS_URL || DEFAULT_OMS_ORDERS_URL;
-  const cookiesPath = process.env.OMS_COOKIES_PATH || DEFAULT_OMS_COOKIES_PATH;
-  const storagePath = process.env.OMS_STORAGE_PATH || DEFAULT_OMS_STORAGE_PATH;
+async function attemptLogin(page, username, password) {
+  if (!username || !password) {
+    return { attempted: false, success: false, reason: 'credentials_missing' };
+  }
 
-  const hiddenMode = isTruthy(process.env.OMS_HIDDEN);
-  const windowWidth = Number(process.env.OMS_WINDOW_WIDTH || DEFAULT_WINDOW_WIDTH);
-  const windowHeight = Number(process.env.OMS_WINDOW_HEIGHT || DEFAULT_WINDOW_HEIGHT);
-  const launchSetPageSize = !/^(0|false|no|off)$/i.test(String(process.env.OMS_SET_PAGE_SIZE_ON_LAUNCH || '1').trim());
-  const launchPageSize = Number(process.env.OMS_LAUNCH_PAGE_SIZE || DEFAULT_LAUNCH_PAGE_SIZE);
-  const requestedDebugPort = Number(process.env.DEBUG_PORT || 9222);
+  const filled = await page.evaluate(
+    ({ user, pass }) => {
+      const textInputs = Array.from(document.querySelectorAll('input'));
+      const userInput =
+        textInputs.find((el) => /user|account|login|email|phone/i.test(String(el.name || ''))) ||
+        textInputs.find((el) => /user|account|login|email|phone/i.test(String(el.placeholder || ''))) ||
+        textInputs.find((el) => (el.type || '').toLowerCase() === 'text');
+      const passInput =
+        textInputs.find((el) => (el.type || '').toLowerCase() === 'password') ||
+        textInputs.find((el) => /password|pwd|pass/i.test(String(el.name || ''))) ||
+        textInputs.find((el) => /password|pwd|pass/i.test(String(el.placeholder || '')));
+
+      if (!userInput || !passInput) {
+        return { ok: false, reason: 'inputs_not_found' };
+      }
+
+      const setValue = (el, value) => {
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+        if (setter) {
+          setter.call(el, value);
+        } else {
+          el.value = value;
+        }
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      };
+
+      setValue(userInput, user);
+      setValue(passInput, pass);
+
+      const submitBtn =
+        document.querySelector('button[type="submit"]') ||
+        Array.from(document.querySelectorAll('button, .el-button')).find((el) =>
+          /login|sign in|log in|\u767b\u5f55/i.test((el.textContent || '').trim())
+        );
+      if (!submitBtn) {
+        return { ok: true, reason: 'submitted_manual_required' };
+      }
+      submitBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      submitBtn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+      submitBtn.click();
+      return { ok: true, reason: 'submitted' };
+    },
+    { user: String(username), pass: String(password) }
+  );
+
+  if (!filled.ok) {
+    return { attempted: true, success: false, reason: filled.reason };
+  }
+
+  try {
+    await Promise.race([
+      page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 15_000 }),
+      page.waitForFunction(() => !window.location.href.includes('/login'), { timeout: 15_000 })
+    ]);
+  } catch {
+    // Best-effort; allow manual completion if login takes longer or needs challenge handling.
+  }
+  const landedUrl = page.url();
+  return { attempted: true, success: !landedUrl.includes('/login'), reason: filled.reason, landedUrl };
+}
+
+async function main() {
+  const configPath = process.env.OMS_CONFIG_PATH || DEFAULT_PROJECT_CONFIG_PATH;
+  const projectConfigLoad = await loadProjectConfig(configPath);
+  const omsConfig = projectConfigLoad.data && typeof projectConfigLoad.data.oms === 'object' ? projectConfigLoad.data.oms : {};
+  const launchConfig = omsConfig.launch && typeof omsConfig.launch === 'object' ? omsConfig.launch : {};
+  const credentials = omsConfig.credentials && typeof omsConfig.credentials === 'object' ? omsConfig.credentials : {};
+
+  const loginUrl = process.env.OMS_LOGIN_URL || omsConfig.loginUrl || DEFAULT_OMS_LOGIN_URL;
+  const ordersUrl = process.env.OMS_ORDERS_URL || omsConfig.ordersUrl || DEFAULT_OMS_ORDERS_URL;
+  const cookiesPath = process.env.OMS_COOKIES_PATH || omsConfig.cookiesPath || DEFAULT_OMS_COOKIES_PATH;
+  const storagePath = process.env.OMS_STORAGE_PATH || omsConfig.storagePath || DEFAULT_OMS_STORAGE_PATH;
+  const omsUsername = process.env.OMS_USERNAME || credentials.username || '';
+  const omsPassword = process.env.OMS_PASSWORD || credentials.password || '';
+
+  const hiddenMode = process.env.OMS_HIDDEN != null ? isTruthy(process.env.OMS_HIDDEN) : isTruthy(launchConfig.hidden);
+  const windowWidth = Number(process.env.OMS_WINDOW_WIDTH || launchConfig.windowWidth || DEFAULT_WINDOW_WIDTH);
+  const windowHeight = Number(process.env.OMS_WINDOW_HEIGHT || launchConfig.windowHeight || DEFAULT_WINDOW_HEIGHT);
+  const launchSetPageSize = !/^(0|false|no|off)$/i.test(
+    String(process.env.OMS_SET_PAGE_SIZE_ON_LAUNCH ?? launchConfig.setPageSizeOnLaunch ?? '1').trim()
+  );
+  const launchPageSize = Number(process.env.OMS_LAUNCH_PAGE_SIZE || launchConfig.launchPageSize || DEFAULT_LAUNCH_PAGE_SIZE);
+  const requestedDebugPort = Number(process.env.DEBUG_PORT || launchConfig.debugPort || 9222);
   const debugPort = await pickDebugPort(requestedDebugPort);
   const browserLaunchConfig = await resolveBrowserLaunchConfig();
 
@@ -347,8 +439,17 @@ async function main() {
   const usedStorage = await loadStorageState(page, storagePath, ordersUrl);
 
   await page.goto(ordersUrl, { waitUntil: 'domcontentloaded', timeout: 120_000 });
-  const landedUrl = page.url();
-  const onLoginPage = landedUrl.includes('/login');
+  let landedUrl = page.url();
+  let onLoginPage = landedUrl.includes('/login');
+  let loginAttemptStatus = 'skipped';
+  if (onLoginPage && omsUsername && omsPassword) {
+    const loginAttempt = await attemptLogin(page, omsUsername, omsPassword);
+    loginAttemptStatus = loginAttempt.success ? 'ok' : `warning (${loginAttempt.reason})`;
+    landedUrl = loginAttempt.landedUrl || page.url();
+    onLoginPage = landedUrl.includes('/login');
+  } else if (onLoginPage) {
+    loginAttemptStatus = 'skipped (credentials missing)';
+  }
   let launchPageSizeStatus = 'skipped';
   if (!onLoginPage && launchSetPageSize) {
     try {
@@ -370,10 +471,14 @@ async function main() {
   console.log(`OMS login URL: ${loginUrl}`);
   console.log(`OMS orders URL: ${ordersUrl}`);
   console.log(`Current page URL: ${landedUrl}`);
+  console.log(`Config path: ${configPath}`);
+  console.log(`Config loaded: ${projectConfigLoad.loaded ? 'yes' : 'no'}`);
   console.log(`Cookies path: ${cookiesPath}`);
   console.log(`Storage path: ${storagePath}`);
   console.log(`Cookies preloaded: ${usedCookies ? 'yes' : 'no'}`);
   console.log(`Storage preloaded: ${usedStorage ? 'yes' : 'no'}`);
+  console.log(`Login credentials configured: ${omsUsername && omsPassword ? 'yes' : 'no'}`);
+  console.log(`Login autofill result: ${loginAttemptStatus}`);
   console.log(`Session state: ${onLoginPage ? 'not logged in (login page)' : 'likely logged in'}`);
   console.log(`Launch page size target: ${launchPageSize}`);
   console.log(`Launch page size result: ${launchPageSizeStatus}`);
