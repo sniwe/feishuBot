@@ -5,6 +5,12 @@ param(
     [bool]$EnableQv2rayUsAutoSelect = $true,
     [string]$GlobalMgmtDir = "",
     [string]$CmdStartupCommand = "codex --dangerously-bypass-approvals-and-sandbox",
+    [bool]$EnableAlternateLeftGroups = $true,
+    [string]$VsCodePath = "",
+    [string]$WeChatPath = "",
+    [string]$ChromePath = "",
+    [string]$AlternateCmdStartupCommand = "",
+    [int]$AlternateGroupPauseMs = 700,
     [int]$InitialDelayMs = 2500,
     [int]$LaunchDelayMs = 1200,
     [int]$WindowTimeoutSeconds = 30
@@ -56,6 +62,7 @@ $VK_LEFT = 0x25
 $VK_RIGHT = 0x27
 $VK_UP = 0x26
 $VK_DOWN = 0x28
+$VK_D = 0x44
 
 function Wait-ProcessMainWindow {
     param(
@@ -134,6 +141,48 @@ function Ensure-Qv2rayWindowHandle {
     }
 
     throw "Timed out waiting for qv2ray window from executable '$Qv2rayExePath'."
+}
+
+function Ensure-AppWindowHandle {
+    param(
+        [Parameter(Mandatory = $true)][string]$AppPath,
+        [string]$ProcessName = "",
+        [string[]]$ArgumentList = @(),
+        [Parameter(Mandatory = $true)][int]$TimeoutSeconds
+    )
+
+    if (!(Test-Path -LiteralPath $AppPath -PathType Leaf)) {
+        throw "App executable was not found: $AppPath"
+    }
+
+    $procName = if ([string]::IsNullOrWhiteSpace($ProcessName)) {
+        [IO.Path]::GetFileNameWithoutExtension($AppPath)
+    } else {
+        $ProcessName
+    }
+
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    $attempt = 0
+    $lastLaunch = [datetime]::MinValue
+
+    while ((Get-Date) -lt $deadline) {
+        $handle = Get-MainWindowHandleByProcessName -ProcessName $procName
+        if ($handle -ne [IntPtr]::Zero) {
+            return $handle
+        }
+
+        $now = Get-Date
+        $shouldLaunch = ($attempt -eq 0) -or (($now - $lastLaunch).TotalSeconds -ge 4)
+        if ($shouldLaunch) {
+            Start-Process -FilePath $AppPath -ArgumentList $ArgumentList | Out-Null
+            $attempt += 1
+            $lastLaunch = $now
+        }
+
+        Start-Sleep -Milliseconds 300
+    }
+
+    throw "Timed out waiting for app window from executable '$AppPath'."
 }
 
 function Wait-ExplorerWindowHandle {
@@ -248,6 +297,17 @@ function Send-WinArrow {
     Start-Sleep -Milliseconds 40
     [NativeWindowTools]::keybd_event([byte]$VK_LWIN, 0, $KEYEVENTF_KEYUP, [UIntPtr]::Zero)
     Start-Sleep -Milliseconds 280
+}
+
+function Send-WinDesktopShow {
+    [NativeWindowTools]::keybd_event([byte]$VK_LWIN, 0, 0, [UIntPtr]::Zero)
+    Start-Sleep -Milliseconds 40
+    [NativeWindowTools]::keybd_event([byte]$VK_D, 0, 0, [UIntPtr]::Zero)
+    Start-Sleep -Milliseconds 40
+    [NativeWindowTools]::keybd_event([byte]$VK_D, 0, $KEYEVENTF_KEYUP, [UIntPtr]::Zero)
+    Start-Sleep -Milliseconds 40
+    [NativeWindowTools]::keybd_event([byte]$VK_LWIN, 0, $KEYEVENTF_KEYUP, [UIntPtr]::Zero)
+    Start-Sleep -Milliseconds 350
 }
 
 function Test-WindowNearBounds {
@@ -450,6 +510,21 @@ function Save-Qv2raySelectionCache {
     $payload | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $CachePath -Encoding UTF8
 }
 
+function Resolve-FirstPathCandidate {
+    param(
+        [string[]]$Candidates
+    )
+
+    foreach ($candidate in $Candidates) {
+        if ([string]::IsNullOrWhiteSpace($candidate)) { continue }
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+            return $candidate
+        }
+    }
+
+    return ($Candidates | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -First 1)
+}
+
 if (!(Test-Path -LiteralPath $ExplorerPath -PathType Container)) {
     throw "Explorer path does not exist: $ExplorerPath"
 }
@@ -505,6 +580,33 @@ if ($InitialDelayMs -gt 0) {
     Start-Sleep -Milliseconds $InitialDelayMs
 }
 
+$resolvedVsCodePath = if ([string]::IsNullOrWhiteSpace($VsCodePath)) {
+    Resolve-FirstPathCandidate -Candidates @(
+        (if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA "Programs\Microsoft VS Code\Code.exe" } else { $null }),
+        (if ($env:ProgramFiles) { Join-Path $env:ProgramFiles "Microsoft VS Code\Code.exe" } else { $null }),
+        (if (${env:ProgramFiles(x86)}) { Join-Path ${env:ProgramFiles(x86)} "Microsoft VS Code\Code.exe" } else { $null })
+    )
+} else {
+    [IO.Path]::GetFullPath($VsCodePath)
+}
+$resolvedWeChatPath = if ([string]::IsNullOrWhiteSpace($WeChatPath)) {
+    Resolve-FirstPathCandidate -Candidates @(
+        (if (${env:ProgramFiles(x86)}) { Join-Path ${env:ProgramFiles(x86)} "Tencent\WeChat\WeChat.exe" } else { $null }),
+        (if ($env:ProgramFiles) { Join-Path $env:ProgramFiles "Tencent\WeChat\WeChat.exe" } else { $null }),
+        (if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA "Tencent\WeChat\WeChat.exe" } else { $null })
+    )
+} else {
+    [IO.Path]::GetFullPath($WeChatPath)
+}
+$resolvedChromePath = if ([string]::IsNullOrWhiteSpace($ChromePath)) {
+    Resolve-FirstPathCandidate -Candidates @(
+        (if ($env:ProgramFiles) { Join-Path $env:ProgramFiles "Google\Chrome\Application\chrome.exe" } else { $null }),
+        (if (${env:ProgramFiles(x86)}) { Join-Path ${env:ProgramFiles(x86)} "Google\Chrome\Application\chrome.exe" } else { $null })
+    )
+} else {
+    [IO.Path]::GetFullPath($ChromePath)
+}
+
 $workingArea = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
 $leftWidth = [int][Math]::Floor($workingArea.Width / 2)
 $rightWidth = $workingArea.Width - $leftWidth
@@ -550,6 +652,97 @@ if (-not $snapCmdOk) {
     Set-WindowBounds -Handle $cmdHandle -X ($workingArea.Left + $leftWidth) -Y ($workingArea.Top + $upperHeight) -Width $rightWidth -Height $lowerHeight
 }
 
+$alternateGroupResults = @()
+if ($EnableAlternateLeftGroups) {
+    $alternateSpecs = @(
+        [pscustomobject]@{
+            id = "vscode"
+            process_name = "Code"
+            app_path = $resolvedVsCodePath
+            args = @()
+        },
+        [pscustomobject]@{
+            id = "wechat"
+            process_name = "WeChat"
+            app_path = $resolvedWeChatPath
+            args = @()
+        },
+        [pscustomobject]@{
+            id = "chrome"
+            process_name = "chrome"
+            app_path = $resolvedChromePath
+            args = @()
+        }
+    )
+
+    foreach ($alt in $alternateSpecs) {
+        Send-WinDesktopShow
+        if ($AlternateGroupPauseMs -gt 0) {
+            Start-Sleep -Milliseconds $AlternateGroupPauseMs
+        }
+
+        $altResult = [ordered]@{
+            app = $alt.id
+            app_path = $alt.app_path
+            created = $false
+            warning = $null
+            snap_result = [ordered]@{
+                left = $false
+                explorer = $false
+                cmd = $false
+            }
+        }
+
+        if (!(Test-Path -LiteralPath $alt.app_path -PathType Leaf)) {
+            $altResult.warning = "App executable was not found."
+            $alternateGroupResults += [pscustomobject]$altResult
+            continue
+        }
+
+        try {
+            $leftHandle = Ensure-AppWindowHandle -AppPath $alt.app_path -ProcessName $alt.process_name -ArgumentList $alt.args -TimeoutSeconds $WindowTimeoutSeconds
+
+            $altExplorerStartedAt = Get-Date
+            Start-Process -FilePath "explorer.exe" -ArgumentList "/n,`"$ExplorerPath`"" | Out-Null
+            Start-Sleep -Milliseconds 300
+
+            $altCmdArgs = @("/k")
+            if (-not [string]::IsNullOrWhiteSpace($AlternateCmdStartupCommand)) {
+                $altCmdArgs += $AlternateCmdStartupCommand
+            }
+            $altCmdProcess = Start-Process -FilePath "cmd.exe" -ArgumentList $altCmdArgs -PassThru
+
+            Start-Sleep -Milliseconds $LaunchDelayMs
+
+            $altExplorerHandle = Wait-ExplorerWindowHandle -TargetPath $ExplorerPath -StartedAfter $altExplorerStartedAt -TimeoutSeconds $WindowTimeoutSeconds
+            $altCmdHandle = Wait-ProcessMainWindow -Process $altCmdProcess -TimeoutSeconds $WindowTimeoutSeconds
+
+            $altSnapLeft = Invoke-SnapStep -Handle $leftHandle -Directions @("Left") -ExpectedX $workingArea.Left -ExpectedY $workingArea.Top -ExpectedWidth $leftWidth -ExpectedHeight $workingArea.Height
+            $altSnapExplorer = Invoke-SnapStep -Handle $altExplorerHandle -Directions @("Right", "Up") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY $workingArea.Top -ExpectedWidth $rightWidth -ExpectedHeight $upperHeight
+            $altSnapCmd = Invoke-SnapStep -Handle $altCmdHandle -Directions @("Right", "Down") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY ($workingArea.Top + $upperHeight) -ExpectedWidth $rightWidth -ExpectedHeight $lowerHeight
+
+            if (-not $altSnapLeft) {
+                Set-WindowBounds -Handle $leftHandle -X $workingArea.Left -Y $workingArea.Top -Width $leftWidth -Height $workingArea.Height
+            }
+            if (-not $altSnapExplorer) {
+                Set-WindowBounds -Handle $altExplorerHandle -X ($workingArea.Left + $leftWidth) -Y $workingArea.Top -Width $rightWidth -Height $upperHeight
+            }
+            if (-not $altSnapCmd) {
+                Set-WindowBounds -Handle $altCmdHandle -X ($workingArea.Left + $leftWidth) -Y ($workingArea.Top + $upperHeight) -Width $rightWidth -Height $lowerHeight
+            }
+
+            $altResult.created = $true
+            $altResult.snap_result.left = $altSnapLeft
+            $altResult.snap_result.explorer = $altSnapExplorer
+            $altResult.snap_result.cmd = $altSnapCmd
+        } catch {
+            $altResult.warning = $_.Exception.Message
+        }
+
+        $alternateGroupResults += [pscustomobject]$altResult
+    }
+}
+
 [pscustomobject]@{
     ok = $true
     explorer_path = [IO.Path]::GetFullPath($ExplorerPath)
@@ -568,6 +761,11 @@ if (-not $snapCmdOk) {
     }
     terminal_startup = [ordered]@{
         cmd_startup_command = $CmdStartupCommand
+    }
+    alternate_groups = [ordered]@{
+        enabled = [bool]$EnableAlternateLeftGroups
+        alternate_cmd_startup_command = $AlternateCmdStartupCommand
+        results = $alternateGroupResults
     }
     snap_attempted = $true
     snap_result = [ordered]@{
