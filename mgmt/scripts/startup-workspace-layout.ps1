@@ -174,7 +174,11 @@ function Ensure-AppWindowHandle {
         $now = Get-Date
         $shouldLaunch = ($attempt -eq 0) -or (($now - $lastLaunch).TotalSeconds -ge 4)
         if ($shouldLaunch) {
-            Start-Process -FilePath $AppPath -ArgumentList $ArgumentList | Out-Null
+            if ($null -ne $ArgumentList -and $ArgumentList.Count -gt 0) {
+                Start-Process -FilePath $AppPath -ArgumentList $ArgumentList | Out-Null
+            } else {
+                Start-Process -FilePath $AppPath | Out-Null
+            }
             $attempt += 1
             $lastLaunch = $now
         }
@@ -606,6 +610,8 @@ $resolvedWeChatPath = if ([string]::IsNullOrWhiteSpace($WeChatPath)) {
     Resolve-FirstPathCandidate -Candidates @(
         (Join-PathIfPresent -BasePath ${env:ProgramFiles(x86)} -ChildPath "Tencent\WeChat\WeChat.exe"),
         (Join-PathIfPresent -BasePath $env:ProgramFiles -ChildPath "Tencent\WeChat\WeChat.exe"),
+        (Join-PathIfPresent -BasePath ${env:ProgramFiles(x86)} -ChildPath "Tencent\Weixin\Weixin.exe"),
+        (Join-PathIfPresent -BasePath $env:ProgramFiles -ChildPath "Tencent\Weixin\Weixin.exe"),
         (Join-PathIfPresent -BasePath $env:LOCALAPPDATA -ChildPath "Tencent\WeChat\WeChat.exe")
     )
 } else {
@@ -667,6 +673,12 @@ if (-not $snapCmdOk) {
 
 $alternateGroupResults = @()
 if ($EnableAlternateLeftGroups) {
+    $weChatProcessName = if ([string]::IsNullOrWhiteSpace($resolvedWeChatPath)) {
+        "WeChat"
+    } else {
+        [IO.Path]::GetFileNameWithoutExtension($resolvedWeChatPath)
+    }
+
     $alternateSpecs = @(
         [pscustomobject]@{
             id = "vscode"
@@ -676,7 +688,7 @@ if ($EnableAlternateLeftGroups) {
         },
         [pscustomobject]@{
             id = "wechat"
-            process_name = "WeChat"
+            process_name = $weChatProcessName
             app_path = $resolvedWeChatPath
             args = @()
         },
