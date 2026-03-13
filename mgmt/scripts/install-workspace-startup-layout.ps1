@@ -3,6 +3,7 @@ param(
     [string]$TaskName = "WorkspaceStartupLayout",
     [string]$ExplorerPath = "C:\Users\Qub",
     [string]$Qv2rayPath = "C:\Program Files\qv2ray\qv2ray.exe",
+    [string]$CmdWorkingDirectory = "",
     [int]$InitialDelayMs = 2500,
     [bool]$InstallNetworkRecovery = $true,
     [string]$RecoveryTaskName = "Qv2rayNetworkRecovery",
@@ -31,7 +32,12 @@ if ($InstallNetworkRecovery -and !(Test-Path -LiteralPath $recoveryInstaller)) {
 $taskAuthor = if ($env:USERDOMAIN) { "$env:USERDOMAIN\$env:USERNAME" } else { $env:USERNAME }
 $taskUserSid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
 $startBoundary = (Get-Date).ToString("s")
-$taskArgs = "-NoLogo -NonInteractive -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File ""$layoutScript"" -ExplorerPath ""$ExplorerPath"" -Qv2rayPath ""$Qv2rayPath"" -InitialDelayMs $InitialDelayMs"
+$resolvedCmdWorkingDirectory = if ([string]::IsNullOrWhiteSpace($CmdWorkingDirectory)) {
+    if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { "C:\Users\Qub" } else { $env:USERPROFILE }
+} else {
+    [IO.Path]::GetFullPath($CmdWorkingDirectory)
+}
+$taskArgs = "-NoLogo -NonInteractive -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File ""$layoutScript"" -ExplorerPath ""$ExplorerPath"" -Qv2rayPath ""$Qv2rayPath"" -CmdWorkingDirectory ""$resolvedCmdWorkingDirectory"" -InitialDelayMs $InitialDelayMs"
 $taskXmlPath = Join-Path $env:TEMP ("{0}.xml" -f [guid]::NewGuid().ToString("N"))
 $taskXml = @"
 <?xml version="1.0" encoding="UTF-16"?>
@@ -45,7 +51,7 @@ $taskXml = @"
     <Principal id="Author">
       <UserId>$taskUserSid</UserId>
       <LogonType>InteractiveToken</LogonType>
-      <RunLevel>LeastPrivilege</RunLevel>
+      <RunLevel>HighestAvailable</RunLevel>
     </Principal>
   </Principals>
   <Settings>
@@ -98,6 +104,7 @@ if ($InstallNetworkRecovery) {
     script = $layoutScript
     explorer_path = [IO.Path]::GetFullPath($ExplorerPath)
     qv2ray_path = [IO.Path]::GetFullPath($Qv2rayPath)
+    cmd_working_directory = $resolvedCmdWorkingDirectory
     initial_delay_ms = $InitialDelayMs
     network_recovery_task = $recoveryResult
 } | ConvertTo-Json -Depth 5

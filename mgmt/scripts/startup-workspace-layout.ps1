@@ -5,6 +5,9 @@ param(
     [bool]$EnableQv2rayUsAutoSelect = $true,
     [string]$GlobalMgmtDir = "",
     [string]$CmdStartupCommand = "codex --dangerously-bypass-approvals-and-sandbox",
+    [string]$CmdWorkingDirectory = "",
+    [bool]$AutoResumeCodexInTerminal = $true,
+    [int]$CodexResumeDelayMs = 1400,
     [bool]$EnableAlternateLeftGroups = $true,
     [string]$VsCodePath = "",
     [string]$WeChatPath = "",
@@ -350,6 +353,21 @@ function Send-WinDesktopShow {
     Start-Sleep -Milliseconds 350
 }
 
+function Send-KeysToWindow {
+    param(
+        [Parameter(Mandatory = $true)][IntPtr]$Handle,
+        [Parameter(Mandatory = $true)][string]$Keys,
+        [int]$PreDelayMs = 120
+    )
+
+    Set-WindowForeground -Handle $Handle
+    if ($PreDelayMs -gt 0) {
+        Start-Sleep -Milliseconds $PreDelayMs
+    }
+    [System.Windows.Forms.SendKeys]::SendWait($Keys)
+    Start-Sleep -Milliseconds 120
+}
+
 function Test-WindowNearBounds {
     param(
         [Parameter(Mandatory = $true)][IntPtr]$Handle,
@@ -597,6 +615,14 @@ $resolvedGlobalMgmtDir = if ([string]::IsNullOrWhiteSpace($GlobalMgmtDir)) {
 } else {
     [IO.Path]::GetFullPath($GlobalMgmtDir)
 }
+$resolvedCmdWorkingDirectory = if ([string]::IsNullOrWhiteSpace($CmdWorkingDirectory)) {
+    if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { "C:\Users\Qub" } else { $env:USERPROFILE }
+} else {
+    [IO.Path]::GetFullPath($CmdWorkingDirectory)
+}
+if (!(Test-Path -LiteralPath $resolvedCmdWorkingDirectory -PathType Container)) {
+    $resolvedCmdWorkingDirectory = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { "C:\Users\Qub" } else { $env:USERPROFILE }
+}
 $stateDir = Join-Path $resolvedGlobalMgmtDir "state"
 New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
 $selectionCachePath = Join-Path $stateDir "qv2ray-us-last-good.json"
@@ -683,12 +709,26 @@ $cmdArgs = @("/k")
 if (-not [string]::IsNullOrWhiteSpace($CmdStartupCommand)) {
     $cmdArgs += $CmdStartupCommand
 }
-$cmdProcess = Start-Process -FilePath "cmd.exe" -ArgumentList $cmdArgs -PassThru
+$cmdProcess = Start-Process -FilePath "cmd.exe" -ArgumentList $cmdArgs -WorkingDirectory $resolvedCmdWorkingDirectory -PassThru
 
 Start-Sleep -Milliseconds $LaunchDelayMs
 
 $explorerHandle = Wait-ExplorerWindowHandle -TargetPath $ExplorerPath -StartedAfter $explorerStartedAt -TimeoutSeconds $WindowTimeoutSeconds
 $cmdHandle = Wait-ProcessMainWindow -Process $cmdProcess -TimeoutSeconds $WindowTimeoutSeconds
+
+$codexResumeAttempted = $false
+$codexResumeWarning = $null
+if ($AutoResumeCodexInTerminal -and $CmdStartupCommand -match "(^|\\s)codex(\\s|$)") {
+    try {
+        if ($CodexResumeDelayMs -gt 0) {
+            Start-Sleep -Milliseconds $CodexResumeDelayMs
+        }
+        Send-KeysToWindow -Handle $cmdHandle -Keys "/resume{ENTER}{ENTER}" -PreDelayMs 150
+        $codexResumeAttempted = $true
+    } catch {
+        $codexResumeWarning = $_.Exception.Message
+    }
+}
 
 $snapQv2rayOk = $false
 if ($qv2rayHandle -ne [IntPtr]::Zero) {
@@ -770,6 +810,12 @@ if ($EnableAlternateLeftGroups) {
                 Set-WindowBounds -Handle $leftHandle -X $workingArea.Left -Y $workingArea.Top -Width $leftWidth -Height $workingArea.Height
             }
 
+            if ($alt.id -eq "wechat") {
+                Send-KeysToWindow -Handle $leftHandle -Keys "{ENTER}" -PreDelayMs 120
+            } elseif ($alt.id -eq "chrome") {
+                Send-KeysToWindow -Handle $leftHandle -Keys "{ESC}" -PreDelayMs 120
+            }
+
             $altResult.created = $true
             $altResult.snap_result.left = $altSnapLeft
         } catch {
@@ -778,6 +824,18 @@ if ($EnableAlternateLeftGroups) {
 
         $alternateGroupResults += [pscustomobject]$altResult
     }
+}
+
+$primaryRefocusWarning = $null
+try {
+    if ($qv2rayHandle -ne [IntPtr]::Zero) {
+        [void](Invoke-SnapStep -Handle $qv2rayHandle -Directions @("Left") -ExpectedX $workingArea.Left -ExpectedY $workingArea.Top -ExpectedWidth $leftWidth -ExpectedHeight $workingArea.Height)
+    }
+    [void](Invoke-SnapStep -Handle $explorerHandle -Directions @("Right", "Up") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY $workingArea.Top -ExpectedWidth $rightWidth -ExpectedHeight $upperHeight)
+    [void](Invoke-SnapStep -Handle $cmdHandle -Directions @("Right", "Down") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY ($workingArea.Top + $upperHeight) -ExpectedWidth $rightWidth -ExpectedHeight $lowerHeight)
+    Set-WindowForeground -Handle $cmdHandle
+} catch {
+    $primaryRefocusWarning = $_.Exception.Message
 }
 
 [pscustomobject]@{
@@ -798,10 +856,16 @@ if ($EnableAlternateLeftGroups) {
     }
     terminal_startup = [ordered]@{
         cmd_startup_command = $CmdStartupCommand
+        cmd_working_directory = $resolvedCmdWorkingDirectory
+        codex_resume_attempted = $codexResumeAttempted
+        codex_resume_warning = $codexResumeWarning
     }
     alternate_groups = [ordered]@{
         enabled = [bool]$EnableAlternateLeftGroups
         results = $alternateGroupResults
+    }
+    primary_group_refocus = [ordered]@{
+        warning = $primaryRefocusWarning
     }
     snap_attempted = $true
     snap_result = [ordered]@{
