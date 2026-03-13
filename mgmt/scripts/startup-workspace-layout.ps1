@@ -813,18 +813,6 @@ $cmdHandle = Wait-ProcessMainWindow -Process $cmdProcess -TimeoutSeconds $Window
 
 $isCodexStartupCommand = $CmdStartupCommand -match '(^|\s)codex(\s|$)'
 
-if ($isCodexStartupCommand) {
-    try {
-        if ($CodexResumeDelayMs -gt 0) {
-            Start-Sleep -Milliseconds $CodexResumeDelayMs
-        }
-        Send-KeysToWindow -Handle $cmdHandle -Keys ".{ENTER}" -PreDelayMs 120
-        $codexPostStartDotSent = $true
-    } catch {
-        $codexPostStartDotWarning = $_.Exception.Message
-    }
-}
-
 if ($qv2rayHandle -ne [IntPtr]::Zero) {
     $snapQv2rayOk = Invoke-SnapStep -Handle $qv2rayHandle -Directions @("Left") -ExpectedX $workingArea.Left -ExpectedY $workingArea.Top -ExpectedWidth $leftWidth -ExpectedHeight $workingArea.Height
 }
@@ -849,7 +837,7 @@ if ($isCodexStartupCommand) {
 
         $attempts = [Math]::Max(1, $CodexPostStartDotRetries)
         for ($attempt = 1; $attempt -le $attempts; $attempt++) {
-            Send-KeysToWindow -Handle $cmdHandle -Keys ".{ENTER}" -PreDelayMs 120
+            Send-KeysToWindow -Handle $cmdHandle -Keys "test{ENTER}" -PreDelayMs 120
             $codexPostStartDotSent = $true
 
             if ($attempt -lt $attempts -and $CodexPostStartDotRetryDelayMs -gt 0) {
