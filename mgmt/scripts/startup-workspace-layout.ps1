@@ -1,6 +1,8 @@
 param(
     [string]$ExplorerPath = "C:\Users\Qub",
     [string]$Qv2rayPath = "C:\Program Files\qv2ray\qv2ray.exe",
+    [string]$Qv2rayConfigDir = "",
+    [bool]$EnableQv2rayUsAutoSelect = $true,
     [int]$InitialDelayMs = 2500,
     [int]$LaunchDelayMs = 1200,
     [int]$WindowTimeoutSeconds = 30
@@ -231,12 +233,116 @@ function Invoke-SnapStep {
     return (Test-WindowNearBounds -Handle $Handle -X $ExpectedX -Y $ExpectedY -Width $ExpectedWidth -Height $ExpectedHeight)
 }
 
+function Select-Qv2rayLowestLatencyUsConnection {
+    param(
+        [Parameter(Mandatory = $true)][string]$ConfigDir
+    )
+
+    $connectionsPath = Join-Path $ConfigDir "connections.json"
+    $groupsPath = Join-Path $ConfigDir "groups.json"
+    $mainConfigPath = Join-Path $ConfigDir "Qv2ray.conf"
+
+    foreach ($path in @($connectionsPath, $groupsPath, $mainConfigPath)) {
+        if (!(Test-Path -LiteralPath $path -PathType Leaf)) {
+            throw "Missing qv2ray config file: $path"
+        }
+    }
+
+    $connectionsJson = Get-Content -LiteralPath $connectionsPath -Raw | ConvertFrom-Json
+    $groupsJson = Get-Content -LiteralPath $groupsPath -Raw | ConvertFrom-Json
+    $mainConfig = Get-Content -LiteralPath $mainConfigPath -Raw | ConvertFrom-Json
+
+    $usCandidates = @()
+    foreach ($prop in $connectionsJson.PSObject.Properties) {
+        $id = [string]$prop.Name
+        $meta = $prop.Value
+        if ($null -eq $meta) { continue }
+
+        $name = [string]$meta.displayName
+        if ([string]::IsNullOrWhiteSpace($name)) { continue }
+        if ($name -notmatch "(^|[\s_\(])US([-\s_\)]|$)") { continue }
+
+        $latency = [int]::MaxValue
+        try { $latency = [int]$meta.latency } catch { continue }
+        if ($latency -le 0) { continue }
+
+        $lastConnected = 0
+        try { $lastConnected = [int64]$meta.lastConnected } catch { $lastConnected = 0 }
+
+        $usCandidates += [pscustomobject]@{
+            id = $id
+            name = $name
+            latency = $latency
+            lastConnected = $lastConnected
+        }
+    }
+
+    if ($usCandidates.Count -eq 0) {
+        throw "No US connections with valid latency were found in $connectionsPath."
+    }
+
+    $selected = $usCandidates | Sort-Object latency, @{ Expression = { -1 * $_.lastConnected } } | Select-Object -First 1
+
+    $selectedGroupId = "000000000000"
+    foreach ($grp in $groupsJson.PSObject.Properties) {
+        $groupId = [string]$grp.Name
+        $groupValue = $grp.Value
+        if ($null -eq $groupValue) { continue }
+        if ($groupValue.connections -contains $selected.id) {
+            $selectedGroupId = $groupId
+            break
+        }
+    }
+
+    $target = [pscustomobject]@{
+        connectionId = $selected.id
+        groupId = $selectedGroupId
+    }
+
+    if ($null -eq $mainConfig.lastConnectedId) {
+        $mainConfig | Add-Member -MemberType NoteProperty -Name lastConnectedId -Value $target
+    } else {
+        $mainConfig.lastConnectedId = $target
+    }
+
+    if ($null -eq $mainConfig.autoStartId) {
+        $mainConfig | Add-Member -MemberType NoteProperty -Name autoStartId -Value $target
+    } else {
+        $mainConfig.autoStartId = $target
+    }
+
+    # 2 is the commonly used qv2ray config value for auto-connect startup behavior.
+    $mainConfig.autoStartBehavior = 2
+
+    $mainConfig | ConvertTo-Json -Depth 30 | Set-Content -LiteralPath $mainConfigPath -Encoding UTF8
+
+    return [pscustomobject]@{
+        ok = $true
+        connection_id = $selected.id
+        display_name = $selected.name
+        latency_ms = $selected.latency
+        group_id = $selectedGroupId
+        config_path = $mainConfigPath
+    }
+}
+
 if (!(Test-Path -LiteralPath $ExplorerPath -PathType Container)) {
     throw "Explorer path does not exist: $ExplorerPath"
 }
 
 if (!(Test-Path -LiteralPath $Qv2rayPath -PathType Leaf)) {
     throw "Qv2ray executable was not found: $Qv2rayPath"
+}
+
+$resolvedQv2rayConfigDir = if ([string]::IsNullOrWhiteSpace($Qv2rayConfigDir)) {
+    Join-Path $env:LOCALAPPDATA "qv2ray"
+} else {
+    [IO.Path]::GetFullPath($Qv2rayConfigDir)
+}
+
+$qv2raySelection = $null
+if ($EnableQv2rayUsAutoSelect) {
+    $qv2raySelection = Select-Qv2rayLowestLatencyUsConnection -ConfigDir $resolvedQv2rayConfigDir
 }
 
 if ($InitialDelayMs -gt 0) {
@@ -281,6 +387,11 @@ if (-not $snapCmdOk) {
     explorer_path = [IO.Path]::GetFullPath($ExplorerPath)
     qv2ray_path = [IO.Path]::GetFullPath($Qv2rayPath)
     initial_delay_ms = $InitialDelayMs
+    qv2ray_us_autoselect = [ordered]@{
+        enabled = [bool]$EnableQv2rayUsAutoSelect
+        config_dir = $resolvedQv2rayConfigDir
+        selection = $qv2raySelection
+    }
     snap_attempted = $true
     snap_result = [ordered]@{
         qv2ray = $snapQv2rayOk
