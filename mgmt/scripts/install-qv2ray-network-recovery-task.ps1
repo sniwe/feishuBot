@@ -1,13 +1,9 @@
 param(
     [string]$GlobalMgmtDir = "",
-    [string]$TaskName = "WorkspaceStartupLayout",
-    [string]$ExplorerPath = "C:\Users\Qub",
+    [string]$TaskName = "Qv2rayNetworkRecovery",
     [string]$Qv2rayPath = "C:\Program Files\qv2ray\qv2ray.exe",
-    [int]$InitialDelayMs = 2500,
-    [bool]$InstallNetworkRecovery = $true,
-    [string]$RecoveryTaskName = "Qv2rayNetworkRecovery",
-    [int]$RecoveryMaxDurationMinutes = 30,
-    [int]$RecoveryPollIntervalSeconds = 90
+    [int]$MaxDurationMinutes = 30,
+    [int]$PollIntervalSeconds = 90
 )
 
 Set-StrictMode -Version Latest
@@ -19,20 +15,18 @@ $GLOBAL_MGMT_DIR = if ([string]::IsNullOrWhiteSpace($GlobalMgmtDir)) {
     [IO.Path]::GetFullPath($GlobalMgmtDir)
 }
 
-$layoutScript = Join-Path $GLOBAL_MGMT_DIR "scripts\startup-workspace-layout.ps1"
-if (!(Test-Path -LiteralPath $layoutScript)) {
-    throw "Missing layout script: $layoutScript"
-}
-$recoveryInstaller = Join-Path $GLOBAL_MGMT_DIR "scripts\install-qv2ray-network-recovery-task.ps1"
-if ($InstallNetworkRecovery -and !(Test-Path -LiteralPath $recoveryInstaller)) {
-    throw "Missing recovery task installer: $recoveryInstaller"
+$recoveryScript = Join-Path $GLOBAL_MGMT_DIR "scripts\ensure-qv2ray-connected.ps1"
+if (!(Test-Path -LiteralPath $recoveryScript -PathType Leaf)) {
+    throw "Missing recovery script: $recoveryScript"
 }
 
 $taskAuthor = if ($env:USERDOMAIN) { "$env:USERDOMAIN\$env:USERNAME" } else { $env:USERNAME }
 $taskUserSid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
 $startBoundary = (Get-Date).ToString("s")
-$taskArgs = "-NoLogo -NonInteractive -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File ""$layoutScript"" -ExplorerPath ""$ExplorerPath"" -Qv2rayPath ""$Qv2rayPath"" -InitialDelayMs $InitialDelayMs"
+$taskArgs = "-NoLogo -NonInteractive -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File ""$recoveryScript"" -GlobalMgmtDir ""$GLOBAL_MGMT_DIR"" -Qv2rayPath ""$Qv2rayPath"" -MaxDurationMinutes $MaxDurationMinutes -PollIntervalSeconds $PollIntervalSeconds"
 $taskXmlPath = Join-Path $env:TEMP ("{0}.xml" -f [guid]::NewGuid().ToString("N"))
+
+$repeatDuration = "PT{0}M" -f ([Math]::Max(5, $MaxDurationMinutes))
 $taskXml = @"
 <?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
@@ -60,12 +54,17 @@ $taskXml = @"
     <Hidden>false</Hidden>
     <RunOnlyIfIdle>false</RunOnlyIfIdle>
     <WakeToRun>false</WakeToRun>
-    <ExecutionTimeLimit>PT15M</ExecutionTimeLimit>
+    <ExecutionTimeLimit>PT1H</ExecutionTimeLimit>
     <Priority>7</Priority>
   </Settings>
   <Triggers>
     <LogonTrigger>
       <Enabled>true</Enabled>
+      <Repetition>
+        <Interval>PT2M</Interval>
+        <Duration>$repeatDuration</Duration>
+        <StopAtDurationEnd>false</StopAtDurationEnd>
+      </Repetition>
     </LogonTrigger>
   </Triggers>
   <Actions Context="Author">
@@ -87,17 +86,11 @@ finally {
     Remove-Item -LiteralPath $taskXmlPath -Force -ErrorAction SilentlyContinue
 }
 
-$recoveryResult = $null
-if ($InstallNetworkRecovery) {
-    $recoveryResult = & $recoveryInstaller -GlobalMgmtDir $GLOBAL_MGMT_DIR -TaskName $RecoveryTaskName -Qv2rayPath $Qv2rayPath -MaxDurationMinutes $RecoveryMaxDurationMinutes -PollIntervalSeconds $RecoveryPollIntervalSeconds | ConvertFrom-Json
-}
-
 [pscustomobject]@{
     ok = $true
     task_name = $TaskName
-    script = $layoutScript
-    explorer_path = [IO.Path]::GetFullPath($ExplorerPath)
+    script = $recoveryScript
     qv2ray_path = [IO.Path]::GetFullPath($Qv2rayPath)
-    initial_delay_ms = $InitialDelayMs
-    network_recovery_task = $recoveryResult
+    max_duration_minutes = [Math]::Max(5, $MaxDurationMinutes)
+    poll_interval_seconds = $PollIntervalSeconds
 } | ConvertTo-Json -Depth 5

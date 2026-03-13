@@ -3,6 +3,7 @@ param(
     [string]$Qv2rayPath = "C:\Program Files\qv2ray\qv2ray.exe",
     [string]$Qv2rayConfigDir = "",
     [bool]$EnableQv2rayUsAutoSelect = $true,
+    [string]$GlobalMgmtDir = "",
     [int]$InitialDelayMs = 2500,
     [int]$LaunchDelayMs = 1200,
     [int]$WindowTimeoutSeconds = 30
@@ -378,6 +379,76 @@ function Select-Qv2rayLowestLatencyUsConnection {
     }
 }
 
+function Set-Qv2rayConnectionPreference {
+    param(
+        [Parameter(Mandatory = $true)][string]$ConfigDir,
+        [Parameter(Mandatory = $true)][string]$ConnectionId,
+        [Parameter(Mandatory = $true)][string]$GroupId
+    )
+
+    $mainConfigPath = Join-Path $ConfigDir "Qv2ray.conf"
+    if (!(Test-Path -LiteralPath $mainConfigPath -PathType Leaf)) {
+        throw "Missing qv2ray config file: $mainConfigPath"
+    }
+
+    $mainConfig = Get-Content -LiteralPath $mainConfigPath -Raw | ConvertFrom-Json
+    $target = [pscustomobject]@{
+        connectionId = $ConnectionId
+        groupId = $GroupId
+    }
+
+    if ($null -eq $mainConfig.lastConnectedId) {
+        $mainConfig | Add-Member -MemberType NoteProperty -Name lastConnectedId -Value $target
+    } else {
+        $mainConfig.lastConnectedId = $target
+    }
+
+    if ($null -eq $mainConfig.autoStartId) {
+        $mainConfig | Add-Member -MemberType NoteProperty -Name autoStartId -Value $target
+    } else {
+        $mainConfig.autoStartId = $target
+    }
+
+    $mainConfig.autoStartBehavior = 2
+    $mainConfig | ConvertTo-Json -Depth 30 | Set-Content -LiteralPath $mainConfigPath -Encoding UTF8
+}
+
+function Get-Qv2raySelectionCache {
+    param(
+        [Parameter(Mandatory = $true)][string]$CachePath
+    )
+
+    if (!(Test-Path -LiteralPath $CachePath -PathType Leaf)) {
+        return $null
+    }
+
+    try {
+        $cached = Get-Content -LiteralPath $CachePath -Raw | ConvertFrom-Json
+        if ($null -eq $cached.connection_id -or $null -eq $cached.group_id) {
+            return $null
+        }
+        return $cached
+    } catch {
+        return $null
+    }
+}
+
+function Save-Qv2raySelectionCache {
+    param(
+        [Parameter(Mandatory = $true)][string]$CachePath,
+        [Parameter(Mandatory = $true)][object]$Selection
+    )
+
+    $payload = [pscustomobject]@{
+        updated = (Get-Date).ToString("o")
+        connection_id = [string]$Selection.connection_id
+        group_id = [string]$Selection.group_id
+        display_name = [string]$Selection.display_name
+        latency_ms = [int]$Selection.latency_ms
+    }
+    $payload | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $CachePath -Encoding UTF8
+}
+
 if (!(Test-Path -LiteralPath $ExplorerPath -PathType Container)) {
     throw "Explorer path does not exist: $ExplorerPath"
 }
@@ -392,9 +463,41 @@ $resolvedQv2rayConfigDir = if ([string]::IsNullOrWhiteSpace($Qv2rayConfigDir)) {
     [IO.Path]::GetFullPath($Qv2rayConfigDir)
 }
 
+$resolvedGlobalMgmtDir = if ([string]::IsNullOrWhiteSpace($GlobalMgmtDir)) {
+    Split-Path -Parent $PSScriptRoot
+} else {
+    [IO.Path]::GetFullPath($GlobalMgmtDir)
+}
+$stateDir = Join-Path $resolvedGlobalMgmtDir "state"
+New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
+$selectionCachePath = Join-Path $stateDir "qv2ray-us-last-good.json"
+
 $qv2raySelection = $null
+$qv2raySelectionWarning = $null
 if ($EnableQv2rayUsAutoSelect) {
-    $qv2raySelection = Select-Qv2rayLowestLatencyUsConnection -ConfigDir $resolvedQv2rayConfigDir
+    try {
+        $qv2raySelection = Select-Qv2rayLowestLatencyUsConnection -ConfigDir $resolvedQv2rayConfigDir
+        Save-Qv2raySelectionCache -CachePath $selectionCachePath -Selection $qv2raySelection
+    } catch {
+        $qv2raySelectionWarning = $_.Exception.Message
+        $cachedSelection = Get-Qv2raySelectionCache -CachePath $selectionCachePath
+        if ($null -ne $cachedSelection) {
+            try {
+                Set-Qv2rayConnectionPreference -ConfigDir $resolvedQv2rayConfigDir -ConnectionId $cachedSelection.connection_id -GroupId $cachedSelection.group_id
+                $qv2raySelection = [pscustomobject]@{
+                    ok = $true
+                    connection_id = $cachedSelection.connection_id
+                    display_name = [string]$cachedSelection.display_name
+                    latency_ms = [int]$cachedSelection.latency_ms
+                    group_id = $cachedSelection.group_id
+                    config_path = (Join-Path $resolvedQv2rayConfigDir "Qv2ray.conf")
+                    source = "cache_fallback"
+                }
+            } catch {
+                $qv2raySelectionWarning = "{0}; cache fallback failed: {1}" -f $qv2raySelectionWarning, $_.Exception.Message
+            }
+        }
+    }
 }
 
 if ($InitialDelayMs -gt 0) {
@@ -408,7 +511,13 @@ $upperHeight = [int][Math]::Floor($workingArea.Height / 2)
 $lowerHeight = $workingArea.Height - $upperHeight
 
 $explorerStartedAt = Get-Date
-$qv2rayHandle = Ensure-Qv2rayWindowHandle -Qv2rayExePath $Qv2rayPath -TimeoutSeconds $WindowTimeoutSeconds
+$qv2rayHandle = [IntPtr]::Zero
+$qv2rayLaunchWarning = $null
+try {
+    $qv2rayHandle = Ensure-Qv2rayWindowHandle -Qv2rayExePath $Qv2rayPath -TimeoutSeconds $WindowTimeoutSeconds
+} catch {
+    $qv2rayLaunchWarning = $_.Exception.Message
+}
 Start-Sleep -Milliseconds 400
 Start-Process -FilePath "explorer.exe" -ArgumentList "`"$ExplorerPath`"" | Out-Null
 Start-Sleep -Milliseconds 400
@@ -419,11 +528,14 @@ Start-Sleep -Milliseconds $LaunchDelayMs
 $explorerHandle = Wait-ExplorerWindowHandle -TargetPath $ExplorerPath -StartedAfter $explorerStartedAt -TimeoutSeconds $WindowTimeoutSeconds
 $cmdHandle = Wait-ProcessMainWindow -Process $cmdProcess -TimeoutSeconds $WindowTimeoutSeconds
 
-$snapQv2rayOk = Invoke-SnapStep -Handle $qv2rayHandle -Directions @("Left") -ExpectedX $workingArea.Left -ExpectedY $workingArea.Top -ExpectedWidth $leftWidth -ExpectedHeight $workingArea.Height
+$snapQv2rayOk = $false
+if ($qv2rayHandle -ne [IntPtr]::Zero) {
+    $snapQv2rayOk = Invoke-SnapStep -Handle $qv2rayHandle -Directions @("Left") -ExpectedX $workingArea.Left -ExpectedY $workingArea.Top -ExpectedWidth $leftWidth -ExpectedHeight $workingArea.Height
+}
 $snapExplorerOk = Invoke-SnapStep -Handle $explorerHandle -Directions @("Right", "Up") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY $workingArea.Top -ExpectedWidth $rightWidth -ExpectedHeight $upperHeight
 $snapCmdOk = Invoke-SnapStep -Handle $cmdHandle -Directions @("Right", "Down") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY ($workingArea.Top + $upperHeight) -ExpectedWidth $rightWidth -ExpectedHeight $lowerHeight
 
-if (-not $snapQv2rayOk) {
+if ($qv2rayHandle -ne [IntPtr]::Zero -and -not $snapQv2rayOk) {
     Set-WindowBounds -Handle $qv2rayHandle -X $workingArea.Left -Y $workingArea.Top -Width $leftWidth -Height $workingArea.Height
 }
 if (-not $snapExplorerOk) {
@@ -441,7 +553,13 @@ if (-not $snapCmdOk) {
     qv2ray_us_autoselect = [ordered]@{
         enabled = [bool]$EnableQv2rayUsAutoSelect
         config_dir = $resolvedQv2rayConfigDir
+        cache_path = $selectionCachePath
         selection = $qv2raySelection
+        warning = $qv2raySelectionWarning
+    }
+    qv2ray_startup = [ordered]@{
+        window_found = [bool]($qv2rayHandle -ne [IntPtr]::Zero)
+        warning = $qv2rayLaunchWarning
     }
     snap_attempted = $true
     snap_result = [ordered]@{
