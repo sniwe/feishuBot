@@ -826,18 +826,6 @@ if ($EnableAlternateLeftGroups) {
     }
 }
 
-$primaryRefocusWarning = $null
-try {
-    if ($qv2rayHandle -ne [IntPtr]::Zero) {
-        [void](Invoke-SnapStep -Handle $qv2rayHandle -Directions @("Left") -ExpectedX $workingArea.Left -ExpectedY $workingArea.Top -ExpectedWidth $leftWidth -ExpectedHeight $workingArea.Height)
-    }
-    [void](Invoke-SnapStep -Handle $explorerHandle -Directions @("Right", "Up") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY $workingArea.Top -ExpectedWidth $rightWidth -ExpectedHeight $upperHeight)
-    [void](Invoke-SnapStep -Handle $cmdHandle -Directions @("Right", "Down") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY ($workingArea.Top + $upperHeight) -ExpectedWidth $rightWidth -ExpectedHeight $lowerHeight)
-    Set-WindowForeground -Handle $cmdHandle
-} catch {
-    $primaryRefocusWarning = $_.Exception.Message
-}
-
 [pscustomobject]@{
     ok = $true
     explorer_path = [IO.Path]::GetFullPath($ExplorerPath)
@@ -863,9 +851,6 @@ try {
     alternate_groups = [ordered]@{
         enabled = [bool]$EnableAlternateLeftGroups
         results = $alternateGroupResults
-    }
-    primary_group_refocus = [ordered]@{
-        warning = $primaryRefocusWarning
     }
     snap_attempted = $true
     snap_result = [ordered]@{
