@@ -1,0 +1,20 @@
+{
+    "oms":  {
+                "loginUrl":  "https://oms.xlwms.com/login",
+                "ordersUrl":  "https://oms.xlwms.com/platform/order/list",
+                "credentials":  {
+                                    "username":  "LM607",
+                                    "password":  "hx123456"
+                                },
+                "launch":  {
+                               "hidden":  false,
+                               "windowWidth":  1440,
+                               "windowHeight":  900,
+                               "setPageSizeOnLaunch":  true,
+                               "launchPageSize":  2000,
+                               "debugPort":  9222
+                           },
+                "cookiesPath":  "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.cookies.json",
+                "storagePath":  "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.cookies.storage.json"
+            }
+}

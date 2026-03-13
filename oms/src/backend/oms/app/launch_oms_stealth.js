@@ -9,16 +9,47 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
 const DEFAULT_OMS_LOGIN_URL = 'https://oms.xlwms.com/login';
-const DEFAULT_OMS_ORDERS_URL = 'https://oms.xlwms.com/platform/order/list';
-const DEFAULT_OMS_COOKIES_PATH = 'C:\\orderBot\\mgmt\\data\\oms\\cookies.json';
-const DEFAULT_OMS_STORAGE_PATH = 'C:\\orderBot\\mgmt\\data\\oms\\cookies.storage.json';
+const DEFAULT_OMS_ORDERS_URL = 'https://oms.xlwms.com/';
+const DEFAULT_OMS_COOKIES_PATH = path.resolve(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  '..',
+  'mgmt',
+  'config',
+  'oms.cookies.json'
+);
+const DEFAULT_OMS_STORAGE_PATH = path.resolve(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  '..',
+  'mgmt',
+  'config',
+  'oms.cookies.storage.json'
+);
 const DEFAULT_WINDOW_WIDTH = 1440;
 const DEFAULT_WINDOW_HEIGHT = 900;
 const DEFAULT_LAUNCH_PAGE_SIZE = 2000;
-const DEFAULT_PROJECT_CONFIG_PATH = path.resolve(__dirname, '..', '..', '..', '..', 'mgmt', 'oms.config.json');
+const DEFAULT_PROJECT_CONFIG_PATH = path.resolve(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  '..',
+  'mgmt',
+  'config',
+  'oms.config.json'
+);
 
 function isTruthy(value) {
   return /^(1|true|yes|on)$/i.test(String(value || '').trim());
+}
+
+function stripBom(value) {
+  return String(value || '').replace(/^\uFEFF/, '');
 }
 
 async function fileExists(filePath) {
@@ -36,7 +67,7 @@ async function loadProjectConfig(configPath) {
   }
   try {
     const raw = await fs.readFile(configPath, 'utf8');
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(stripBom(raw));
     return { loaded: true, path: configPath, data: parsed && typeof parsed === 'object' ? parsed : {} };
   } catch (error) {
     console.warn(`Failed to load OMS config from ${configPath}: ${error.message}`);

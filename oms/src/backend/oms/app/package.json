@@ -7,10 +7,7 @@
   "scripts": {
     "launch:oms": "node launch_oms_stealth.js",
     "launch:oms:hidden": "set OMS_HIDDEN=1&& node launch_oms_stealth.js",
-    "action:page-size-2000": "node actions/set_oms_page_size_2000.js",
-    "action:refresh-cache-parquet": "node actions/refresh_and_cache_oms_orders_parquet.js",
-    "action:refresh-cache-tk-orders-parquet": "node actions/refresh_and_cache_tk_orders_parquet.js",
-    "action:refresh-cache-parquet:loop": "node actions/loop_refresh_cache_parquet.js"
+    "action:login-cdp-and-capture-cookies": "node ../actions/cdp-login-fill/orch.js"
   },
   "dependencies": {
     "puppeteer": "^24.3.0",
