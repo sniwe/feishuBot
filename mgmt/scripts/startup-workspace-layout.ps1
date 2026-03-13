@@ -8,7 +8,10 @@ param(
     [string]$CmdWorkingDirectory = "",
     [bool]$AutoResumeCodexInTerminal = $true,
     [int]$CodexResumeDelayMs = 1400,
+    [bool]$UseCodexPromptArgument = $true,
     [int]$CodexPostStartDelayMs = 3200,
+    [string]$CodexPostStartText = "test",
+    [string]$CodexSubmitKeys = "^j",
     [int]$CodexPostStartDotRetries = 2,
     [int]$CodexPostStartDotRetryDelayMs = 900,
     [bool]$EnableAlternateLeftGroups = $true,
@@ -701,6 +704,7 @@ $qv2rayHandle = [IntPtr]::Zero
 $qv2rayLaunchWarning = $null
 $codexPostStartDotSent = $false
 $codexPostStartDotWarning = $null
+$codexPromptArgumentUsed = $false
 $snapQv2rayOk = $false
 $snapExplorerOk = $false
 $snapCmdOk = $false
@@ -800,9 +804,16 @@ try {
 Start-Sleep -Milliseconds 400
 Start-Process -FilePath "explorer.exe" -ArgumentList "`"$ExplorerPath`"" | Out-Null
 Start-Sleep -Milliseconds 400
+$isCodexStartupCommand = $CmdStartupCommand -match '(^|\s)codex(\s|$)'
+$effectiveCmdStartupCommand = $CmdStartupCommand
+if ($UseCodexPromptArgument -and $isCodexStartupCommand -and -not [string]::IsNullOrWhiteSpace($CodexPostStartText)) {
+    $effectiveCmdStartupCommand = "$CmdStartupCommand `"$CodexPostStartText`""
+    $codexPromptArgumentUsed = $true
+}
+
 $cmdArgs = @("/k")
-if (-not [string]::IsNullOrWhiteSpace($CmdStartupCommand)) {
-    $cmdArgs += $CmdStartupCommand
+if (-not [string]::IsNullOrWhiteSpace($effectiveCmdStartupCommand)) {
+    $cmdArgs += $effectiveCmdStartupCommand
 }
 $cmdProcess = Start-Process -FilePath "cmd.exe" -ArgumentList $cmdArgs -WorkingDirectory $resolvedCmdWorkingDirectory -PassThru
 
@@ -810,8 +821,6 @@ Start-Sleep -Milliseconds $LaunchDelayMs
 
 $explorerHandle = Wait-ExplorerWindowHandle -TargetPath $ExplorerPath -StartedAfter $explorerStartedAt -TimeoutSeconds $WindowTimeoutSeconds
 $cmdHandle = Wait-ProcessMainWindow -Process $cmdProcess -TimeoutSeconds $WindowTimeoutSeconds
-
-$isCodexStartupCommand = $CmdStartupCommand -match '(^|\s)codex(\s|$)'
 
 if ($qv2rayHandle -ne [IntPtr]::Zero) {
     $snapQv2rayOk = Invoke-SnapStep -Handle $qv2rayHandle -Directions @("Left") -ExpectedX $workingArea.Left -ExpectedY $workingArea.Top -ExpectedWidth $leftWidth -ExpectedHeight $workingArea.Height
@@ -829,7 +838,7 @@ if (-not $snapCmdOk) {
     Set-WindowBounds -Handle $cmdHandle -X ($workingArea.Left + $leftWidth) -Y ($workingArea.Top + $upperHeight) -Width $rightWidth -Height $lowerHeight
 }
 
-if ($isCodexStartupCommand) {
+if ($isCodexStartupCommand -and -not $codexPromptArgumentUsed) {
     try {
         if ($CodexPostStartDelayMs -gt 0) {
             Start-Sleep -Milliseconds $CodexPostStartDelayMs
@@ -837,7 +846,9 @@ if ($isCodexStartupCommand) {
 
         $attempts = [Math]::Max(1, $CodexPostStartDotRetries)
         for ($attempt = 1; $attempt -le $attempts; $attempt++) {
-            Send-KeysToWindow -Handle $cmdHandle -Keys "test{ENTER}" -PreDelayMs 120
+            Send-KeysToWindow -Handle $cmdHandle -Keys $CodexPostStartText -PreDelayMs 120
+            Start-Sleep -Milliseconds 80
+            Send-KeysToWindow -Handle $cmdHandle -Keys $CodexSubmitKeys -PreDelayMs 40
             $codexPostStartDotSent = $true
 
             if ($attempt -lt $attempts -and $CodexPostStartDotRetryDelayMs -gt 0) {
@@ -867,11 +878,15 @@ if ($isCodexStartupCommand) {
     }
     terminal_startup = [ordered]@{
         cmd_startup_command = $CmdStartupCommand
+        cmd_effective_startup_command = $effectiveCmdStartupCommand
         cmd_working_directory = $resolvedCmdWorkingDirectory
+        codex_prompt_argument_used = $codexPromptArgumentUsed
         codex_poststart_dot_sent = $codexPostStartDotSent
         codex_poststart_dot_warning = $codexPostStartDotWarning
         codex_poststart_delay_ms = $CodexPostStartDelayMs
         codex_poststart_dot_retries = $CodexPostStartDotRetries
+        codex_poststart_text = $CodexPostStartText
+        codex_submit_keys = $CodexSubmitKeys
     }
     alternate_groups = [ordered]@{
         enabled = [bool]$EnableAlternateLeftGroups
