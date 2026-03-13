@@ -4,6 +4,7 @@ param(
     [string]$Qv2rayConfigDir = "",
     [bool]$EnableQv2rayUsAutoSelect = $true,
     [string]$GlobalMgmtDir = "",
+    [string]$CmdStartupCommand = "codex --dangerously-bypass-approvals-and-sandbox",
     [int]$InitialDelayMs = 2500,
     [int]$LaunchDelayMs = 1200,
     [int]$WindowTimeoutSeconds = 30
@@ -521,7 +522,11 @@ try {
 Start-Sleep -Milliseconds 400
 Start-Process -FilePath "explorer.exe" -ArgumentList "`"$ExplorerPath`"" | Out-Null
 Start-Sleep -Milliseconds 400
-$cmdProcess = Start-Process -FilePath "cmd.exe" -PassThru
+$cmdArgs = @("/k")
+if (-not [string]::IsNullOrWhiteSpace($CmdStartupCommand)) {
+    $cmdArgs += $CmdStartupCommand
+}
+$cmdProcess = Start-Process -FilePath "cmd.exe" -ArgumentList $cmdArgs -PassThru
 
 Start-Sleep -Milliseconds $LaunchDelayMs
 
@@ -560,6 +565,9 @@ if (-not $snapCmdOk) {
     qv2ray_startup = [ordered]@{
         window_found = [bool]($qv2rayHandle -ne [IntPtr]::Zero)
         warning = $qv2rayLaunchWarning
+    }
+    terminal_startup = [ordered]@{
+        cmd_startup_command = $CmdStartupCommand
     }
     snap_attempted = $true
     snap_result = [ordered]@{
