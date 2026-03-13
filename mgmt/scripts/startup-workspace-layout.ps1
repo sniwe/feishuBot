@@ -8,6 +8,9 @@ param(
     [string]$CmdWorkingDirectory = "",
     [bool]$AutoResumeCodexInTerminal = $true,
     [int]$CodexResumeDelayMs = 1400,
+    [int]$CodexPostStartDelayMs = 3200,
+    [int]$CodexPostStartDotRetries = 2,
+    [int]$CodexPostStartDotRetryDelayMs = 900,
     [bool]$EnableAlternateLeftGroups = $true,
     [string]$VsCodePath = "",
     [string]$WeChatPath = "",
@@ -696,8 +699,6 @@ $lowerHeight = $workingArea.Height - $upperHeight
 
 $qv2rayHandle = [IntPtr]::Zero
 $qv2rayLaunchWarning = $null
-$codexResumeAttempted = $false
-$codexResumeWarning = $null
 $codexPostStartDotSent = $false
 $codexPostStartDotWarning = $null
 $snapQv2rayOk = $false
@@ -812,22 +813,12 @@ $cmdHandle = Wait-ProcessMainWindow -Process $cmdProcess -TimeoutSeconds $Window
 
 $isCodexStartupCommand = $CmdStartupCommand -match '(^|\s)codex(\s|$)'
 
-if ($AutoResumeCodexInTerminal -and $isCodexStartupCommand) {
+if ($isCodexStartupCommand) {
     try {
         if ($CodexResumeDelayMs -gt 0) {
             Start-Sleep -Milliseconds $CodexResumeDelayMs
         }
-        Send-KeysToWindow -Handle $cmdHandle -Keys "/resume{ENTER}{ENTER}" -PreDelayMs 150
-        $codexResumeAttempted = $true
-    } catch {
-        $codexResumeWarning = $_.Exception.Message
-    }
-}
-
-if ($isCodexStartupCommand) {
-    try {
-        Start-Sleep -Milliseconds 250
-        Send-KeysToWindow -Handle $cmdHandle -Keys "." -PreDelayMs 120
+        Send-KeysToWindow -Handle $cmdHandle -Keys ".{ENTER}" -PreDelayMs 120
         $codexPostStartDotSent = $true
     } catch {
         $codexPostStartDotWarning = $_.Exception.Message
@@ -850,6 +841,26 @@ if (-not $snapCmdOk) {
     Set-WindowBounds -Handle $cmdHandle -X ($workingArea.Left + $leftWidth) -Y ($workingArea.Top + $upperHeight) -Width $rightWidth -Height $lowerHeight
 }
 
+if ($isCodexStartupCommand) {
+    try {
+        if ($CodexPostStartDelayMs -gt 0) {
+            Start-Sleep -Milliseconds $CodexPostStartDelayMs
+        }
+
+        $attempts = [Math]::Max(1, $CodexPostStartDotRetries)
+        for ($attempt = 1; $attempt -le $attempts; $attempt++) {
+            Send-KeysToWindow -Handle $cmdHandle -Keys ".{ENTER}" -PreDelayMs 120
+            $codexPostStartDotSent = $true
+
+            if ($attempt -lt $attempts -and $CodexPostStartDotRetryDelayMs -gt 0) {
+                Start-Sleep -Milliseconds $CodexPostStartDotRetryDelayMs
+            }
+        }
+    } catch {
+        $codexPostStartDotWarning = $_.Exception.Message
+    }
+}
+
 [pscustomobject]@{
     ok = $true
     explorer_path = [IO.Path]::GetFullPath($ExplorerPath)
@@ -869,10 +880,10 @@ if (-not $snapCmdOk) {
     terminal_startup = [ordered]@{
         cmd_startup_command = $CmdStartupCommand
         cmd_working_directory = $resolvedCmdWorkingDirectory
-        codex_resume_attempted = $codexResumeAttempted
-        codex_resume_warning = $codexResumeWarning
         codex_poststart_dot_sent = $codexPostStartDotSent
         codex_poststart_dot_warning = $codexPostStartDotWarning
+        codex_poststart_delay_ms = $CodexPostStartDelayMs
+        codex_poststart_dot_retries = $CodexPostStartDotRetries
     }
     alternate_groups = [ordered]@{
         enabled = [bool]$EnableAlternateLeftGroups
