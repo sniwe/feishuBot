@@ -86,8 +86,11 @@ $taskXml = @"
 
 try {
     Set-Content -LiteralPath $taskXmlPath -Value $taskXml -Encoding Unicode
-    cmd /c "schtasks /Delete /TN ""$TaskName"" /F >nul 2>&1" | Out-Null
-    cmd /c "schtasks /Create /TN ""$TaskName"" /XML ""$taskXmlPath"" /F" | Out-Null
+    & schtasks.exe /Delete /TN $TaskName /F 2>$null | Out-Null
+    & schtasks.exe /Create /TN $TaskName /XML $taskXmlPath /F | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create scheduled task '$TaskName' (exit code $LASTEXITCODE)."
+    }
 }
 finally {
     Remove-Item -LiteralPath $taskXmlPath -Force -ErrorAction SilentlyContinue
