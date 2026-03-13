@@ -694,58 +694,13 @@ $rightWidth = $workingArea.Width - $leftWidth
 $upperHeight = [int][Math]::Floor($workingArea.Height / 2)
 $lowerHeight = $workingArea.Height - $upperHeight
 
-$explorerStartedAt = Get-Date
 $qv2rayHandle = [IntPtr]::Zero
 $qv2rayLaunchWarning = $null
-try {
-    $qv2rayHandle = Ensure-Qv2rayWindowHandle -Qv2rayExePath $Qv2rayPath -TimeoutSeconds $WindowTimeoutSeconds
-} catch {
-    $qv2rayLaunchWarning = $_.Exception.Message
-}
-Start-Sleep -Milliseconds 400
-Start-Process -FilePath "explorer.exe" -ArgumentList "`"$ExplorerPath`"" | Out-Null
-Start-Sleep -Milliseconds 400
-$cmdArgs = @("/k")
-if (-not [string]::IsNullOrWhiteSpace($CmdStartupCommand)) {
-    $cmdArgs += $CmdStartupCommand
-}
-$cmdProcess = Start-Process -FilePath "cmd.exe" -ArgumentList $cmdArgs -WorkingDirectory $resolvedCmdWorkingDirectory -PassThru
-
-Start-Sleep -Milliseconds $LaunchDelayMs
-
-$explorerHandle = Wait-ExplorerWindowHandle -TargetPath $ExplorerPath -StartedAfter $explorerStartedAt -TimeoutSeconds $WindowTimeoutSeconds
-$cmdHandle = Wait-ProcessMainWindow -Process $cmdProcess -TimeoutSeconds $WindowTimeoutSeconds
-
 $codexResumeAttempted = $false
 $codexResumeWarning = $null
-if ($AutoResumeCodexInTerminal -and $CmdStartupCommand -match "(^|\\s)codex(\\s|$)") {
-    try {
-        if ($CodexResumeDelayMs -gt 0) {
-            Start-Sleep -Milliseconds $CodexResumeDelayMs
-        }
-        Send-KeysToWindow -Handle $cmdHandle -Keys "/resume{ENTER}{ENTER}" -PreDelayMs 150
-        $codexResumeAttempted = $true
-    } catch {
-        $codexResumeWarning = $_.Exception.Message
-    }
-}
-
 $snapQv2rayOk = $false
-if ($qv2rayHandle -ne [IntPtr]::Zero) {
-    $snapQv2rayOk = Invoke-SnapStep -Handle $qv2rayHandle -Directions @("Left") -ExpectedX $workingArea.Left -ExpectedY $workingArea.Top -ExpectedWidth $leftWidth -ExpectedHeight $workingArea.Height
-}
-$snapExplorerOk = Invoke-SnapStep -Handle $explorerHandle -Directions @("Right", "Up") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY $workingArea.Top -ExpectedWidth $rightWidth -ExpectedHeight $upperHeight
-$snapCmdOk = Invoke-SnapStep -Handle $cmdHandle -Directions @("Right", "Down") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY ($workingArea.Top + $upperHeight) -ExpectedWidth $rightWidth -ExpectedHeight $lowerHeight
-
-if ($qv2rayHandle -ne [IntPtr]::Zero -and -not $snapQv2rayOk) {
-    Set-WindowBounds -Handle $qv2rayHandle -X $workingArea.Left -Y $workingArea.Top -Width $leftWidth -Height $workingArea.Height
-}
-if (-not $snapExplorerOk) {
-    Set-WindowBounds -Handle $explorerHandle -X ($workingArea.Left + $leftWidth) -Y $workingArea.Top -Width $rightWidth -Height $upperHeight
-}
-if (-not $snapCmdOk) {
-    Set-WindowBounds -Handle $cmdHandle -X ($workingArea.Left + $leftWidth) -Y ($workingArea.Top + $upperHeight) -Width $rightWidth -Height $lowerHeight
-}
+$snapExplorerOk = $false
+$snapCmdOk = $false
 
 $alternateGroupResults = @()
 if ($EnableAlternateLeftGroups) {
@@ -824,6 +779,61 @@ if ($EnableAlternateLeftGroups) {
 
         $alternateGroupResults += [pscustomobject]$altResult
     }
+
+    # After the final alternate-group key action (chrome ESC), return to desktop
+    # before launching and arranging the primary qv2ray/explorer/cmd group.
+    Send-WinDesktopShow
+    if ($AlternateGroupPauseMs -gt 0) {
+        Start-Sleep -Milliseconds $AlternateGroupPauseMs
+    }
+}
+
+$explorerStartedAt = Get-Date
+try {
+    $qv2rayHandle = Ensure-Qv2rayWindowHandle -Qv2rayExePath $Qv2rayPath -TimeoutSeconds $WindowTimeoutSeconds
+} catch {
+    $qv2rayLaunchWarning = $_.Exception.Message
+}
+Start-Sleep -Milliseconds 400
+Start-Process -FilePath "explorer.exe" -ArgumentList "`"$ExplorerPath`"" | Out-Null
+Start-Sleep -Milliseconds 400
+$cmdArgs = @("/k")
+if (-not [string]::IsNullOrWhiteSpace($CmdStartupCommand)) {
+    $cmdArgs += $CmdStartupCommand
+}
+$cmdProcess = Start-Process -FilePath "cmd.exe" -ArgumentList $cmdArgs -WorkingDirectory $resolvedCmdWorkingDirectory -PassThru
+
+Start-Sleep -Milliseconds $LaunchDelayMs
+
+$explorerHandle = Wait-ExplorerWindowHandle -TargetPath $ExplorerPath -StartedAfter $explorerStartedAt -TimeoutSeconds $WindowTimeoutSeconds
+$cmdHandle = Wait-ProcessMainWindow -Process $cmdProcess -TimeoutSeconds $WindowTimeoutSeconds
+
+if ($AutoResumeCodexInTerminal -and $CmdStartupCommand -match "(^|\\s)codex(\\s|$)") {
+    try {
+        if ($CodexResumeDelayMs -gt 0) {
+            Start-Sleep -Milliseconds $CodexResumeDelayMs
+        }
+        Send-KeysToWindow -Handle $cmdHandle -Keys "/resume{ENTER}{ENTER}" -PreDelayMs 150
+        $codexResumeAttempted = $true
+    } catch {
+        $codexResumeWarning = $_.Exception.Message
+    }
+}
+
+if ($qv2rayHandle -ne [IntPtr]::Zero) {
+    $snapQv2rayOk = Invoke-SnapStep -Handle $qv2rayHandle -Directions @("Left") -ExpectedX $workingArea.Left -ExpectedY $workingArea.Top -ExpectedWidth $leftWidth -ExpectedHeight $workingArea.Height
+}
+$snapExplorerOk = Invoke-SnapStep -Handle $explorerHandle -Directions @("Right", "Up") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY $workingArea.Top -ExpectedWidth $rightWidth -ExpectedHeight $upperHeight
+$snapCmdOk = Invoke-SnapStep -Handle $cmdHandle -Directions @("Right", "Down") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY ($workingArea.Top + $upperHeight) -ExpectedWidth $rightWidth -ExpectedHeight $lowerHeight
+
+if ($qv2rayHandle -ne [IntPtr]::Zero -and -not $snapQv2rayOk) {
+    Set-WindowBounds -Handle $qv2rayHandle -X $workingArea.Left -Y $workingArea.Top -Width $leftWidth -Height $workingArea.Height
+}
+if (-not $snapExplorerOk) {
+    Set-WindowBounds -Handle $explorerHandle -X ($workingArea.Left + $leftWidth) -Y $workingArea.Top -Width $rightWidth -Height $upperHeight
+}
+if (-not $snapCmdOk) {
+    Set-WindowBounds -Handle $cmdHandle -X ($workingArea.Left + $leftWidth) -Y ($workingArea.Top + $upperHeight) -Width $rightWidth -Height $lowerHeight
 }
 
 [pscustomobject]@{
