@@ -20,12 +20,38 @@ public static class NativeWindowTools {
 
     [DllImport("user32.dll")]
     public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+    [DllImport("user32.dll")]
+    public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern bool BringWindowToTop(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+    [DllImport("user32.dll")]
+    public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct RECT {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
 }
 "@
 
 $SW_RESTORE = 9
 $SWP_NOZORDER = 0x0004
 $SWP_NOACTIVATE = 0x0010
+$KEYEVENTF_KEYUP = 0x0002
+$VK_LWIN = 0x5B
+$VK_LEFT = 0x25
+$VK_RIGHT = 0x27
+$VK_UP = 0x26
+$VK_DOWN = 0x28
 
 function Wait-ProcessMainWindow {
     param(
@@ -116,6 +142,95 @@ function Set-WindowBounds {
     }
 }
 
+function Get-WindowRect {
+    param(
+        [Parameter(Mandatory = $true)][IntPtr]$Handle
+    )
+
+    $rect = New-Object NativeWindowTools+RECT
+    $ok = [NativeWindowTools]::GetWindowRect($Handle, [ref]$rect)
+    if (-not $ok) {
+        throw "Failed to read window bounds for handle '$Handle'."
+    }
+
+    [pscustomobject]@{
+        left = $rect.Left
+        top = $rect.Top
+        width = $rect.Right - $rect.Left
+        height = $rect.Bottom - $rect.Top
+    }
+}
+
+function Set-WindowForeground {
+    param(
+        [Parameter(Mandatory = $true)][IntPtr]$Handle
+    )
+
+    [void][NativeWindowTools]::ShowWindowAsync($Handle, $SW_RESTORE)
+    [void][NativeWindowTools]::BringWindowToTop($Handle)
+    [void][NativeWindowTools]::SetForegroundWindow($Handle)
+    Start-Sleep -Milliseconds 200
+}
+
+function Send-WinArrow {
+    param(
+        [Parameter(Mandatory = $true)][ValidateSet("Left", "Right", "Up", "Down")][string]$Direction
+    )
+
+    $arrowVk = switch ($Direction) {
+        "Left" { $VK_LEFT }
+        "Right" { $VK_RIGHT }
+        "Up" { $VK_UP }
+        "Down" { $VK_DOWN }
+    }
+
+    [NativeWindowTools]::keybd_event([byte]$VK_LWIN, 0, 0, [UIntPtr]::Zero)
+    Start-Sleep -Milliseconds 40
+    [NativeWindowTools]::keybd_event([byte]$arrowVk, 0, 0, [UIntPtr]::Zero)
+    Start-Sleep -Milliseconds 40
+    [NativeWindowTools]::keybd_event([byte]$arrowVk, 0, $KEYEVENTF_KEYUP, [UIntPtr]::Zero)
+    Start-Sleep -Milliseconds 40
+    [NativeWindowTools]::keybd_event([byte]$VK_LWIN, 0, $KEYEVENTF_KEYUP, [UIntPtr]::Zero)
+    Start-Sleep -Milliseconds 280
+}
+
+function Test-WindowNearBounds {
+    param(
+        [Parameter(Mandatory = $true)][IntPtr]$Handle,
+        [Parameter(Mandatory = $true)][int]$X,
+        [Parameter(Mandatory = $true)][int]$Y,
+        [Parameter(Mandatory = $true)][int]$Width,
+        [Parameter(Mandatory = $true)][int]$Height,
+        [int]$TolerancePx = 40
+    )
+
+    $rect = Get-WindowRect -Handle $Handle
+    return (
+        [Math]::Abs($rect.left - $X) -le $TolerancePx -and
+        [Math]::Abs($rect.top - $Y) -le $TolerancePx -and
+        [Math]::Abs($rect.width - $Width) -le $TolerancePx -and
+        [Math]::Abs($rect.height - $Height) -le $TolerancePx
+    )
+}
+
+function Invoke-SnapStep {
+    param(
+        [Parameter(Mandatory = $true)][IntPtr]$Handle,
+        [Parameter(Mandatory = $true)][string[]]$Directions,
+        [Parameter(Mandatory = $true)][int]$ExpectedX,
+        [Parameter(Mandatory = $true)][int]$ExpectedY,
+        [Parameter(Mandatory = $true)][int]$ExpectedWidth,
+        [Parameter(Mandatory = $true)][int]$ExpectedHeight
+    )
+
+    Set-WindowForeground -Handle $Handle
+    foreach ($dir in $Directions) {
+        Send-WinArrow -Direction $dir
+    }
+
+    return (Test-WindowNearBounds -Handle $Handle -X $ExpectedX -Y $ExpectedY -Width $ExpectedWidth -Height $ExpectedHeight)
+}
+
 if (!(Test-Path -LiteralPath $ExplorerPath -PathType Container)) {
     throw "Explorer path does not exist: $ExplorerPath"
 }
@@ -147,15 +262,31 @@ $qv2rayHandle = Wait-ProcessMainWindow -Process $qv2rayProcess -TimeoutSeconds $
 $explorerHandle = Wait-ExplorerWindowHandle -TargetPath $ExplorerPath -StartedAfter $explorerStartedAt -TimeoutSeconds $WindowTimeoutSeconds
 $cmdHandle = Wait-ProcessMainWindow -Process $cmdProcess -TimeoutSeconds $WindowTimeoutSeconds
 
-Set-WindowBounds -Handle $qv2rayHandle -X $workingArea.Left -Y $workingArea.Top -Width $leftWidth -Height $workingArea.Height
-Set-WindowBounds -Handle $explorerHandle -X ($workingArea.Left + $leftWidth) -Y $workingArea.Top -Width $rightWidth -Height $upperHeight
-Set-WindowBounds -Handle $cmdHandle -X ($workingArea.Left + $leftWidth) -Y ($workingArea.Top + $upperHeight) -Width $rightWidth -Height $lowerHeight
+$snapQv2rayOk = Invoke-SnapStep -Handle $qv2rayHandle -Directions @("Left") -ExpectedX $workingArea.Left -ExpectedY $workingArea.Top -ExpectedWidth $leftWidth -ExpectedHeight $workingArea.Height
+$snapExplorerOk = Invoke-SnapStep -Handle $explorerHandle -Directions @("Right", "Up") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY $workingArea.Top -ExpectedWidth $rightWidth -ExpectedHeight $upperHeight
+$snapCmdOk = Invoke-SnapStep -Handle $cmdHandle -Directions @("Right", "Down") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY ($workingArea.Top + $upperHeight) -ExpectedWidth $rightWidth -ExpectedHeight $lowerHeight
+
+if (-not $snapQv2rayOk) {
+    Set-WindowBounds -Handle $qv2rayHandle -X $workingArea.Left -Y $workingArea.Top -Width $leftWidth -Height $workingArea.Height
+}
+if (-not $snapExplorerOk) {
+    Set-WindowBounds -Handle $explorerHandle -X ($workingArea.Left + $leftWidth) -Y $workingArea.Top -Width $rightWidth -Height $upperHeight
+}
+if (-not $snapCmdOk) {
+    Set-WindowBounds -Handle $cmdHandle -X ($workingArea.Left + $leftWidth) -Y ($workingArea.Top + $upperHeight) -Width $rightWidth -Height $lowerHeight
+}
 
 [pscustomobject]@{
     ok = $true
     explorer_path = [IO.Path]::GetFullPath($ExplorerPath)
     qv2ray_path = [IO.Path]::GetFullPath($Qv2rayPath)
     initial_delay_ms = $InitialDelayMs
+    snap_attempted = $true
+    snap_result = [ordered]@{
+        qv2ray = $snapQv2rayOk
+        explorer = $snapExplorerOk
+        cmd = $snapCmdOk
+    }
     layout = [ordered]@{
         left = "qv2ray"
         right_top = "explorer"
