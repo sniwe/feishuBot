@@ -9,7 +9,6 @@ param(
     [string]$VsCodePath = "",
     [string]$WeChatPath = "",
     [string]$ChromePath = "",
-    [string]$AlternateCmdStartupCommand = "",
     [int]$AlternateGroupPauseMs = 700,
     [int]$InitialDelayMs = 2500,
     [int]$LaunchDelayMs = 1200,
@@ -112,6 +111,28 @@ function Get-MainWindowHandleByProcessName {
     return [IntPtr]::Zero
 }
 
+function Get-MainWindowHandlesByProcessName {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProcessName
+    )
+
+    $handles = @()
+    $candidates = @(Get-Process -Name $ProcessName -ErrorAction SilentlyContinue)
+    foreach ($candidate in $candidates) {
+        try {
+            $candidate.Refresh()
+            if ($candidate.HasExited) { continue }
+            if ($candidate.MainWindowHandle -and $candidate.MainWindowHandle -ne [IntPtr]::Zero) {
+                $handles += [IntPtr]$candidate.MainWindowHandle
+            }
+        } catch {
+            continue
+        }
+    }
+
+    return $handles
+}
+
 function Ensure-Qv2rayWindowHandle {
     param(
         [Parameter(Mandatory = $true)][string]$Qv2rayExePath,
@@ -148,6 +169,7 @@ function Ensure-AppWindowHandle {
         [Parameter(Mandatory = $true)][string]$AppPath,
         [string]$ProcessName = "",
         [string[]]$ArgumentList = @(),
+        [bool]$ForceNewWindow = $false,
         [Parameter(Mandatory = $true)][int]$TimeoutSeconds
     )
 
@@ -161,14 +183,28 @@ function Ensure-AppWindowHandle {
         $ProcessName
     }
 
+    $existingHandles = @()
+    if ($ForceNewWindow) {
+        $existingHandles = Get-MainWindowHandlesByProcessName -ProcessName $procName
+    }
+
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     $attempt = 0
     $lastLaunch = [datetime]::MinValue
 
     while ((Get-Date) -lt $deadline) {
-        $handle = Get-MainWindowHandleByProcessName -ProcessName $procName
-        if ($handle -ne [IntPtr]::Zero) {
-            return $handle
+        if ($ForceNewWindow) {
+            $currentHandles = Get-MainWindowHandlesByProcessName -ProcessName $procName
+            foreach ($handle in $currentHandles) {
+                if ($existingHandles -notcontains $handle) {
+                    return $handle
+                }
+            }
+        } else {
+            $handle = Get-MainWindowHandleByProcessName -ProcessName $procName
+            if ($handle -ne [IntPtr]::Zero) {
+                return $handle
+            }
         }
 
         $now = Get-Date
@@ -684,19 +720,22 @@ if ($EnableAlternateLeftGroups) {
             id = "vscode"
             process_name = "Code"
             app_path = $resolvedVsCodePath
-            args = @()
+            args = @("--new-window")
+            force_new_window = $true
         },
         [pscustomobject]@{
             id = "wechat"
             process_name = $weChatProcessName
             app_path = $resolvedWeChatPath
             args = @()
+            force_new_window = $false
         },
         [pscustomobject]@{
             id = "chrome"
             process_name = "chrome"
             app_path = $resolvedChromePath
             args = @()
+            force_new_window = $false
         }
     )
 
@@ -713,8 +752,6 @@ if ($EnableAlternateLeftGroups) {
             warning = $null
             snap_result = [ordered]@{
                 left = $false
-                explorer = $false
-                cmd = $false
             }
         }
 
@@ -725,41 +762,16 @@ if ($EnableAlternateLeftGroups) {
         }
 
         try {
-            $leftHandle = Ensure-AppWindowHandle -AppPath $alt.app_path -ProcessName $alt.process_name -ArgumentList $alt.args -TimeoutSeconds $WindowTimeoutSeconds
-
-            $altExplorerStartedAt = Get-Date
-            Start-Process -FilePath "explorer.exe" -ArgumentList "/n,`"$ExplorerPath`"" | Out-Null
-            Start-Sleep -Milliseconds 300
-
-            $altCmdArgs = @("/k")
-            if (-not [string]::IsNullOrWhiteSpace($AlternateCmdStartupCommand)) {
-                $altCmdArgs += $AlternateCmdStartupCommand
-            }
-            $altCmdProcess = Start-Process -FilePath "cmd.exe" -ArgumentList $altCmdArgs -PassThru
-
-            Start-Sleep -Milliseconds $LaunchDelayMs
-
-            $altExplorerHandle = Wait-ExplorerWindowHandle -TargetPath $ExplorerPath -StartedAfter $altExplorerStartedAt -TimeoutSeconds $WindowTimeoutSeconds
-            $altCmdHandle = Wait-ProcessMainWindow -Process $altCmdProcess -TimeoutSeconds $WindowTimeoutSeconds
+            $leftHandle = Ensure-AppWindowHandle -AppPath $alt.app_path -ProcessName $alt.process_name -ArgumentList $alt.args -ForceNewWindow $alt.force_new_window -TimeoutSeconds $WindowTimeoutSeconds
 
             $altSnapLeft = Invoke-SnapStep -Handle $leftHandle -Directions @("Left") -ExpectedX $workingArea.Left -ExpectedY $workingArea.Top -ExpectedWidth $leftWidth -ExpectedHeight $workingArea.Height
-            $altSnapExplorer = Invoke-SnapStep -Handle $altExplorerHandle -Directions @("Right", "Up") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY $workingArea.Top -ExpectedWidth $rightWidth -ExpectedHeight $upperHeight
-            $altSnapCmd = Invoke-SnapStep -Handle $altCmdHandle -Directions @("Right", "Down") -ExpectedX ($workingArea.Left + $leftWidth) -ExpectedY ($workingArea.Top + $upperHeight) -ExpectedWidth $rightWidth -ExpectedHeight $lowerHeight
 
             if (-not $altSnapLeft) {
                 Set-WindowBounds -Handle $leftHandle -X $workingArea.Left -Y $workingArea.Top -Width $leftWidth -Height $workingArea.Height
             }
-            if (-not $altSnapExplorer) {
-                Set-WindowBounds -Handle $altExplorerHandle -X ($workingArea.Left + $leftWidth) -Y $workingArea.Top -Width $rightWidth -Height $upperHeight
-            }
-            if (-not $altSnapCmd) {
-                Set-WindowBounds -Handle $altCmdHandle -X ($workingArea.Left + $leftWidth) -Y ($workingArea.Top + $upperHeight) -Width $rightWidth -Height $lowerHeight
-            }
 
             $altResult.created = $true
             $altResult.snap_result.left = $altSnapLeft
-            $altResult.snap_result.explorer = $altSnapExplorer
-            $altResult.snap_result.cmd = $altSnapCmd
         } catch {
             $altResult.warning = $_.Exception.Message
         }
@@ -789,7 +801,6 @@ if ($EnableAlternateLeftGroups) {
     }
     alternate_groups = [ordered]@{
         enabled = [bool]$EnableAlternateLeftGroups
-        alternate_cmd_startup_command = $AlternateCmdStartupCommand
         results = $alternateGroupResults
     }
     snap_attempted = $true
