@@ -525,6 +525,19 @@ function Resolve-FirstPathCandidate {
     return ($Candidates | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -First 1)
 }
 
+function Join-PathIfPresent {
+    param(
+        [string]$BasePath,
+        [Parameter(Mandatory = $true)][string]$ChildPath
+    )
+
+    if ([string]::IsNullOrWhiteSpace($BasePath)) {
+        return $null
+    }
+
+    return (Join-Path $BasePath $ChildPath)
+}
+
 if (!(Test-Path -LiteralPath $ExplorerPath -PathType Container)) {
     throw "Explorer path does not exist: $ExplorerPath"
 }
@@ -582,26 +595,26 @@ if ($InitialDelayMs -gt 0) {
 
 $resolvedVsCodePath = if ([string]::IsNullOrWhiteSpace($VsCodePath)) {
     Resolve-FirstPathCandidate -Candidates @(
-        (if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA "Programs\Microsoft VS Code\Code.exe" } else { $null }),
-        (if ($env:ProgramFiles) { Join-Path $env:ProgramFiles "Microsoft VS Code\Code.exe" } else { $null }),
-        (if (${env:ProgramFiles(x86)}) { Join-Path ${env:ProgramFiles(x86)} "Microsoft VS Code\Code.exe" } else { $null })
+        (Join-PathIfPresent -BasePath $env:LOCALAPPDATA -ChildPath "Programs\Microsoft VS Code\Code.exe"),
+        (Join-PathIfPresent -BasePath $env:ProgramFiles -ChildPath "Microsoft VS Code\Code.exe"),
+        (Join-PathIfPresent -BasePath ${env:ProgramFiles(x86)} -ChildPath "Microsoft VS Code\Code.exe")
     )
 } else {
     [IO.Path]::GetFullPath($VsCodePath)
 }
 $resolvedWeChatPath = if ([string]::IsNullOrWhiteSpace($WeChatPath)) {
     Resolve-FirstPathCandidate -Candidates @(
-        (if (${env:ProgramFiles(x86)}) { Join-Path ${env:ProgramFiles(x86)} "Tencent\WeChat\WeChat.exe" } else { $null }),
-        (if ($env:ProgramFiles) { Join-Path $env:ProgramFiles "Tencent\WeChat\WeChat.exe" } else { $null }),
-        (if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA "Tencent\WeChat\WeChat.exe" } else { $null })
+        (Join-PathIfPresent -BasePath ${env:ProgramFiles(x86)} -ChildPath "Tencent\WeChat\WeChat.exe"),
+        (Join-PathIfPresent -BasePath $env:ProgramFiles -ChildPath "Tencent\WeChat\WeChat.exe"),
+        (Join-PathIfPresent -BasePath $env:LOCALAPPDATA -ChildPath "Tencent\WeChat\WeChat.exe")
     )
 } else {
     [IO.Path]::GetFullPath($WeChatPath)
 }
 $resolvedChromePath = if ([string]::IsNullOrWhiteSpace($ChromePath)) {
     Resolve-FirstPathCandidate -Candidates @(
-        (if ($env:ProgramFiles) { Join-Path $env:ProgramFiles "Google\Chrome\Application\chrome.exe" } else { $null }),
-        (if (${env:ProgramFiles(x86)}) { Join-Path ${env:ProgramFiles(x86)} "Google\Chrome\Application\chrome.exe" } else { $null })
+        (Join-PathIfPresent -BasePath $env:ProgramFiles -ChildPath "Google\Chrome\Application\chrome.exe"),
+        (Join-PathIfPresent -BasePath ${env:ProgramFiles(x86)} -ChildPath "Google\Chrome\Application\chrome.exe")
     )
 } else {
     [IO.Path]::GetFullPath($ChromePath)
