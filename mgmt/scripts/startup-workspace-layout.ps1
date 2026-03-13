@@ -82,6 +82,58 @@ function Wait-ProcessMainWindow {
     throw "Timed out waiting for process '$($Process.ProcessName)' to expose a main window."
 }
 
+function Get-MainWindowHandleByProcessName {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProcessName
+    )
+
+    $candidates = @(Get-Process -Name $ProcessName -ErrorAction SilentlyContinue)
+    foreach ($candidate in $candidates) {
+        try {
+            $candidate.Refresh()
+            if ($candidate.HasExited) { continue }
+            if ($candidate.MainWindowHandle -and $candidate.MainWindowHandle -ne [IntPtr]::Zero) {
+                return [IntPtr]$candidate.MainWindowHandle
+            }
+        } catch {
+            continue
+        }
+    }
+
+    return [IntPtr]::Zero
+}
+
+function Ensure-Qv2rayWindowHandle {
+    param(
+        [Parameter(Mandatory = $true)][string]$Qv2rayExePath,
+        [Parameter(Mandatory = $true)][int]$TimeoutSeconds
+    )
+
+    $procName = [IO.Path]::GetFileNameWithoutExtension($Qv2rayExePath)
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    $attempt = 0
+    $lastLaunch = [datetime]::MinValue
+
+    while ((Get-Date) -lt $deadline) {
+        $handle = Get-MainWindowHandleByProcessName -ProcessName $procName
+        if ($handle -ne [IntPtr]::Zero) {
+            return $handle
+        }
+
+        $now = Get-Date
+        $shouldLaunch = ($attempt -eq 0) -or (($now - $lastLaunch).TotalSeconds -ge 4)
+        if ($shouldLaunch) {
+            Start-Process -FilePath $Qv2rayExePath | Out-Null
+            $attempt += 1
+            $lastLaunch = $now
+        }
+
+        Start-Sleep -Milliseconds 300
+    }
+
+    throw "Timed out waiting for qv2ray window from executable '$Qv2rayExePath'."
+}
+
 function Wait-ExplorerWindowHandle {
     param(
         [Parameter(Mandatory = $true)][string]$TargetPath,
@@ -356,7 +408,7 @@ $upperHeight = [int][Math]::Floor($workingArea.Height / 2)
 $lowerHeight = $workingArea.Height - $upperHeight
 
 $explorerStartedAt = Get-Date
-$qv2rayProcess = Start-Process -FilePath $Qv2rayPath -PassThru
+$qv2rayHandle = Ensure-Qv2rayWindowHandle -Qv2rayExePath $Qv2rayPath -TimeoutSeconds $WindowTimeoutSeconds
 Start-Sleep -Milliseconds 400
 Start-Process -FilePath "explorer.exe" -ArgumentList "`"$ExplorerPath`"" | Out-Null
 Start-Sleep -Milliseconds 400
@@ -364,7 +416,6 @@ $cmdProcess = Start-Process -FilePath "cmd.exe" -PassThru
 
 Start-Sleep -Milliseconds $LaunchDelayMs
 
-$qv2rayHandle = Wait-ProcessMainWindow -Process $qv2rayProcess -TimeoutSeconds $WindowTimeoutSeconds
 $explorerHandle = Wait-ExplorerWindowHandle -TargetPath $ExplorerPath -StartedAfter $explorerStartedAt -TimeoutSeconds $WindowTimeoutSeconds
 $cmdHandle = Wait-ProcessMainWindow -Process $cmdProcess -TimeoutSeconds $WindowTimeoutSeconds
 
