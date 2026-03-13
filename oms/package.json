@@ -2,11 +2,11 @@
   "name": "oms-workspace",
   "private": true,
   "scripts": {
-    "launch:oms": "npm --prefix src/backend/ingest/oms run launch:oms",
-    "launch:oms:hidden": "npm --prefix src/backend/ingest/oms run launch:oms:hidden",
-    "action:page-size-2000": "npm --prefix src/backend/ingest/oms run action:page-size-2000",
-    "action:refresh-cache-parquet": "npm --prefix src/backend/ingest/oms run action:refresh-cache-parquet",
-    "action:refresh-cache-tk-orders-parquet": "npm --prefix src/backend/ingest/oms run action:refresh-cache-tk-orders-parquet",
-    "action:refresh-cache-parquet:loop": "npm --prefix src/backend/ingest/oms run action:refresh-cache-parquet:loop"
+    "launch:oms": "npm --prefix src/backend/oms run launch:oms",
+    "launch:oms:hidden": "npm --prefix src/backend/oms run launch:oms:hidden",
+    "action:page-size-2000": "npm --prefix src/backend/oms run action:page-size-2000",
+    "action:refresh-cache-parquet": "npm --prefix src/backend/oms run action:refresh-cache-parquet",
+    "action:refresh-cache-tk-orders-parquet": "npm --prefix src/backend/oms run action:refresh-cache-tk-orders-parquet",
+    "action:refresh-cache-parquet:loop": "npm --prefix src/backend/oms run action:refresh-cache-parquet:loop"
   }
 }
