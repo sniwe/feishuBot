@@ -698,6 +698,8 @@ $qv2rayHandle = [IntPtr]::Zero
 $qv2rayLaunchWarning = $null
 $codexResumeAttempted = $false
 $codexResumeWarning = $null
+$codexPostStartDotSent = $false
+$codexPostStartDotWarning = $null
 $snapQv2rayOk = $false
 $snapExplorerOk = $false
 $snapCmdOk = $false
@@ -808,7 +810,9 @@ Start-Sleep -Milliseconds $LaunchDelayMs
 $explorerHandle = Wait-ExplorerWindowHandle -TargetPath $ExplorerPath -StartedAfter $explorerStartedAt -TimeoutSeconds $WindowTimeoutSeconds
 $cmdHandle = Wait-ProcessMainWindow -Process $cmdProcess -TimeoutSeconds $WindowTimeoutSeconds
 
-if ($AutoResumeCodexInTerminal -and $CmdStartupCommand -match "(^|\\s)codex(\\s|$)") {
+$isCodexStartupCommand = $CmdStartupCommand -match '(^|\s)codex(\s|$)'
+
+if ($AutoResumeCodexInTerminal -and $isCodexStartupCommand) {
     try {
         if ($CodexResumeDelayMs -gt 0) {
             Start-Sleep -Milliseconds $CodexResumeDelayMs
@@ -817,6 +821,16 @@ if ($AutoResumeCodexInTerminal -and $CmdStartupCommand -match "(^|\\s)codex(\\s|
         $codexResumeAttempted = $true
     } catch {
         $codexResumeWarning = $_.Exception.Message
+    }
+}
+
+if ($isCodexStartupCommand) {
+    try {
+        Start-Sleep -Milliseconds 250
+        Send-KeysToWindow -Handle $cmdHandle -Keys "." -PreDelayMs 120
+        $codexPostStartDotSent = $true
+    } catch {
+        $codexPostStartDotWarning = $_.Exception.Message
     }
 }
 
@@ -857,6 +871,8 @@ if (-not $snapCmdOk) {
         cmd_working_directory = $resolvedCmdWorkingDirectory
         codex_resume_attempted = $codexResumeAttempted
         codex_resume_warning = $codexResumeWarning
+        codex_poststart_dot_sent = $codexPostStartDotSent
+        codex_poststart_dot_warning = $codexPostStartDotWarning
     }
     alternate_groups = [ordered]@{
         enabled = [bool]$EnableAlternateLeftGroups
