@@ -4,6 +4,7 @@ const puppeteer = require('puppeteer');
 
 const DEFAULT_CONFIG_PATH = path.resolve(__dirname, '..', '..', '..', '..', '..', 'mgmt', 'config', 'oms.config.json');
 const DEFAULT_COOKIES_PATH = path.resolve(__dirname, '..', '..', '..', '..', '..', 'mgmt', 'config', 'oms.cookies.json');
+const DEFAULT_STORAGE_PATH = path.resolve(__dirname, '..', '..', '..', '..', '..', 'mgmt', 'config', 'oms.cookies.storage.json');
 
 function stripBom(value) {
   return String(value || '').replace(/^\uFEFF/, '');
@@ -23,7 +24,9 @@ async function loadConfig(ctx) {
   if (!username || !password) {
     throw new Error(`Missing oms.credentials.username/password in ${configPath}`);
   }
-  return { configPath, username, password };
+  const cookiesPath = String(parsed?.oms?.cookiesPath || DEFAULT_COOKIES_PATH);
+  const storagePath = String(parsed?.oms?.storagePath || DEFAULT_STORAGE_PATH);
+  return { configPath, username, password, cookiesPath, storagePath };
 }
 
 /**
@@ -148,10 +151,48 @@ async function captureCookies(ctx) {
   const { fsApi } = deps;
   const page = data.page;
   const cookiesPath = data.cookiesPath || DEFAULT_COOKIES_PATH;
-  const cookies = await page.cookies();
+  let cookies = await page.cookies('https://oms.xlwms.com', 'https://oms.xlwms.com/platform/order/list');
+  if (!Array.isArray(cookies) || cookies.length === 0) {
+    cookies = await page.cookies();
+  }
   await fsApi.mkdir(path.dirname(cookiesPath), { recursive: true });
   await fsApi.writeFile(cookiesPath, JSON.stringify(cookies, null, 2), 'utf8');
   return { cookiesPath, count: Array.isArray(cookies) ? cookies.length : 0 };
+}
+
+/**
+ * @param {{ data?: object, ui?: object, deps: object }} ctx
+ */
+async function captureStorageState(ctx) {
+  const { data = {}, deps } = ctx;
+  const { fsApi } = deps;
+  const page = data.page;
+  const storagePath = data.storagePath || DEFAULT_STORAGE_PATH;
+  const state = await page.evaluate(() => {
+    const localStorageState = {};
+    const sessionStorageState = {};
+    for (let i = 0; i < window.localStorage.length; i += 1) {
+      const key = window.localStorage.key(i);
+      if (key != null) localStorageState[key] = window.localStorage.getItem(key);
+    }
+    for (let i = 0; i < window.sessionStorage.length; i += 1) {
+      const key = window.sessionStorage.key(i);
+      if (key != null) sessionStorageState[key] = window.sessionStorage.getItem(key);
+    }
+    return {
+      origin: window.location.origin,
+      localStorage: localStorageState,
+      sessionStorage: sessionStorageState
+    };
+  });
+  await fsApi.mkdir(path.dirname(storagePath), { recursive: true });
+  await fsApi.writeFile(storagePath, JSON.stringify(state, null, 2), 'utf8');
+  return {
+    storagePath,
+    localStorageKeys: Object.keys(state.localStorage || {}).length,
+    sessionStorageKeys: Object.keys(state.sessionStorage || {}).length,
+    origin: state.origin
+  };
 }
 
 /**
@@ -182,7 +223,11 @@ async function main(ctx) {
     });
 
     const cookieResult = await captureCookies({
-      data: { page: fillResult.page, cookiesPath: data.cookiesPath },
+      data: { page: fillResult.page, cookiesPath: data.cookiesPath || configInfo.cookiesPath },
+      deps: { fsApi }
+    });
+    const storageResult = await captureStorageState({
+      data: { page: fillResult.page, storagePath: data.storagePath || configInfo.storagePath },
       deps: { fsApi }
     });
 
@@ -195,6 +240,10 @@ async function main(ctx) {
           currentUrl: fillResult.page.url(),
           cookiesPath: cookieResult.cookiesPath,
           cookiesCount: cookieResult.count,
+          storagePath: storageResult.storagePath,
+          storageOrigin: storageResult.origin,
+          localStorageKeys: storageResult.localStorageKeys,
+          sessionStorageKeys: storageResult.sessionStorageKeys,
           usernameLength: configInfo.username.length,
           passwordLength: configInfo.password.length
         },
@@ -211,6 +260,7 @@ main({
   data: {
     configPath: process.env.OMS_CONFIG_PATH || DEFAULT_CONFIG_PATH,
     cookiesPath: process.env.OMS_COOKIES_PATH || DEFAULT_COOKIES_PATH,
+    storagePath: process.env.OMS_STORAGE_PATH || DEFAULT_STORAGE_PATH,
     loginUrl: process.env.OMS_LOGIN_URL || 'https://oms.xlwms.com/login',
     startPort: process.env.CDP_PORT_START || 9222,
     endPort: process.env.CDP_PORT_END || 9265
