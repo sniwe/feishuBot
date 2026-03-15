@@ -6,6 +6,7 @@
   const input = document.getElementById("audio-file");
   const cards = document.getElementById("audio-cards");
   const emptyState = document.getElementById("empty-state");
+  const saveStatus = document.getElementById("save-status");
   const fileName = document.getElementById("file-name");
   const audio = document.getElementById("audio");
   const progress = document.getElementById("progress");
@@ -21,7 +22,8 @@
     selectedSpanIndex: -1,
     markerSignature: "",
     isPlayerVisible: false,
-    activeSessionId: null
+    activeSessionId: null,
+    saveQueue: Promise.resolve()
   };
 
   input.addEventListener("change", handleFileChange);
@@ -36,6 +38,7 @@
 
   async function initialize() {
     fileName.textContent = "";
+    setSaveStatus("Ready");
     showLibraryView();
     await loadPersistedAudioCards();
   }
@@ -56,7 +59,7 @@
     resetPlaybackState();
     showPlayerView();
     updateUi();
-    await saveSessionState().catch(function () {});
+    enqueueAutoSave();
   }
 
   function handleKeyDown(event) {
@@ -71,7 +74,7 @@
     if ((event.ctrlKey || event.metaKey) && event.code === "KeyS") {
       event.preventDefault();
       if (state.isPlayerVisible && audio.src) {
-        saveSessionState().catch(function () {});
+        enqueueAutoSave();
       }
       return;
     }
@@ -132,6 +135,9 @@
       audio.pause();
     }
     showLibraryView();
+    if (state.currentFile) {
+      enqueueAutoSave();
+    }
   }
 
   async function loadPersistedAudioCards() {
@@ -242,6 +248,7 @@
     state.selectedSpanIndex = -1;
     state.markerSignature = "";
     updateUi();
+    enqueueAutoSave();
   }
 
   function cycleSpanSelection(step) {
@@ -400,6 +407,31 @@
     return deduped;
   }
 
+  function enqueueAutoSave() {
+    if (!state.currentFile || !audio.src) {
+      return state.saveQueue;
+    }
+
+    setSaveStatus("Saving...");
+    state.saveQueue = state.saveQueue
+      .then(function () {
+        return saveSessionState();
+      })
+      .then(function () {
+        setSaveStatus("Saved");
+      })
+      .catch(function () {
+        setSaveStatus("Save failed. Try a smaller file or save again.", true);
+      });
+
+    return state.saveQueue;
+  }
+
+  function setSaveStatus(text, isError) {
+    saveStatus.textContent = text;
+    saveStatus.classList.toggle("error", Boolean(isError));
+  }
+
   async function saveSessionState() {
     if (!audio.src || !state.currentFile) {
       return;
@@ -431,7 +463,8 @@
     });
 
     if (!response.ok) {
-      throw new Error("session_save_failed");
+      const detail = await response.text().catch(function () { return ""; });
+      throw new Error("session_save_failed:" + detail);
     }
 
     const saved = await response.json();

@@ -43,6 +43,16 @@ h1, p { margin: 0; }
   gap: 12px;
 }
 
+.save-status {
+  color: var(--muted);
+  font-size: 0.82rem;
+  min-height: 1em;
+}
+
+.save-status.error {
+  color: #a22c2c;
+}
+
 .upload-row {
   display: flex;
   justify-content: flex-end;

@@ -10,7 +10,7 @@ const DATA_DIR = path.join(PROJECT_ROOT, "data");
 const SESSIONS_DIR = path.join(DATA_DIR, "sessions");
 const SESSION_PATH = path.join(DATA_DIR, "session-latest.json");
 const PORT = Number(process.env.PORT || 8787);
-const MAX_BODY_SIZE = 1024 * 1024 * 100;
+const MAX_BODY_SIZE = 1024 * 1024 * 500;
 
 startServer({ data: {}, deps: { http, fs, fsp, path } }).catch(function (error) {
   console.error(error);
