@@ -8,8 +8,10 @@
 </head>
 <body>
   <main class="app">
-    <button id="upload-button" class="upload-button" type="button" aria-label="Upload audio" title="Upload audio">Upload</button>
     <input id="audio-file" type="file" accept="audio/*" hidden />
+    <div class="upload-row">
+      <button id="upload-button" class="upload-button" type="button" aria-label="Upload audio" title="Upload audio">Upload</button>
+    </div>
 
     <section class="player" aria-live="polite">
       <audio id="audio" preload="metadata"></audio>
