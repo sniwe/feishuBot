@@ -127,6 +127,12 @@ h1, p { margin: 0; }
   background: #f5f9ff;
 }
 
+.audio-card.is-disabled,
+.audio-card:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .audio-card-title {
   color: var(--ink);
   font-size: 0.95rem;

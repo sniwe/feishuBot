@@ -23,7 +23,8 @@
     markerSignature: "",
     isPlayerVisible: false,
     activeSessionId: null,
-    saveQueue: Promise.resolve()
+    saveQueue: Promise.resolve(),
+    isPersisting: false
   };
 
   input.addEventListener("change", handleFileChange);
@@ -57,9 +58,8 @@
     state.activeSessionId = null;
     setAudioSource({ data: { file, displayName: file.name }, deps: {} });
     resetPlaybackState();
-    showPlayerView();
-    updateUi();
-    enqueueAutoSave();
+    showLibraryView();
+    await enqueueAutoSave();
   }
 
   function handleKeyDown(event) {
@@ -178,7 +178,12 @@
       const button = document.createElement("button");
       button.type = "button";
       button.className = "audio-card";
+      button.disabled = state.isPersisting;
+      button.classList.toggle("is-disabled", state.isPersisting);
       button.addEventListener("click", function () {
+        if (state.isPersisting) {
+          return;
+        }
         openPersistedSession(session.id).catch(function () {});
       });
 
@@ -216,6 +221,10 @@
   }
 
   async function openPersistedSession(sessionId) {
+    if (state.isPersisting) {
+      return;
+    }
+
     const response = await fetch("/api/session?id=" + encodeURIComponent(sessionId), {
       method: "GET",
       cache: "no-store"
@@ -412,24 +421,43 @@
       return state.saveQueue;
     }
 
+    state.isPersisting = true;
     setSaveStatus("Saving...");
+    refreshCardInteractivity();
     state.saveQueue = state.saveQueue
       .then(function () {
         return saveSessionState();
       })
       .then(function () {
+        state.isPersisting = false;
         setSaveStatus("Saved");
+        refreshCardInteractivity();
       })
-      .catch(function () {
-        setSaveStatus("Save failed. Try a smaller file or save again.", true);
+      .catch(function (error) {
+        state.isPersisting = false;
+        setSaveStatus("Save failed: " + normalizeErrorMessage(error), true);
+        refreshCardInteractivity();
       });
 
     return state.saveQueue;
   }
 
+  function refreshCardInteractivity() {
+    const cardButtons = cards.querySelectorAll(".audio-card");
+    cardButtons.forEach(function (button) {
+      button.disabled = state.isPersisting;
+      button.classList.toggle("is-disabled", state.isPersisting);
+    });
+  }
+
   function setSaveStatus(text, isError) {
     saveStatus.textContent = text;
     saveStatus.classList.toggle("error", Boolean(isError));
+  }
+
+  function normalizeErrorMessage(error) {
+    const raw = String(error && error.message ? error.message : error || "unknown_error");
+    return raw.length > 180 ? raw.slice(0, 180) + "..." : raw;
   }
 
   async function saveSessionState() {
@@ -464,7 +492,7 @@
 
     if (!response.ok) {
       const detail = await response.text().catch(function () { return ""; });
-      throw new Error("session_save_failed:" + detail);
+      throw new Error("session_save_failed status=" + String(response.status) + " detail=" + detail);
     }
 
     const saved = await response.json();
