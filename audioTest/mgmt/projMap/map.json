@@ -4,16 +4,16 @@
     "name":  "audioTest",
     "summary":  "Toy browser audio checkpoint player with keyboard controls",
     "root":  "C:\\Users\\Qub\\audioTest",
-    "updated":  "2026-03-12T08:21:46.0080454+08:00",
+    "updated":  "2026-03-15T09:33:52.8539547+08:00",
     "nodes":  [
                   {
                       "id":  "control:ui",
                       "type":  "control",
                       "name":  "src/public/index.html",
-                      "summary":  "Audio picker with streamlined progress bar UI, checkpoint tags, and custom playhead",
+                      "summary":  "Icon-based upload trigger with streamlined progress bar UI, track title, checkpoint tags, and custom playhead",
                       "features":  [
                                        {
-                                           "summary":  "Render upload/player interface with checkpoint overlays and playhead timestamp",
+                                           "summary":  "Render icon upload trigger and player interface with track title, checkpoint overlays, and playhead timestamp",
                                            "flow":  [
                                                         "e1"
                                                     ]
