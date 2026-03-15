@@ -4,16 +4,16 @@
     "name":  "audioTest",
     "summary":  "Toy browser audio checkpoint player with keyboard controls",
     "root":  "C:\\Users\\Qub\\audioTest",
-    "updated":  "2026-03-15T09:33:52.8539547+08:00",
+    "updated":  "2026-03-15T10:04:13.7508015+08:00",
     "nodes":  [
                   {
                       "id":  "control:ui",
                       "type":  "control",
                       "name":  "src/public/index.html",
-                      "summary":  "Icon-based upload trigger with streamlined progress bar UI, track title, checkpoint tags, and custom playhead",
+                      "summary":  "Two-phase UI with persisted-audio card library, upload trigger, and player with checkpoint overlays and custom playhead",
                       "features":  [
                                        {
-                                           "summary":  "Render icon upload trigger and player interface with track title, checkpoint overlays, and playhead timestamp",
+                                           "summary":  "Render persisted-audio card list and transition into focused player view with track title, checkpoint overlays, and playhead timestamp",
                                            "flow":  [
                                                         "e1"
                                                     ]
@@ -84,10 +84,10 @@
                       "id":  "module:session-backend",
                       "type":  "module",
                       "name":  "src/backend/server.js",
-                      "summary":  "Refactored Node HTTP server with route normalization, payload validation, and hardened static path resolution",
+                      "summary":  "Node HTTP server with persisted-audio list/detail APIs, payload validation, and hardened static path resolution",
                       "features":  [
                                        {
-                                           "summary":  "GET/POST /api/session reads and writes latest session JSON under project data directory",
+                                           "summary":  "GET /api/sessions and GET/POST /api/session persist and retrieve audio sessions from project data storage",
                                            "flow":  [
                                                         "e5",
                                                         "e6"
