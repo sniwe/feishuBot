@@ -56,6 +56,7 @@
     resetPlaybackState();
     showPlayerView();
     updateUi();
+    await saveSessionState().catch(function () {});
   }
 
   function handleKeyDown(event) {
