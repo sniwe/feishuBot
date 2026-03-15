@@ -4,7 +4,7 @@
     "name":  "audioTest",
     "summary":  "Toy browser audio checkpoint player with keyboard controls",
     "root":  "C:\\Users\\Qub\\audioTest",
-    "updated":  "2026-03-15T10:10:06.3573705+08:00",
+    "updated":  "2026-03-15T10:18:18.5065396+08:00",
     "nodes":  [
                   {
                       "id":  "control:ui",
@@ -13,7 +13,7 @@
                       "summary":  "Two-phase UI with persisted-audio card library, upload trigger, and player with checkpoint overlays and custom playhead",
                       "features":  [
                                        {
-                                           "summary":  "Render persisted-audio card list and transition into focused player view with track title, checkpoint overlays, playhead timestamp, and auto-save on upload",
+                                           "summary":  "Render persisted-audio card list and transition into focused player view with track title, checkpoint overlays, playhead timestamp, and queued auto-save on upload/checkpoint updates",
                                            "flow":  [
                                                         "e1"
                                                     ]
