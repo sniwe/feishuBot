@@ -23,6 +23,7 @@ body {
 }
 
 .app {
+  position: relative;
   width: 100%;
   max-width: 760px;
   background: var(--surface);
@@ -35,19 +36,57 @@ body {
 }
 
 h1, p { margin: 0; }
-.top { display: grid; gap: 8px; }
 
-.picker {
-  display: grid;
-  gap: 8px;
+.upload-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 12px;
+  border-radius: 8px;
+  background: #f8fbff;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  font-size: 0;
+}
+
+.upload-button:hover {
+  border-color: #b8c6dd;
+  color: var(--ink);
+}
+
+.upload-button::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 7px solid currentColor;
+  transform: translateY(-2px);
+}
+
+.upload-button::after {
+  content: "";
+  position: absolute;
+  width: 11px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  transform: translateY(6px);
 }
 
 .file-name {
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  min-height: 1em;
 }
 
 .player {

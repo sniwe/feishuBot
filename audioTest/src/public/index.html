@@ -8,18 +8,12 @@
 </head>
 <body>
   <main class="app">
-    <header class="top">
-      <h1>audioTest</h1>
-    </header>
-
-    <section class="picker">
-      <label for="audio-file">Audio file</label>
-      <input id="audio-file" type="file" accept="audio/*" />
-      <p id="file-name" class="file-name">No file selected</p>
-    </section>
+    <button id="upload-button" class="upload-button" type="button" aria-label="Upload audio" title="Upload audio">Upload</button>
+    <input id="audio-file" type="file" accept="audio/*" hidden />
 
     <section class="player" aria-live="polite">
       <audio id="audio" preload="metadata"></audio>
+      <p id="file-name" class="file-name"></p>
       <div class="progress-wrap" role="group" aria-label="Playback progress">
         <div class="progress-track">
           <input id="progress" type="range" min="0" max="1000" value="0" disabled />
