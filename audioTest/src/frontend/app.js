@@ -1,6 +1,11 @@
 (function () {
+  const libraryView = document.getElementById("library-view");
+  const playerView = document.getElementById("player-view");
   const uploadButton = document.getElementById("upload-button");
+  const backButton = document.getElementById("back-button");
   const input = document.getElementById("audio-file");
+  const cards = document.getElementById("audio-cards");
+  const emptyState = document.getElementById("empty-state");
   const fileName = document.getElementById("file-name");
   const audio = document.getElementById("audio");
   const progress = document.getElementById("progress");
@@ -14,40 +19,57 @@
     currentFile: null,
     checkpoints: [],
     selectedSpanIndex: -1,
-    markerSignature: ""
+    markerSignature: "",
+    isPlayerVisible: false,
+    activeSessionId: null
   };
 
   input.addEventListener("change", handleFileChange);
   uploadButton.addEventListener("click", openFilePicker);
+  backButton.addEventListener("click", goBackToLibrary);
   audio.addEventListener("loadedmetadata", updateUi);
   audio.addEventListener("timeupdate", updateUi);
   audio.addEventListener("durationchange", updateUi);
   document.addEventListener("keydown", handleKeyDown);
 
-  restoreSessionOnLaunch();
-  fileName.textContent = "";
+  initialize();
+
+  async function initialize() {
+    fileName.textContent = "";
+    showLibraryView();
+    await loadPersistedAudioCards();
+  }
 
   function openFilePicker() {
     input.value = "";
     input.click();
   }
 
-  function handleFileChange(event) {
+  async function handleFileChange(event) {
     const file = event.target.files && event.target.files[0];
     if (!file) {
       return;
     }
 
+    state.activeSessionId = null;
     setAudioSource({ data: { file, displayName: file.name }, deps: {} });
-    state.checkpoints = [];
-    state.selectedSpanIndex = -1;
+    resetPlaybackState();
+    showPlayerView();
     updateUi();
   }
 
   function handleKeyDown(event) {
+    if ((event.ctrlKey || event.metaKey) && event.code === "Backspace") {
+      if (state.isPlayerVisible) {
+        event.preventDefault();
+        goBackToLibrary();
+      }
+      return;
+    }
+
     if ((event.ctrlKey || event.metaKey) && event.code === "KeyS") {
       event.preventDefault();
-      if (audio.src) {
+      if (state.isPlayerVisible && audio.src) {
         saveSessionState().catch(function () {});
       }
       return;
@@ -58,7 +80,7 @@
       return;
     }
 
-    if (!audio.src) {
+    if (!state.isPlayerVisible || !audio.src) {
       return;
     }
 
@@ -90,6 +112,126 @@
     } else {
       audio.pause();
     }
+  }
+
+  function showLibraryView() {
+    libraryView.classList.remove("hidden");
+    playerView.classList.add("hidden");
+    state.isPlayerVisible = false;
+  }
+
+  function showPlayerView() {
+    libraryView.classList.add("hidden");
+    playerView.classList.remove("hidden");
+    state.isPlayerVisible = true;
+  }
+
+  function goBackToLibrary() {
+    if (!audio.paused) {
+      audio.pause();
+    }
+    showLibraryView();
+  }
+
+  async function loadPersistedAudioCards() {
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "GET",
+        cache: "no-store"
+      });
+
+      if (response.status === 404) {
+        renderAudioCards([]);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("session_list_failed");
+      }
+
+      const payload = await response.json();
+      const sessions = payload && Array.isArray(payload.sessions) ? payload.sessions : [];
+      renderAudioCards(sessions);
+    } catch {
+      renderAudioCards([]);
+    }
+  }
+
+  function renderAudioCards(sessions) {
+    cards.innerHTML = "";
+
+    if (!sessions.length) {
+      emptyState.classList.remove("hidden");
+      return;
+    }
+
+    emptyState.classList.add("hidden");
+
+    sessions.forEach(function (session) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "audio-card";
+      button.addEventListener("click", function () {
+        openPersistedSession(session.id).catch(function () {});
+      });
+
+      const title = document.createElement("span");
+      title.className = "audio-card-title";
+      title.textContent = (session.file && session.file.name) || "Untitled audio";
+
+      const meta = document.createElement("span");
+      meta.className = "audio-card-meta";
+      meta.textContent = buildSessionMeta(session);
+
+      button.appendChild(title);
+      button.appendChild(meta);
+      cards.appendChild(button);
+    });
+  }
+
+  function buildSessionMeta(session) {
+    const checkpointCount = Array.isArray(session.playback && session.playback.checkpoints)
+      ? session.playback.checkpoints.length
+      : 0;
+    const when = formatSavedAt(session.savedAt);
+    return when + "  |  checkpoints: " + String(checkpointCount);
+  }
+
+  function formatSavedAt(savedAt) {
+    if (!savedAt) {
+      return "saved";
+    }
+    const date = new Date(savedAt);
+    if (Number.isNaN(date.getTime())) {
+      return "saved";
+    }
+    return date.toLocaleString();
+  }
+
+  async function openPersistedSession(sessionId) {
+    const response = await fetch("/api/session?id=" + encodeURIComponent(sessionId), {
+      method: "GET",
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error("session_load_failed");
+    }
+
+    const saved = await response.json();
+    if (!saved || !saved.audioBase64) {
+      throw new Error("session_payload_invalid");
+    }
+
+    applySavedSession(saved);
+    state.activeSessionId = saved.id || sessionId;
+    showPlayerView();
+  }
+
+  function resetPlaybackState() {
+    state.checkpoints = [];
+    state.selectedSpanIndex = -1;
+    state.markerSignature = "";
   }
 
   function dropCheckpoint() {
@@ -263,6 +405,7 @@
     }
 
     const payload = {
+      sessionId: state.activeSessionId,
       file: {
         name: state.currentFile.name,
         type: state.currentFile.type,
@@ -289,32 +432,13 @@
     if (!response.ok) {
       throw new Error("session_save_failed");
     }
-  }
 
-  async function restoreSessionOnLaunch() {
-    try {
-      const response = await fetch("/api/session", {
-        method: "GET",
-        cache: "no-store"
-      });
-
-      if (response.status === 404) {
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error("session_load_failed");
-      }
-
-      const saved = await response.json();
-      if (!saved || !saved.audioBase64) {
-        return;
-      }
-
-      applySavedSession(saved);
-    } catch {
-      // Ignore unavailable local backend or malformed saved state.
+    const saved = await response.json();
+    if (saved && saved.id) {
+      state.activeSessionId = saved.id;
     }
+
+    await loadPersistedAudioCards();
   }
 
   function applySavedSession(saved) {
@@ -338,15 +462,11 @@
     state.markerSignature = "";
 
     const resumeTime = Number.isFinite(savedPlayback.currentTime) ? savedPlayback.currentTime : 0;
-    const shouldResumePlayback = Boolean(savedPlayback.wasPlaying);
 
     audio.addEventListener("loadedmetadata", function handleRestoreMetadata() {
       const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
       audio.currentTime = Math.max(0, Math.min(duration || resumeTime, resumeTime));
       updateUi();
-      if (shouldResumePlayback) {
-        audio.play().catch(function () {});
-      }
     }, { once: true });
 
     updateUi();
@@ -407,5 +527,3 @@
 
   window.addEventListener("beforeunload", revokeObjectUrl);
 })();
-
-

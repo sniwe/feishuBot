@@ -9,24 +9,35 @@
 <body>
   <main class="app">
     <input id="audio-file" type="file" accept="audio/*" hidden />
-    <div class="upload-row">
-      <button id="upload-button" class="upload-button" type="button" aria-label="Upload audio" title="Upload audio">Upload</button>
-    </div>
+    <section id="library-view" class="library-view">
+      <div class="upload-row">
+        <button id="upload-button" class="upload-button" type="button" aria-label="Upload audio" title="Upload audio">Upload</button>
+      </div>
+      <section class="library" aria-live="polite">
+        <div id="audio-cards" class="audio-cards"></div>
+        <p id="empty-state" class="empty-state">No persisted audio files yet.</p>
+      </section>
+    </section>
 
-    <section class="player" aria-live="polite">
-      <audio id="audio" preload="metadata"></audio>
-      <p id="file-name" class="file-name"></p>
-      <div class="progress-wrap" role="group" aria-label="Playback progress">
-        <div class="progress-track">
-          <input id="progress" type="range" min="0" max="1000" value="0" disabled />
-          <div id="selected-span-overlay" class="selected-span-overlay" aria-hidden="true"></div>
-          <div id="checkpoint-markers" class="checkpoint-markers" aria-hidden="true"></div>
-          <div id="playhead" class="playhead" aria-hidden="true">
-            <span class="playhead-arrow"></span>
-            <span id="playhead-time" class="playhead-time">00:00</span>
+    <section id="player-view" class="player-view hidden">
+      <div class="player-head">
+        <button id="back-button" class="back-button" type="button" aria-label="Back to audio list">Back</button>
+      </div>
+      <section class="player" aria-live="polite">
+        <audio id="audio" preload="metadata"></audio>
+        <p id="file-name" class="file-name"></p>
+        <div class="progress-wrap" role="group" aria-label="Playback progress">
+          <div class="progress-track">
+            <input id="progress" type="range" min="0" max="1000" value="0" disabled />
+            <div id="selected-span-overlay" class="selected-span-overlay" aria-hidden="true"></div>
+            <div id="checkpoint-markers" class="checkpoint-markers" aria-hidden="true"></div>
+            <div id="playhead" class="playhead" aria-hidden="true">
+              <span class="playhead-arrow"></span>
+              <span id="playhead-time" class="playhead-time">00:00</span>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </section>
   </main>
 
