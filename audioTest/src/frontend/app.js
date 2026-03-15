@@ -1,4 +1,5 @@
-﻿(function () {
+(function () {
+  const uploadButton = document.getElementById("upload-button");
   const input = document.getElementById("audio-file");
   const fileName = document.getElementById("file-name");
   const audio = document.getElementById("audio");
@@ -17,12 +18,19 @@
   };
 
   input.addEventListener("change", handleFileChange);
+  uploadButton.addEventListener("click", openFilePicker);
   audio.addEventListener("loadedmetadata", updateUi);
   audio.addEventListener("timeupdate", updateUi);
   audio.addEventListener("durationchange", updateUi);
   document.addEventListener("keydown", handleKeyDown);
 
   restoreSessionOnLaunch();
+  fileName.textContent = "";
+
+  function openFilePicker() {
+    input.value = "";
+    input.click();
+  }
 
   function handleFileChange(event) {
     const file = event.target.files && event.target.files[0];
@@ -356,7 +364,7 @@
 
     state.objectUrl = URL.createObjectURL(file);
     audio.src = state.objectUrl;
-    fileName.textContent = displayName || state.currentFile.name || "No file selected";
+    fileName.textContent = displayName || state.currentFile.name || "";
     state.markerSignature = "";
   }
 
@@ -399,3 +407,5 @@
 
   window.addEventListener("beforeunload", revokeObjectUrl);
 })();
+
+
