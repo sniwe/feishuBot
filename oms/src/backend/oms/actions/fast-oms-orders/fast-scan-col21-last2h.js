@@ -17,6 +17,19 @@ function yyMMdd(date) {
   return `${yy}${mm}${dd}`;
 }
 
+function sanitizeFilePart(value) {
+  const cleaned = String(value || '')
+    .replace(/[\\/:*?"<>|]/g, '_')
+    .trim();
+  return cleaned || 'UNK';
+}
+
+function col13Prefix(row) {
+  const raw = String(row?.cols?.col_13 || '').trim();
+  const first3 = Array.from(raw).slice(0, 3).join('');
+  return sanitizeFilePart(first3 || 'UNK');
+}
+
 function toIsoLocal(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -228,13 +241,14 @@ async function writeGroupedOutput(outputRoot, grouped, metadata) {
     const fallbackKey = yyMMdd(new Date());
     const dir = path.join(outputRoot, fallbackKey);
     await fs.mkdir(dir, { recursive: true });
-    const outPath = path.join(dir, 'xid1_col21_last2h.json');
+    const outPath = path.join(dir, 'NO_MATCH.json');
     await fs.writeFile(
       outPath,
       JSON.stringify(
         {
           ...metadata,
           orderDate: fallbackKey,
+          col13Prefix: 'NO_MATCH',
           matchedCount: 0,
           rows: []
         },
@@ -249,15 +263,24 @@ async function writeGroupedOutput(outputRoot, grouped, metadata) {
   for (const [dateKey, rows] of entries) {
     const dir = path.join(outputRoot, dateKey);
     await fs.mkdir(dir, { recursive: true });
-    const outPath = path.join(dir, 'xid1_col21_last2h.json');
-    const payload = {
-      ...metadata,
-      orderDate: dateKey,
-      matchedCount: rows.length,
-      rows
-    };
-    await fs.writeFile(outPath, JSON.stringify(payload, null, 2), 'utf8');
-    written.push(outPath);
+    const byPrefix = {};
+    for (const row of rows) {
+      const prefix = col13Prefix(row);
+      if (!byPrefix[prefix]) byPrefix[prefix] = [];
+      byPrefix[prefix].push(row);
+    }
+    for (const [prefix, prefRows] of Object.entries(byPrefix)) {
+      const outPath = path.join(dir, `${prefix}.json`);
+      const payload = {
+        ...metadata,
+        orderDate: dateKey,
+        col13Prefix: prefix,
+        matchedCount: prefRows.length,
+        rows: prefRows
+      };
+      await fs.writeFile(outPath, JSON.stringify(payload, null, 2), 'utf8');
+      written.push(outPath);
+    }
   }
   return written;
 }
