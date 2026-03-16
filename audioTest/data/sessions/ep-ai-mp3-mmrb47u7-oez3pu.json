@@ -1,6 +1,6 @@
 {
   "id": "ep-ai-mp3-mmrb47u7-oez3pu",
-  "savedAt": "2026-03-16T01:20:26.304Z",
+  "savedAt": "2026-03-16T01:38:29.006Z",
   "file": {
     "name": "ep：AI危机如何看待.mp3",
     "type": "audio/mpeg",
@@ -34,11 +34,19 @@
       {
         "start": 48.199623,
         "end": 51.099757
+      },
+      {
+        "start": 59.642507,
+        "end": 61.568182
+      },
+      {
+        "start": 64.969291,
+        "end": 68.734234
       }
     ],
     "selectedSpanIndex": -1,
-    "currentTime": 5.2788,
-    "wasPlaying": false
+    "currentTime": 64.969291,
+    "wasPlaying": true
   },
   "audioId": "ep-ai-mp3-mmrb473y-365g4b",
   "audioUrl": ""
