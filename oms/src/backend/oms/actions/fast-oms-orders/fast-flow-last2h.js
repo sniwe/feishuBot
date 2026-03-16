@@ -5,6 +5,7 @@ const { spawn } = require('child_process');
 
 const DEFAULT_CONFIG_PATH = path.resolve(__dirname, '..', '..', '..', '..', '..', 'mgmt', 'config', 'oms.config.json');
 const DEFAULT_OUTPUT_ROOT = path.resolve(__dirname, '..', '..', 'data', 'orders');
+const DEFAULT_LOGIN_URL = 'https://oms.xlwms.com/login';
 const DEFAULT_ORDERS_URL = 'https://oms.xlwms.com/platform/order/list';
 const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..', '..', '..', '..');
 
@@ -92,10 +93,16 @@ async function loadLaunchConfig(configPath) {
   const raw = await fs.readFile(configPath, 'utf8');
   const parsed = JSON.parse(stripBom(raw));
   const launch = parsed?.oms?.launch || {};
+  const credentials = parsed?.oms?.credentials || {};
   return {
     configPath,
     debugPort: Number(process.env.CDP_PORT || process.env.DEBUG_PORT || launch.debugPort || 9222),
-    ordersUrl: String(process.env.OMS_ORDERS_URL || parsed?.oms?.ordersUrl || DEFAULT_ORDERS_URL)
+    loginUrl: String(process.env.OMS_LOGIN_URL || parsed?.oms?.loginUrl || DEFAULT_LOGIN_URL),
+    ordersUrl: String(process.env.OMS_ORDERS_URL || parsed?.oms?.ordersUrl || DEFAULT_ORDERS_URL),
+    username: String(process.env.OMS_USERNAME || credentials.username || ''),
+    password: String(process.env.OMS_PASSWORD || credentials.password || ''),
+    cookiesPath: String(process.env.OMS_COOKIES_PATH || parsed?.oms?.cookiesPath || ''),
+    storagePath: String(process.env.OMS_STORAGE_PATH || parsed?.oms?.storagePath || '')
   };
 }
 
@@ -176,6 +183,101 @@ async function resolveOrdersPage(browser, ordersUrl) {
     await page.goto(ordersUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
   }
   return page;
+}
+
+async function detectLoginPage(page) {
+  if ((page.url() || '').includes('/login')) return true;
+  const hasLoginInputs = await page
+    .evaluate(() => {
+      const user = document.querySelector('input[placeholder="请输入账号名"], input[name="username"]');
+      const pass = document.querySelector('input[placeholder="请输入密码"], input[name="password"], input[type="password"]');
+      return Boolean(user && pass);
+    })
+    .catch(() => false);
+  return hasLoginInputs;
+}
+
+async function autoLoginIfNeeded(page, launch) {
+  const loginDetected = await detectLoginPage(page);
+  if (!loginDetected) return { loginDetected: false, loginPerformed: false, loginSucceeded: true };
+
+  if (!launch.username || !launch.password) {
+    return { loginDetected: true, loginPerformed: false, loginSucceeded: false, reason: 'credentials_missing' };
+  }
+
+  await page.goto(launch.loginUrl, { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => null);
+  await page.waitForSelector('input[placeholder="请输入账号名"], input[name="username"]', { visible: true, timeout: 20000 });
+  await page.waitForSelector('input[placeholder="请输入密码"], input[name="password"], input[type="password"]', {
+    visible: true,
+    timeout: 20000
+  });
+
+  const userSel = 'input[placeholder="请输入账号名"], input[name="username"]';
+  const passSel = 'input[placeholder="请输入密码"], input[name="password"], input[type="password"]';
+  await page.click(userSel, { clickCount: 3 });
+  await page.keyboard.press('Backspace');
+  await page.type(userSel, launch.username, { delay: 20 });
+  await page.click(passSel, { clickCount: 3 });
+  await page.keyboard.press('Backspace');
+  await page.type(passSel, launch.password, { delay: 20 });
+
+  const clicked = await page.evaluate(() => {
+    const btn = Array.from(document.querySelectorAll('button, .el-button, [role="button"]')).find((el) =>
+      /(^|\s)登录(\s|$)/.test(String(el.textContent || '').trim())
+    );
+    if (!btn) return false;
+    btn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    btn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    btn.click();
+    return true;
+  });
+  if (!clicked) {
+    return { loginDetected: true, loginPerformed: true, loginSucceeded: false, reason: 'login_button_missing' };
+  }
+
+  await Promise.race([
+    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 45000 }).catch(() => null),
+    page.waitForFunction(() => !window.location.href.includes('/login'), { timeout: 45000 }).catch(() => null)
+  ]);
+
+  const stillLogin = await detectLoginPage(page);
+  return {
+    loginDetected: true,
+    loginPerformed: true,
+    loginSucceeded: !stillLogin,
+    reason: stillLogin ? 'still_on_login' : 'ok'
+  };
+}
+
+async function persistSessionArtifacts(page, launch) {
+  const out = { cookiesSaved: false, storageSaved: false, cookiesPath: launch.cookiesPath, storagePath: launch.storagePath };
+
+  if (launch.cookiesPath) {
+    const cookies = await page.cookies('https://oms.xlwms.com', launch.ordersUrl).catch(() => page.cookies());
+    await fs.mkdir(path.dirname(launch.cookiesPath), { recursive: true });
+    await fs.writeFile(launch.cookiesPath, JSON.stringify(cookies, null, 2), 'utf8');
+    out.cookiesSaved = true;
+  }
+
+  if (launch.storagePath) {
+    const state = await page.evaluate(() => {
+      const localStorageState = {};
+      const sessionStorageState = {};
+      for (let i = 0; i < window.localStorage.length; i += 1) {
+        const key = window.localStorage.key(i);
+        if (key != null) localStorageState[key] = window.localStorage.getItem(key);
+      }
+      for (let i = 0; i < window.sessionStorage.length; i += 1) {
+        const key = window.sessionStorage.key(i);
+        if (key != null) sessionStorageState[key] = window.sessionStorage.getItem(key);
+      }
+      return { origin: window.location.origin, localStorage: localStorageState, sessionStorage: sessionStorageState };
+    });
+    await fs.mkdir(path.dirname(launch.storagePath), { recursive: true });
+    await fs.writeFile(launch.storagePath, JSON.stringify(state, null, 2), 'utf8');
+    out.storageSaved = true;
+  }
+  return out;
 }
 
 async function clickMainTabFast(page) {
@@ -350,6 +452,14 @@ async function main() {
   const conn = await connectWithAutoLaunch(launch.debugPort);
   try {
     const page = await resolveOrdersPage(conn.browser, launch.ordersUrl);
+    const login = await autoLoginIfNeeded(page, launch);
+    if (login.loginDetected && !login.loginSucceeded) {
+      throw new Error(`Auto-login failed: ${login.reason || 'unknown'}`);
+    }
+    if ((page.url() || '').includes('/login')) {
+      await page.goto(launch.ordersUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    }
+    const sessionSaved = await persistSessionArtifacts(page, launch);
     await clickMainTabFast(page);
     const stable = await waitTableStabilityFast(page);
     const scan = await scanAllRowsFast(page);
@@ -401,6 +511,8 @@ async function main() {
           cdpPort: conn.port,
           autoLaunched: conn.autoLaunched,
           launchedPid: conn.launchedPid,
+          login,
+          sessionSaved,
           configPath: launch.configPath,
           url: page.url(),
           stabilized: stable,
