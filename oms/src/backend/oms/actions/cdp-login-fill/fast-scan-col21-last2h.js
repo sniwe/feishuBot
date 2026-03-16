@@ -223,7 +223,30 @@ async function scanTableRows(page) {
 
 async function writeGroupedOutput(outputRoot, grouped, metadata) {
   const written = [];
-  for (const [dateKey, rows] of Object.entries(grouped)) {
+  const entries = Object.entries(grouped);
+  if (entries.length === 0) {
+    const fallbackKey = yyMMdd(new Date());
+    const dir = path.join(outputRoot, fallbackKey);
+    await fs.mkdir(dir, { recursive: true });
+    const outPath = path.join(dir, 'xid1_col21_last2h.json');
+    await fs.writeFile(
+      outPath,
+      JSON.stringify(
+        {
+          ...metadata,
+          orderDate: fallbackKey,
+          matchedCount: 0,
+          rows: []
+        },
+        null,
+        2
+      ),
+      'utf8'
+    );
+    written.push(outPath);
+    return written;
+  }
+  for (const [dateKey, rows] of entries) {
     const dir = path.join(outputRoot, dateKey);
     await fs.mkdir(dir, { recursive: true });
     const outPath = path.join(dir, 'xid1_col21_last2h.json');
