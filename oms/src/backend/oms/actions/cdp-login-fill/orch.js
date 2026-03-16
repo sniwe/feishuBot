@@ -2,12 +2,23 @@
 const path = require('path');
 const puppeteer = require('puppeteer');
 
-const DEFAULT_CONFIG_PATH = path.resolve(__dirname, '..', '..', '..', '..', '..', 'mgmt', 'config', 'oms.config.json');
+const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..', '..', '..', '..');
+const DEFAULT_CONFIG_PATH = path.resolve(WORKSPACE_ROOT, 'mgmt', 'config', 'oms.config.json');
 const DEFAULT_COOKIES_PATH = path.resolve(__dirname, '..', '..', '..', '..', '..', 'mgmt', 'config', 'oms.cookies.json');
 const DEFAULT_STORAGE_PATH = path.resolve(__dirname, '..', '..', '..', '..', '..', 'mgmt', 'config', 'oms.cookies.storage.json');
 
 function stripBom(value) {
   return String(value || '').replace(/^\uFEFF/, '');
+}
+
+function resolvePathValue(pathValue, { fallbackPath, configPath }) {
+  const candidate = String(pathValue || '').trim();
+  if (!candidate) return fallbackPath;
+  if (path.isAbsolute(candidate)) return candidate;
+  if (candidate.startsWith('./') || candidate.startsWith('.\\') || candidate.startsWith('..')) {
+    return path.resolve(path.dirname(configPath), candidate);
+  }
+  return path.resolve(WORKSPACE_ROOT, candidate);
 }
 
 /**
@@ -16,7 +27,8 @@ function stripBom(value) {
 async function loadConfig(ctx) {
   const { data = {}, deps } = ctx;
   const { fsApi } = deps;
-  const configPath = data.configPath || DEFAULT_CONFIG_PATH;
+  const requestedPath = String(data.configPath || DEFAULT_CONFIG_PATH);
+  const configPath = path.isAbsolute(requestedPath) ? requestedPath : path.resolve(process.cwd(), requestedPath);
   const raw = await fsApi.readFile(configPath, 'utf8');
   const parsed = JSON.parse(stripBom(raw));
   const username = String(parsed?.oms?.credentials?.username || '');
@@ -24,8 +36,14 @@ async function loadConfig(ctx) {
   if (!username || !password) {
     throw new Error(`Missing oms.credentials.username/password in ${configPath}`);
   }
-  const cookiesPath = String(parsed?.oms?.cookiesPath || DEFAULT_COOKIES_PATH);
-  const storagePath = String(parsed?.oms?.storagePath || DEFAULT_STORAGE_PATH);
+  const cookiesPath = resolvePathValue(parsed?.oms?.cookiesPath, {
+    fallbackPath: DEFAULT_COOKIES_PATH,
+    configPath
+  });
+  const storagePath = resolvePathValue(parsed?.oms?.storagePath, {
+    fallbackPath: DEFAULT_STORAGE_PATH,
+    configPath
+  });
   return { configPath, username, password, cookiesPath, storagePath };
 }
 

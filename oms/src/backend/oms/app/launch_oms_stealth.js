@@ -33,12 +33,9 @@ const DEFAULT_OMS_STORAGE_PATH = path.resolve(
 const DEFAULT_WINDOW_WIDTH = 1440;
 const DEFAULT_WINDOW_HEIGHT = 900;
 const DEFAULT_LAUNCH_PAGE_SIZE = 2000;
+const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..', '..', '..');
 const DEFAULT_PROJECT_CONFIG_PATH = path.resolve(
-  __dirname,
-  '..',
-  '..',
-  '..',
-  '..',
+  WORKSPACE_ROOT,
   'mgmt',
   'config',
   'oms.config.json'
@@ -73,6 +70,16 @@ async function loadProjectConfig(configPath) {
     console.warn(`Failed to load OMS config from ${configPath}: ${error.message}`);
     return { loaded: false, path: configPath, data: {} };
   }
+}
+
+function resolvePathValue(pathValue, { fallbackPath, configPath }) {
+  const candidate = String(pathValue || '').trim();
+  if (!candidate) return fallbackPath;
+  if (path.isAbsolute(candidate)) return candidate;
+  if (candidate.startsWith('./') || candidate.startsWith('.\\') || candidate.startsWith('..')) {
+    return path.resolve(path.dirname(configPath), candidate);
+  }
+  return path.resolve(WORKSPACE_ROOT, candidate);
 }
 
 async function resolveBrowserLaunchConfig() {
@@ -395,7 +402,8 @@ async function attemptLogin(page, username, password) {
 }
 
 async function main() {
-  const configPath = process.env.OMS_CONFIG_PATH || DEFAULT_PROJECT_CONFIG_PATH;
+  const configPathRaw = process.env.OMS_CONFIG_PATH || DEFAULT_PROJECT_CONFIG_PATH;
+  const configPath = path.isAbsolute(configPathRaw) ? configPathRaw : path.resolve(process.cwd(), configPathRaw);
   const projectConfigLoad = await loadProjectConfig(configPath);
   const omsConfig = projectConfigLoad.data && typeof projectConfigLoad.data.oms === 'object' ? projectConfigLoad.data.oms : {};
   const launchConfig = omsConfig.launch && typeof omsConfig.launch === 'object' ? omsConfig.launch : {};
@@ -403,8 +411,14 @@ async function main() {
 
   const loginUrl = process.env.OMS_LOGIN_URL || omsConfig.loginUrl || DEFAULT_OMS_LOGIN_URL;
   const ordersUrl = process.env.OMS_ORDERS_URL || omsConfig.ordersUrl || DEFAULT_OMS_ORDERS_URL;
-  const cookiesPath = process.env.OMS_COOKIES_PATH || omsConfig.cookiesPath || DEFAULT_OMS_COOKIES_PATH;
-  const storagePath = process.env.OMS_STORAGE_PATH || omsConfig.storagePath || DEFAULT_OMS_STORAGE_PATH;
+  const cookiesPath = resolvePathValue(process.env.OMS_COOKIES_PATH || omsConfig.cookiesPath, {
+    fallbackPath: DEFAULT_OMS_COOKIES_PATH,
+    configPath
+  });
+  const storagePath = resolvePathValue(process.env.OMS_STORAGE_PATH || omsConfig.storagePath, {
+    fallbackPath: DEFAULT_OMS_STORAGE_PATH,
+    configPath
+  });
   const omsUsername = process.env.OMS_USERNAME || credentials.username || '';
   const omsPassword = process.env.OMS_PASSWORD || credentials.password || '';
 

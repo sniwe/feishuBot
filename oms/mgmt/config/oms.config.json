@@ -14,7 +14,7 @@
                                "launchPageSize":  2000,
                                "debugPort":  9222
                            },
-                "cookiesPath":  "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.cookies.json",
-                "storagePath":  "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.cookies.storage.json"
+                "cookiesPath":  "./oms.cookies.json",
+                "storagePath":  "./oms.cookies.storage.json"
             }
 }

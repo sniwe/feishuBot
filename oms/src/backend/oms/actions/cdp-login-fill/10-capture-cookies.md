@@ -3,8 +3,8 @@
 Goal: persist authenticated session artifacts after login navigation.
 
 Output paths:
-- `C:\Users\Qub\oms\mgmt\config\oms.cookies.json`
-- `C:\Users\Qub\oms\mgmt\config\oms.cookies.storage.json`
+- `${WORKSPACE_ROOT}\mgmt\config\oms.cookies.json`
+- `${WORKSPACE_ROOT}\mgmt\config\oms.cookies.storage.json`
 
 Action:
 - Read cookies from current page context.

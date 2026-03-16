@@ -3,7 +3,7 @@
 Goal: load input values from project config source.
 
 Source:
-- `C:\Users\Qub\oms\mgmt\config\oms.config.json`
+- `${WORKSPACE_ROOT}\mgmt\config\oms.config.json`
 
 Fields:
 - `oms.credentials.username`

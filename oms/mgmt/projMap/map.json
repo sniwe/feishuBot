@@ -3,8 +3,8 @@
     "type":  "project-map",
     "name":  "template",
     "summary":  "Template project map",
-    "root":  "C:\\Users\\Qub\\oms",
-    "updated":  "2026-03-16T16:14:27.1949478+08:00",
+    "root":  "${WORKSPACE_ROOT}",
+    "updated":  "2026-03-16T16:26:58.7778009+08:00",
     "nodes":  [
 
               ],

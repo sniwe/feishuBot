@@ -3,9 +3,9 @@
 Goal: verify launcher and config paths point to the governed project location.
 
 Required paths:
-- `C:\Users\Qub\oms\mgmt\config\oms.config.json`
-- `C:\Users\Qub\oms\mgmt\config\oms.cookies.json`
-- `C:\Users\Qub\oms\mgmt\config\oms.cookies.storage.json`
+- `${WORKSPACE_ROOT}\mgmt\config\oms.config.json`
+- `${WORKSPACE_ROOT}\mgmt\config\oms.cookies.json`
+- `${WORKSPACE_ROOT}\mgmt\config\oms.cookies.storage.json`
 
 Checks:
 - `ordersUrl` is `https://oms.xlwms.com/platform/order/list`.

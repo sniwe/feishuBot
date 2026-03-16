@@ -1,7 +1,8 @@
-﻿# codex-governed:start
+# codex-governed:start
 mgmt/projMap/threads/current-thread.json
 mgmt/projMap/state/thread-map-deltas.json
-mgmt/oms.config.json
+mgmt/projMap/state/ingest-report.json
+src/backend/oms/data/orders/
 .env
 .env.*
 *.local
