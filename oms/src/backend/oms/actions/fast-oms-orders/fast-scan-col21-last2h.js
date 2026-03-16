@@ -3,7 +3,7 @@ const path = require('path');
 const puppeteer = require('puppeteer');
 
 const DEFAULT_CONFIG_PATH = path.resolve(__dirname, '..', '..', '..', '..', '..', 'mgmt', 'config', 'oms.config.json');
-const DEFAULT_OUTPUT_ROOT = path.resolve(__dirname, '..', '..', 'data', 'orders_col21_last2h');
+const DEFAULT_OUTPUT_ROOT = path.resolve(__dirname, '..', '..', 'data', 'orders');
 const DEFAULT_ORDERS_URL = 'https://oms.xlwms.com/platform/order/list';
 
 function stripBom(value) {
