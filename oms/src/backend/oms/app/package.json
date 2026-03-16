@@ -10,7 +10,8 @@
     "action:login-cdp-and-capture-cookies": "node ../actions/cdp-login-fill/orch.js",
     "action:fast-click-tab-1": "node ../actions/fast-oms-orders/fast-click-tab-1.js",
     "action:fast-scan-col21-last2h": "node ../actions/fast-oms-orders/fast-scan-col21-last2h.js",
-    "action:fast-flow-last2h": "node ../actions/fast-oms-orders/fast-flow-last2h.js"
+    "action:fast-flow-last2h": "node ../actions/fast-oms-orders/fast-flow-last2h.js",
+    "action:fast-flow-last2h:loop": "node ../actions/fast-oms-orders/loop-fast-flow-last2h.js"
   },
   "dependencies": {
     "puppeteer": "^24.3.0",
