@@ -2,12 +2,19 @@
   "ok": true,
   "mode": "fast-flow-last2h",
   "cdpPort": 9222,
-  "configPath": "C:\\Users\\rhyse\\oms\\mgmt\\config\\oms.config.json",
+  "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
+<<<<<<< Updated upstream
   "scannedAt": "2026-03-16T09:08:42.445Z",
   "window": {
     "from": "2026-03-16 15:08:34",
     "to": "2026-03-16 17:08:34"
+=======
+  "scannedAt": "2026-03-16T09:29:34.058Z",
+  "window": {
+    "from": "2026-03-16 15:29:24",
+    "to": "2026-03-16 17:29:24"
+>>>>>>> Stashed changes
   },
   "stabilized": {
     "samples": [
@@ -35,6 +42,10 @@
       1,
       1,
       1,
+<<<<<<< Updated upstream
+=======
+      1,
+>>>>>>> Stashed changes
       13,
       13,
       13
@@ -46,10 +57,119 @@
   "scannedRowCount": 1130,
   "orderDate": "260316",
   "col13Prefix": "403",
+<<<<<<< Updated upstream
   "matchedCount": 5,
   "rows": [
     {
       "rowIndex": 3,
+=======
+  "matchedCount": 6,
+  "rows": [
+    {
+      "rowIndex": 5,
+      "rowId": "SO051260316000122",
+      "col21": "2026-03-16 16:00:26",
+      "cols": {
+        "col_2": "",
+        "col_3": "",
+        "col_5": "577311065259675674",
+        "col_6": "tiktok",
+        "col_7": "多个(2)",
+        "col_8": "多个(3)",
+        "col_10": "Hailey Thomas",
+        "col_11": "United States of America (USA)(US)",
+        "col_12": "85719",
+        "col_13": "403-Lady Grayy Wigs USA_US(USLCREE2BFUS)",
+        "col_14": "US-本土店铺(Non-LOCAL-US)",
+        "col_15": "ZOO WAREHOUSE ⑥(USW01)",
+        "col_16": "USPS自提(USPS_PICKUP_C)",
+        "col_17": "-",
+        "col_18": "usps",
+        "col_19": "平台面单",
+        "col_20": "2026-03-16 15:59:57",
+        "col_21": "2026-03-16 16:00:26",
+        "col_22": "线上订单",
+        "col_23": "未打印",
+        "col_24": "2026-03-16 17:22:47",
+        "col_26": "-",
+        "col_27": "-",
+        "col_28": "",
+        "col_25": ""
+      },
+      "col21Parsed": "2026-03-16 16:00:26",
+      "orderDateYYMMDD": "260316"
+    },
+    {
+      "rowIndex": 6,
+      "rowId": "SO051260316000121",
+      "col21": "2026-03-16 16:00:51",
+      "cols": {
+        "col_2": "",
+        "col_3": "",
+        "col_5": "577311066429231641",
+        "col_6": "tiktok",
+        "col_7": "多个(3)",
+        "col_8": "多个(4)",
+        "col_10": "Jenny T",
+        "col_11": "United States of America (USA)(US)",
+        "col_12": "90716",
+        "col_13": "403-Lady Grayy Wigs USA_US(USLCREE2BFUS)",
+        "col_14": "US-本土店铺(Non-LOCAL-US)",
+        "col_15": "ZOO WAREHOUSE ⑥(USW01)",
+        "col_16": "USPS自提(USPS_PICKUP_C)",
+        "col_17": "-",
+        "col_18": "usps",
+        "col_19": "平台面单",
+        "col_20": "2026-03-16 16:00:47",
+        "col_21": "2026-03-16 16:00:51",
+        "col_22": "线上订单",
+        "col_23": "未打印",
+        "col_24": "2026-03-16 17:22:47",
+        "col_26": "-",
+        "col_27": "-",
+        "col_28": "",
+        "col_25": ""
+      },
+      "col21Parsed": "2026-03-16 16:00:51",
+      "orderDateYYMMDD": "260316"
+    },
+    {
+      "rowIndex": 7,
+      "rowId": "SO051260316000120",
+      "col21": "2026-03-16 16:03:05",
+      "cols": {
+        "col_2": "",
+        "col_3": "",
+        "col_5": "577311063515107776",
+        "col_6": "tiktok",
+        "col_7": "BL66213-1 * 1",
+        "col_8": "多个(2)",
+        "col_10": "Heather Higgins",
+        "col_11": "United States of America (USA)(US)",
+        "col_12": "48176",
+        "col_13": "403-Lady Grayy Wigs USA_US(USLCREE2BFUS)",
+        "col_14": "US-本土店铺(Non-LOCAL-US)",
+        "col_15": "ZOO WAREHOUSE ⑥(USW01)",
+        "col_16": "USPS自提(USPS_PICKUP_C)",
+        "col_17": "-",
+        "col_18": "usps",
+        "col_19": "平台面单",
+        "col_20": "2026-03-16 16:03:02",
+        "col_21": "2026-03-16 16:03:05",
+        "col_22": "线上订单",
+        "col_23": "未打印",
+        "col_24": "2026-03-16 17:22:47",
+        "col_26": "-",
+        "col_27": "-",
+        "col_28": "",
+        "col_25": ""
+      },
+      "col21Parsed": "2026-03-16 16:03:05",
+      "orderDateYYMMDD": "260316"
+    },
+    {
+      "rowIndex": 9,
+>>>>>>> Stashed changes
       "rowId": "SO051260316000119",
       "col21": "2026-03-16 15:55:56",
       "cols": {
@@ -83,7 +203,11 @@
       "orderDateYYMMDD": "260316"
     },
     {
+<<<<<<< Updated upstream
       "rowIndex": 4,
+=======
+      "rowIndex": 10,
+>>>>>>> Stashed changes
       "rowId": "SO051260316000118",
       "col21": "2026-03-16 15:34:36",
       "cols": {
@@ -92,7 +216,7 @@
         "col_5": "577311057311404704",
         "col_6": "tiktok",
         "col_7": "多个(2)",
-        "col_8": "多个(2)",
+        "col_8": "多个(3)",
         "col_10": "sandra Ritter",
         "col_11": "United States of America (USA)(US)",
         "col_12": "33955",
@@ -117,7 +241,11 @@
       "orderDateYYMMDD": "260316"
     },
     {
+<<<<<<< Updated upstream
       "rowIndex": 5,
+=======
+      "rowIndex": 11,
+>>>>>>> Stashed changes
       "rowId": "SO051260316000117",
       "col21": "2026-03-16 15:35:13",
       "cols": {
@@ -149,6 +277,7 @@
       },
       "col21Parsed": "2026-03-16 15:35:13",
       "orderDateYYMMDD": "260316"
+<<<<<<< Updated upstream
     },
     {
       "rowIndex": 8,
@@ -217,6 +346,8 @@
       },
       "col21Parsed": "2026-03-16 15:13:46",
       "orderDateYYMMDD": "260316"
+=======
+>>>>>>> Stashed changes
     }
   ]
 }

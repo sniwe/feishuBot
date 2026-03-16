@@ -124,21 +124,75 @@ async function connectFast(primaryPort) {
   throw new Error(`Fast-path connect failed on ports ${ports.join(', ')}: ${lastError?.message || lastError}`);
 }
 
+async function isHeadlessBrowser(browser) {
+  try {
+    const version = await browser.version();
+    return /HeadlessChrome/i.test(String(version || ''));
+  } catch {
+    return false;
+  }
+}
+
+async function isHeadlessPort(port) {
+  try {
+    const resp = await fetch(`http://127.0.0.1:${port}/json/version`);
+    if (!resp.ok) return false;
+    const info = await resp.json();
+    const ua = String(info?.['User-Agent'] || '');
+    const browser = String(info?.Browser || '');
+    return /HeadlessChrome/i.test(ua) || /HeadlessChrome/i.test(browser);
+  } catch {
+    return false;
+  }
+}
+
+async function connectFastPreferred(primaryPort, options = {}) {
+  const { requireVisible = true } = options;
+  const ports = Array.from({ length: 20 }, (_, index) => primaryPort + index);
+  let lastError = null;
+  for (const port of ports) {
+    let browser = null;
+    try {
+      browser = await puppeteer.connect({
+        browserURL: `http://127.0.0.1:${port}`,
+        defaultViewport: null,
+        protocolTimeout: 12000
+      });
+      if (requireVisible && ((await isHeadlessPort(port)) || (await isHeadlessBrowser(browser)))) {
+        await browser.disconnect();
+        continue;
+      }
+      return { browser, port };
+    } catch (error) {
+      if (browser) {
+        try {
+          await browser.disconnect();
+        } catch {
+          // ignore disconnect races
+        }
+      }
+      lastError = error;
+    }
+  }
+  throw new Error(`Fast-path connect failed on ports ${ports.join(', ')}: ${lastError?.message || lastError}`);
+}
+
 function launchOmsIfNeeded(primaryPort) {
+  const forceHidden = /^(1|true|yes|on)$/i.test(String(process.env.OMS_HIDDEN || '').trim());
   const env = {
     ...process.env,
-    DEBUG_PORT: String(primaryPort),
-    OMS_HIDDEN: '1'
+    DEBUG_PORT: String(primaryPort)
   };
+  if (forceHidden) env.OMS_HIDDEN = '1';
   const spawnSpec =
     process.platform === 'win32'
       ? {
           cmd: process.env.ComSpec || 'cmd.exe',
-          args: ['/d', '/s', '/c', 'npm.cmd run launch:oms:hidden']
+          args: ['/d', '/s', '/c', `npm.cmd run ${forceHidden ? 'launch:oms:hidden' : 'launch:oms'}`]
         }
       : {
           cmd: 'npm',
-          args: ['run', 'launch:oms:hidden']
+          args: ['run', forceHidden ? 'launch:oms:hidden' : 'launch:oms']
         };
   const child = spawn(spawnSpec.cmd, spawnSpec.args, {
     cwd: WORKSPACE_ROOT,
@@ -151,8 +205,13 @@ function launchOmsIfNeeded(primaryPort) {
 }
 
 async function connectWithAutoLaunch(primaryPort) {
+  const allowHeadlessAttach = /^(1|true|yes|on)$/i.test(String(process.env.OMS_ALLOW_HEADLESS_ATTACH || '').trim());
   try {
-    return { ...(await connectFast(primaryPort)), launchedPid: null, autoLaunched: false };
+    return {
+      ...(await connectFastPreferred(primaryPort, { requireVisible: !allowHeadlessAttach })),
+      launchedPid: null,
+      autoLaunched: false
+    };
   } catch (firstError) {
     const launchedPid = launchOmsIfNeeded(primaryPort);
     const startedAt = Date.now();
@@ -161,7 +220,7 @@ async function connectWithAutoLaunch(primaryPort) {
     while (Date.now() - startedAt < timeoutMs) {
       await new Promise((resolve) => setTimeout(resolve, 1200));
       try {
-        const conn = await connectFast(primaryPort);
+        const conn = await connectFastPreferred(primaryPort, { requireVisible: !allowHeadlessAttach });
         return { ...conn, launchedPid, autoLaunched: true };
       } catch (error) {
         lastError = error;

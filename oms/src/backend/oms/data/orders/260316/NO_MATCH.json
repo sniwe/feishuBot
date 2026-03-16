@@ -4,17 +4,10 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-<<<<<<< Updated upstream
-  "scannedAt": "2026-03-16T08:53:54.680Z",
+  "scannedAt": "2026-03-16T09:33:53.107Z",
   "window": {
-    "from": "2026-03-16 14:53:49",
-    "to": "2026-03-16 16:53:49"
-=======
-  "scannedAt": "2026-03-16T08:57:28.471Z",
-  "window": {
-    "from": "2026-03-16 14:57:23",
-    "to": "2026-03-16 16:57:23"
->>>>>>> Stashed changes
+    "from": "2026-03-16 15:33:48",
+    "to": "2026-03-16 17:33:48"
   },
   "stabilized": {
     "samples": [

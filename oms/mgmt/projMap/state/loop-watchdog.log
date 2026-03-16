@@ -1,0 +1,10 @@
+
+> action:fast-flow-last2h:loop
+> npm --prefix src/backend/oms/app run action:fast-flow-last2h:loop
+
+
+> stealth-launcher-oms@1.0.0 action:fast-flow-last2h:loop
+> node ../actions/fast-oms-orders/loop-fast-flow-last2h.js
+
+[loop-fast-flow] starting interval tick_ms=60000 workspace=C:\Users\Qub\oms
+[loop-fast-flow] tick=1 started_at=2026-03-16T09:40:31.796Z

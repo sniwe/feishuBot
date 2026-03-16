@@ -2,6 +2,8 @@ const { spawn } = require('child_process');
 const path = require('path');
 
 const TICK_MS = Number(process.env.OMS_FAST_FLOW_TICK_MS || 60_000);
+const RUN_TIMEOUT_MS = Number(process.env.OMS_FAST_FLOW_RUN_TIMEOUT_MS || TICK_MS);
+const MAX_TICKS = Number(process.env.OMS_FAST_FLOW_MAX_TICKS || 0);
 const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..', '..', '..', '..');
 
 let running = false;
@@ -13,20 +15,73 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function killProcessTree(pid) {
+  return new Promise((resolve) => {
+    if (!pid) {
+      resolve();
+      return;
+    }
+    if (process.platform === 'win32') {
+      const killer = spawn('taskkill', ['/PID', String(pid), '/T', '/F'], {
+        stdio: 'ignore',
+        windowsHide: true
+      });
+      killer.on('close', () => resolve());
+      killer.on('error', () => resolve());
+      return;
+    }
+    try {
+      process.kill(pid, 'SIGTERM');
+    } catch {
+      resolve();
+      return;
+    }
+    setTimeout(() => {
+      try {
+        process.kill(pid, 'SIGKILL');
+      } catch {
+        // ignore when already exited
+      }
+      resolve();
+    }, 3000);
+  });
+}
+
 function runFastFlowOnce() {
   return new Promise((resolve) => {
     const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+    const startedAt = Date.now();
     const child = spawn(npmCmd, ['--prefix', 'src/backend/oms/app', 'run', 'action:fast-flow-last2h'], {
       cwd: WORKSPACE_ROOT,
       stdio: 'inherit'
     });
 
-    child.on('close', (code) => {
-      resolve(code || 0);
+    const childDone = new Promise((done) => {
+      child.on('close', (code) => {
+        done({ code: code || 0, timedOut: false, elapsedMs: Date.now() - startedAt });
+      });
+      child.on('error', () => {
+        done({ code: 1, timedOut: false, elapsedMs: Date.now() - startedAt });
+      });
     });
-    child.on('error', () => {
-      resolve(1);
+
+    const timeoutDone = new Promise((done) => {
+      const t = setTimeout(() => {
+        done({ code: 124, timedOut: true, elapsedMs: Date.now() - startedAt });
+      }, RUN_TIMEOUT_MS);
+      t.unref();
     });
+
+    Promise.race([childDone, timeoutDone])
+      .then(async (result) => {
+        if (result.timedOut) {
+          await killProcessTree(child.pid).catch(() => {});
+        }
+        resolve(result);
+      })
+      .catch(() => {
+        resolve({ code: 1, timedOut: false, elapsedMs: Date.now() - startedAt });
+      });
   });
 }
 
@@ -36,14 +91,21 @@ async function tick() {
   tickCount += 1;
   const startedAt = Date.now();
   console.log(`[loop-fast-flow] tick=${tickCount} started_at=${nowIso()}`);
-  const code = await runFastFlowOnce();
+  const result = await runFastFlowOnce();
   const elapsedMs = Date.now() - startedAt;
-  console.log(`[loop-fast-flow] tick=${tickCount} exit_code=${code} elapsed_ms=${elapsedMs} finished_at=${nowIso()}`);
+  console.log(
+    `[loop-fast-flow] tick=${tickCount} exit_code=${result.code} timed_out=${result.timedOut ? 1 : 0} elapsed_ms=${elapsedMs} finished_at=${nowIso()}`
+  );
   running = false;
+  if (MAX_TICKS > 0 && tickCount >= MAX_TICKS) {
+    shutdown(`MAX_TICKS_${MAX_TICKS}`);
+  }
 }
 
 function start() {
-  console.log(`[loop-fast-flow] starting interval tick_ms=${TICK_MS} workspace=${WORKSPACE_ROOT}`);
+  console.log(
+    `[loop-fast-flow] starting interval tick_ms=${TICK_MS} run_timeout_ms=${RUN_TIMEOUT_MS} max_ticks=${MAX_TICKS} workspace=${WORKSPACE_ROOT}`
+  );
   tick().catch(() => {});
   timer = setInterval(() => {
     tick().catch(() => {});
@@ -68,4 +130,3 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 start();
-
