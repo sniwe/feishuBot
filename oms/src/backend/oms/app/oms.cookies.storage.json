@@ -1,6 +1,7 @@
 {
   "origin": "https://oms.xlwms.com",
   "localStorage": {
+    "tab-sawebjssdk-0.7682956104252401": "{\"data\":[],\"expireTime\":1773651241259,\"serverUrl\":\"https://shence.naloc.cn/sa.gif?project=Production_WMS\"}",
     "logoInfo": "{}",
     "oms-token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIlN0IlMjJidXNpbmVzc1R5cGUlMjIlM0ElMjJvbXMlMjIlMkMlMjJsb2dpbkFjY291bnQlMjIlM0ElMjJMTTYwNyUyMiUyQyUyMnVzZXJOYW1lQ24lMjIlM0ElMjIlMjIlMkMlMjJ1c2VyTmFtZUVuJTIyJTNBJTIyJTIyJTJDJTIyY3VzdG9tZXJDb2RlJTIyJTNBJTIyMzI4NzA1MSUyMiUyQyUyMnRlbmFudENvZGUlMjIlM0FudWxsJTJDJTIydGVybWluYWxUeXBlJTIyJTNBbnVsbCU3RCIsImlzcyI6InhpbmdsaWFuLnNlY3VyaXR5IiwiYnVzaW5lc3NUeXBlIjoib21zIiwiZXhwIjoxNzczNTM5NDcwLCJpYXQiOjE3NzM0NTMwNzAsImp0aSI6ImM0YTQ1YjdiLWQxNTgtNDY5NS1iNzU3LTY5Y2E5NzljMmUyMSJ9.t3CLS1b0a9BMFdrRi4Gyj2ggybPcJ58KWsZsba1eecQ",
     "PLATFORM.ORDER.TAG": "false",

@@ -2,12 +2,12 @@
   "ok": true,
   "mode": "fast-flow-last2h",
   "cdpPort": 9222,
-  "configPath": "C:\\Users\\rhyse\\oms\\mgmt\\config\\oms.config.json",
+  "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-16T08:45:11.293Z",
+  "scannedAt": "2026-03-16T08:53:54.680Z",
   "window": {
-    "from": "2026-03-16 14:45:06",
-    "to": "2026-03-16 16:45:06"
+    "from": "2026-03-16 14:53:49",
+    "to": "2026-03-16 16:53:49"
   },
   "stabilized": {
     "samples": [
