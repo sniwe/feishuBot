@@ -8,9 +8,22 @@ const PUBLIC_DIR = path.join(PROJECT_ROOT, "src", "public");
 const FRONTEND_DIR = path.join(PROJECT_ROOT, "src", "frontend");
 const DATA_DIR = path.join(PROJECT_ROOT, "data");
 const SESSIONS_DIR = path.join(DATA_DIR, "sessions");
+const AUDIO_DIR = path.join(DATA_DIR, "audio");
 const SESSION_PATH = path.join(DATA_DIR, "session-latest.json");
 const PORT = Number(process.env.PORT || 8787);
 const MAX_BODY_SIZE = 1024 * 1024 * 500;
+const LOGIN_TTL_MS = 10 * 60 * 1000;
+const STORAGE_PROVIDER = String(process.env.SESSION_STORE || "local").trim().toLowerCase();
+const REMOTE_BASE_URL = String(process.env.REMOTE_BASE_URL || "https://braggadocian-osteometrical-petronila.ngrok-free.dev").trim().replace(/\/+$/g, "");
+const REMOTE_TIMEOUT_MS = Number(process.env.REMOTE_TIMEOUT_MS || 60000);
+const REMOTE_SESSIONS_PATH = String(process.env.REMOTE_SESSIONS_PATH || "/api/sessions").trim() || "/api/sessions";
+const REMOTE_SESSION_PATH = String(process.env.REMOTE_SESSION_PATH || "/api/session").trim() || "/api/session";
+const REMOTE_AUDIO_PATH = String(process.env.REMOTE_AUDIO_PATH || "/api/audio").trim() || "/api/audio";
+const IS_REMOTE_STORAGE = STORAGE_PROVIDER === "remote" || STORAGE_PROVIDER === "ngrok";
+const USER_CREDENTIALS = {
+  zhaoying: String(process.env.USER_PASSWORD_ZHAOYING || "zhaoying123"),
+  rhys: String(process.env.USER_PASSWORD_RHYS || "rhys123")
+};
 
 startServer({ data: {}, deps: { http, fs, fsp, path } }).catch(function (error) {
   console.error(error);
@@ -19,8 +32,11 @@ startServer({ data: {}, deps: { http, fs, fsp, path } }).catch(function (error) 
 
 async function startServer(ctx) {
   const { deps } = ctx;
-  await deps.fsp.mkdir(DATA_DIR, { recursive: true });
-  await deps.fsp.mkdir(SESSIONS_DIR, { recursive: true });
+  if (!IS_REMOTE_STORAGE) {
+    await deps.fsp.mkdir(DATA_DIR, { recursive: true });
+    await deps.fsp.mkdir(SESSIONS_DIR, { recursive: true });
+    await deps.fsp.mkdir(AUDIO_DIR, { recursive: true });
+  }
 
   const server = deps.http.createServer(function (req, res) {
     routeRequest({ data: { req, res }, deps: { fs: deps.fs, fsp: deps.fsp, path: deps.path } }).catch(function (error) {
@@ -51,8 +67,37 @@ async function routeRequest(ctx) {
     return;
   }
 
+  if (req.method === "GET" && requestPath === "/api/audio") {
+    await handleGetAudio({ data: { req, res, audioId: requestUrl.searchParams.get("id") }, deps: { fs: deps.fs, fsp: deps.fsp, path: deps.path } });
+    return;
+  }
+
   if (req.method === "POST" && requestPath === "/api/session") {
     await handlePostSession({ data: { req, res }, deps: { fsp: deps.fsp, path: deps.path } });
+    return;
+  }
+
+  if (req.method === "POST" && requestPath === "/api/login") {
+    await handlePostLogin({ data: { req, res }, deps: {} });
+    return;
+  }
+
+  if (req.method === "DELETE" && requestPath === "/api/session") {
+    await handleDeleteSession({ data: { res, sessionId: requestUrl.searchParams.get("id") }, deps: { fsp: deps.fsp, path: deps.path } });
+    return;
+  }
+
+  if (req.method === "POST" && requestPath === "/api/audio") {
+    await handlePostAudio({
+      data: {
+        req,
+        res,
+        fileName: requestUrl.searchParams.get("name"),
+        mimeType: requestUrl.searchParams.get("type"),
+        lastModified: requestUrl.searchParams.get("lastModified")
+      },
+      deps: { fsp: deps.fsp, path: deps.path, fs: deps.fs }
+    });
     return;
   }
 
@@ -68,7 +113,9 @@ async function handleGetSessions(ctx) {
   const { data, deps } = ctx;
   const { res } = data;
 
-  const sessions = await readSessionSummaries({ data: {}, deps: { fsp: deps.fsp, path: deps.path } });
+  const sessions = IS_REMOTE_STORAGE
+    ? await readRemoteSessionSummaries({ data: {}, deps: {} })
+    : await readSessionSummaries({ data: {}, deps: { fsp: deps.fsp, path: deps.path } });
   sendJson({ data: { res, status: 200, payload: { sessions } }, deps: {} });
 }
 
@@ -76,20 +123,36 @@ async function handleGetSession(ctx) {
   const { data, deps } = ctx;
   const { res, sessionId } = data;
 
+  if (IS_REMOTE_STORAGE) {
+    try {
+      const session = await getRemoteSession({ data: { sessionId }, deps: {} });
+      sendJson({ data: { res, status: 200, payload: session }, deps: {} });
+    } catch (error) {
+      if (error && error.code === "REMOTE_SESSION_NOT_FOUND") {
+        sendJson({ data: { res, status: 404, payload: { error: "session_not_found" } }, deps: {} });
+        return;
+      }
+      throw error;
+    }
+    return;
+  }
+
   const resolvedSessionId = normalizeSessionId({ data: { sessionId }, deps: {} });
 
   try {
     if (!resolvedSessionId) {
       const text = await deps.fsp.readFile(SESSION_PATH, "utf8");
       const parsed = JSON.parse(text);
-      sendJson({ data: { res, status: 200, payload: parsed }, deps: {} });
+      const normalized = await normalizeLoadedSession({ data: { record: parsed }, deps: { fsp: deps.fsp, path: deps.path } });
+      sendJson({ data: { res, status: 200, payload: normalized }, deps: {} });
       return;
     }
 
     const sessionPath = getSessionFilePath({ data: { sessionId: resolvedSessionId }, deps: { path: deps.path } });
     const text = await deps.fsp.readFile(sessionPath, "utf8");
     const parsed = JSON.parse(text);
-    sendJson({ data: { res, status: 200, payload: parsed }, deps: {} });
+    const normalized = await normalizeLoadedSession({ data: { record: parsed }, deps: { fsp: deps.fsp, path: deps.path } });
+    sendJson({ data: { res, status: 200, payload: normalized }, deps: {} });
   } catch (error) {
     if (error && error.code === "ENOENT") {
       sendJson({ data: { res, status: 404, payload: { error: "session_not_found" } }, deps: {} });
@@ -116,6 +179,19 @@ async function handlePostSession(ctx) {
     return;
   }
 
+  if (IS_REMOTE_STORAGE) {
+    const saved = await saveRemoteSession({ data: { payload }, deps: {} });
+    sendJson({
+      data: {
+        res,
+        status: 200,
+        payload: { ok: true, id: saved.id, path: "remote://session/" + String(saved.id || "") }
+      },
+      deps: {}
+    });
+    return;
+  }
+
   const sessionId = normalizeSessionId({ data: { sessionId: payload.sessionId }, deps: {} }) || buildSessionId({ data: { fileName: payload.file && payload.file.name }, deps: {} });
   const sessionPath = getSessionFilePath({ data: { sessionId }, deps: { path: deps.path } });
 
@@ -124,8 +200,22 @@ async function handlePostSession(ctx) {
     savedAt: new Date().toISOString(),
     file: payload.file,
     playback: payload.playback,
-    audioBase64: payload.audioBase64
+    audioId: normalizeSessionId({ data: { sessionId: payload.audioId }, deps: {} }) || "",
+    audioUrl: payload.audioUrl ? String(payload.audioUrl) : ""
   };
+
+  if (!record.audioId && payload.audioBase64) {
+    const uploadedAudio = await saveLocalAudioFromBase64({
+      data: { payload },
+      deps: { fsp: deps.fsp, path: deps.path }
+    });
+    record.audioId = uploadedAudio.id;
+  }
+
+  if (!record.audioId && !record.audioUrl) {
+    sendJson({ data: { res, status: 400, payload: { error: "missing_audio_reference" } }, deps: {} });
+    return;
+  }
 
   await deps.fsp.mkdir(DATA_DIR, { recursive: true });
   await deps.fsp.mkdir(SESSIONS_DIR, { recursive: true });
@@ -133,6 +223,91 @@ async function handlePostSession(ctx) {
   await deps.fsp.writeFile(SESSION_PATH, JSON.stringify(record, null, 2), "utf8");
 
   sendJson({ data: { res, status: 200, payload: { ok: true, id: sessionId, path: sessionPath } }, deps: {} });
+}
+
+async function handlePostLogin(ctx) {
+  const { data } = ctx;
+  const { req, res } = data;
+  let payload;
+  try {
+    payload = await readJsonBody({ data: { req }, deps: {} });
+  } catch (error) {
+    sendJson({ data: { res, status: 400, payload: { error: "invalid_json", detail: String(error && error.message ? error.message : error) } }, deps: {} });
+    return;
+  }
+
+  const username = normalizeUsername({ data: { username: payload && payload.username }, deps: {} });
+  const password = payload && typeof payload.password === "string" ? payload.password : "";
+  if (!username || !password) {
+    sendJson({ data: { res, status: 400, payload: { ok: false, error: "missing_credentials" } }, deps: {} });
+    return;
+  }
+
+  const expectedPassword = USER_CREDENTIALS[username];
+  if (!expectedPassword || password !== expectedPassword) {
+    sendJson({ data: { res, status: 401, payload: { ok: false, error: "invalid_credentials" } }, deps: {} });
+    return;
+  }
+
+  sendJson({
+    data: {
+      res,
+      status: 200,
+      payload: {
+        ok: true,
+        username,
+        loggedInAt: Date.now(),
+        ttlMs: LOGIN_TTL_MS
+      }
+    },
+    deps: {}
+  });
+}
+
+async function handleDeleteSession(ctx) {
+  const { data, deps } = ctx;
+  const { res, sessionId } = data;
+  const resolvedSessionId = normalizeSessionId({ data: { sessionId }, deps: {} });
+
+  if (!resolvedSessionId) {
+    sendJson({ data: { res, status: 400, payload: { error: "invalid_session_id" } }, deps: {} });
+    return;
+  }
+
+  if (IS_REMOTE_STORAGE) {
+    const deleted = await deleteRemoteSession({ data: { sessionId: resolvedSessionId }, deps: {} });
+    sendJson({ data: { res, status: 200, payload: deleted }, deps: {} });
+    return;
+  }
+
+  const sessionPath = getSessionFilePath({ data: { sessionId: resolvedSessionId }, deps: { path: deps.path } });
+  let deletedRecord = null;
+  try {
+    const text = await deps.fsp.readFile(sessionPath, "utf8");
+    deletedRecord = JSON.parse(text);
+  } catch (error) {
+    if (error && error.code === "ENOENT") {
+      sendJson({ data: { res, status: 404, payload: { error: "session_not_found" } }, deps: {} });
+      return;
+    }
+    throw error;
+  }
+
+  await deps.fsp.unlink(sessionPath).catch(function () {});
+  await refreshLatestSessionAfterDelete({ data: { deletedSessionId: resolvedSessionId }, deps: { fsp: deps.fsp, path: deps.path } });
+
+  const deletedAudioId = normalizeSessionId({ data: { sessionId: deletedRecord && deletedRecord.audioId }, deps: {} });
+  if (deletedAudioId) {
+    const stillReferenced = await isAudioReferencedByAnySession({
+      data: { audioId: deletedAudioId, ignoreSessionId: resolvedSessionId },
+      deps: { fsp: deps.fsp, path: deps.path }
+    });
+    if (!stillReferenced) {
+      await deleteAudioById({ data: { audioId: deletedAudioId }, deps: { fsp: deps.fsp, path: deps.path } });
+    }
+  }
+
+  sendJson({ data: { res, status: 200, payload: { ok: true, id: resolvedSessionId } }, deps: {} });
 }
 
 async function readSessionSummaries(ctx) {
@@ -170,7 +345,7 @@ async function readSessionSummaries(ctx) {
     try {
       const latestText = await deps.fsp.readFile(SESSION_PATH, "utf8");
       const latest = JSON.parse(latestText);
-      if (latest && typeof latest === "object" && latest.audioBase64) {
+      if (latest && typeof latest === "object" && (latest.audioBase64 || latest.audioId || latest.audioUrl)) {
         sessions.push(toSessionSummary({ data: { parsed: latest, fallbackId: "session-latest" }, deps: {} }));
       }
     } catch {
@@ -197,8 +372,221 @@ function toSessionSummary(ctx) {
       checkpoints: Array.isArray(parsed.playback && parsed.playback.checkpoints)
         ? parsed.playback.checkpoints
         : []
-    }
+    },
+    audioId: normalizeSessionId({ data: { sessionId: parsed.audioId }, deps: {} }) || "",
+    audioUrl: typeof parsed.audioUrl === "string" ? parsed.audioUrl : ""
   };
+}
+
+async function handlePostAudio(ctx) {
+  const { data, deps } = ctx;
+  const { req, res, fileName, mimeType, lastModified } = data;
+
+  if (IS_REMOTE_STORAGE) {
+    const bodyBuffer = await readBodyBuffer({ data: { req }, deps: {} });
+    const result = await saveRemoteAudio({
+      data: { bodyBuffer, fileName, mimeType, lastModified },
+      deps: {}
+    });
+    sendJson({ data: { res, status: 200, payload: result }, deps: {} });
+    return;
+  }
+
+  const bodyBuffer = await readBodyBuffer({ data: { req }, deps: {} });
+  if (!bodyBuffer.length) {
+    sendJson({ data: { res, status: 400, payload: { error: "empty_audio_payload" } }, deps: {} });
+    return;
+  }
+
+  const audioId = buildSessionId({ data: { fileName: fileName || "audio" }, deps: {} });
+  const binaryPath = getAudioBinaryPath({ data: { audioId }, deps: { path: deps.path } });
+  const metadataPath = getAudioMetadataPath({ data: { audioId }, deps: { path: deps.path } });
+  const resolvedMimeType = String(mimeType || req.headers["content-type"] || "application/octet-stream").slice(0, 120);
+  const resolvedFileName = String(fileName || "audio.bin").slice(0, 255);
+  const resolvedLastModified = Number(lastModified || Date.now());
+
+  await deps.fsp.mkdir(AUDIO_DIR, { recursive: true });
+  await deps.fsp.writeFile(binaryPath, bodyBuffer);
+  await deps.fsp.writeFile(metadataPath, JSON.stringify({
+    id: audioId,
+    fileName: resolvedFileName,
+    mimeType: resolvedMimeType,
+    size: bodyBuffer.length,
+    lastModified: Number.isFinite(resolvedLastModified) ? resolvedLastModified : Date.now(),
+    savedAt: new Date().toISOString()
+  }, null, 2), "utf8");
+
+  sendJson({
+    data: {
+      res,
+      status: 200,
+      payload: {
+        ok: true,
+        audio: {
+          id: audioId,
+          fileName: resolvedFileName,
+          mimeType: resolvedMimeType,
+          size: bodyBuffer.length,
+          lastModified: Number.isFinite(resolvedLastModified) ? resolvedLastModified : Date.now(),
+          url: "/api/audio?id=" + encodeURIComponent(audioId)
+        }
+      }
+    },
+    deps: {}
+  });
+}
+
+async function handleGetAudio(ctx) {
+  const { data, deps } = ctx;
+  const { req, res, audioId } = data;
+  const safeId = normalizeSessionId({ data: { sessionId: audioId }, deps: {} });
+
+  if (!safeId) {
+    sendJson({ data: { res, status: 404, payload: { error: "audio_not_found" } }, deps: {} });
+    return;
+  }
+
+  if (IS_REMOTE_STORAGE) {
+    const rangeHeader = req && req.headers && req.headers.range ? String(req.headers.range) : "";
+    const headers = {};
+    if (rangeHeader) {
+      headers.Range = rangeHeader;
+    }
+    const response = await remoteFetch({
+      data: { method: "GET", endpointPath: REMOTE_AUDIO_PATH + "?id=" + encodeURIComponent(safeId), headers },
+      deps: {}
+    });
+    res.writeHead(response.status, {
+      "Content-Type": response.headers.get("content-type") || "application/octet-stream",
+      "Cache-Control": "no-store",
+      "Accept-Ranges": response.headers.get("accept-ranges") || "bytes",
+      ...(response.headers.get("content-range") ? { "Content-Range": response.headers.get("content-range") } : {}),
+      ...(response.headers.get("content-length") ? { "Content-Length": response.headers.get("content-length") } : {})
+    });
+    const arrayBuffer = await response.arrayBuffer();
+    res.end(Buffer.from(arrayBuffer));
+    return;
+  }
+
+  const metadataPath = getAudioMetadataPath({ data: { audioId: safeId }, deps: { path: deps.path } });
+  const binaryPath = getAudioBinaryPath({ data: { audioId: safeId }, deps: { path: deps.path } });
+
+  let meta = {};
+  try {
+    const raw = await deps.fsp.readFile(metadataPath, "utf8");
+    meta = JSON.parse(raw);
+  } catch {
+    sendJson({ data: { res, status: 404, payload: { error: "audio_not_found" } }, deps: {} });
+    return;
+  }
+
+  await streamAudioBinary({
+    data: {
+      req,
+      res,
+      filePath: binaryPath,
+      contentType: String(meta.mimeType || "application/octet-stream")
+    },
+    deps: { fs: deps.fs, fsp: deps.fsp }
+  });
+}
+
+async function deleteAudioById(ctx) {
+  const { data, deps } = ctx;
+  const { audioId } = data;
+  const safeId = normalizeSessionId({ data: { sessionId: audioId }, deps: {} });
+  if (!safeId) {
+    return;
+  }
+  const metadataPath = getAudioMetadataPath({ data: { audioId: safeId }, deps: { path: deps.path } });
+  const binaryPath = getAudioBinaryPath({ data: { audioId: safeId }, deps: { path: deps.path } });
+  await deps.fsp.unlink(metadataPath).catch(function () {});
+  await deps.fsp.unlink(binaryPath).catch(function () {});
+}
+
+async function refreshLatestSessionAfterDelete(ctx) {
+  const { deps } = ctx;
+  let latestText = "";
+  try {
+    latestText = await deps.fsp.readFile(SESSION_PATH, "utf8");
+  } catch {
+    return;
+  }
+
+  let latest = null;
+  try {
+    latest = JSON.parse(latestText);
+  } catch {
+    latest = null;
+  }
+  if (!latest || typeof latest !== "object") {
+    return;
+  }
+
+  const latestId = normalizeSessionId({ data: { sessionId: latest.id }, deps: {} });
+  const deletedSessionId = normalizeSessionId({ data: { sessionId: ctx.data.deletedSessionId }, deps: {} });
+  if (!latestId || latestId !== deletedSessionId) {
+    return;
+  }
+
+  const summaries = await readSessionSummaries({ data: {}, deps: { fsp: deps.fsp, path: deps.path } });
+  if (!summaries.length) {
+    await deps.fsp.unlink(SESSION_PATH).catch(function () {});
+    return;
+  }
+
+  const nextId = normalizeSessionId({ data: { sessionId: summaries[0].id }, deps: {} });
+  if (!nextId) {
+    await deps.fsp.unlink(SESSION_PATH).catch(function () {});
+    return;
+  }
+
+  const nextPath = getSessionFilePath({ data: { sessionId: nextId }, deps: { path: deps.path } });
+  try {
+    const nextText = await deps.fsp.readFile(nextPath, "utf8");
+    await deps.fsp.writeFile(SESSION_PATH, nextText, "utf8");
+  } catch {
+    await deps.fsp.unlink(SESSION_PATH).catch(function () {});
+  }
+}
+
+async function isAudioReferencedByAnySession(ctx) {
+  const { data, deps } = ctx;
+  const { audioId, ignoreSessionId } = data;
+  const safeAudioId = normalizeSessionId({ data: { sessionId: audioId }, deps: {} });
+  const ignoredId = normalizeSessionId({ data: { sessionId: ignoreSessionId }, deps: {} });
+  if (!safeAudioId) {
+    return false;
+  }
+
+  let entries = [];
+  try {
+    entries = await deps.fsp.readdir(SESSIONS_DIR, { withFileTypes: true });
+  } catch {
+    return false;
+  }
+
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith(".json")) {
+      continue;
+    }
+    const sid = normalizeSessionId({ data: { sessionId: entry.name.slice(0, -5) }, deps: {} });
+    if (sid && sid === ignoredId) {
+      continue;
+    }
+    try {
+      const raw = await deps.fsp.readFile(deps.path.join(SESSIONS_DIR, entry.name), "utf8");
+      const parsed = JSON.parse(raw);
+      const candidate = normalizeSessionId({ data: { sessionId: parsed && parsed.audioId }, deps: {} });
+      if (candidate && candidate === safeAudioId) {
+        return true;
+      }
+    } catch {
+      // Ignore malformed rows.
+    }
+  }
+
+  return false;
 }
 
 async function handleStatic(ctx) {
@@ -253,6 +641,16 @@ function normalizeSessionId(ctx) {
   return sanitized.slice(0, 80);
 }
 
+function normalizeUsername(ctx) {
+  const { data } = ctx;
+  const { username } = data;
+  const value = String(username || "").trim().toLowerCase();
+  if (!value) {
+    return "";
+  }
+  return value.replace(/[^a-z0-9_-]/g, "");
+}
+
 function buildSessionId(ctx) {
   const { data } = ctx;
   const { fileName } = data;
@@ -267,6 +665,18 @@ function getSessionFilePath(ctx) {
   const { sessionId } = data;
   const safeId = normalizeSessionId({ data: { sessionId }, deps: {} });
   return deps.path.join(SESSIONS_DIR, safeId + ".json");
+}
+
+function getAudioBinaryPath(ctx) {
+  const { data, deps } = ctx;
+  const { audioId } = data;
+  return deps.path.join(AUDIO_DIR, String(audioId) + ".bin");
+}
+
+function getAudioMetadataPath(ctx) {
+  const { data, deps } = ctx;
+  const { audioId } = data;
+  return deps.path.join(AUDIO_DIR, String(audioId) + ".json");
 }
 
 function isValidSessionPayload(ctx) {
@@ -284,7 +694,16 @@ function isValidSessionPayload(ctx) {
   if (!payload.playback || typeof payload.playback !== "object") {
     return false;
   }
-  if (!payload.audioBase64 || typeof payload.audioBase64 !== "string") {
+  if (payload.audioBase64 != null && typeof payload.audioBase64 !== "string") {
+    return false;
+  }
+  if (payload.audioId != null && typeof payload.audioId !== "string") {
+    return false;
+  }
+  if (payload.audioUrl != null && typeof payload.audioUrl !== "string") {
+    return false;
+  }
+  if (!payload.audioBase64 && !payload.audioId && !payload.audioUrl) {
     return false;
   }
   return true;
@@ -296,13 +715,13 @@ function streamFile(ctx) {
 
   return new Promise(function (resolve) {
     const ext = path.extname(filePath).toLowerCase();
-    const type = ext === ".html"
+    const type = data.overrideContentType || (ext === ".html"
       ? "text/html; charset=utf-8"
       : ext === ".css"
         ? "text/css; charset=utf-8"
         : ext === ".js"
           ? "application/javascript; charset=utf-8"
-          : "application/octet-stream";
+          : "application/octet-stream");
 
     const stream = deps.fs.createReadStream(filePath);
     stream.on("error", function () {
@@ -315,6 +734,125 @@ function streamFile(ctx) {
       "Cache-Control": "no-store"
     });
 
+    stream.on("end", resolve);
+    stream.pipe(res);
+  });
+}
+
+async function streamAudioBinary(ctx) {
+  const { data, deps } = ctx;
+  const { req, res, filePath, contentType } = data;
+  let stat;
+  try {
+    stat = await deps.fsp.stat(filePath);
+  } catch {
+    sendJson({ data: { res, status: 404, payload: { error: "audio_not_found" } }, deps: {} });
+    return;
+  }
+
+  const fileSize = Number(stat.size || 0);
+  const range = req && req.headers && req.headers.range ? String(req.headers.range) : "";
+
+  if (!range || !/^bytes=/.test(range)) {
+    await pipeStream({
+      data: {
+        res,
+        stream: deps.fs.createReadStream(filePath),
+        status: 200,
+        headers: {
+          "Content-Type": contentType,
+          "Content-Length": String(fileSize),
+          "Accept-Ranges": "bytes",
+          "Cache-Control": "no-store"
+        }
+      },
+      deps: {}
+    });
+    return;
+  }
+
+  const parsed = parseBytesRange({ data: { range, fileSize }, deps: {} });
+  if (!parsed) {
+    res.writeHead(416, {
+      "Content-Range": "bytes */" + String(fileSize),
+      "Cache-Control": "no-store"
+    });
+    res.end();
+    return;
+  }
+
+  await pipeStream({
+    data: {
+      res,
+      stream: deps.fs.createReadStream(filePath, { start: parsed.start, end: parsed.end }),
+      status: 206,
+      headers: {
+        "Content-Type": contentType,
+        "Content-Length": String(parsed.end - parsed.start + 1),
+        "Content-Range": "bytes " + String(parsed.start) + "-" + String(parsed.end) + "/" + String(fileSize),
+        "Accept-Ranges": "bytes",
+        "Cache-Control": "no-store"
+      }
+    },
+    deps: {}
+  });
+}
+
+function parseBytesRange(ctx) {
+  const { data } = ctx;
+  const { range, fileSize } = data;
+  const raw = String(range || "").trim();
+  const match = /^bytes=(\d*)-(\d*)$/i.exec(raw);
+  if (!match) {
+    return null;
+  }
+
+  const startRaw = match[1];
+  const endRaw = match[2];
+
+  if (!startRaw && !endRaw) {
+    return null;
+  }
+
+  let start = startRaw ? Number(startRaw) : NaN;
+  let end = endRaw ? Number(endRaw) : NaN;
+
+  if (!Number.isFinite(start) && Number.isFinite(end)) {
+    const suffix = end;
+    if (suffix <= 0) {
+      return null;
+    }
+    start = Math.max(0, fileSize - suffix);
+    end = fileSize - 1;
+  } else {
+    if (!Number.isFinite(start) || start < 0) {
+      return null;
+    }
+    if (!Number.isFinite(end) || end >= fileSize) {
+      end = fileSize - 1;
+    }
+  }
+
+  if (start > end || start >= fileSize) {
+    return null;
+  }
+
+  return { start, end };
+}
+
+function pipeStream(ctx) {
+  const { data } = ctx;
+  const { res, stream, status, headers } = data;
+  return new Promise(function (resolve) {
+    stream.on("error", function () {
+      if (!res.headersSent) {
+        sendJson({ data: { res, status: 404, payload: { error: "not_found" } }, deps: {} });
+      } else {
+        res.end();
+      }
+      resolve();
+    });
+    res.writeHead(status, headers);
     stream.on("end", resolve);
     stream.pipe(res);
   });
@@ -346,6 +884,27 @@ function readBodyText(ctx) {
   });
 }
 
+function readBodyBuffer(ctx) {
+  const { data } = ctx;
+  const { req } = data;
+
+  return new Promise(function (resolve, reject) {
+    const chunks = [];
+    let total = 0;
+    req.on("data", function (chunk) {
+      const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      total += buf.length;
+      if (total > MAX_BODY_SIZE) {
+        reject(new Error("payload_too_large"));
+        return;
+      }
+      chunks.push(buf);
+    });
+    req.on("end", function () { resolve(Buffer.concat(chunks)); });
+    req.on("error", reject);
+  });
+}
+
 function sendJson(ctx) {
   const { data } = ctx;
   const { res, status, payload } = data;
@@ -355,4 +914,193 @@ function sendJson(ctx) {
     "Cache-Control": "no-store"
   });
   res.end(JSON.stringify(payload));
+}
+
+async function readRemoteSessionSummaries(ctx) {
+  const payload = await remoteRequestJson({
+    data: { method: "GET", endpointPath: REMOTE_SESSIONS_PATH },
+    deps: {}
+  });
+  if (!payload || !Array.isArray(payload.sessions)) {
+    return [];
+  }
+  return payload.sessions;
+}
+
+async function getRemoteSession(ctx) {
+  const { data } = ctx;
+  const { sessionId } = data;
+  const resolvedSessionId = normalizeSessionId({ data: { sessionId }, deps: {} });
+  const query = resolvedSessionId ? "?id=" + encodeURIComponent(resolvedSessionId) : "";
+  const payload = await remoteRequestJson({
+    data: { method: "GET", endpointPath: REMOTE_SESSION_PATH + query },
+    deps: {}
+  });
+  if (payload && payload.error === "session_not_found") {
+    const notFoundError = new Error("session_not_found");
+    notFoundError.code = "REMOTE_SESSION_NOT_FOUND";
+    throw notFoundError;
+  }
+  if (!payload || typeof payload !== "object") {
+    throw new Error("invalid_remote_session_payload");
+  }
+
+  return {
+    id: payload._id || payload.id || resolvedSessionId || "",
+    savedAt: payload.savedAt,
+    file: payload.file || {},
+    playback: payload.playback || {},
+    audioId: payload.audioId || "",
+    audioUrl: payload.audioUrl || ""
+  };
+}
+
+async function saveRemoteSession(ctx) {
+  const { data } = ctx;
+  const { payload } = data;
+  const result = await remoteRequestJson({
+    data: { method: "POST", endpointPath: REMOTE_SESSION_PATH, payload },
+    deps: {}
+  });
+  if (!result || !result.ok) {
+    throw new Error("remote_save_failed detail=" + JSON.stringify(result || {}));
+  }
+  return result;
+}
+
+async function deleteRemoteSession(ctx) {
+  const { data } = ctx;
+  const { sessionId } = data;
+  const result = await remoteRequestJson({
+    data: { method: "DELETE", endpointPath: REMOTE_SESSION_PATH + "?id=" + encodeURIComponent(sessionId) },
+    deps: {}
+  });
+  if (!result || !result.ok) {
+    throw new Error("remote_delete_failed detail=" + JSON.stringify(result || {}));
+  }
+  return result;
+}
+
+async function saveRemoteAudio(ctx) {
+  const { data } = ctx;
+  const { bodyBuffer, fileName, mimeType, lastModified } = data;
+
+  const response = await remoteFetch({
+    data: {
+      method: "POST",
+      endpointPath: REMOTE_AUDIO_PATH + buildAudioUploadQuery({ data: { fileName, mimeType, lastModified }, deps: {} }),
+      headers: { "Content-Type": String(mimeType || "application/octet-stream") },
+      body: bodyBuffer
+    },
+    deps: {}
+  });
+  const text = await response.text();
+  const payload = text ? JSON.parse(text) : {};
+  if (!response.ok || !payload.ok) {
+    throw new Error("remote_audio_save_failed detail=" + text);
+  }
+  return payload;
+}
+
+function buildAudioUploadQuery(ctx) {
+  const { data } = ctx;
+  const query = new URLSearchParams();
+  if (data.fileName) {
+    query.set("name", String(data.fileName));
+  }
+  if (data.mimeType) {
+    query.set("type", String(data.mimeType));
+  }
+  if (data.lastModified) {
+    query.set("lastModified", String(data.lastModified));
+  }
+  const serialized = query.toString();
+  return serialized ? "?" + serialized : "";
+}
+
+async function remoteRequestJson(ctx) {
+  const { data } = ctx;
+  const { method, endpointPath, payload } = data;
+  if (!REMOTE_BASE_URL) {
+    throw new Error("REMOTE_BASE_URL is required when SESSION_STORE=remote");
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(function () { controller.abort(); }, REMOTE_TIMEOUT_MS);
+
+  try {
+    const response = await remoteFetch({
+      data: {
+        method,
+        endpointPath,
+        headers: { "Content-Type": "application/json" },
+        payload
+      },
+      deps: { controller }
+    });
+    const text = await response.text();
+    const parsed = text ? JSON.parse(text) : {};
+    if (!response.ok) {
+      throw new Error("remote_http_error status=" + String(response.status) + " detail=" + text);
+    }
+    return parsed;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function remoteFetch(ctx) {
+  const { data, deps } = ctx;
+  const controller = deps && deps.controller;
+  return fetch(REMOTE_BASE_URL + data.endpointPath, {
+    method: data.method,
+    headers: data.headers || {},
+    cache: "no-store",
+    signal: controller ? controller.signal : undefined,
+    body: data.payload ? JSON.stringify(data.payload) : data.body
+  });
+}
+
+async function saveLocalAudioFromBase64(ctx) {
+  const { data, deps } = ctx;
+  const { payload } = data;
+  const base64 = String(payload.audioBase64 || "");
+  const marker = "base64,";
+  const markerIndex = base64.indexOf(marker);
+  const raw = markerIndex >= 0 ? base64.slice(markerIndex + marker.length) : base64;
+  const buffer = Buffer.from(raw, "base64");
+  const audioId = buildSessionId({ data: { fileName: payload.file && payload.file.name }, deps: {} });
+  const binaryPath = getAudioBinaryPath({ data: { audioId }, deps: { path: deps.path } });
+  const metadataPath = getAudioMetadataPath({ data: { audioId }, deps: { path: deps.path } });
+  await deps.fsp.mkdir(AUDIO_DIR, { recursive: true });
+  await deps.fsp.writeFile(binaryPath, buffer);
+  await deps.fsp.writeFile(metadataPath, JSON.stringify({
+    id: audioId,
+    fileName: payload.file && payload.file.name ? String(payload.file.name) : "audio.bin",
+    mimeType: payload.file && payload.file.type ? String(payload.file.type) : "application/octet-stream",
+    size: buffer.length,
+    lastModified: payload.file && Number.isFinite(Number(payload.file.lastModified)) ? Number(payload.file.lastModified) : Date.now(),
+    savedAt: new Date().toISOString()
+  }, null, 2), "utf8");
+  return { id: audioId };
+}
+
+async function normalizeLoadedSession(ctx) {
+  const { data, deps } = ctx;
+  const { record } = data;
+  if (!record || typeof record !== "object") {
+    return { id: "", file: {}, playback: {} };
+  }
+  if (!record.audioId && typeof record.audioBase64 === "string" && record.audioBase64) {
+    const uploadedAudio = await saveLocalAudioFromBase64({ data: { payload: record }, deps: { fsp: deps.fsp, path: deps.path } });
+    record.audioId = uploadedAudio.id;
+  }
+  return {
+    id: record.id || "",
+    savedAt: record.savedAt,
+    file: record.file || {},
+    playback: record.playback || {},
+    audioId: record.audioId || "",
+    audioUrl: record.audioUrl || ""
+  };
 }

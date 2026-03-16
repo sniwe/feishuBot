@@ -1,1 +1,1 @@
-﻿{"name":"audiotest","private":true,"version":"1.0.0","scripts":{"start":"node src/backend/server.js"}}
+{"name":"audiotest","private":true,"version":"1.0.0","scripts":{"start":"node src/backend/server.js","migrate:remote":"node src/backend/migrate-local-to-remote.js"}}

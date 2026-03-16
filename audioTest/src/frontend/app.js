@@ -1,4 +1,13 @@
 (function () {
+  const LOGIN_STORAGE_KEY = "audioTest.auth";
+  const LOGIN_TTL_MS = 10 * 60 * 1000;
+  const ALLOWED_USERS = ["zhaoying", "rhys"];
+  const loginView = document.getElementById("login-view");
+  const loginForm = document.getElementById("login-form");
+  const loginUsername = document.getElementById("login-username");
+  const loginPassword = document.getElementById("login-password");
+  const loginButton = document.getElementById("login-button");
+  const loginStatus = document.getElementById("login-status");
   const libraryView = document.getElementById("library-view");
   const playerView = document.getElementById("player-view");
   const uploadButton = document.getElementById("upload-button");
@@ -10,38 +19,176 @@
   const fileName = document.getElementById("file-name");
   const audio = document.getElementById("audio");
   const progress = document.getElementById("progress");
+  const progressTrackMain = document.getElementById("progress-track-main");
   const selectedSpanOverlay = document.getElementById("selected-span-overlay");
+  const subSegOverlays = document.getElementById("subseg-overlays");
   const checkpointMarkers = document.getElementById("checkpoint-markers");
+  const checkpointMagnifier = document.getElementById("checkpoint-magnifier");
+  const checkpointMagnifierTime = document.getElementById("checkpoint-magnifier-time");
   const playhead = document.getElementById("playhead");
   const playheadTime = document.getElementById("playhead-time");
+  const playerLoading = document.getElementById("player-loading");
+  const targetProgressWrap = document.getElementById("target-progress-wrap");
+  const targetProgress = document.getElementById("target-progress");
+  const targetSpanOverlay = document.getElementById("target-span-overlay");
+  const targetSubSegActiveFill = document.getElementById("target-subseg-active-fill");
+  const targetCheckpointMarkers = document.getElementById("target-checkpoint-markers");
+  const targetPlayhead = document.getElementById("target-playhead");
+  const targetPlayheadTime = document.getElementById("target-playhead-time");
 
   const state = {
     objectUrl: null,
     currentFile: null,
+    activeAudioId: null,
+    activeAudioUrl: null,
+    pendingUpload: null,
+    loadingSessionId: null,
+    isListLoading: false,
+    openMenuSessionId: null,
+    sessionsCache: [],
     checkpoints: [],
+    subSegs: [],
     selectedSpanIndex: -1,
+    targetSpanIndex: -1,
+    targetStart: null,
+    targetEnd: null,
+    targetSubSegs: [],
+    selectedTargetSubSegIndex: -1,
+    shiftHoldTss: null,
+    hasAutoFocusedProgress: false,
     markerSignature: "",
+    subSegSignature: "",
+    targetMarkerSignature: "",
     isPlayerVisible: false,
+    isPlayerLoading: false,
+    checkpointDrag: null,
+    checkpointPreviewTimerId: null,
+    cycleLatch: { left: "", right: "" },
+    authUser: null,
     activeSessionId: null,
     saveQueue: Promise.resolve(),
     isPersisting: false
   };
 
+  const DEBUG_AUDIO = (function () {
+    try {
+      const qp = new URLSearchParams(window.location.search);
+      if (qp.get("debugAudio") === "1") {
+        return true;
+      }
+      return window.localStorage && window.localStorage.getItem("audioTest.debugAudio") === "1";
+    } catch {
+      return false;
+    }
+  })();
+
+  function debugLog(label, detail) {
+    if (!DEBUG_AUDIO) {
+      return;
+    }
+    const stamp = new Date().toISOString();
+    console.log("[audioTest][" + stamp + "] " + label, detail || {});
+  }
+
   input.addEventListener("change", handleFileChange);
+  loginForm.addEventListener("submit", handleLoginSubmit);
   uploadButton.addEventListener("click", openFilePicker);
   backButton.addEventListener("click", goBackToLibrary);
   audio.addEventListener("loadedmetadata", updateUi);
   audio.addEventListener("timeupdate", updateUi);
   audio.addEventListener("durationchange", updateUi);
-  document.addEventListener("keydown", handleKeyDown);
+  audio.addEventListener("play", function () {
+    debugLog("audio.play", { currentTime: audio.currentTime, duration: audio.duration });
+  });
+  audio.addEventListener("pause", function () {
+    debugLog("audio.pause", { currentTime: audio.currentTime, duration: audio.duration });
+  });
+  audio.addEventListener("seeking", function () {
+    debugLog("audio.seeking", { currentTime: audio.currentTime, duration: audio.duration });
+  });
+  audio.addEventListener("seeked", function () {
+    debugLog("audio.seeked", { currentTime: audio.currentTime, duration: audio.duration });
+  });
+  window.addEventListener("keydown", handleKeyDown, { capture: true });
+  window.addEventListener("keyup", handleKeyUp, { capture: true });
+  window.addEventListener("mousemove", handleCheckpointDragMove, { capture: true });
+  window.addEventListener("mouseup", handleCheckpointDragEnd, { capture: true });
+  document.addEventListener("click", handleGlobalClick);
 
   initialize();
 
   async function initialize() {
     fileName.textContent = "";
     setSaveStatus("Ready");
-    showLibraryView();
-    await loadPersistedAudioCards();
+    progress.disabled = false;
+    showLoginView();
+    const restored = restoreLoginFromStorage();
+    if (restored) {
+      state.authUser = restored.username;
+      setLoginStatus("Welcome back, " + restored.username + ".");
+      showLibraryView();
+      await loadPersistedAudioCards();
+      return;
+    }
+    setLoginStatus("Log in to continue.");
+  }
+
+  async function handleLoginSubmit(event) {
+    event.preventDefault();
+    const usernameRaw = String(loginUsername.value || "").trim().toLowerCase();
+    const password = String(loginPassword.value || "");
+
+    if (!usernameRaw || !password) {
+      setLoginStatus("Username and password are required.", true);
+      return;
+    }
+    if (ALLOWED_USERS.indexOf(usernameRaw) < 0) {
+      setLoginStatus("User is not allowed.", true);
+      return;
+    }
+
+    loginButton.disabled = true;
+    setLoginStatus("Signing in...");
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username: usernameRaw,
+          password
+        })
+      });
+
+      if (!response.ok) {
+        const detail = await response.text().catch(function () { return ""; });
+        throw new Error("login_failed status=" + String(response.status) + " detail=" + detail);
+      }
+
+      const payload = await response.json();
+      if (!payload || !payload.ok || !payload.username) {
+        throw new Error("invalid_login_response");
+      }
+
+      const ttl = Number.isFinite(Number(payload.ttlMs)) ? Number(payload.ttlMs) : LOGIN_TTL_MS;
+      const loggedInAt = Number.isFinite(Number(payload.loggedInAt)) ? Number(payload.loggedInAt) : Date.now();
+      persistLogin({
+        username: payload.username,
+        loggedInAt,
+        ttlMs: ttl
+      });
+
+      state.authUser = payload.username;
+      loginPassword.value = "";
+      setLoginStatus("Signed in as " + payload.username + ".");
+      showLibraryView();
+      await loadPersistedAudioCards();
+    } catch (error) {
+      setLoginStatus("Login failed: " + normalizeErrorMessage(error), true);
+    } finally {
+      loginButton.disabled = false;
+    }
   }
 
   function openFilePicker() {
@@ -56,58 +203,147 @@
     }
 
     state.activeSessionId = null;
+    state.activeAudioId = null;
+    state.activeAudioUrl = null;
+    state.pendingUpload = {
+      id: "pending-" + Date.now().toString(36),
+      file: {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        lastModified: file.lastModified
+      },
+      progress: 0,
+      phase: "uploading",
+      savedAt: new Date().toISOString(),
+      playback: { checkpoints: [] }
+    };
     setAudioSource({ data: { file, displayName: file.name }, deps: {} });
     resetPlaybackState();
     showLibraryView();
+    renderAudioCards(state.sessionsCache);
     await enqueueAutoSave();
   }
 
   function handleKeyDown(event) {
-    if ((event.ctrlKey || event.metaKey) && event.code === "Backspace") {
-      if (state.isPlayerVisible) {
+    if (event.defaultPrevented) {
+      return;
+    }
+    const keyCode = String(event.code || "");
+    const keyValue = String(event.key || "");
+    const isArrowRight = keyCode === "ArrowRight" || keyValue === "ArrowRight" || keyValue === "Right";
+    const isArrowLeft = keyCode === "ArrowLeft" || keyValue === "ArrowLeft" || keyValue === "Left";
+    const isSpaceKey = keyCode === "Space" || keyValue === " " || keyValue === "Spacebar";
+    const isEnterKey = keyCode === "Enter" || keyValue === "Enter";
+    const isShiftKey = keyCode === "ShiftLeft" || keyCode === "ShiftRight" || keyValue === "Shift";
+    debugLog("keydown", {
+      code: keyCode,
+      key: keyValue,
+      ctrl: Boolean(event.ctrlKey || event.metaKey),
+      shift: Boolean(event.shiftKey),
+      isPlayerActive: isPlayerActive(),
+      paused: audio.paused,
+      currentTime: Number.isFinite(audio.currentTime) ? audio.currentTime : null,
+      selectedSpanIndex: state.selectedSpanIndex,
+      targetSpanIndex: state.targetSpanIndex,
+      selectedTargetSubSegIndex: state.selectedTargetSubSegIndex,
+      shiftHoldTss: state.shiftHoldTss
+    });
+
+    if (isShiftKey && isPlayerActive() && hasTargetSpan() && !Number.isFinite(state.shiftHoldTss)) {
+      state.shiftHoldTss = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+      debugLog("target:shiftHoldStart", { tss: state.shiftHoldTss });
+      setSaveStatus("audSeg tss armed at " + formatTime(state.shiftHoldTss));
+      return;
+    }
+
+    if ((event.ctrlKey || event.metaKey) && (keyCode === "Backspace" || keyValue === "Backspace")) {
+      if (isPlayerActive()) {
         event.preventDefault();
-        goBackToLibrary();
+        if (state.selectedTargetSubSegIndex >= 0) {
+          state.selectedTargetSubSegIndex = -1;
+          updateUi();
+          setSaveStatus("audSeg subSeg deselected");
+          return;
+        }
+        if (hasTargetSpan()) {
+          clearTargetSpanLock({ preserveSelection: true });
+          updateUi();
+          setSaveStatus("audSeg target unlocked");
+          return;
+        }
+        if (state.selectedSpanIndex >= 0) {
+          state.selectedSpanIndex = -1;
+          updateUi();
+          setSaveStatus("audSeg deselected");
+          enqueueAutoSave();
+        } else {
+          goBackToLibrary();
+        }
       }
       return;
     }
 
-    if ((event.ctrlKey || event.metaKey) && event.code === "KeyS") {
+    if ((event.ctrlKey || event.metaKey) && (keyCode === "KeyS" || keyValue.toLowerCase() === "s")) {
       event.preventDefault();
-      if (state.isPlayerVisible && audio.src) {
+      if (isPlayerActive() && audio.src) {
         enqueueAutoSave();
       }
       return;
     }
 
-    const target = event.target;
-    if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
+    if (!isPlayerActive() || !audio.src) {
       return;
     }
 
-    if (!state.isPlayerVisible || !audio.src) {
-      return;
-    }
-
-    if ((event.code === "ArrowRight" || event.code === "ArrowLeft") && event.ctrlKey && getCheckpointSeries().length > 1) {
+    if (isEnterKey) {
       event.preventDefault();
-      cycleSpanSelection(event.code === "ArrowRight" ? 1 : -1);
+      lockSelectedSpanAsTarget();
       return;
     }
 
-    if (event.code === "ArrowRight" || event.code === "ArrowLeft") {
+    if ((isArrowRight || isArrowLeft) && event.ctrlKey) {
+      const latchKey = isArrowRight ? "right" : "left";
+      const latchMode = hasTargetSpan() ? "target" : "span";
+      if (state.cycleLatch[latchKey] === latchMode || event.repeat) {
+        event.preventDefault();
+        return;
+      }
+      state.cycleLatch[latchKey] = latchMode;
+      if (hasTargetSpan()) {
+        event.preventDefault();
+        cycleTargetSubSegSelection(isArrowRight ? 1 : -1);
+        return;
+      }
+      if (getCheckpointSeries().length <= 1) {
+        return;
+      }
       event.preventDefault();
-      seekBy(event.code === "ArrowRight" ? 5 : -5);
+      cycleSpanSelection(isArrowRight ? 1 : -1);
+      debugLog("keydown:cycleSpan", { dir: isArrowRight ? 1 : -1, selectedSpanIndex: state.selectedSpanIndex });
       return;
     }
 
-    if (event.code !== "Space") {
+    if (isArrowRight || isArrowLeft) {
+      event.preventDefault();
+      debugLog("keydown:seekBy", { delta: isArrowRight ? 5 : -5 });
+      seekBy(isArrowRight ? 5 : -5);
+      return;
+    }
+
+    if (!isSpaceKey) {
       return;
     }
 
     event.preventDefault();
 
     if (event.shiftKey) {
+      if (hasTargetSpan()) {
+        createTargetSubSegFromShiftHold();
+        return;
+      }
       dropCheckpoint();
+      debugLog("keydown:checkpoint", { currentTime: audio.currentTime, checkpoints: state.checkpoints.slice() });
       return;
     }
 
@@ -118,29 +354,288 @@
     }
   }
 
+  function handleKeyUp(event) {
+    const keyCode = String(event.code || "");
+    const keyValue = String(event.key || "");
+    const isShiftKey = keyCode === "ShiftLeft" || keyCode === "ShiftRight" || keyValue === "Shift";
+    const isArrowRight = keyCode === "ArrowRight" || keyValue === "ArrowRight" || keyValue === "Right";
+    const isArrowLeft = keyCode === "ArrowLeft" || keyValue === "ArrowLeft" || keyValue === "Left";
+    const isCtrlKey = keyCode === "ControlLeft" || keyCode === "ControlRight" || keyValue === "Control";
+    const isMetaKey = keyCode === "MetaLeft" || keyCode === "MetaRight" || keyValue === "Meta";
+
+    if (isArrowRight) {
+      state.cycleLatch.right = "";
+    }
+    if (isArrowLeft) {
+      state.cycleLatch.left = "";
+    }
+    if (isCtrlKey || isMetaKey) {
+      state.cycleLatch.left = "";
+      state.cycleLatch.right = "";
+    }
+
+    if (!isShiftKey || !Number.isFinite(state.shiftHoldTss)) {
+      return;
+    }
+    state.shiftHoldTss = null;
+    debugLog("target:shiftHoldClear", {});
+    if (hasTargetSpan() && isPlayerActive()) {
+      setSaveStatus("audSeg tss cleared");
+    }
+  }
+
+  function beginCheckpointDrag(event, checkpointIndex) {
+    if (!isPlayerActive() || state.isPlayerLoading) {
+      return;
+    }
+    if (hasTargetSpan()) {
+      return;
+    }
+    const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+    if (duration <= 0 || checkpointIndex < 0 || checkpointIndex >= state.checkpoints.length) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+
+    const prev = checkpointIndex > 0 ? state.checkpoints[checkpointIndex - 1] : 0;
+    const next = checkpointIndex < (state.checkpoints.length - 1) ? state.checkpoints[checkpointIndex + 1] : duration;
+    const wasPlaying = !audio.paused;
+    if (wasPlaying) {
+      audio.pause();
+    }
+
+    state.checkpointDrag = {
+      index: checkpointIndex,
+      prev: Number.isFinite(prev) ? prev : 0,
+      next: Number.isFinite(next) ? next : duration,
+      wasPlaying,
+      lastAppliedTime: state.checkpoints[checkpointIndex]
+    };
+
+    const startTime = state.checkpoints[checkpointIndex];
+    showCheckpointMagnifier(startTime);
+    previewCheckpointPosition(startTime);
+    updateUi();
+  }
+
+  function handleCheckpointDragMove(event) {
+    if (!state.checkpointDrag) {
+      return;
+    }
+    const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+    if (duration <= 0) {
+      return;
+    }
+    event.preventDefault();
+
+    const nextTime = resolveTimeFromClientX(event.clientX, duration);
+    const epsilon = 0.02;
+    const minTime = Math.max(0, state.checkpointDrag.prev + epsilon);
+    const maxTime = Math.min(duration, state.checkpointDrag.next - epsilon);
+    const clamped = Math.max(minTime, Math.min(maxTime, nextTime));
+    if (!Number.isFinite(clamped)) {
+      return;
+    }
+    if (Math.abs(clamped - state.checkpointDrag.lastAppliedTime) < 0.001) {
+      return;
+    }
+
+    state.checkpoints[state.checkpointDrag.index] = clamped;
+    state.checkpointDrag.lastAppliedTime = clamped;
+    state.markerSignature = "";
+    state.subSegSignature = "";
+    state.targetMarkerSignature = "";
+    syncTargetSubSegsFromCurrentBounds();
+    showCheckpointMagnifier(clamped);
+    previewCheckpointPosition(clamped);
+    updateUi();
+  }
+
+  function handleCheckpointDragEnd() {
+    if (!state.checkpointDrag) {
+      return;
+    }
+    const dragState = state.checkpointDrag;
+    state.checkpointDrag = null;
+    hideCheckpointMagnifier();
+    if (state.checkpointPreviewTimerId) {
+      window.clearTimeout(state.checkpointPreviewTimerId);
+      state.checkpointPreviewTimerId = null;
+    }
+    if (dragState.wasPlaying) {
+      audio.play().catch(function () {});
+    } else {
+      audio.pause();
+    }
+    syncTargetSubSegsFromCurrentBounds();
+    updateUi();
+    enqueueAutoSave();
+  }
+
+  function clearCheckpointDragState() {
+    state.checkpointDrag = null;
+    if (state.checkpointPreviewTimerId) {
+      window.clearTimeout(state.checkpointPreviewTimerId);
+      state.checkpointPreviewTimerId = null;
+    }
+    hideCheckpointMagnifier();
+  }
+
+  function resolveTimeFromClientX(clientX, duration) {
+    const trackRect = progressTrackMain ? progressTrackMain.getBoundingClientRect() : progress.getBoundingClientRect();
+    const ratio = trackRect.width > 0 ? (clientX - trackRect.left) / trackRect.width : 0;
+    const clampedRatio = Math.max(0, Math.min(1, ratio));
+    return clampedRatio * duration;
+  }
+
+  function showCheckpointMagnifier(seconds) {
+    if (!checkpointMagnifier) {
+      return;
+    }
+    const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+    const trackRect = progressTrackMain ? progressTrackMain.getBoundingClientRect() : progress.getBoundingClientRect();
+    const percent = duration > 0 ? Math.max(0, Math.min(1, seconds / duration)) : 0;
+    const x = percent * trackRect.width;
+    const left = Math.max(0, Math.min(trackRect.width - 88, x - 44));
+    checkpointMagnifier.style.left = String(left) + "px";
+    checkpointMagnifier.classList.remove("hidden");
+    if (checkpointMagnifierTime) {
+      checkpointMagnifierTime.textContent = formatTime(seconds);
+    }
+  }
+
+  function hideCheckpointMagnifier() {
+    if (!checkpointMagnifier) {
+      return;
+    }
+    checkpointMagnifier.classList.add("hidden");
+  }
+
+  function previewCheckpointPosition(seconds) {
+    if (!Number.isFinite(seconds)) {
+      return;
+    }
+    if (state.checkpointPreviewTimerId) {
+      window.clearTimeout(state.checkpointPreviewTimerId);
+      state.checkpointPreviewTimerId = null;
+    }
+    const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+    const safe = Math.max(0, Math.min(duration || seconds, seconds));
+    audio.currentTime = safe;
+    audio.play().catch(function () {});
+    state.checkpointPreviewTimerId = window.setTimeout(function () {
+      if (state.checkpointDrag) {
+        const loopPoint = Number.isFinite(state.checkpointDrag.lastAppliedTime)
+          ? state.checkpointDrag.lastAppliedTime
+          : safe;
+        previewCheckpointPosition(loopPoint);
+        return;
+      }
+      audio.pause();
+      state.checkpointPreviewTimerId = null;
+    }, 1000);
+  }
+
   function showLibraryView() {
+    blurActiveEditable();
+    clearCheckpointDragState();
+    loginView.classList.add("hidden");
     libraryView.classList.remove("hidden");
     playerView.classList.add("hidden");
+    setPlayerLoading(false);
     state.isPlayerVisible = false;
   }
 
   function showPlayerView() {
+    blurActiveEditable();
+    loginView.classList.add("hidden");
     libraryView.classList.add("hidden");
     playerView.classList.remove("hidden");
     state.isPlayerVisible = true;
   }
 
-  function goBackToLibrary() {
+  function showLoginView() {
+    blurActiveEditable();
+    clearCheckpointDragState();
+    loginView.classList.remove("hidden");
+    libraryView.classList.add("hidden");
+    playerView.classList.add("hidden");
+    setPlayerLoading(false);
+    state.isPlayerVisible = false;
+  }
+
+  function setPlayerLoading(isLoading, message) {
+    const active = Boolean(isLoading);
+    state.isPlayerLoading = active;
+    playerView.classList.toggle("is-loading", active);
+    if (playerLoading) {
+      playerLoading.classList.toggle("hidden", !active);
+      if (message) {
+        const label = playerLoading.querySelector(".card-progress-label");
+        if (label) {
+          label.textContent = String(message);
+        }
+      }
+    }
+  }
+
+  function blurActiveEditable() {
+    const active = document.activeElement;
+    if (!active) {
+      return;
+    }
+    if (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.isContentEditable || active.tagName === "BUTTON") {
+      try {
+        active.blur();
+      } catch {
+        // Ignore blur failures.
+      }
+    }
+  }
+
+  function isPlayerActive() {
+    return state.isPlayerVisible && !playerView.classList.contains("hidden");
+  }
+
+  async function goBackToLibrary() {
     if (!audio.paused) {
       audio.pause();
     }
+    clearTargetSpanLock({ preserveSelection: false });
     showLibraryView();
-    if (state.currentFile) {
-      enqueueAutoSave();
+    state.openMenuSessionId = null;
+    state.isListLoading = true;
+    renderAudioCards(state.sessionsCache);
+    try {
+      if (state.currentFile) {
+        await enqueueAutoSave();
+      } else {
+        await loadPersistedAudioCards();
+      }
+    } finally {
+      state.isListLoading = false;
+      renderAudioCards(state.sessionsCache);
+    }
+  }
+
+  function handleGlobalClick(event) {
+    const target = event.target;
+    if (!target || state.openMenuSessionId == null) {
+      return;
+    }
+    const withinMenu = target.closest && target.closest(".item-actions");
+    const withinSettingsButton = target.closest && target.closest(".item-settings-button");
+    if (!withinMenu && !withinSettingsButton) {
+      state.openMenuSessionId = null;
+      renderAudioCards(state.sessionsCache);
     }
   }
 
   async function loadPersistedAudioCards() {
+    if (!state.authUser) {
+      return;
+    }
     try {
       const response = await fetch("/api/sessions", {
         method: "GET",
@@ -158,30 +653,47 @@
 
       const payload = await response.json();
       const sessions = payload && Array.isArray(payload.sessions) ? payload.sessions : [];
+      state.sessionsCache = sessions;
       renderAudioCards(sessions);
     } catch {
+      state.sessionsCache = [];
       renderAudioCards([]);
     }
   }
 
   function renderAudioCards(sessions) {
+    state.sessionsCache = Array.isArray(sessions) ? sessions : [];
     cards.innerHTML = "";
 
-    if (!sessions.length) {
+    const hasPending = Boolean(state.pendingUpload);
+    if (!state.sessionsCache.length && !hasPending && !state.isListLoading) {
       emptyState.classList.remove("hidden");
       return;
     }
 
     emptyState.classList.add("hidden");
 
-    sessions.forEach(function (session) {
+    if (state.isListLoading) {
+      cards.appendChild(createListLoadingCard());
+    }
+
+    if (state.pendingUpload) {
+      cards.appendChild(createPendingAudioCard(state.pendingUpload));
+    }
+
+    state.sessionsCache.forEach(function (session) {
+      const row = document.createElement("div");
+      row.className = "audio-card-row";
+
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "audio-card";
+      button.className = "audio-card audio-card-main";
+      const isLoading = state.loadingSessionId && state.loadingSessionId === session.id;
       button.disabled = state.isPersisting;
       button.classList.toggle("is-disabled", state.isPersisting);
+      button.classList.toggle("is-loading", Boolean(isLoading));
       button.addEventListener("click", function () {
-        if (state.isPersisting) {
+        if (state.isPersisting || state.loadingSessionId) {
           return;
         }
         openPersistedSession(session.id).catch(function () {});
@@ -193,19 +705,149 @@
 
       const meta = document.createElement("span");
       meta.className = "audio-card-meta";
-      meta.textContent = buildSessionMeta(session);
+      meta.textContent = buildSessionMeta(session, isLoading ? "loading" : "");
 
       button.appendChild(title);
       button.appendChild(meta);
-      cards.appendChild(button);
+      if (isLoading) {
+        button.appendChild(createProgressRow({ mode: "indeterminate", label: "Loading audio..." }));
+      }
+      row.appendChild(button);
+
+      const settingsButton = document.createElement("button");
+      settingsButton.type = "button";
+      settingsButton.className = "item-settings-button";
+      settingsButton.setAttribute("aria-label", "Item settings");
+      settingsButton.title = "Item settings";
+      settingsButton.textContent = "...";
+      settingsButton.disabled = state.isPersisting || Boolean(state.loadingSessionId);
+      settingsButton.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleSessionMenu(session.id);
+      });
+      row.appendChild(settingsButton);
+
+      if (state.openMenuSessionId === session.id) {
+        row.appendChild(createItemActionsMenu(session.id));
+      }
+
+      cards.appendChild(row);
     });
   }
 
-  function buildSessionMeta(session) {
+  function createListLoadingCard() {
+    const wrap = document.createElement("div");
+    wrap.className = "audio-card is-pending";
+
+    const title = document.createElement("span");
+    title.className = "audio-card-title";
+    title.textContent = "Refreshing list";
+
+    const meta = document.createElement("span");
+    meta.className = "audio-card-meta";
+    meta.textContent = "Loading updated sessions...";
+
+    wrap.appendChild(title);
+    wrap.appendChild(meta);
+    wrap.appendChild(createProgressRow({ mode: "indeterminate", label: "Loading..." }));
+    return wrap;
+  }
+
+  function createItemActionsMenu(sessionId) {
+    const menu = document.createElement("div");
+    menu.className = "item-actions";
+
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "item-action-button danger";
+    del.textContent = "Delete";
+    del.disabled = state.isPersisting || Boolean(state.loadingSessionId);
+    del.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      deleteSession(sessionId).catch(function () {});
+    });
+
+    menu.appendChild(del);
+    return menu;
+  }
+
+  function toggleSessionMenu(sessionId) {
+    if (state.isPersisting || state.loadingSessionId) {
+      return;
+    }
+    state.openMenuSessionId = state.openMenuSessionId === sessionId ? null : sessionId;
+    renderAudioCards(state.sessionsCache);
+  }
+
+  function createPendingAudioCard(upload) {
+    const wrap = document.createElement("div");
+    wrap.className = "audio-card is-pending";
+
+    const title = document.createElement("span");
+    title.className = "audio-card-title";
+    title.textContent = (upload.file && upload.file.name) || "Uploading audio";
+
+    const phaseText = upload.phase === "saving"
+      ? "Finalizing metadata..."
+      : upload.phase === "failed"
+        ? "Upload failed"
+        : "Uploading audio...";
+
+    const meta = document.createElement("span");
+    meta.className = "audio-card-meta";
+    meta.textContent = phaseText;
+
+    const progress = createProgressRow({
+      mode: upload.phase === "uploading" ? "percent" : upload.phase === "saving" ? "indeterminate" : "stopped",
+      percent: upload.progress || 0,
+      label: upload.phase === "failed"
+        ? "Failed"
+        : upload.phase === "saving"
+          ? "Saving..."
+          : String(Math.round((upload.progress || 0) * 100)) + "%"
+    });
+
+    wrap.appendChild(title);
+    wrap.appendChild(meta);
+    wrap.appendChild(progress);
+    return wrap;
+  }
+
+  function createProgressRow(ctx) {
+    const data = ctx || {};
+    const row = document.createElement("div");
+    row.className = "card-progress";
+
+    const bar = document.createElement("span");
+    bar.className = "card-progress-bar";
+    if (data.mode === "indeterminate") {
+      bar.classList.add("is-indeterminate");
+    } else if (data.mode === "stopped") {
+      bar.style.setProperty("--card-progress", "0%");
+    } else {
+      const pct = Math.max(0, Math.min(100, Math.round(Number(data.percent || 0) * 100)));
+      bar.style.setProperty("--card-progress", String(pct) + "%");
+    }
+
+    const label = document.createElement("span");
+    label.className = "card-progress-label";
+    label.textContent = data.label || "";
+
+    row.appendChild(bar);
+    row.appendChild(label);
+    return row;
+  }
+
+  function buildSessionMeta(session, mode) {
     const checkpointCount = Array.isArray(session.playback && session.playback.checkpoints)
       ? session.playback.checkpoints.length
       : 0;
     const when = formatSavedAt(session.savedAt);
+    if (mode === "loading") {
+      return "Opening...  |  checkpoints: " + String(checkpointCount);
+    }
     return when + "  |  checkpoints: " + String(checkpointCount);
   }
 
@@ -221,46 +863,83 @@
   }
 
   async function openPersistedSession(sessionId) {
-    if (state.isPersisting) {
+    if (state.isPersisting || state.loadingSessionId) {
       return;
     }
+    state.loadingSessionId = sessionId;
+    state.openMenuSessionId = null;
+    debugLog("openPersistedSession:start", { sessionId });
+    renderAudioCards(state.sessionsCache);
 
-    const response = await fetch("/api/session?id=" + encodeURIComponent(sessionId), {
-      method: "GET",
-      cache: "no-store"
-    });
+    try {
+      showPlayerView();
+      setPlayerLoading(true, "Restoring checkpoints and subSegs...");
 
-    if (!response.ok) {
-      throw new Error("session_load_failed");
+      const response = await fetch("/api/session?id=" + encodeURIComponent(sessionId), {
+        method: "GET",
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        throw new Error("session_load_failed");
+      }
+
+      const saved = await response.json();
+      if (!saved || typeof saved !== "object") {
+        throw new Error("session_payload_invalid");
+      }
+
+      await applySavedSession(saved);
+      state.activeSessionId = saved.id || sessionId;
+      state.activeAudioId = typeof saved.audioId === "string" ? saved.audioId : null;
+      state.activeAudioUrl = typeof saved.audioUrl === "string" ? saved.audioUrl : null;
+      debugLog("openPersistedSession:loaded", {
+        sessionId: state.activeSessionId,
+        audioId: state.activeAudioId,
+        audioUrl: state.activeAudioUrl,
+        checkpoints: Array.isArray(saved.playback && saved.playback.checkpoints) ? saved.playback.checkpoints.length : 0
+      });
+      setPlayerLoading(false);
+      focusProgressControl();
+    } finally {
+      setPlayerLoading(false);
+      state.loadingSessionId = null;
+      renderAudioCards(state.sessionsCache);
     }
-
-    const saved = await response.json();
-    if (!saved || !saved.audioBase64) {
-      throw new Error("session_payload_invalid");
-    }
-
-    applySavedSession(saved);
-    state.activeSessionId = saved.id || sessionId;
-    showPlayerView();
   }
 
   function resetPlaybackState() {
+    clearCheckpointDragState();
     state.checkpoints = [];
+    state.subSegs = [];
     state.selectedSpanIndex = -1;
+    clearTargetSpanLock({ preserveSelection: false });
+    state.shiftHoldTss = null;
     state.markerSignature = "";
+    state.subSegSignature = "";
+    state.targetMarkerSignature = "";
   }
 
   function dropCheckpoint() {
+    if (hasTargetSpan()) {
+      setSaveStatus("audSeg target mode: checkpoint set disabled");
+      return;
+    }
     const seconds = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+    debugLog("dropCheckpoint:before", { seconds, checkpoints: state.checkpoints.slice() });
     state.checkpoints.push(seconds);
     state.checkpoints.sort(function (a, b) { return a - b; });
     state.selectedSpanIndex = -1;
     state.markerSignature = "";
     updateUi();
     enqueueAutoSave();
+    debugLog("dropCheckpoint:after", { checkpoints: state.checkpoints.slice() });
   }
 
   function cycleSpanSelection(step) {
+    if (hasTargetSpan()) {
+      return;
+    }
     const allCheckpoints = getCheckpointSeries();
     const spanCount = allCheckpoints.length - 1;
     if (spanCount <= 0) {
@@ -273,19 +952,130 @@
       state.selectedSpanIndex = (state.selectedSpanIndex + step + spanCount) % spanCount;
     }
 
-    audio.currentTime = allCheckpoints[state.selectedSpanIndex];
+    snapToSelectedSpanStart();
     updateUi();
+  }
+
+  function snapToSelectedSpanStart() {
+    const range = getSpanBoundsByIndex(state.selectedSpanIndex);
+    if (!range) {
+      return;
+    }
+    const spanLength = range.end - range.start;
+    if (!Number.isFinite(spanLength) || spanLength <= 0) {
+      return;
+    }
+
+    const epsilon = Math.min(0.02, Math.max(0.003, spanLength / 20));
+    const target = Math.min(range.end - 0.001, range.start + epsilon);
+    audio.currentTime = target;
+
+    window.setTimeout(function () {
+      const verifyRange = getSpanBoundsByIndex(state.selectedSpanIndex);
+      if (!verifyRange) {
+        return;
+      }
+      const current = Number.isFinite(audio.currentTime) ? audio.currentTime : target;
+      if (current >= verifyRange.end || current < (verifyRange.start - 0.01)) {
+        audio.currentTime = Math.min(verifyRange.end - 0.001, verifyRange.start + epsilon);
+        updateUi();
+      }
+    }, 50);
+  }
+
+  function createTargetSubSegFromShiftHold() {
+    if (!hasTargetSpan()) {
+      return;
+    }
+    const tss = Number.isFinite(state.shiftHoldTss)
+      ? state.shiftHoldTss
+      : (Number.isFinite(audio.currentTime) ? audio.currentTime : 0);
+    if (!Number.isFinite(state.shiftHoldTss)) {
+      state.shiftHoldTss = tss;
+      debugLog("target:shiftHoldStart:auto", { tss });
+    }
+
+    const tse = Number.isFinite(audio.currentTime) ? audio.currentTime : tss;
+    const bounds = getTargetSpanBounds();
+    if (!bounds) {
+      return;
+    }
+
+    const start = Math.max(bounds.start, Math.min(bounds.end, Math.min(tss, tse)));
+    const end = Math.max(bounds.start, Math.min(bounds.end, Math.max(tss, tse)));
+    if (!Number.isFinite(start) || !Number.isFinite(end) || (end - start) <= 0.03) {
+      setSaveStatus("audSeg subSeg ignored (too short)");
+      return;
+    }
+
+    const created = { start, end };
+    state.subSegs.push(created);
+    state.subSegs = normalizeSubSegs(state.subSegs);
+    syncTargetSubSegsFromCurrentBounds();
+    state.subSegSignature = "";
+    state.markerSignature = "";
+    state.targetMarkerSignature = "";
+    audio.currentTime = start;
+    updateUi();
+    debugLog("target:subSegCreated", {
+      tss,
+      tse,
+      start,
+      end,
+      count: state.subSegs.length,
+      selectedTargetSubSegIndex: state.selectedTargetSubSegIndex
+    });
+    setSaveStatus("audSeg subSeg created: " + formatTime(start) + " -> " + formatTime(end));
+    enqueueAutoSave();
+  }
+
+  function cycleTargetSubSegSelection(step) {
+    if (!hasTargetSpan()) {
+      return;
+    }
+    syncTargetSubSegsFromCurrentBounds();
+    const total = state.targetSubSegs.length;
+    if (total <= 0) {
+      setSaveStatus("No audSeg subSegs yet (Shift hold, then Shift+Space)");
+      return;
+    }
+    if (state.selectedTargetSubSegIndex < 0 || state.selectedTargetSubSegIndex >= total) {
+      state.selectedTargetSubSegIndex = step > 0 ? 0 : total - 1;
+    } else {
+      state.selectedTargetSubSegIndex = (state.selectedTargetSubSegIndex + step + total) % total;
+    }
+    const selected = state.targetSubSegs[state.selectedTargetSubSegIndex];
+    if (selected) {
+      audio.currentTime = selected.start;
+      setSaveStatus(
+        "audSeg subSeg " + String(state.selectedTargetSubSegIndex + 1) + "/" + String(total) +
+        ": " + formatTime(selected.start) + " -> " + formatTime(selected.end)
+      );
+    }
+    updateUi();
+    debugLog("target:cycleSubSeg", {
+      step,
+      selectedTargetSubSegIndex: state.selectedTargetSubSegIndex,
+      total
+    });
   }
 
   function seekBy(deltaSeconds) {
     const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
     const current = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
-    const allCheckpoints = getCheckpointSeries();
-    const spanCount = allCheckpoints.length - 1;
+    const activeRange = getActiveLoopRange();
+    debugLog("seekBy:start", {
+      deltaSeconds,
+      current,
+      duration,
+      selectedSpanIndex: state.selectedSpanIndex,
+      targetSpanIndex: state.targetSpanIndex,
+      activeRange
+    });
 
-    if (state.selectedSpanIndex >= 0 && state.selectedSpanIndex < spanCount) {
-      const spanStart = allCheckpoints[state.selectedSpanIndex];
-      const spanEnd = allCheckpoints[state.selectedSpanIndex + 1];
+    if (activeRange) {
+      const spanStart = activeRange.start;
+      const spanEnd = activeRange.end;
       const spanLength = spanEnd - spanStart;
 
       if (spanLength > 0) {
@@ -299,6 +1089,12 @@
     }
 
     updateUi();
+    debugLog("seekBy:end", {
+      deltaSeconds,
+      nextCurrent: Number.isFinite(audio.currentTime) ? audio.currentTime : null,
+      selectedSpanIndex: state.selectedSpanIndex,
+      targetSpanIndex: state.targetSpanIndex
+    });
   }
 
   function updateUi() {
@@ -314,8 +1110,15 @@
     playhead.style.left = String(percent) + "%";
     playheadTime.textContent = formatTime(current);
 
+    renderMainSubSegOverlays();
     renderCheckpointMarkers();
     renderSelectedSpanOverlay();
+    renderTargetProgress();
+
+    if (isPlayerActive() && duration > 0 && !state.hasAutoFocusedProgress) {
+      state.hasAutoFocusedProgress = true;
+      focusProgressControl();
+    }
   }
 
   function clampCurrentTimeWithinSelectedSpan(ctx) {
@@ -323,14 +1126,21 @@
     const { duration } = data;
     let current = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
 
-    const allCheckpoints = getCheckpointSeries();
-    const spanCount = allCheckpoints.length - 1;
-    if (state.selectedSpanIndex >= 0 && state.selectedSpanIndex < spanCount) {
-      const spanStart = allCheckpoints[state.selectedSpanIndex];
-      const spanEnd = allCheckpoints[state.selectedSpanIndex + 1];
+    const activeRange = getActiveLoopRange();
+    if (activeRange) {
+      const spanStart = activeRange.start;
+      const spanEnd = activeRange.end;
       if (spanEnd > spanStart && (current < spanStart || current >= spanEnd)) {
         const epsilon = Math.min(0.02, (spanEnd - spanStart) / 4);
         const loopTime = current < spanStart ? Math.max(spanStart, spanEnd - epsilon) : spanStart;
+        debugLog("clampCurrentTimeWithinSelectedSpan:loopClamp", {
+          before: current,
+          spanStart,
+          spanEnd,
+          loopTime,
+          selectedSpanIndex: state.selectedSpanIndex,
+          targetSpanIndex: state.targetSpanIndex
+        });
         audio.currentTime = loopTime;
         current = loopTime;
       }
@@ -345,8 +1155,14 @@
 
   function renderCheckpointMarkers() {
     const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
-    const series = getCheckpointSeries();
-    const signature = duration.toFixed(3) + "|" + series.map(function (v) { return v.toFixed(3); }).join(",");
+    const targetSig = hasTargetSpan()
+      ? String(state.targetStart.toFixed(3)) + "-" + String(state.targetEnd.toFixed(3))
+      : "none";
+    const signature = duration.toFixed(3) +
+      "|" + state.checkpoints.map(function (v) { return v.toFixed(3); }).join(",") +
+      "|" + String(Boolean(state.checkpointDrag)) +
+      "|" + String(state.selectedSpanIndex) +
+      "|" + targetSig;
 
     if (signature === state.markerSignature) {
       return;
@@ -359,18 +1175,118 @@
       return;
     }
 
-    series.forEach(function (seconds) {
+    const selectedRange = hasTargetSpan() ? getTargetSpanBounds() : getSpanBoundsByIndex(state.selectedSpanIndex);
+    const hasLockedTarget = hasTargetSpan();
+    function classifyBoundary(seconds) {
+      if (!selectedRange) {
+        return "";
+      }
+      if (Math.abs(seconds - selectedRange.start) <= 0.01) {
+        return "start";
+      }
+      if (Math.abs(seconds - selectedRange.end) <= 0.01) {
+        return "end";
+      }
+      return "";
+    }
+
+    [0, duration].forEach(function (seconds) {
       const marker = document.createElement("span");
       marker.className = "checkpoint-marker";
       const percent = Math.max(0, Math.min(100, (seconds / duration) * 100));
       marker.style.left = String(percent) + "%";
+      const boundaryRole = classifyBoundary(seconds);
+      if (boundaryRole) {
+        marker.classList.add("is-cycle-target-" + boundaryRole);
+      }
 
       const tag = document.createElement("span");
       tag.className = "checkpoint-tag";
+      if (boundaryRole) {
+        tag.classList.add("cycle-target-tag", "cycle-target-tag-" + boundaryRole);
+        if (hasLockedTarget && boundaryRole === "start") {
+          tag.classList.add("checkpoint-tag-target-start");
+        }
+      }
       tag.textContent = formatTime(seconds);
       marker.appendChild(tag);
 
       checkpointMarkers.appendChild(marker);
+    });
+
+    const dragEnabled = !hasTargetSpan();
+    state.checkpoints.forEach(function (seconds, checkpointIndex) {
+      const marker = document.createElement("span");
+      marker.className = "checkpoint-marker" + (dragEnabled ? " is-draggable" : "");
+      if (state.checkpointDrag && state.checkpointDrag.index === checkpointIndex) {
+        marker.classList.add("is-dragging");
+      }
+      const boundaryRole = classifyBoundary(seconds);
+      if (boundaryRole) {
+        marker.classList.add("is-cycle-target-" + boundaryRole);
+      }
+      const percent = Math.max(0, Math.min(100, (seconds / duration) * 100));
+      marker.style.left = String(percent) + "%";
+      marker.dataset.checkpointIndex = String(checkpointIndex);
+      if (dragEnabled) {
+        marker.addEventListener("mousedown", function (event) {
+          beginCheckpointDrag(event, checkpointIndex);
+        });
+      }
+
+      const tag = document.createElement("span");
+      tag.className = "checkpoint-tag";
+      if (boundaryRole) {
+        tag.classList.add("cycle-target-tag", "cycle-target-tag-" + boundaryRole);
+        if (hasLockedTarget && boundaryRole === "start") {
+          tag.classList.add("checkpoint-tag-target-start");
+        }
+      }
+      tag.textContent = formatTime(seconds);
+      if (dragEnabled) {
+        tag.addEventListener("mousedown", function (event) {
+          beginCheckpointDrag(event, checkpointIndex);
+        });
+      }
+      marker.appendChild(tag);
+
+      checkpointMarkers.appendChild(marker);
+    });
+  }
+
+  function renderMainSubSegOverlays() {
+    if (!subSegOverlays) {
+      return;
+    }
+    const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+    const sig = duration.toFixed(3) + "|" + state.subSegs.map(function (seg, idx) {
+      return String(idx) + ":" + seg.start.toFixed(3) + "-" + seg.end.toFixed(3);
+    }).join(",");
+
+    if (sig === state.subSegSignature) {
+      return;
+    }
+    state.subSegSignature = sig;
+    subSegOverlays.innerHTML = "";
+
+    if (duration <= 0) {
+      return;
+    }
+
+    state.subSegs.forEach(function (seg) {
+      const start = Math.max(0, Math.min(duration, seg.start));
+      const end = Math.max(0, Math.min(duration, seg.end));
+      if (end <= start) {
+        return;
+      }
+      const startPct = Math.max(0, Math.min(100, (start / duration) * 100));
+      const endPct = Math.max(0, Math.min(100, (end / duration) * 100));
+      const widthPct = Math.max(0.3, endPct - startPct);
+      const span = document.createElement("span");
+      span.className = "subseg-main-span";
+      span.style.left = String(startPct) + "%";
+      span.style.width = String(widthPct) + "%";
+      subSegOverlays.appendChild(span);
     });
   }
 
@@ -393,11 +1309,125 @@
     selectedSpanOverlay.style.width = String(Math.max(0, endPercent - startPercent)) + "%";
   }
 
+  function renderTargetProgress() {
+    if (!targetProgressWrap) {
+      return;
+    }
+    const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+    const target = getTargetSpanBounds();
+    if (!target || duration <= 0) {
+      targetProgressWrap.classList.add("hidden");
+      targetSpanOverlay.style.display = "none";
+      if (targetSubSegActiveFill) {
+        targetSubSegActiveFill.style.display = "none";
+      }
+      return;
+    }
+
+    targetProgressWrap.classList.remove("hidden");
+
+    const current = Math.max(target.start, Math.min(target.end, Number.isFinite(audio.currentTime) ? audio.currentTime : target.start));
+    const spanLength = Math.max(0, target.end - target.start);
+    const spanPercent = spanLength > 0 ? Math.max(0, Math.min(100, ((current - target.start) / spanLength) * 100)) : 0;
+
+    const selectedSubSeg = getTargetSubSegBoundsByIndex(state.selectedTargetSubSegIndex);
+    const hasSelectedSubSeg = Boolean(selectedSubSeg && spanLength > 0);
+    if (hasSelectedSubSeg) {
+      targetProgress.value = 0;
+      targetProgress.style.setProperty("--progress-pct", "0%");
+    } else {
+      targetProgress.value = Math.min(1000, Math.max(0, Math.round((spanPercent / 100) * 1000)));
+      targetProgress.style.setProperty("--progress-pct", String(spanPercent) + "%");
+    }
+    targetPlayhead.style.left = String(spanPercent) + "%";
+    targetPlayheadTime.textContent = formatTime(current);
+
+    if (hasSelectedSubSeg && targetSubSegActiveFill) {
+      const subSegStartPct = Math.max(0, Math.min(100, ((selectedSubSeg.start - target.start) / spanLength) * 100));
+      const subSegCurrent = Math.max(selectedSubSeg.start, Math.min(selectedSubSeg.end, current));
+      const subSegCurrentPct = Math.max(0, Math.min(100, ((subSegCurrent - target.start) / spanLength) * 100));
+      const fillWidthPct = Math.max(0, subSegCurrentPct - subSegStartPct);
+      targetSubSegActiveFill.style.display = "block";
+      targetSubSegActiveFill.style.left = String(subSegStartPct) + "%";
+      targetSubSegActiveFill.style.width = String(fillWidthPct) + "%";
+    } else if (targetSubSegActiveFill) {
+      targetSubSegActiveFill.style.display = "none";
+    }
+
+    targetSpanOverlay.style.display = "block";
+    targetSpanOverlay.style.left = "0%";
+    targetSpanOverlay.style.width = "100%";
+    renderTargetMarkers(target);
+  }
+
+  function renderTargetMarkers(target) {
+    const subSegSig = state.targetSubSegs.map(function (seg, idx) {
+      return String(idx) + ":" + seg.start.toFixed(3) + "-" + seg.end.toFixed(3);
+    }).join(",");
+    const signature = [target.start, target.end, state.selectedTargetSubSegIndex, subSegSig]
+      .map(function (v) { return String(v); })
+      .join("|");
+    if (state.targetMarkerSignature === signature) {
+      return;
+    }
+    state.targetMarkerSignature = signature;
+    targetCheckpointMarkers.innerHTML = "";
+
+    [target.start, target.end].forEach(function (seconds, idx) {
+      const marker = document.createElement("span");
+      marker.className = "checkpoint-marker";
+      marker.style.left = idx === 0 ? "0%" : "100%";
+
+      const tag = document.createElement("span");
+      tag.className = "checkpoint-tag";
+      tag.textContent = formatTime(seconds);
+      marker.appendChild(tag);
+
+      targetCheckpointMarkers.appendChild(marker);
+    });
+
+    const spanLength = Math.max(0, target.end - target.start);
+    if (spanLength <= 0) {
+      return;
+    }
+    state.targetSubSegs.forEach(function (seg, idx) {
+      const startPct = Math.max(0, Math.min(100, ((seg.start - target.start) / spanLength) * 100));
+      const endPct = Math.max(0, Math.min(100, ((seg.end - target.start) / spanLength) * 100));
+      const widthPct = Math.max(0.8, endPct - startPct);
+
+      const span = document.createElement("span");
+      span.className = "target-subseg-span" + (idx === state.selectedTargetSubSegIndex ? " selected" : "");
+      span.style.left = String(startPct) + "%";
+      span.style.width = String(widthPct) + "%";
+
+      const tag = document.createElement("span");
+      tag.className = "checkpoint-tag target-subseg-tag";
+      tag.textContent = formatCompactedRange(seg.start, seg.end);
+      span.appendChild(tag);
+
+      targetCheckpointMarkers.appendChild(span);
+    });
+  }
+
   function formatTime(totalSeconds) {
     const safe = Math.max(0, Math.floor(totalSeconds));
     const minutes = Math.floor(safe / 60);
     const seconds = safe % 60;
     return String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+  }
+
+  function formatCompactedRange(startSeconds, endSeconds) {
+    const safeStart = Math.max(0, Math.floor(startSeconds));
+    const safeEnd = Math.max(0, Math.floor(endSeconds));
+    const startMinutes = Math.floor(safeStart / 60);
+    const startRemainder = safeStart % 60;
+    const endMinutes = Math.floor(safeEnd / 60);
+    const endRemainder = safeEnd % 60;
+    const startLabel = String(startMinutes).padStart(2, "0") + ":" + String(startRemainder).padStart(2, "0");
+    if (startMinutes === endMinutes) {
+      return startLabel + "-" + String(endRemainder);
+    }
+    return startLabel + "-" + String(endMinutes).padStart(2, "0") + ":" + String(endRemainder).padStart(2, "0");
   }
 
   function getCheckpointSeries() {
@@ -416,6 +1446,162 @@
     return deduped;
   }
 
+  function normalizeSubSegs(subSegs) {
+    const list = Array.isArray(subSegs) ? subSegs : [];
+    const normalized = [];
+    list.forEach(function (seg) {
+      const start = Number(seg && seg.start);
+      const end = Number(seg && seg.end);
+      if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+        return;
+      }
+      const clampedStart = Math.max(0, start);
+      const clampedEnd = Math.max(0, end);
+      if ((clampedEnd - clampedStart) <= 0.03) {
+        return;
+      }
+      normalized.push({ start: clampedStart, end: clampedEnd });
+    });
+    normalized.sort(function (a, b) {
+      if (Math.abs(a.start - b.start) > 0.01) {
+        return a.start - b.start;
+      }
+      return a.end - b.end;
+    });
+    return normalized;
+  }
+
+  function getSubSegsForBounds(bounds) {
+    if (!bounds) {
+      return [];
+    }
+    return state.subSegs.filter(function (seg) {
+      return seg.start >= bounds.start - 0.01 && seg.end <= bounds.end + 0.01;
+    });
+  }
+
+  function syncTargetSubSegsFromCurrentBounds(ctx) {
+    const data = ctx || {};
+    const selectedStart = Number(data.selectedStart);
+    const selectedEnd = Number(data.selectedEnd);
+    const bounds = getTargetSpanBounds();
+    state.targetSubSegs = getSubSegsForBounds(bounds);
+    if (!state.targetSubSegs.length) {
+      state.selectedTargetSubSegIndex = -1;
+      return;
+    }
+
+    if (Number.isFinite(selectedStart) && Number.isFinite(selectedEnd)) {
+      const idx = state.targetSubSegs.findIndex(function (seg) {
+        return Math.abs(seg.start - selectedStart) <= 0.01 && Math.abs(seg.end - selectedEnd) <= 0.01;
+      });
+      if (idx >= 0) {
+        state.selectedTargetSubSegIndex = idx;
+        return;
+      }
+    }
+
+    if (state.selectedTargetSubSegIndex < 0 || state.selectedTargetSubSegIndex >= state.targetSubSegs.length) {
+      state.selectedTargetSubSegIndex = -1;
+    }
+  }
+
+  function getSpanBoundsByIndex(index) {
+    const allCheckpoints = getCheckpointSeries();
+    const spanCount = allCheckpoints.length - 1;
+    if (index < 0 || index >= spanCount) {
+      return null;
+    }
+    const start = allCheckpoints[index];
+    const end = allCheckpoints[index + 1];
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+      return null;
+    }
+    return { start, end, index };
+  }
+
+  function hasTargetSpan() {
+    return Number.isFinite(state.targetStart) && Number.isFinite(state.targetEnd) && state.targetEnd > state.targetStart;
+  }
+
+  function getTargetSpanBounds() {
+    if (!hasTargetSpan()) {
+      return null;
+    }
+    return {
+      start: state.targetStart,
+      end: state.targetEnd,
+      index: Number.isFinite(state.targetSpanIndex) ? state.targetSpanIndex : -1
+    };
+  }
+
+  function getTargetSubSegBoundsByIndex(index) {
+    if (index < 0 || index >= state.targetSubSegs.length) {
+      return null;
+    }
+    const seg = state.targetSubSegs[index];
+    if (!seg || !Number.isFinite(seg.start) || !Number.isFinite(seg.end) || seg.end <= seg.start) {
+      return null;
+    }
+    return { start: seg.start, end: seg.end, index };
+  }
+
+  function getActiveLoopRange() {
+    if (state.checkpointDrag) {
+      return null;
+    }
+    const subSeg = getTargetSubSegBoundsByIndex(state.selectedTargetSubSegIndex);
+    if (subSeg) {
+      return subSeg;
+    }
+    const target = getTargetSpanBounds();
+    if (target) {
+      return target;
+    }
+    return getSpanBoundsByIndex(state.selectedSpanIndex);
+  }
+
+  function clearTargetSpanLock(ctx) {
+    const data = ctx || {};
+    const preserveSelection = Boolean(data.preserveSelection);
+    const priorIndex = Number.isFinite(state.targetSpanIndex) ? state.targetSpanIndex : -1;
+    state.targetSpanIndex = -1;
+    state.targetStart = null;
+    state.targetEnd = null;
+    state.targetSubSegs = [];
+    state.selectedTargetSubSegIndex = -1;
+    state.shiftHoldTss = null;
+    state.targetMarkerSignature = "";
+    if (preserveSelection && priorIndex >= 0) {
+      state.selectedSpanIndex = priorIndex;
+    }
+    debugLog("target:cleared", { preserveSelection, priorIndex, selectedSpanIndex: state.selectedSpanIndex });
+  }
+
+  function lockSelectedSpanAsTarget() {
+    const span = getSpanBoundsByIndex(state.selectedSpanIndex);
+    if (!span) {
+      setSaveStatus("Select an audSeg first (Ctrl+Left/Right)");
+      return;
+    }
+    if (!audio.paused) {
+      audio.pause();
+    }
+    state.targetSpanIndex = span.index;
+    state.targetStart = span.start;
+    state.targetEnd = span.end;
+    state.shiftHoldTss = null;
+    syncTargetSubSegsFromCurrentBounds();
+    state.selectedTargetSubSegIndex = -1;
+    state.targetMarkerSignature = "";
+    const spanLength = span.end - span.start;
+    const epsilon = Math.min(0.02, Math.max(0.003, spanLength / 20));
+    audio.currentTime = Math.min(span.end - 0.001, span.start + epsilon);
+    updateUi();
+    debugLog("target:locked", { index: span.index, start: span.start, end: span.end });
+    setSaveStatus("audSeg target locked (playback reset to start)");
+  }
+
   function enqueueAutoSave() {
     if (!state.currentFile || !audio.src) {
       return state.saveQueue;
@@ -424,6 +1610,7 @@
     state.isPersisting = true;
     setSaveStatus("Saving...");
     refreshCardInteractivity();
+    renderAudioCards(state.sessionsCache);
     state.saveQueue = state.saveQueue
       .then(function () {
         return saveSessionState();
@@ -432,11 +1619,16 @@
         state.isPersisting = false;
         setSaveStatus("Saved");
         refreshCardInteractivity();
+        renderAudioCards(state.sessionsCache);
       })
       .catch(function (error) {
         state.isPersisting = false;
+        if (state.pendingUpload) {
+          state.pendingUpload.phase = "failed";
+        }
         setSaveStatus("Save failed: " + normalizeErrorMessage(error), true);
         refreshCardInteractivity();
+        renderAudioCards(state.sessionsCache);
       });
 
     return state.saveQueue;
@@ -445,9 +1637,45 @@
   function refreshCardInteractivity() {
     const cardButtons = cards.querySelectorAll(".audio-card");
     cardButtons.forEach(function (button) {
-      button.disabled = state.isPersisting;
+      if (button.tagName === "BUTTON") {
+        button.disabled = state.isPersisting;
+      }
       button.classList.toggle("is-disabled", state.isPersisting);
     });
+  }
+
+  async function deleteSession(sessionId) {
+    if (!sessionId || state.isPersisting || state.loadingSessionId) {
+      return;
+    }
+
+    state.loadingSessionId = sessionId;
+    state.openMenuSessionId = null;
+    renderAudioCards(state.sessionsCache);
+
+    try {
+      const response = await fetch("/api/session?id=" + encodeURIComponent(sessionId), {
+        method: "DELETE"
+      });
+      if (!response.ok) {
+        const detail = await response.text().catch(function () { return ""; });
+        throw new Error("session_delete_failed status=" + String(response.status) + " detail=" + detail);
+      }
+
+      if (state.activeSessionId === sessionId) {
+        state.activeSessionId = null;
+        state.activeAudioId = null;
+        state.activeAudioUrl = null;
+      }
+
+      setSaveStatus("Deleted");
+      await loadPersistedAudioCards();
+    } catch (error) {
+      setSaveStatus("Delete failed: " + normalizeErrorMessage(error), true);
+    } finally {
+      state.loadingSessionId = null;
+      renderAudioCards(state.sessionsCache);
+    }
   }
 
   function setSaveStatus(text, isError) {
@@ -455,15 +1683,61 @@
     saveStatus.classList.toggle("error", Boolean(isError));
   }
 
+  function setLoginStatus(text, isError) {
+    if (!loginStatus) {
+      return;
+    }
+    loginStatus.textContent = text;
+    loginStatus.classList.toggle("error", Boolean(isError));
+  }
+
   function normalizeErrorMessage(error) {
     const raw = String(error && error.message ? error.message : error || "unknown_error");
     return raw.length > 180 ? raw.slice(0, 180) + "..." : raw;
+  }
+
+  function persistLogin(record) {
+    try {
+      const safe = {
+        username: String(record.username || "").toLowerCase(),
+        loggedInAt: Number(record.loggedInAt || Date.now()),
+        ttlMs: Number(record.ttlMs || LOGIN_TTL_MS)
+      };
+      window.localStorage.setItem(LOGIN_STORAGE_KEY, JSON.stringify(safe));
+    } catch {
+      // Ignore storage failures.
+    }
+  }
+
+  function restoreLoginFromStorage() {
+    try {
+      const raw = window.localStorage.getItem(LOGIN_STORAGE_KEY);
+      if (!raw) {
+        return null;
+      }
+      const parsed = JSON.parse(raw);
+      const username = String(parsed && parsed.username ? parsed.username : "").toLowerCase();
+      const loggedInAt = Number(parsed && parsed.loggedInAt);
+      const ttlMs = Number(parsed && parsed.ttlMs ? parsed.ttlMs : LOGIN_TTL_MS);
+      if (ALLOWED_USERS.indexOf(username) < 0 || !Number.isFinite(loggedInAt) || !Number.isFinite(ttlMs) || ttlMs <= 0) {
+        return null;
+      }
+      if ((Date.now() - loggedInAt) > ttlMs) {
+        window.localStorage.removeItem(LOGIN_STORAGE_KEY);
+        return null;
+      }
+      return { username, loggedInAt, ttlMs };
+    } catch {
+      return null;
+    }
   }
 
   async function saveSessionState() {
     if (!audio.src || !state.currentFile) {
       return;
     }
+
+    const uploadedAudio = await ensureAudioUploaded();
 
     const payload = {
       sessionId: state.activeSessionId,
@@ -475,11 +1749,14 @@
       },
       playback: {
         checkpoints: state.checkpoints.slice(),
-        selectedSpanIndex: state.selectedSpanIndex,
+        subSegs: state.subSegs.map(function (seg) {
+          return { start: seg.start, end: seg.end };
+        }),
+        selectedSpanIndex: -1,
         currentTime: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
         wasPlaying: !audio.paused
       },
-      audioBase64: await blobToBase64({ data: { blob: state.currentFile }, deps: {} })
+      audioId: uploadedAudio.id
     };
 
     const response = await fetch("/api/session", {
@@ -499,38 +1776,77 @@
     if (saved && saved.id) {
       state.activeSessionId = saved.id;
     }
+    if (uploadedAudio && uploadedAudio.id) {
+      state.activeAudioId = uploadedAudio.id;
+      state.activeAudioUrl = uploadedAudio.url || null;
+    }
+    state.pendingUpload = null;
 
     await loadPersistedAudioCards();
   }
 
-  function applySavedSession(saved) {
+  async function applySavedSession(saved) {
     const savedFile = saved.file || {};
     const savedPlayback = saved.playback || {};
-    const blobType = savedFile.type || "audio/*";
-    const audioBlob = base64ToBlob({ data: { base64: saved.audioBase64, mimeType: blobType }, deps: {} });
-
-    setAudioSource({ data: { file: audioBlob, displayName: savedFile.name || "Restored audio" }, deps: {} });
-
-    state.currentFile = new File([audioBlob], savedFile.name || "restored-audio", {
-      type: blobType,
-      lastModified: savedFile.lastModified || Date.now()
+    debugLog("applySavedSession:start", {
+      id: saved && saved.id,
+      audioId: saved && saved.audioId,
+      hasAudioUrl: Boolean(saved && saved.audioUrl),
+      hasAudioBase64: Boolean(saved && saved.audioBase64),
+      savedCurrentTime: savedPlayback.currentTime,
+      savedSelectedSpanIndex: savedPlayback.selectedSpanIndex
     });
+    if (saved && typeof saved.audioId === "string" && saved.audioId) {
+      setAudioSourceFromRemoteUrl({
+        data: {
+          url: "/api/audio?id=" + encodeURIComponent(saved.audioId),
+          displayName: savedFile.name || "Restored audio",
+          fileMeta: savedFile
+        },
+        deps: {}
+      });
+    } else if (saved && typeof saved.audioUrl === "string" && saved.audioUrl) {
+      setAudioSourceFromRemoteUrl({
+        data: {
+          url: saved.audioUrl,
+          displayName: savedFile.name || "Restored audio",
+          fileMeta: savedFile
+        },
+        deps: {}
+      });
+    } else {
+      const audioBlob = await fetchSavedAudioBlob(saved);
+      const blobType = savedFile.type || audioBlob.type || "audio/*";
+
+      setAudioSource({ data: { file: audioBlob, displayName: savedFile.name || "Restored audio" }, deps: {} });
+
+      state.currentFile = new File([audioBlob], savedFile.name || "restored-audio", {
+        type: blobType,
+        lastModified: savedFile.lastModified || Date.now()
+      });
+    }
 
     state.checkpoints = Array.isArray(savedPlayback.checkpoints)
       ? savedPlayback.checkpoints.filter(function (v) { return Number.isFinite(v) && v >= 0; }).sort(function (a, b) { return a - b; })
       : [];
+    state.subSegs = normalizeSubSegs(savedPlayback.subSegs);
 
-    state.selectedSpanIndex = Number.isInteger(savedPlayback.selectedSpanIndex) ? savedPlayback.selectedSpanIndex : -1;
+    state.selectedSpanIndex = -1;
+    clearTargetSpanLock({ preserveSelection: false });
     state.markerSignature = "";
+    state.subSegSignature = "";
+    state.targetMarkerSignature = "";
 
     const resumeTime = Number.isFinite(savedPlayback.currentTime) ? savedPlayback.currentTime : 0;
-
-    audio.addEventListener("loadedmetadata", function handleRestoreMetadata() {
-      const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
-      audio.currentTime = Math.max(0, Math.min(duration || resumeTime, resumeTime));
-      updateUi();
-    }, { once: true });
-
+    await waitForAudioReady();
+    const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+    const current = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+    const safeResume = Math.max(0, Math.min(duration || resumeTime, resumeTime));
+    debugLog("applySavedSession:loadedmetadata", { duration, current, safeResume });
+    if (safeResume > 0.05 && current <= 0.05) {
+      audio.currentTime = safeResume;
+      debugLog("applySavedSession:resumeApplied", { safeResume });
+    }
     updateUi();
   }
 
@@ -544,10 +1860,69 @@
       ? file
       : new File([file], String(displayName || "audio.bin"), { type: file.type || "application/octet-stream", lastModified: Date.now() });
 
-    state.objectUrl = URL.createObjectURL(file);
+    state.objectUrl = URL.createObjectURL(state.currentFile);
     audio.src = state.objectUrl;
     fileName.textContent = displayName || state.currentFile.name || "";
+    state.hasAutoFocusedProgress = false;
+    clearTargetSpanLock({ preserveSelection: false });
     state.markerSignature = "";
+    state.subSegSignature = "";
+    state.targetMarkerSignature = "";
+  }
+
+  function setAudioSourceFromRemoteUrl(ctx) {
+    const { data } = ctx;
+    const { url, displayName, fileMeta } = data;
+    revokeObjectUrl();
+    state.currentFile = {
+      name: (fileMeta && fileMeta.name) || displayName || "audio",
+      type: (fileMeta && fileMeta.type) || "audio/*",
+      size: (fileMeta && fileMeta.size) || 0,
+      lastModified: (fileMeta && fileMeta.lastModified) || Date.now()
+    };
+    audio.src = String(url || "");
+    debugLog("setAudioSourceFromRemoteUrl", { url: audio.src, file: state.currentFile });
+    fileName.textContent = displayName || state.currentFile.name || "";
+    state.hasAutoFocusedProgress = false;
+    clearTargetSpanLock({ preserveSelection: false });
+    state.markerSignature = "";
+    state.subSegSignature = "";
+    state.targetMarkerSignature = "";
+  }
+
+  function focusProgressControl() {
+    requestAnimationFrame(function () {
+      try {
+        progress.focus({ preventScroll: true });
+      } catch {
+        try {
+          progress.focus();
+        } catch {
+          // Ignore focus failures.
+        }
+      }
+    });
+  }
+
+  function waitForAudioReady() {
+    if (Number.isFinite(audio.duration) && audio.duration > 0) {
+      return Promise.resolve();
+    }
+    return new Promise(function (resolve) {
+      let settled = false;
+      function done() {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        audio.removeEventListener("loadedmetadata", done);
+        audio.removeEventListener("canplay", done);
+        resolve();
+      }
+      audio.addEventListener("loadedmetadata", done, { once: true });
+      audio.addEventListener("canplay", done, { once: true });
+      window.setTimeout(done, 3000);
+    });
   }
 
   function revokeObjectUrl() {
@@ -557,21 +1932,110 @@
     }
   }
 
-  function blobToBase64(ctx) {
+  async function ensureAudioUploaded() {
+    if (state.activeAudioId) {
+      return { id: state.activeAudioId, url: state.activeAudioUrl || ("/api/audio?id=" + encodeURIComponent(state.activeAudioId)) };
+    }
+    if (!state.currentFile) {
+      throw new Error("missing_current_file");
+    }
+
+    setSaveStatus("Uploading audio...");
+
+    const query = new URLSearchParams();
+    query.set("name", state.currentFile.name || "audio.bin");
+    query.set("type", state.currentFile.type || "application/octet-stream");
+    query.set("lastModified", String(state.currentFile.lastModified || Date.now()));
+
+    const payload = await uploadAudioWithProgress({
+      data: {
+        file: state.currentFile,
+        queryString: query.toString()
+      },
+      deps: {}
+    });
+
+    if (!payload || !payload.ok || !payload.audio || !payload.audio.id) {
+      throw new Error("audio_upload_invalid_response");
+    }
+
+    if (state.pendingUpload) {
+      state.pendingUpload.progress = 1;
+      state.pendingUpload.phase = "saving";
+      renderAudioCards(state.sessionsCache);
+    }
+
+    state.activeAudioId = payload.audio.id;
+    state.activeAudioUrl = payload.audio.url || null;
+    return { id: state.activeAudioId, url: state.activeAudioUrl };
+  }
+
+  function uploadAudioWithProgress(ctx) {
     const { data } = ctx;
-    const { blob } = data;
+    const { file, queryString } = data;
 
     return new Promise(function (resolve, reject) {
-      const reader = new FileReader();
-      reader.onload = function () {
-        const result = String(reader.result || "");
-        const marker = "base64,";
-        const idx = result.indexOf(marker);
-        resolve(idx >= 0 ? result.slice(idx + marker.length) : "");
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/api/audio?" + queryString);
+      xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+
+      xhr.upload.onprogress = function (event) {
+        if (!event.lengthComputable || !state.pendingUpload) {
+          return;
+        }
+        state.pendingUpload.progress = event.total > 0 ? event.loaded / event.total : 0;
+        state.pendingUpload.phase = "uploading";
+        renderAudioCards(state.sessionsCache);
       };
-      reader.onerror = function () { reject(reader.error); };
-      reader.readAsDataURL(blob);
+
+      xhr.onerror = function () {
+        reject(new Error("audio_upload_network_error"));
+      };
+
+      xhr.onload = function () {
+        let parsed = {};
+        try {
+          parsed = xhr.responseText ? JSON.parse(xhr.responseText) : {};
+        } catch {
+          parsed = {};
+        }
+        if (xhr.status < 200 || xhr.status >= 300) {
+          reject(new Error("audio_upload_failed status=" + String(xhr.status)));
+          return;
+        }
+        resolve(parsed);
+      };
+
+      xhr.send(file);
     });
+  }
+
+  async function fetchSavedAudioBlob(saved) {
+    const blobType = saved && saved.file && saved.file.type ? saved.file.type : "application/octet-stream";
+    if (saved && typeof saved.audioId === "string" && saved.audioId) {
+      const response = await fetch("/api/audio?id=" + encodeURIComponent(saved.audioId), {
+        method: "GET",
+        cache: "no-store"
+      });
+      if (!response.ok) {
+        throw new Error("audio_fetch_failed");
+      }
+      return response.blob();
+    }
+    if (saved && typeof saved.audioUrl === "string" && saved.audioUrl) {
+      const response = await fetch(saved.audioUrl, {
+        method: "GET",
+        cache: "no-store"
+      });
+      if (!response.ok) {
+        throw new Error("audio_fetch_failed");
+      }
+      return response.blob();
+    }
+    if (saved && typeof saved.audioBase64 === "string" && saved.audioBase64) {
+      return base64ToBlob({ data: { base64: saved.audioBase64, mimeType: blobType }, deps: {} });
+    }
+    throw new Error("session_missing_audio_reference");
   }
 
   function base64ToBlob(ctx) {

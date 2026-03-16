@@ -224,5 +224,10 @@ $GLOBAL_MGMT_DIR = Join-Path $USER_ROOT 'mgmt'
 $SESSIONS_ROOT = Join-Path $USER_ROOT '.codex\sessions'
 ```
 
+## Project Terms (Persistent)
+
+- `audEps`: audio episode/session items shown in the library list (`audio-cards`).
+- `audSegs`: selected checkpoint span segments within a loaded `audEp` (mapped to `selectedSpanIndex` + checkpoint series).
+
 
 

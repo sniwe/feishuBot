@@ -9,6 +9,19 @@
 <body>
   <main class="app">
     <input id="audio-file" type="file" accept="audio/*" hidden />
+    <section id="login-view" class="login-view">
+      <h2 class="login-title">Sign In</h2>
+      <p class="login-copy">Enter username and password to continue.</p>
+      <form id="login-form" class="login-form" novalidate>
+        <label class="login-label" for="login-username">Username</label>
+        <input id="login-username" class="login-input" type="text" autocomplete="username" required />
+        <label class="login-label" for="login-password">Password</label>
+        <input id="login-password" class="login-input" type="password" autocomplete="current-password" required />
+        <button id="login-button" class="login-button" type="submit">Log In</button>
+      </form>
+      <p id="login-status" class="login-status"></p>
+    </section>
+
     <section id="library-view" class="library-view">
       <div class="upload-row">
         <button id="upload-button" class="upload-button" type="button" aria-label="Upload audio" title="Upload audio">Upload</button>
@@ -26,15 +39,39 @@
       </div>
       <section class="player" aria-live="polite">
         <audio id="audio" preload="metadata"></audio>
+        <div id="player-loading" class="player-loading hidden" aria-live="polite">
+          <span class="player-loading-title">Loading audEp...</span>
+          <div class="card-progress">
+            <span class="card-progress-bar is-indeterminate"></span>
+            <span class="card-progress-label">Restoring checkpoints and subSegs</span>
+          </div>
+        </div>
         <p id="file-name" class="file-name"></p>
         <div class="progress-wrap" role="group" aria-label="Playback progress">
-          <div class="progress-track">
+          <div id="progress-track-main" class="progress-track">
             <input id="progress" type="range" min="0" max="1000" value="0" disabled />
             <div id="selected-span-overlay" class="selected-span-overlay" aria-hidden="true"></div>
+            <div id="subseg-overlays" class="subseg-overlays" aria-hidden="true"></div>
             <div id="checkpoint-markers" class="checkpoint-markers" aria-hidden="true"></div>
+            <div id="checkpoint-magnifier" class="checkpoint-magnifier hidden" aria-hidden="true">
+              <span id="checkpoint-magnifier-line" class="checkpoint-magnifier-line"></span>
+              <span id="checkpoint-magnifier-time" class="checkpoint-magnifier-time">00:00</span>
+            </div>
             <div id="playhead" class="playhead" aria-hidden="true">
               <span class="playhead-arrow"></span>
               <span id="playhead-time" class="playhead-time">00:00</span>
+            </div>
+          </div>
+        </div>
+        <div id="target-progress-wrap" class="progress-wrap hidden" role="group" aria-label="Target audSeg progress">
+          <div class="progress-track target-progress-track">
+            <input id="target-progress" type="range" min="0" max="1000" value="0" disabled />
+            <div id="target-span-overlay" class="selected-span-overlay target-span-overlay" aria-hidden="true"></div>
+            <div id="target-subseg-active-fill" class="target-subseg-active-fill" aria-hidden="true"></div>
+            <div id="target-checkpoint-markers" class="checkpoint-markers target-checkpoint-markers" aria-hidden="true"></div>
+            <div id="target-playhead" class="playhead target-playhead" aria-hidden="true">
+              <span class="playhead-arrow"></span>
+              <span id="target-playhead-time" class="playhead-time">00:00</span>
             </div>
           </div>
         </div>

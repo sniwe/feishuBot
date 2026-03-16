@@ -4,16 +4,16 @@
     "name":  "audioTest",
     "summary":  "Toy browser audio checkpoint player with keyboard controls",
     "root":  "C:\\Users\\Qub\\audioTest",
-    "updated":  "2026-03-15T10:27:53.0952677+08:00",
+    "updated":  "2026-03-16T11:19:00.0000000+08:00",
     "nodes":  [
                   {
                       "id":  "control:ui",
                       "type":  "control",
                       "name":  "src/public/index.html",
-                      "summary":  "Two-phase UI with persisted-audio card library, upload trigger, and player with checkpoint overlays and custom playhead",
+                      "summary":  "Two-phase UI with persisted-audio card library, upload trigger, and player with checkpoint/subSeg overlays, load-state indicator, and custom playhead",
                       "features":  [
                                        {
-                                           "summary":  "Render persisted-audio card list with queued auto-save on upload/checkpoint updates, keep uploads in phase one until persistence completes, disable card selection during save, and surface detailed save failure diagnostics",
+                                           "summary":  "Render persisted-audio card list with queued auto-save on upload/checkpoint/subSeg updates, keep uploads in phase one until persistence completes, disable card selection during save, and show a player loading bar while audEp restore completes",
                                            "flow":  [
                                                         "e1"
                                                     ]
@@ -35,10 +35,10 @@
                       "id":  "module:audio-control",
                       "type":  "module",
                       "name":  "src/frontend/app.js",
-                      "summary":  "Refactored audio controller with centralized state/UI updates, session save/restore via backend API, and reduced rerender churn",
+                      "summary":  "Refactored audio controller with centralized state/UI updates, session save/restore via backend API, and audSeg target-lock playback mode",
                       "features":  [
                                        {
-                                           "summary":  "Keyboard controls and looping are preserved while Ctrl+S persists session to backend and startup restores state through GET /api/session",
+                                           "summary":  "Keyboard controls and looping are preserved while Enter can lock a selected audSeg into target mode with a second loop progress bar, Shift hold plus Shift+Space creates subSegs that persist with checkpoints and render on both audEp and target bars, draggable checkpoint markers/tags support micro-adjust with magnifier and 500ms live preview, Ctrl+arrows cycle target-local subSegs, and startup restore waits for full audio metadata load via GET /api/session",
                                            "flow":  [
                                                         "e2",
                                                         "e3",
@@ -154,7 +154,7 @@
                       "kind":  "control",
                       "from":  "module:audio-control",
                       "to":  "module:audio-control",
-                      "note":  "Shift+Space creates checkpoints while Ctrl+arrows cycle spans that become active playback loops"
+                      "note":  "Shift+Space creates checkpoints in normal mode; in target mode Shift hold arms tss and Shift+Space commits subSegs while Ctrl+arrows cycle only target subSegs; checkpoint drag updates audSeg/subSeg membership immediately"
                   },
                   {
                       "id":  "e5",

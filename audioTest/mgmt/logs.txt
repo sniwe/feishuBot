@@ -1,0 +1,49 @@
+app.js:54 [audioTest][2026-03-15T05:49:27.737Z] openPersistedSession:start Object
+app.js:54 [audioTest][2026-03-15T05:49:28.068Z] applySavedSession:start Object
+app.js:54 [audioTest][2026-03-15T05:49:28.068Z] setAudioSourceFromRemoteUrl Object
+app.js:54 [audioTest][2026-03-15T05:49:28.068Z] openPersistedSession:loaded Object
+app.js:54 [audioTest][2026-03-15T05:49:28.837Z] applySavedSession:loadedmetadata Object
+app.js:54 [audioTest][2026-03-15T05:49:28.837Z] applySavedSession:resumeApplied Object
+app.js:54 [audioTest][2026-03-15T05:49:28.837Z] audio.seeking Object
+app.js:54 [audioTest][2026-03-15T05:49:28.847Z] audio.seeked Object
+app.js:54 [audioTest][2026-03-15T05:49:29.779Z] keydown Object
+app.js:54 [audioTest][2026-03-15T05:49:29.780Z] audio.play Object
+app.js:54 [audioTest][2026-03-15T05:49:31.301Z] keydown Object
+app.js:54 [audioTest][2026-03-15T05:49:31.301Z] keydown:seekBy Object
+app.js:54 [audioTest][2026-03-15T05:49:31.301Z] seekBy:start Object
+app.js:54 [audioTest][2026-03-15T05:49:31.301Z] seekBy:end Object
+app.js:54 [audioTest][2026-03-15T05:49:31.302Z] audio.seeking Object
+app.js:54 [audioTest][2026-03-15T05:49:31.302Z] audio.seeked Object
+app.js:54 [audioTest][2026-03-15T05:49:33.663Z] keydown Object
+app.js:54 [audioTest][2026-03-15T05:49:42.665Z] keydown {code: 'ArrowRight', key: 'ArrowRight', ctrl: false, shift: false, isPlayerActive: true, …}
+app.js:54 [audioTest][2026-03-15T05:49:42.670Z] keydown:seekBy {delta: 5}
+app.js:54 [audioTest][2026-03-15T05:49:42.670Z] seekBy:start {deltaSeconds: 5, current: 11.296302, duration: 837.520544, selectedSpanIndex: -1}
+app.js:54 [audioTest][2026-03-15T05:49:42.670Z] seekBy:end {deltaSeconds: 5, nextCurrent: 0, selectedSpanIndex: -1}
+app.js:54 [audioTest][2026-03-15T05:49:42.671Z] audio.seeking {currentTime: 0, duration: 837.520544}
+app.js:54 [audioTest][2026-03-15T05:49:42.672Z] audio.seeked {currentTime: 0, duration: 837.520544}
+app.js:54 [audioTest][2026-03-15T05:49:43.803Z] keydown {code: 'Space', key: ' ', ctrl: false, shift: false, isPlayerActive: true, …}
+app.js:54 [audioTest][2026-03-15T05:49:43.803Z] audio.pause {currentTime: 1.07787, duration: 837.520544}
+app.js:54 [audioTest][2026-03-15T05:50:01.126Z] keydown {code: 'ArrowRight', key: 'ArrowRight', ctrl: false, shift: false, isPlayerActive: true, …}
+app.js:54 [audioTest][2026-03-15T05:50:01.126Z] keydown:seekBy {delta: 5}
+app.js:54 [audioTest][2026-03-15T05:50:01.126Z] seekBy:start {deltaSeconds: 5, current: 1.07787, duration: 837.520544, selectedSpanIndex: -1}
+app.js:54 [audioTest][2026-03-15T05:50:01.126Z] seekBy:end {deltaSeconds: 5, nextCurrent: 0, selectedSpanIndex: -1}
+app.js:54 [audioTest][2026-03-15T05:50:01.128Z] audio.seeking {currentTime: 0, duration: 837.520544}
+app.js:54 [audioTest][2026-03-15T05:50:01.129Z] audio.seeked {currentTime: 0, duration: 837.520544}
+app.js:54 [audioTest][2026-03-15T05:50:01.769Z] keydown {code: 'ArrowRight', key: 'ArrowRight', ctrl: false, shift: false, isPlayerActive: true, …}
+app.js:54 [audioTest][2026-03-15T05:50:01.769Z] keydown:seekBy {delta: 5}
+app.js:54 [audioTest][2026-03-15T05:50:01.769Z] seekBy:start {deltaSeconds: 5, current: 0, duration: 837.520544, selectedSpanIndex: -1}
+app.js:54 [audioTest][2026-03-15T05:50:01.769Z] seekBy:end {deltaSeconds: 5, nextCurrent: 0, selectedSpanIndex: -1}
+app.js:54 [audioTest][2026-03-15T05:50:01.770Z] audio.seeking {currentTime: 0, duration: 837.520544}
+app.js:54 [audioTest][2026-03-15T05:50:01.771Z] audio.seeked {currentTime: 0, duration: 837.520544}
+app.js:54 [audioTest][2026-03-15T05:50:02.007Z] keydown {code: 'ArrowRight', key: 'ArrowRight', ctrl: false, shift: false, isPlayerActive: true, …}
+app.js:54 [audioTest][2026-03-15T05:50:02.007Z] keydown:seekBy {delta: 5}
+app.js:54 [audioTest][2026-03-15T05:50:02.007Z] seekBy:start {deltaSeconds: 5, current: 0, duration: 837.520544, selectedSpanIndex: -1}
+app.js:54 [audioTest][2026-03-15T05:50:02.007Z] seekBy:end {deltaSeconds: 5, nextCurrent: 0, selectedSpanIndex: -1}deltaSeconds: 5nextCurrent: 0selectedSpanIndex: -1[[Prototype]]: Object
+app.js:54 [audioTest][2026-03-15T05:50:02.008Z] audio.seeking {currentTime: 0, duration: 837.520544}
+app.js:54 [audioTest][2026-03-15T05:50:02.008Z] audio.seeked {currentTime: 0, duration: 837.520544}
+app.js:54 [audioTest][2026-03-15T05:50:02.243Z] keydown {code: 'ArrowRight', key: 'ArrowRight', ctrl: false, shift: false, isPlayerActive: true, …}
+app.js:54 [audioTest][2026-03-15T05:50:02.243Z] keydown:seekBy {delta: 5}
+app.js:54 [audioTest][2026-03-15T05:50:02.243Z] seekBy:start {deltaSeconds: 5, current: 0, duration: 837.520544, selectedSpanIndex: -1}
+app.js:54 [audioTest][2026-03-15T05:50:02.244Z] seekBy:end {deltaSeconds: 5, nextCurrent: 0, selectedSpanIndex: -1}
+app.js:54 [audioTest][2026-03-15T05:50:02.244Z] audio.seeking {currentTime: 0, duration: 837.520544}
+app.js:54 [audioTest][2026-03-15T05:50:02.245Z] audio.seeked {currentTime: 0, duration: 837.520544}
