@@ -7,7 +7,8 @@
   "scripts": {
     "launch:oms": "node launch_oms_stealth.js",
     "launch:oms:hidden": "set OMS_HIDDEN=1&& node launch_oms_stealth.js",
-    "action:login-cdp-and-capture-cookies": "node ../actions/cdp-login-fill/orch.js"
+    "action:login-cdp-and-capture-cookies": "node ../actions/cdp-login-fill/orch.js",
+    "action:fast-click-tab-1": "node ../actions/cdp-login-fill/fast-click-tab-1.js"
   },
   "dependencies": {
     "puppeteer": "^24.3.0",

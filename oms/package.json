@@ -4,6 +4,7 @@
   "scripts": {
     "launch:oms": "npm --prefix src/backend/oms/app run launch:oms",
     "launch:oms:hidden": "npm --prefix src/backend/oms/app run launch:oms:hidden",
-    "action:login-cdp-and-capture-cookies": "npm --prefix src/backend/oms/app run action:login-cdp-and-capture-cookies"
+    "action:login-cdp-and-capture-cookies": "npm --prefix src/backend/oms/app run action:login-cdp-and-capture-cookies",
+    "action:fast-click-tab-1": "npm --prefix src/backend/oms/app run action:fast-click-tab-1"
   }
 }
