@@ -1,10 +1,12 @@
 const fs = require('fs/promises');
 const path = require('path');
 const puppeteer = require('puppeteer');
+const { spawn } = require('child_process');
 
 const DEFAULT_CONFIG_PATH = path.resolve(__dirname, '..', '..', '..', '..', '..', 'mgmt', 'config', 'oms.config.json');
 const DEFAULT_OUTPUT_ROOT = path.resolve(__dirname, '..', '..', 'data', 'orders');
 const DEFAULT_ORDERS_URL = 'https://oms.xlwms.com/platform/order/list';
+const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..', '..', '..', '..');
 
 function stripBom(value) {
   return String(value || '').replace(/^\uFEFF/, '');
@@ -115,6 +117,53 @@ async function connectFast(primaryPort) {
   throw new Error(`Fast-path connect failed on ports ${ports.join(', ')}: ${lastError?.message || lastError}`);
 }
 
+function launchOmsIfNeeded() {
+  if (process.platform === 'win32') {
+    const psScript =
+      `$p = Start-Process -FilePath 'npm.cmd' -ArgumentList @('run','launch:oms') ` +
+      `-WorkingDirectory '${WORKSPACE_ROOT.replace(/'/g, "''")}' -PassThru; ` +
+      `Write-Output $p.Id`;
+    const child = spawn('powershell.exe', ['-NoProfile', '-Command', psScript], {
+      cwd: WORKSPACE_ROOT,
+      detached: true,
+      stdio: 'ignore'
+    });
+    child.unref();
+    return child.pid || null;
+  }
+
+  const child = spawn('npm', ['run', 'launch:oms'], {
+    cwd: WORKSPACE_ROOT,
+    detached: true,
+    stdio: 'ignore'
+  });
+  child.unref();
+  return child.pid || null;
+}
+
+async function connectWithAutoLaunch(primaryPort) {
+  try {
+    return { ...(await connectFast(primaryPort)), launchedPid: null, autoLaunched: false };
+  } catch (firstError) {
+    const launchedPid = launchOmsIfNeeded();
+    const startedAt = Date.now();
+    const timeoutMs = 90000;
+    let lastError = firstError;
+    while (Date.now() - startedAt < timeoutMs) {
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+      try {
+        const conn = await connectFast(primaryPort);
+        return { ...conn, launchedPid, autoLaunched: true };
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw new Error(
+      `Auto-launch started (pid=${launchedPid || 'unknown'}) but CDP was not reachable in ${timeoutMs}ms: ${lastError?.message || lastError}`
+    );
+  }
+}
+
 async function resolveOrdersPage(browser, ordersUrl) {
   const pages = await browser.pages();
   const page =
@@ -138,7 +187,8 @@ async function waitTableStabilityFast(page) {
   const samples = [];
   let prev = null;
   let stable = 0;
-  for (let i = 0; i < 14; i += 1) {
+  let maxSeen = 0;
+  for (let i = 0; i < 28; i += 1) {
     const count = await page.evaluate(() => {
       const xidNodes = Array.from(document.querySelectorAll('[xid="1"]'));
       const ranked = xidNodes
@@ -150,13 +200,15 @@ async function waitTableStabilityFast(page) {
       return ranked.length ? ranked[0].col21Count : 0;
     });
     samples.push(count);
+    if (count > maxSeen) maxSeen = count;
     if (prev !== null && count === prev) stable += 1;
     else stable = 0;
     prev = count;
-    if (stable >= 3) break;
-    await new Promise((resolve) => setTimeout(resolve, 180));
+    const enoughRows = count >= 10;
+    if (enoughRows && stable >= 2) break;
+    await new Promise((resolve) => setTimeout(resolve, 160));
   }
-  return { samples, stableReached: stable >= 3, finalCount: prev || 0 };
+  return { samples, stableReached: stable >= 2 && (prev || 0) >= 10, finalCount: prev || 0, maxSeen };
 }
 
 async function scanAllRowsFast(page) {
@@ -295,7 +347,7 @@ async function main() {
   const cutoff = new Date(now.getTime() - 2 * 60 * 60 * 1000);
 
   const launch = await loadLaunchConfig(configPath);
-  const conn = await connectFast(launch.debugPort);
+  const conn = await connectWithAutoLaunch(launch.debugPort);
   try {
     const page = await resolveOrdersPage(conn.browser, launch.ordersUrl);
     await clickMainTabFast(page);
@@ -347,6 +399,8 @@ async function main() {
           ok: true,
           mode: 'fast-flow-last2h',
           cdpPort: conn.port,
+          autoLaunched: conn.autoLaunched,
+          launchedPid: conn.launchedPid,
           configPath: launch.configPath,
           url: page.url(),
           stabilized: stable,
@@ -368,4 +422,3 @@ main().catch((error) => {
   console.error(error?.stack || String(error));
   process.exit(1);
 });
-
