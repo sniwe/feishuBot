@@ -4,10 +4,10 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\rhyse\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-16T08:54:37.415Z",
+  "scannedAt": "2026-03-16T08:58:10.857Z",
   "window": {
-    "from": "2026-03-16 14:54:29",
-    "to": "2026-03-16 16:54:29"
+    "from": "2026-03-16 14:58:03",
+    "to": "2026-03-16 16:58:03"
   },
   "stabilized": {
     "samples": [
@@ -36,18 +36,18 @@
       1,
       1,
       1,
-      13,
+      1,
       13,
       13
     ],
-    "stableReached": true,
+    "stableReached": false,
     "finalCount": 13,
     "maxSeen": 13
   },
   "scannedRowCount": 1130,
   "orderDate": "260316",
   "col13Prefix": "403",
-  "matchedCount": 5,
+  "matchedCount": 4,
   "rows": [
     {
       "rowIndex": 1,
@@ -115,40 +115,6 @@
         "col_25": ""
       },
       "col21Parsed": "2026-03-16 15:35:13",
-      "orderDateYYMMDD": "260316"
-    },
-    {
-      "rowIndex": 5,
-      "rowId": "SO051260316000116",
-      "col21": "2026-03-16 14:54:49",
-      "cols": {
-        "col_2": "",
-        "col_3": "",
-        "col_5": "577311032492003577",
-        "col_6": "tiktok",
-        "col_7": "WL1121-1 * 1",
-        "col_8": "WL1121-1 * 1",
-        "col_10": "LeeAnne Walter",
-        "col_11": "United States of America (USA)(US)",
-        "col_12": "48618",
-        "col_13": "403-Lady Grayy Wigs USA_US(USLCREE2BFUS)",
-        "col_14": "US-本土店铺(Non-LOCAL-US)",
-        "col_15": "ZOO WAREHOUSE ⑥(USW01)",
-        "col_16": "USPS自提(USPS_PICKUP_C)",
-        "col_17": "-",
-        "col_18": "usps",
-        "col_19": "平台面单",
-        "col_20": "2026-03-16 14:54:45",
-        "col_21": "2026-03-16 14:54:49",
-        "col_22": "线上订单",
-        "col_23": "未打印",
-        "col_24": "2026-03-16 16:14:42",
-        "col_26": "-",
-        "col_27": "-",
-        "col_28": "",
-        "col_25": ""
-      },
-      "col21Parsed": "2026-03-16 14:54:49",
       "orderDateYYMMDD": "260316"
     },
     {

@@ -1,13 +1,19 @@
 [
   {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     "name": "prod",
     "value": "always",
+=======
+    "name": "_hjSessionUser_3119560",
+    "value": "eyJpZCI6ImY5MTg0OWEzLWU1NDItNWExNC1hMjhhLTMyMjUyODExNGFmZSIsImNyZWF0ZWQiOjE3NzM0NTI3NzgxMjIsImV4aXN0aW5nIjp0cnVlfQ==",
+>>>>>>> Stashed changes
     "domain": ".xlwms.com",
     "path": "/",
-    "expires": -1,
-    "size": 10,
+    "expires": 1805185121,
+    "size": 138,
     "httpOnly": false,
+<<<<<<< Updated upstream
     "secure": false,
     "session": true,
     "priority": "Medium",
@@ -33,7 +39,11 @@
     "httpOnly": false,
     "secure": false,
 >>>>>>> Stashed changes
+=======
+    "secure": true,
+>>>>>>> Stashed changes
     "session": false,
+    "sameSite": "None",
     "priority": "Medium",
     "sameParty": false,
     "sourceScheme": "Secure"
@@ -88,6 +98,7 @@
     "sourceScheme": "Secure"
   },
   {
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 =======
     "name": "_hjSessionUser_3119560",
@@ -144,6 +155,14 @@
     "expires": 1808209122.495315,
 >>>>>>> Stashed changes
     "size": 29,
+=======
+    "name": "_ga_2HTV43T3DN",
+    "value": "GS2.1.s1773651137$o4$g0$t1773651137$j60$l0$h0",
+    "domain": ".xlwms.com",
+    "path": "/",
+    "expires": 1808211137.839853,
+    "size": 59,
+>>>>>>> Stashed changes
     "httpOnly": false,
     "secure": false,
     "session": false,
@@ -166,16 +185,29 @@
     "sourceScheme": "Secure"
   },
   {
-    "name": "_hjSessionUser_3119560",
-    "value": "eyJpZCI6ImY5MTg0OWEzLWU1NDItNWExNC1hMjhhLTMyMjUyODExNGFmZSIsImNyZWF0ZWQiOjE3NzM0NTI3NzgxMjIsImV4aXN0aW5nIjp0cnVlfQ==",
+    "name": "_ga",
+    "value": "GA1.1.666596731.1773395950",
     "domain": ".xlwms.com",
     "path": "/",
-    "expires": 1805185121,
-    "size": 138,
+    "expires": 1808211138.97734,
+    "size": 29,
     "httpOnly": false,
-    "secure": true,
+    "secure": false,
     "session": false,
-    "sameSite": "None",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "Secure"
+  },
+  {
+    "name": "prod",
+    "value": "always",
+    "domain": ".xlwms.com",
+    "path": "/",
+    "expires": -1,
+    "size": 10,
+    "httpOnly": false,
+    "secure": false,
+    "session": true,
     "priority": "Medium",
     "sameParty": false,
     "sourceScheme": "Secure"
