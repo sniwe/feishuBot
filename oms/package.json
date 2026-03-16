@@ -9,5 +9,10 @@
     "action:fast-scan-col21-last2h": "npm --prefix src/backend/oms/app run action:fast-scan-col21-last2h",
     "action:fast-flow-last2h": "npm --prefix src/backend/oms/app run action:fast-flow-last2h",
     "action:fast-flow-last2h:loop": "npm --prefix src/backend/oms/app run action:fast-flow-last2h:loop"
+  },
+  "dependencies": {
+    "puppeteer": "^24.39.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
   }
 }

@@ -107,7 +107,7 @@ async function loadLaunchConfig(configPath) {
 }
 
 async function connectFast(primaryPort) {
-  const ports = [primaryPort, primaryPort + 1, primaryPort + 2];
+  const ports = Array.from({ length: 20 }, (_, index) => primaryPort + index);
   let lastError = null;
   for (const port of ports) {
     try {
