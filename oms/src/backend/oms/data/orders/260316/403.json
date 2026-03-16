@@ -2,12 +2,12 @@
   "ok": true,
   "mode": "fast-flow-last2h",
   "cdpPort": 9222,
-  "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
+  "configPath": "C:\\Users\\rhyse\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-16T08:18:54.222Z",
+  "scannedAt": "2026-03-16T08:54:37.415Z",
   "window": {
-    "from": "2026-03-16 14:18:48",
-    "to": "2026-03-16 16:18:48"
+    "from": "2026-03-16 14:54:29",
+    "to": "2026-03-16 16:54:29"
   },
   "stabilized": {
     "samples": [
@@ -24,21 +24,101 @@
       1,
       1,
       1,
-      10,
-      10,
-      10
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      13,
+      13,
+      13
     ],
     "stableReached": true,
-    "finalCount": 10,
-    "maxSeen": 10
+    "finalCount": 13,
+    "maxSeen": 13
   },
-  "scannedRowCount": 763,
+  "scannedRowCount": 1130,
   "orderDate": "260316",
   "col13Prefix": "403",
-  "matchedCount": 4,
+  "matchedCount": 5,
   "rows": [
     {
-      "rowIndex": 3,
+      "rowIndex": 1,
+      "rowId": "SO051260316000118",
+      "col21": "2026-03-16 15:34:36",
+      "cols": {
+        "col_2": "",
+        "col_3": "",
+        "col_5": "577311057311404704",
+        "col_6": "tiktok",
+        "col_7": "多个(2)",
+        "col_8": "多个(2)",
+        "col_10": "sandra Ritter",
+        "col_11": "United States of America (USA)(US)",
+        "col_12": "33955",
+        "col_13": "403-Lady Grayy Wigs USA_US(USLCREE2BFUS)",
+        "col_14": "US-本土店铺(Non-LOCAL-US)",
+        "col_15": "ZOO WAREHOUSE ⑥(USW01)",
+        "col_16": "USPS自提(USPS_PICKUP_C)",
+        "col_17": "-",
+        "col_18": "usps",
+        "col_19": "平台面单",
+        "col_20": "2026-03-16 15:34:35",
+        "col_21": "2026-03-16 15:34:36",
+        "col_22": "线上订单",
+        "col_23": "未打印",
+        "col_24": "2026-03-16 16:36:44",
+        "col_26": "-",
+        "col_27": "-",
+        "col_28": "",
+        "col_25": ""
+      },
+      "col21Parsed": "2026-03-16 15:34:36",
+      "orderDateYYMMDD": "260316"
+    },
+    {
+      "rowIndex": 2,
+      "rowId": "SO051260316000117",
+      "col21": "2026-03-16 15:35:13",
+      "cols": {
+        "col_2": "",
+        "col_3": "",
+        "col_5": "577311056291926777",
+        "col_6": "tiktok",
+        "col_7": "SWLC1265-2RB28 * 1",
+        "col_8": "SWLC1265-2RB28 * 1",
+        "col_10": "Tina Daniels",
+        "col_11": "United States of America (USA)(US)",
+        "col_12": "92841",
+        "col_13": "403-Lady Grayy Wigs USA_US(USLCREE2BFUS)",
+        "col_14": "US-本土店铺(Non-LOCAL-US)",
+        "col_15": "ZOO WAREHOUSE ⑥(USW01)",
+        "col_16": "USPS自提(USPS_PICKUP_C)",
+        "col_17": "-",
+        "col_18": "usps",
+        "col_19": "平台面单",
+        "col_20": "2026-03-16 15:35:10",
+        "col_21": "2026-03-16 15:35:13",
+        "col_22": "线上订单",
+        "col_23": "未打印",
+        "col_24": "2026-03-16 16:36:44",
+        "col_26": "-",
+        "col_27": "-",
+        "col_28": "",
+        "col_25": ""
+      },
+      "col21Parsed": "2026-03-16 15:35:13",
+      "orderDateYYMMDD": "260316"
+    },
+    {
+      "rowIndex": 5,
       "rowId": "SO051260316000116",
       "col21": "2026-03-16 14:54:49",
       "cols": {
@@ -72,7 +152,7 @@
       "orderDateYYMMDD": "260316"
     },
     {
-      "rowIndex": 4,
+      "rowIndex": 6,
       "rowId": "SO051260316000115",
       "col21": "2026-03-16 15:08:51",
       "cols": {
@@ -106,7 +186,7 @@
       "orderDateYYMMDD": "260316"
     },
     {
-      "rowIndex": 5,
+      "rowIndex": 7,
       "rowId": "SO051260316000114",
       "col21": "2026-03-16 15:13:46",
       "cols": {
@@ -137,40 +217,6 @@
         "col_25": ""
       },
       "col21Parsed": "2026-03-16 15:13:46",
-      "orderDateYYMMDD": "260316"
-    },
-    {
-      "rowIndex": 6,
-      "rowId": "SO051260316000113",
-      "col21": "2026-03-16 14:50:14",
-      "cols": {
-        "col_2": "",
-        "col_3": "",
-        "col_5": "577311035168363477",
-        "col_6": "tiktok",
-        "col_7": "LC6018-1 * 1",
-        "col_8": "LC6018-1 * 1",
-        "col_10": "Briana Orr",
-        "col_11": "United States of America (USA)(US)",
-        "col_12": "33563",
-        "col_13": "403-Lady Grayy Wigs USA_US(USLCREE2BFUS)",
-        "col_14": "US-本土店铺(Non-LOCAL-US)",
-        "col_15": "ZOO WAREHOUSE ⑥(USW01)",
-        "col_16": "USPS自提(USPS_PICKUP_C)",
-        "col_17": "-",
-        "col_18": "usps",
-        "col_19": "平台面单",
-        "col_20": "2026-03-16 14:50:12",
-        "col_21": "2026-03-16 14:50:14",
-        "col_22": "线上订单",
-        "col_23": "未打印",
-        "col_24": "2026-03-16 15:53:41",
-        "col_26": "-",
-        "col_27": "-",
-        "col_28": "",
-        "col_25": ""
-      },
-      "col21Parsed": "2026-03-16 14:50:14",
       "orderDateYYMMDD": "260316"
     }
   ]

@@ -124,25 +124,27 @@ async function connectFast(primaryPort) {
   throw new Error(`Fast-path connect failed on ports ${ports.join(', ')}: ${lastError?.message || lastError}`);
 }
 
-function launchOmsIfNeeded() {
-  if (process.platform === 'win32') {
-    const psScript =
-      `$p = Start-Process -FilePath 'npm.cmd' -ArgumentList @('run','launch:oms') ` +
-      `-WorkingDirectory '${WORKSPACE_ROOT.replace(/'/g, "''")}' -PassThru; ` +
-      `Write-Output $p.Id`;
-    const child = spawn('powershell.exe', ['-NoProfile', '-Command', psScript], {
-      cwd: WORKSPACE_ROOT,
-      detached: true,
-      stdio: 'ignore'
-    });
-    child.unref();
-    return child.pid || null;
-  }
-
-  const child = spawn('npm', ['run', 'launch:oms'], {
+function launchOmsIfNeeded(primaryPort) {
+  const env = {
+    ...process.env,
+    DEBUG_PORT: String(primaryPort),
+    OMS_HIDDEN: '1'
+  };
+  const spawnSpec =
+    process.platform === 'win32'
+      ? {
+          cmd: process.env.ComSpec || 'cmd.exe',
+          args: ['/d', '/s', '/c', 'npm.cmd run launch:oms:hidden']
+        }
+      : {
+          cmd: 'npm',
+          args: ['run', 'launch:oms:hidden']
+        };
+  const child = spawn(spawnSpec.cmd, spawnSpec.args, {
     cwd: WORKSPACE_ROOT,
     detached: true,
-    stdio: 'ignore'
+    stdio: 'ignore',
+    env
   });
   child.unref();
   return child.pid || null;
@@ -152,7 +154,7 @@ async function connectWithAutoLaunch(primaryPort) {
   try {
     return { ...(await connectFast(primaryPort)), launchedPid: null, autoLaunched: false };
   } catch (firstError) {
-    const launchedPid = launchOmsIfNeeded();
+    const launchedPid = launchOmsIfNeeded(primaryPort);
     const startedAt = Date.now();
     const timeoutMs = 90000;
     let lastError = firstError;
