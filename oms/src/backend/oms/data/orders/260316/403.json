@@ -4,18 +4,53 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-16T07:52:35.737Z",
+  "scannedAt": "2026-03-16T07:56:31.262Z",
   "window": {
-    "from": "2026-03-16 13:52:25",
-    "to": "2026-03-16 15:52:25"
+    "from": "2026-03-16 13:56:25",
+    "to": "2026-03-16 15:56:25"
   },
-  "scannedRowCount": 963,
+  "scannedRowCount": 788,
   "orderDate": "260316",
   "col13Prefix": "403",
-  "matchedCount": 4,
+  "matchedCount": 5,
   "rows": [
     {
       "rowIndex": 1,
+      "rowId": "SO051260316000113",
+      "col21": "2026-03-16 14:50:14",
+      "cols": {
+        "col_2": "",
+        "col_3": "",
+        "col_5": "577311035168363477",
+        "col_6": "tiktok",
+        "col_7": "LC6018-1 * 1",
+        "col_8": "LC6018-1 * 1",
+        "col_10": "Briana Orr",
+        "col_11": "United States of America (USA)(US)",
+        "col_12": "33563",
+        "col_13": "403-Lady Grayy Wigs USA_US(USLCREE2BFUS)",
+        "col_14": "US-本土店铺(Non-LOCAL-US)",
+        "col_15": "ZOO WAREHOUSE ⑥(USW01)",
+        "col_16": "USPS自提(USPS_PICKUP_C)",
+        "col_17": "-",
+        "col_18": "usps",
+        "col_19": "平台面单",
+        "col_20": "2026-03-16 14:50:12",
+        "col_21": "2026-03-16 14:50:14",
+        "col_22": "线上订单",
+        "col_23": "未打印",
+        "col_24": "2026-03-16 15:53:41",
+        "col_26": "-",
+        "col_27": "-",
+        "col_28": "",
+        "col_25": ""
+      },
+      "hasAnyCol": true,
+      "col21Parsed": "2026-03-16 14:50:14",
+      "orderDateYYMMDD": "260316"
+    },
+    {
+      "rowIndex": 3,
       "rowId": "SO051260316000112",
       "col21": "2026-03-16 14:18:14",
       "cols": {
@@ -40,9 +75,9 @@
         "col_22": "线上订单",
         "col_23": "未打印",
         "col_24": "2026-03-16 15:32:40",
-        "col_31": "-",
-        "col_32": "-",
-        "col_33": "",
+        "col_26": "-",
+        "col_27": "-",
+        "col_28": "",
         "col_25": ""
       },
       "hasAnyCol": true,
@@ -50,7 +85,7 @@
       "orderDateYYMMDD": "260316"
     },
     {
-      "rowIndex": 2,
+      "rowIndex": 4,
       "rowId": "SO051260316000111",
       "col21": "2026-03-16 14:18:19",
       "cols": {
@@ -75,9 +110,9 @@
         "col_22": "线上订单",
         "col_23": "未打印",
         "col_24": "2026-03-16 15:32:40",
-        "col_31": "-",
-        "col_32": "-",
-        "col_33": "",
+        "col_26": "-",
+        "col_27": "-",
+        "col_28": "",
         "col_25": ""
       },
       "hasAnyCol": true,
@@ -85,7 +120,7 @@
       "orderDateYYMMDD": "260316"
     },
     {
-      "rowIndex": 5,
+      "rowIndex": 7,
       "rowId": "SO051260316000110",
       "col21": "2026-03-16 14:03:09",
       "cols": {
@@ -110,9 +145,9 @@
         "col_22": "线上订单",
         "col_23": "未打印",
         "col_24": "2026-03-16 15:07:37",
-        "col_31": "-",
-        "col_32": "-",
-        "col_33": "",
+        "col_26": "-",
+        "col_27": "-",
+        "col_28": "",
         "col_25": ""
       },
       "hasAnyCol": true,
@@ -120,7 +155,7 @@
       "orderDateYYMMDD": "260316"
     },
     {
-      "rowIndex": 6,
+      "rowIndex": 8,
       "rowId": "SO051260316000109",
       "col21": "2026-03-16 14:04:14",
       "cols": {
@@ -145,9 +180,9 @@
         "col_22": "线上订单",
         "col_23": "未打印",
         "col_24": "2026-03-16 15:07:37",
-        "col_31": "-",
-        "col_32": "-",
-        "col_33": "",
+        "col_26": "-",
+        "col_27": "-",
+        "col_28": "",
         "col_25": ""
       },
       "hasAnyCol": true,

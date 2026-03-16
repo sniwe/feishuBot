@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "mode": "fast-flow-last2h",
+  "cdpPort": 9222,
+  "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
+  "url": "https://oms.xlwms.com/platform/order/list",
+  "scannedAt": "2026-03-16T08:00:13.987Z",
+  "window": {
+    "from": "2026-03-16 14:00:13",
+    "to": "2026-03-16 16:00:13"
+  },
+  "stabilized": {
+    "samples": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "stableReached": true,
+    "finalCount": 1
+  },
+  "scannedRowCount": 1,
+  "orderDate": "260316",
+  "col13Prefix": "NO_MATCH",
+  "matchedCount": 0,
+  "rows": []
+}

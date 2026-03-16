@@ -6,6 +6,7 @@
     "launch:oms:hidden": "npm --prefix src/backend/oms/app run launch:oms:hidden",
     "action:login-cdp-and-capture-cookies": "npm --prefix src/backend/oms/app run action:login-cdp-and-capture-cookies",
     "action:fast-click-tab-1": "npm --prefix src/backend/oms/app run action:fast-click-tab-1",
-    "action:fast-scan-col21-last2h": "npm --prefix src/backend/oms/app run action:fast-scan-col21-last2h"
+    "action:fast-scan-col21-last2h": "npm --prefix src/backend/oms/app run action:fast-scan-col21-last2h",
+    "action:fast-flow-last2h": "npm --prefix src/backend/oms/app run action:fast-flow-last2h"
   }
 }
