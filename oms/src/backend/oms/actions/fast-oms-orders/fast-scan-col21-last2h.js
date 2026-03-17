@@ -40,6 +40,7 @@ function sanitizeFilePart(value) {
 
 function getStoreNameFromRow(row) {
   if (!row || typeof row !== 'object') return '';
+  if (row.storeName) return String(row.storeName).trim();
   if (row['店铺']) return String(row['店铺']).trim();
   for (const [key, value] of Object.entries(row)) {
     if (String(key).includes('店铺')) {
@@ -105,27 +106,34 @@ function formatSkuListForCell(list) {
     .join(' | ');
 }
 
-function enrichRowWithPayload(row, payloadMap, headerMap) {
-  const enriched = { ...row };
-  const platformOrderKey = getHeaderName(headerMap, 'col_5', 'Column 5');
-  const orderNoKey = getHeaderName(headerMap, 'col_3', 'Column 3');
-  const platformSkuKey = getHeaderName(headerMap, 'col_7', 'Column 7');
-  const systemSkuKey = getHeaderName(headerMap, 'col_8', 'Column 8');
+function resolvePayloadForRow(scanRow, payloadMap) {
+  const platformOrderNo = String(scanRow?.cols?.col_5 || '').trim();
+  const orderNo = String(scanRow?.cols?.col_3 || '').trim() || String(scanRow?.rowId || '').trim();
+  return (platformOrderNo && payloadMap.get(platformOrderNo)) || (orderNo && payloadMap.get(orderNo)) || null;
+}
 
-  const platformOrderNo = String(enriched[platformOrderKey] || '').trim();
-  const orderNo = String(enriched[orderNoKey] || '').trim();
-  const payload = (platformOrderNo && payloadMap.get(platformOrderNo)) || (orderNo && payloadMap.get(orderNo)) || null;
-  if (!payload) return enriched;
-
-  if (Array.isArray(payload.platformSkuList) && payload.platformSkuList.length > 0) {
-    enriched[platformSkuKey] = formatSkuListForCell(payload.platformSkuList);
-    enriched['平台SKU明细'] = payload.platformSkuList;
+function toPayloadKeyedRow(scanRow, payload, extras = {}) {
+  const base = {
+    rowIndex: scanRow.rowIndex,
+    rowId: scanRow.rowId || null,
+    ...extras
+  };
+  if (!payload) {
+    return {
+      ...base,
+      orderNo: String(scanRow?.cols?.col_3 || '').trim() || String(scanRow?.rowId || '').trim(),
+      platformOrderNo: String(scanRow?.cols?.col_5 || '').trim(),
+      rawCols: scanRow?.cols || {}
+    };
   }
-  if (Array.isArray(payload.skuList) && payload.skuList.length > 0) {
-    enriched[systemSkuKey] = formatSkuListForCell(payload.skuList);
-    enriched['系统SKU明细'] = payload.skuList;
-  }
-  return enriched;
+  const platformSkuList = Array.isArray(payload.platformSkuList) ? payload.platformSkuList : [];
+  const skuList = Array.isArray(payload.skuList) ? payload.skuList : [];
+  return {
+    ...base,
+    ...payload,
+    platformSkuListText: formatSkuListForCell(platformSkuList),
+    skuListText: formatSkuListForCell(skuList)
+  };
 }
 
 function toIsoLocal(date) {
@@ -538,11 +546,12 @@ async function main() {
     const grouped = {};
     for (const row of matched) {
       if (!grouped[row.orderDateYYMMDD]) grouped[row.orderDateYYMMDD] = [];
+      const payload = resolvePayloadForRow(row, payloadMap);
       grouped[row.orderDateYYMMDD].push(
-        enrichRowWithPayload(toHeaderKeyedRow(row, scan.headerMap, {
+        toPayloadKeyedRow(row, payload, {
           col21Parsed: row.col21Parsed,
           orderDateYYMMDD: row.orderDateYYMMDD
-        }), payloadMap, scan.headerMap)
+        })
       );
     }
 
