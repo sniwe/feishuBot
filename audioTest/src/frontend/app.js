@@ -1099,6 +1099,94 @@
       selectedTargetSubSegIndex: state.selectedTargetSubSegIndex,
       total
     });
+    syncSubSegValueSelectionToCurrentTarget();
+    renderSubSegValuePanel();
+  }
+
+  function getSubSegValueKey(seg) {
+    if (!seg || !Number.isFinite(seg.start) || !Number.isFinite(seg.end)) {
+      return "";
+    }
+    return seg.start.toFixed(3) + "|" + seg.end.toFixed(3);
+  }
+
+  function getSelectedTargetSubSegValueKey() {
+    const seg = getTargetSubSegBoundsByIndex(state.selectedTargetSubSegIndex);
+    return getSubSegValueKey(seg);
+  }
+
+  function activateSubSegValueSelection() {
+    const key = getSelectedTargetSubSegValueKey();
+    if (!key) {
+      setSaveStatus("Select a subSeg first (Ctrl+Left/Right)");
+      return;
+    }
+    state.activeSubSegValueKey = key;
+    renderSubSegValuePanel();
+    requestAnimationFrame(function () {
+      if (!subSegValueInput) {
+        return;
+      }
+      try {
+        subSegValueInput.focus({ preventScroll: true });
+      } catch {
+        subSegValueInput.focus();
+      }
+    });
+  }
+
+  function syncSubSegValueSelectionToCurrentTarget() {
+    if (!state.activeSubSegValueKey) {
+      return;
+    }
+    const currentKey = getSelectedTargetSubSegValueKey();
+    if (!currentKey || currentKey !== state.activeSubSegValueKey) {
+      state.activeSubSegValueKey = null;
+      if (subSegValueInput) {
+        subSegValueInput.value = "";
+      }
+    }
+  }
+
+  function handleSubSegValueSubmit(event) {
+    event.preventDefault();
+    const key = state.activeSubSegValueKey;
+    if (!key || !subSegValueInput) {
+      return;
+    }
+    const text = String(subSegValueInput.value || "").trim();
+    if (!text) {
+      return;
+    }
+    if (!Array.isArray(state.subSegValueEntries[key])) {
+      state.subSegValueEntries[key] = [];
+    }
+    state.subSegValueEntries[key].push(text);
+    subSegValueInput.value = "";
+    renderSubSegValuePanel();
+    enqueueAutoSave();
+  }
+
+  function renderSubSegValuePanel() {
+    if (!subSegValuePanel || !subSegValueList) {
+      return;
+    }
+    const selectedKey = getSelectedTargetSubSegValueKey();
+    const isVisible = Boolean(hasTargetSpan() && selectedKey && state.activeSubSegValueKey && selectedKey === state.activeSubSegValueKey);
+    subSegValuePanel.classList.toggle("hidden", !isVisible);
+    if (!isVisible) {
+      subSegValueList.innerHTML = "";
+      return;
+    }
+
+    const values = Array.isArray(state.subSegValueEntries[selectedKey]) ? state.subSegValueEntries[selectedKey] : [];
+    subSegValueList.innerHTML = "";
+    values.forEach(function (value) {
+      const card = document.createElement("div");
+      card.className = "subseg-value-card";
+      card.textContent = value;
+      subSegValueList.appendChild(card);
+    });
   }
 
   function seekBy(deltaSeconds) {
