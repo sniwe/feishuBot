@@ -18,8 +18,13 @@ if (!(Test-Path -LiteralPath (Join-Path $REPO_ROOT ".git"))) {
 
 Push-Location $REPO_ROOT
 try {
-    if (-not $NoPull) {
+    $isQubtop = ([string]::Equals($env:COMPUTERNAME, "QUBTOP", [System.StringComparison]::OrdinalIgnoreCase))
+    $effectiveNoPull = $NoPull -or $isQubtop
+
+    if (-not $effectiveNoPull) {
         git pull --rebase --autostash
+    } elseif ($isQubtop) {
+        Write-Output "Skipping pull on QUBTOP (push-only policy)."
     }
 
     if (-not $NoBootstrap) {

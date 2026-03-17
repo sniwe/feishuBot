@@ -140,6 +140,7 @@ New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
 $lockPath = Join-Path $env:TEMP ("codex-auto-sync-{0}.lock" -f $env:USERNAME)
 $now = Get-Date
 $focusSnapshot = Get-FocusSnapshot
+$isQubtop = ([string]::Equals($env:COMPUTERNAME, "QUBTOP", [System.StringComparison]::OrdinalIgnoreCase))
 
 if (Test-Path -LiteralPath $lockPath) {
     try {
@@ -193,8 +194,12 @@ function Get-ManagedPathspecs {
 try {
     $pathspecs = Get-ManagedPathspecs
 
-    # Bidirectional sync: ingest remote commits before inspecting local changes.
-    Invoke-Git -Args @("pull", "--rebase", "--autostash")
+    if (-not $isQubtop) {
+        # Bidirectional sync: ingest remote commits before inspecting local changes.
+        Invoke-Git -Args @("pull", "--rebase", "--autostash")
+    } else {
+        Write-Output "Skipping pull on QUBTOP (push-only policy)."
+    }
 
     Push-Location $REPO_ROOT
     try {
