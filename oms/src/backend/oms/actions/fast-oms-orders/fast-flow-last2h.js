@@ -98,6 +98,50 @@ function toHeaderKeyedRow(row, headerMap, extras = {}) {
   return out;
 }
 
+function getHeaderName(headerMap, colId, fallbackName) {
+  const fromMap = String(headerMap?.[colId] || '').trim();
+  if (fromMap) return fromMap;
+  return fallbackName;
+}
+
+function formatSkuListForCell(list) {
+  const arr = Array.isArray(list) ? list : [];
+  if (!arr.length) return '';
+  return arr
+    .map((item) => {
+      const sku = String(item?.sku || '').trim();
+      const qty = Number(item?.qty || 0);
+      const productName = String(item?.productName || '').trim();
+      const base = `${sku || 'SKU'} * ${Number.isFinite(qty) && qty > 0 ? qty : 1}`;
+      return productName ? `${base} (${productName})` : base;
+    })
+    .join(' | ');
+}
+
+function enrichRowWithPayload(row, payloadMap, headerMap) {
+  const enriched = { ...row };
+  const platformOrderKey = getHeaderName(headerMap, 'col_5', 'Column 5');
+  const orderNoKey = getHeaderName(headerMap, 'col_3', 'Column 3');
+  const platformSkuKey = getHeaderName(headerMap, 'col_7', 'Column 7');
+  const systemSkuKey = getHeaderName(headerMap, 'col_8', 'Column 8');
+
+  const platformOrderNo = String(enriched[platformOrderKey] || '').trim();
+  const orderNo = String(enriched[orderNoKey] || '').trim();
+  const payload = (platformOrderNo && payloadMap.get(platformOrderNo)) || (orderNo && payloadMap.get(orderNo)) || null;
+  if (!payload) return enriched;
+
+  if (Array.isArray(payload.platformSkuList) && payload.platformSkuList.length > 0) {
+    enriched[platformSkuKey] = formatSkuListForCell(payload.platformSkuList);
+    enriched['平台SKU明细'] = payload.platformSkuList;
+  }
+  if (Array.isArray(payload.skuList) && payload.skuList.length > 0) {
+    enriched[systemSkuKey] = formatSkuListForCell(payload.skuList);
+    enriched['系统SKU明细'] = payload.skuList;
+  }
+
+  return enriched;
+}
+
 function toIsoLocal(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -572,6 +616,63 @@ async function scanAllRowsFast(page) {
   });
 }
 
+async function fetchOrderPayloadMap(page) {
+  const records = await page.evaluate(async () => {
+    const token = String(localStorage.getItem('oms-token') || '').trim();
+    if (!token) return [];
+    const resp = await fetch('/gateway/woms/platform/order/list', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        lang: 'zh',
+        version: 'prod',
+        authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        current: 1,
+        size: 2000,
+        subStatus: '',
+        platformCodes: '',
+        receiptCountries: '',
+        siteCodes: '',
+        storeCodes: '',
+        sendWarehouses: '',
+        logisticsChannels: '',
+        markShipmentStatus: '',
+        countKind: 'orderCount',
+        cancelWay: '',
+        deliveryOptionTypes: '',
+        printingStatus: ''
+      }),
+      credentials: 'include'
+    });
+    const text = await resp.text();
+    let json = null;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      return [];
+    }
+    const data = json?.data || {};
+    const rows = Array.isArray(data.records) ? data.records : Array.isArray(data.list) ? data.list : [];
+    return rows.map((r) => ({
+      orderNo: r?.orderNo || '',
+      platformOrderNo: r?.platformOrderNo || '',
+      platformSkuList: Array.isArray(r?.platformSkuList) ? r.platformSkuList : [],
+      skuList: Array.isArray(r?.skuList) ? r.skuList : []
+    }));
+  });
+
+  const out = new Map();
+  for (const r of records) {
+    const orderNo = String(r?.orderNo || '').trim();
+    const platformOrderNo = String(r?.platformOrderNo || '').trim();
+    if (orderNo) out.set(orderNo, r);
+    if (platformOrderNo) out.set(platformOrderNo, r);
+  }
+  return out;
+}
+
 async function writeGroupedOutput(outputRoot, grouped, metadata) {
   const written = [];
   const entries = Object.entries(grouped);
@@ -649,6 +750,7 @@ async function main() {
       await page.goto(launch.ordersUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
     }
     const sessionSaved = await persistSessionArtifacts(page, launch);
+    const payloadMap = await fetchOrderPayloadMap(page);
     await clickMainTabFast(page);
     const stable = await waitTableStabilityFast(page);
     const scan = await scanAllRowsFast(page);
@@ -671,10 +773,10 @@ async function main() {
     for (const row of matched) {
       if (!grouped[row.orderDateYYMMDD]) grouped[row.orderDateYYMMDD] = [];
       grouped[row.orderDateYYMMDD].push(
-        toHeaderKeyedRow(row, scan.headerMap, {
+        enrichRowWithPayload(toHeaderKeyedRow(row, scan.headerMap, {
           col21Parsed: row.col21Parsed,
           orderDateYYMMDD: row.orderDateYYMMDD
-        })
+        }), payloadMap, scan.headerMap)
       );
     }
 

@@ -1,0 +1,886 @@
+{
+  "log": {
+    "version": "1.2",
+    "creator": {
+      "name": "WebInspector",
+      "version": "537.36"
+    },
+    "pages": [],
+    "entries": [
+      {
+        "_connectionId": "211561",
+        "_initiator": {
+          "type": "script",
+          "stack": {
+            "callFrames": [
+              {
+                "functionName": "",
+                "scriptId": "7",
+                "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                "lineNumber": 90,
+                "columnNumber": 6296
+              },
+              {
+                "functionName": "",
+                "scriptId": "7",
+                "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                "lineNumber": 90,
+                "columnNumber": 3991
+              },
+              {
+                "functionName": "",
+                "scriptId": "7",
+                "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                "lineNumber": 31,
+                "columnNumber": 49856
+              }
+            ],
+            "parent": {
+              "description": "Promise.then",
+              "callFrames": [
+                {
+                  "functionName": "",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 0,
+                  "columnNumber": 19495
+                },
+                {
+                  "functionName": "",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 0,
+                  "columnNumber": 234146
+                },
+                {
+                  "functionName": "h",
+                  "scriptId": "25",
+                  "url": "https://oms.xlwms.com/js/platform.js?v=3e480b7c",
+                  "lineNumber": 0,
+                  "columnNumber": 22327
+                },
+                {
+                  "functionName": "getStatusList",
+                  "scriptId": "25",
+                  "url": "https://oms.xlwms.com/js/platform.js?v=3e480b7c",
+                  "lineNumber": 0,
+                  "columnNumber": 146689
+                },
+                {
+                  "functionName": "getDataList",
+                  "scriptId": "25",
+                  "url": "https://oms.xlwms.com/js/platform.js?v=3e480b7c",
+                  "lineNumber": 0,
+                  "columnNumber": 147145
+                },
+                {
+                  "functionName": "search",
+                  "scriptId": "25",
+                  "url": "https://oms.xlwms.com/js/platform.js?v=3e480b7c",
+                  "lineNumber": 0,
+                  "columnNumber": 144623
+                },
+                {
+                  "functionName": "handleClick",
+                  "scriptId": "25",
+                  "url": "https://oms.xlwms.com/js/platform.js?v=3e480b7c",
+                  "lineNumber": 0,
+                  "columnNumber": 148945
+                },
+                {
+                  "functionName": "Hn",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 10,
+                  "columnNumber": 24931
+                },
+                {
+                  "functionName": "n",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 10,
+                  "columnNumber": 14728
+                },
+                {
+                  "functionName": "Hn",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 10,
+                  "columnNumber": 24931
+                },
+                {
+                  "functionName": "",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 10,
+                  "columnNumber": 30941
+                },
+                {
+                  "functionName": "handleTabClick",
+                  "scriptId": "6",
+                  "url": "https://oms.xlwms.com/js/chunk-lingxingUI.js?v=50f36464",
+                  "lineNumber": 24,
+                  "columnNumber": 522179
+                },
+                {
+                  "functionName": "click",
+                  "scriptId": "6",
+                  "url": "https://oms.xlwms.com/js/chunk-lingxingUI.js?v=50f36464",
+                  "lineNumber": 24,
+                  "columnNumber": 519746
+                },
+                {
+                  "functionName": "Hn",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 10,
+                  "columnNumber": 24931
+                },
+                {
+                  "functionName": "n",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 10,
+                  "columnNumber": 14728
+                },
+                {
+                  "functionName": "",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 10,
+                  "columnNumber": 62396
+                }
+              ]
+            }
+          }
+        },
+        "_priority": "High",
+        "_resourceType": "xhr",
+        "cache": {},
+        "connection": "443",
+        "request": {
+          "method": "POST",
+          "url": "https://oms.xlwms.com/gateway/woms/platform/order/statusStatistic",
+          "httpVersion": "prod",
+          "headers": [
+            {
+              "name": ":authority",
+              "value": "oms.xlwms.com"
+            },
+            {
+              "name": ":method",
+              "value": "POST"
+            },
+            {
+              "name": ":path",
+              "value": "/gateway/woms/platform/order/statusStatistic"
+            },
+            {
+              "name": ":scheme",
+              "value": "https"
+            },
+            {
+              "name": "accept",
+              "value": "application/json, text/plain, */*"
+            },
+            {
+              "name": "accept-encoding",
+              "value": "gzip, deflate, br, zstd"
+            },
+            {
+              "name": "accept-language",
+              "value": "en-US,en-GB;q=0.9,en;q=0.8,zh-CN;q=0.7,zh;q=0.6"
+            },
+            {
+              "name": "content-length",
+              "value": "247"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            },
+            {
+              "name": "dnt",
+              "value": "1"
+            },
+            {
+              "name": "lang",
+              "value": "zh"
+            },
+            {
+              "name": "origin",
+              "value": "https://oms.xlwms.com"
+            },
+            {
+              "name": "priority",
+              "value": "u=1, i"
+            },
+            {
+              "name": "referer",
+              "value": "https://oms.xlwms.com/platform/order/list"
+            },
+            {
+              "name": "sec-ch-ua",
+              "value": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\""
+            },
+            {
+              "name": "sec-ch-ua-mobile",
+              "value": "?0"
+            },
+            {
+              "name": "sec-ch-ua-platform",
+              "value": "\"Windows\""
+            },
+            {
+              "name": "sec-fetch-dest",
+              "value": "empty"
+            },
+            {
+              "name": "sec-fetch-mode",
+              "value": "cors"
+            },
+            {
+              "name": "sec-fetch-site",
+              "value": "same-origin"
+            },
+            {
+              "name": "user-agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "version",
+              "value": "prod"
+            }
+          ],
+          "queryString": [],
+          "cookies": [],
+          "headersSize": -1,
+          "bodySize": 247,
+          "postData": {
+            "mimeType": "application/json",
+            "text": "{\"current\":1,\"size\":20,\"platformCodes\":\"\",\"receiptCountries\":\"\",\"siteCodes\":\"\",\"storeCodes\":\"\",\"sendWarehouses\":\"\",\"logisticsChannels\":\"\",\"markShipmentStatus\":\"\",\"countKind\":\"orderCount\",\"cancelWay\":\"\",\"deliveryOptionTypes\":\"\",\"printingStatus\":\"\"}"
+          }
+        },
+        "response": {
+          "status": 200,
+          "statusText": "",
+          "httpVersion": "prod",
+          "headers": [
+            {
+              "name": "access-control-allow-credentials",
+              "value": "true"
+            },
+            {
+              "name": "access-control-allow-credentials",
+              "value": "true"
+            },
+            {
+              "name": "access-control-allow-origin",
+              "value": "https://oms.xlwms.com"
+            },
+            {
+              "name": "access-control-allow-origin",
+              "value": "https://oms.xlwms.com"
+            },
+            {
+              "name": "content-encoding",
+              "value": "gzip"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json;charset=UTF-8"
+            },
+            {
+              "name": "date",
+              "value": "Tue, 17 Mar 2026 03:08:42 GMT"
+            },
+            {
+              "name": "server",
+              "value": "APISIX"
+            },
+            {
+              "name": "vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "name": "vary",
+              "value": "Origin"
+            },
+            {
+              "name": "vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "name": "vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "name": "vary",
+              "value": "Origin"
+            },
+            {
+              "name": "vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "name": "vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "name": "version",
+              "value": "prod"
+            },
+            {
+              "name": "xl-region",
+              "value": "master"
+            }
+          ],
+          "cookies": [],
+          "content": {
+            "size": 850,
+            "mimeType": "application/json"
+          },
+          "redirectURL": "",
+          "headersSize": -1,
+          "bodySize": -1,
+          "_transferSize": 671,
+          "_error": null,
+          "_fetchedViaServiceWorker": false
+        },
+        "serverIPAddress": "124.156.124.173",
+        "startedDateTime": "2026-03-17T03:08:40.190Z",
+        "time": 767.7660000044852,
+        "timings": {
+          "blocked": 2.043000053778291,
+          "dns": -1,
+          "ssl": -1,
+          "connect": -1,
+          "send": 0.378,
+          "wait": 764.7229999875203,
+          "receive": 0.6219999631866813,
+          "_blocked_queueing": 1.1690000537782907,
+          "_workerStart": -1,
+          "_workerReady": -1,
+          "_workerFetchStart": -1,
+          "_workerRespondWithSettled": -1
+        }
+      },
+      {
+        "_connectionId": "211561",
+        "_initiator": {
+          "type": "script",
+          "stack": {
+            "callFrames": [
+              {
+                "functionName": "",
+                "scriptId": "7",
+                "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                "lineNumber": 90,
+                "columnNumber": 6296
+              },
+              {
+                "functionName": "",
+                "scriptId": "7",
+                "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                "lineNumber": 90,
+                "columnNumber": 3991
+              },
+              {
+                "functionName": "",
+                "scriptId": "7",
+                "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                "lineNumber": 31,
+                "columnNumber": 49856
+              }
+            ],
+            "parent": {
+              "description": "Promise.then",
+              "callFrames": [
+                {
+                  "functionName": "",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 0,
+                  "columnNumber": 19495
+                },
+                {
+                  "functionName": "",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 0,
+                  "columnNumber": 234146
+                },
+                {
+                  "functionName": "i",
+                  "scriptId": "25",
+                  "url": "https://oms.xlwms.com/js/platform.js?v=3e480b7c",
+                  "lineNumber": 0,
+                  "columnNumber": 21561
+                },
+                {
+                  "functionName": "getDataList",
+                  "scriptId": "25",
+                  "url": "https://oms.xlwms.com/js/platform.js?v=3e480b7c",
+                  "lineNumber": 0,
+                  "columnNumber": 147198
+                },
+                {
+                  "functionName": "search",
+                  "scriptId": "25",
+                  "url": "https://oms.xlwms.com/js/platform.js?v=3e480b7c",
+                  "lineNumber": 0,
+                  "columnNumber": 144623
+                },
+                {
+                  "functionName": "handleClick",
+                  "scriptId": "25",
+                  "url": "https://oms.xlwms.com/js/platform.js?v=3e480b7c",
+                  "lineNumber": 0,
+                  "columnNumber": 148945
+                },
+                {
+                  "functionName": "Hn",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 10,
+                  "columnNumber": 24931
+                },
+                {
+                  "functionName": "n",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 10,
+                  "columnNumber": 14728
+                },
+                {
+                  "functionName": "Hn",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 10,
+                  "columnNumber": 24931
+                },
+                {
+                  "functionName": "",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 10,
+                  "columnNumber": 30941
+                },
+                {
+                  "functionName": "handleTabClick",
+                  "scriptId": "6",
+                  "url": "https://oms.xlwms.com/js/chunk-lingxingUI.js?v=50f36464",
+                  "lineNumber": 24,
+                  "columnNumber": 522179
+                },
+                {
+                  "functionName": "click",
+                  "scriptId": "6",
+                  "url": "https://oms.xlwms.com/js/chunk-lingxingUI.js?v=50f36464",
+                  "lineNumber": 24,
+                  "columnNumber": 519746
+                },
+                {
+                  "functionName": "Hn",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 10,
+                  "columnNumber": 24931
+                },
+                {
+                  "functionName": "n",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 10,
+                  "columnNumber": 14728
+                },
+                {
+                  "functionName": "",
+                  "scriptId": "7",
+                  "url": "https://oms.xlwms.com/js/chunk-libs.js?v=6def89c1",
+                  "lineNumber": 10,
+                  "columnNumber": 62396
+                }
+              ]
+            }
+          }
+        },
+        "_priority": "High",
+        "_resourceType": "xhr",
+        "cache": {},
+        "connection": "443",
+        "request": {
+          "method": "POST",
+          "url": "https://oms.xlwms.com/gateway/woms/platform/order/list",
+          "httpVersion": "prod",
+          "headers": [
+            {
+              "name": ":authority",
+              "value": "oms.xlwms.com"
+            },
+            {
+              "name": ":method",
+              "value": "POST"
+            },
+            {
+              "name": ":path",
+              "value": "/gateway/woms/platform/order/list"
+            },
+            {
+              "name": ":scheme",
+              "value": "https"
+            },
+            {
+              "name": "accept",
+              "value": "application/json, text/plain, */*"
+            },
+            {
+              "name": "accept-encoding",
+              "value": "gzip, deflate, br, zstd"
+            },
+            {
+              "name": "accept-language",
+              "value": "en-US,en-GB;q=0.9,en;q=0.8,zh-CN;q=0.7,zh;q=0.6"
+            },
+            {
+              "name": "content-length",
+              "value": "262"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            },
+            {
+              "name": "dnt",
+              "value": "1"
+            },
+            {
+              "name": "lang",
+              "value": "zh"
+            },
+            {
+              "name": "origin",
+              "value": "https://oms.xlwms.com"
+            },
+            {
+              "name": "priority",
+              "value": "u=1, i"
+            },
+            {
+              "name": "referer",
+              "value": "https://oms.xlwms.com/platform/order/list"
+            },
+            {
+              "name": "sec-ch-ua",
+              "value": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\""
+            },
+            {
+              "name": "sec-ch-ua-mobile",
+              "value": "?0"
+            },
+            {
+              "name": "sec-ch-ua-platform",
+              "value": "\"Windows\""
+            },
+            {
+              "name": "sec-fetch-dest",
+              "value": "empty"
+            },
+            {
+              "name": "sec-fetch-mode",
+              "value": "cors"
+            },
+            {
+              "name": "sec-fetch-site",
+              "value": "same-origin"
+            },
+            {
+              "name": "user-agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "version",
+              "value": "prod"
+            }
+          ],
+          "queryString": [],
+          "cookies": [],
+          "headersSize": -1,
+          "bodySize": 262,
+          "postData": {
+            "mimeType": "application/json",
+            "text": "{\"current\":1,\"size\":20,\"subStatus\":\"\",\"platformCodes\":\"\",\"receiptCountries\":\"\",\"siteCodes\":\"\",\"storeCodes\":\"\",\"sendWarehouses\":\"\",\"logisticsChannels\":\"\",\"markShipmentStatus\":\"\",\"countKind\":\"orderCount\",\"cancelWay\":\"\",\"deliveryOptionTypes\":\"\",\"printingStatus\":\"\"}"
+          }
+        },
+        "response": {
+          "status": 200,
+          "statusText": "",
+          "httpVersion": "prod",
+          "headers": [
+            {
+              "name": "access-control-allow-credentials",
+              "value": "true"
+            },
+            {
+              "name": "access-control-allow-credentials",
+              "value": "true"
+            },
+            {
+              "name": "access-control-allow-origin",
+              "value": "https://oms.xlwms.com"
+            },
+            {
+              "name": "access-control-allow-origin",
+              "value": "https://oms.xlwms.com"
+            },
+            {
+              "name": "content-encoding",
+              "value": "gzip"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json;charset=UTF-8"
+            },
+            {
+              "name": "date",
+              "value": "Tue, 17 Mar 2026 03:08:42 GMT"
+            },
+            {
+              "name": "server",
+              "value": "APISIX"
+            },
+            {
+              "name": "vary",
+              "value": "Accept-Encoding"
+            },
+            {
+              "name": "vary",
+              "value": "Origin"
+            },
+            {
+              "name": "vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "name": "vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "name": "vary",
+              "value": "Origin"
+            },
+            {
+              "name": "vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "name": "vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "name": "version",
+              "value": "prod"
+            },
+            {
+              "name": "xl-region",
+              "value": "master"
+            }
+          ],
+          "cookies": [],
+          "content": {
+            "size": 32443,
+            "mimeType": "application/json"
+          },
+          "redirectURL": "",
+          "headersSize": -1,
+          "bodySize": -1,
+          "_transferSize": 4789,
+          "_error": null,
+          "_fetchedViaServiceWorker": false
+        },
+        "serverIPAddress": "124.156.124.173",
+        "startedDateTime": "2026-03-17T03:08:40.190Z",
+        "time": 1096.0349999950267,
+        "timings": {
+          "blocked": 2.2429999823085964,
+          "dns": -1,
+          "ssl": -1,
+          "connect": -1,
+          "send": 0.176,
+          "wait": 1092.9530000283755,
+          "receive": 0.6629999843426049,
+          "_blocked_queueing": 2.0539999823085964,
+          "_workerStart": -1,
+          "_workerReady": -1,
+          "_workerFetchStart": -1,
+          "_workerRespondWithSettled": -1
+        }
+      },
+      {
+        "_connectionId": "211561",
+        "_initiator": {
+          "type": "script",
+          "stack": {
+            "callFrames": [
+              {
+                "functionName": "",
+                "scriptId": "3",
+                "url": "https://oms.xlwms.com/js/task.worker.worker.js?v=799c23db",
+                "lineNumber": 0,
+                "columnNumber": 1303
+              },
+              {
+                "functionName": "o",
+                "scriptId": "3",
+                "url": "https://oms.xlwms.com/js/task.worker.worker.js?v=799c23db",
+                "lineNumber": 0,
+                "columnNumber": 980
+              },
+              {
+                "functionName": "a",
+                "scriptId": "3",
+                "url": "https://oms.xlwms.com/js/task.worker.worker.js?v=799c23db",
+                "lineNumber": 0,
+                "columnNumber": 1329
+              }
+            ],
+            "parent": {
+              "description": "setTimeout",
+              "callFrames": [
+                {
+                  "functionName": "",
+                  "scriptId": "3",
+                  "url": "https://oms.xlwms.com/js/task.worker.worker.js?v=799c23db",
+                  "lineNumber": 0,
+                  "columnNumber": 1391
+                }
+              ],
+              "parent": {
+                "description": "Promise.then",
+                "callFrames": [
+                  {
+                    "functionName": "a",
+                    "scriptId": "3",
+                    "url": "https://oms.xlwms.com/js/task.worker.worker.js?v=799c23db",
+                    "lineNumber": 0,
+                    "columnNumber": 1382
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "_priority": "High",
+        "_resourceType": "xhr",
+        "cache": {},
+        "connection": "443",
+        "request": {
+          "method": "POST",
+          "url": "https://oms.xlwms.com/gateway/woms/system/taskCenter/task/notify",
+          "httpVersion": "prod",
+          "headers": [
+            {
+              "name": "Referer",
+              "value": "https://oms.xlwms.com/js/task.worker.worker.js?v=799c23db"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "DNT",
+              "value": "1"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json;charset=UTF-8"
+            },
+            {
+              "name": "version",
+              "value": "prod"
+            }
+          ],
+          "queryString": [],
+          "cookies": [],
+          "headersSize": -1,
+          "bodySize": 2,
+          "postData": {
+            "mimeType": "application/json;charset=UTF-8",
+            "text": "{}"
+          }
+        },
+        "response": {
+          "status": 200,
+          "statusText": "",
+          "httpVersion": "prod",
+          "headers": [
+            {
+              "name": "content-encoding",
+              "value": "gzip"
+            },
+            {
+              "name": "xl-region",
+              "value": "master"
+            },
+            {
+              "name": "access-control-allow-credentials",
+              "value": "true, true"
+            },
+            {
+              "name": "access-control-allow-origin",
+              "value": "https://oms.xlwms.com, https://oms.xlwms.com"
+            },
+            {
+              "name": "date",
+              "value": "Tue, 17 Mar 2026 03:08:45 GMT"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json;charset=UTF-8"
+            },
+            {
+              "name": "vary",
+              "value": "Accept-Encoding, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+            },
+            {
+              "name": "version",
+              "value": "prod"
+            },
+            {
+              "name": "server",
+              "value": "APISIX"
+            }
+          ],
+          "cookies": [],
+          "content": {
+            "size": 43,
+            "mimeType": "application/json"
+          },
+          "redirectURL": "",
+          "headersSize": -1,
+          "bodySize": -1,
+          "_transferSize": 477,
+          "_error": null,
+          "_fetchedViaServiceWorker": false
+        },
+        "serverIPAddress": "124.156.124.173",
+        "startedDateTime": "2026-03-17T03:08:43.553Z",
+        "time": 372.83400003798306,
+        "timings": {
+          "blocked": 2.9190000261105595,
+          "dns": -1,
+          "ssl": -1,
+          "connect": -1,
+          "send": 0.4119999999999999,
+          "wait": 368.8479999720305,
+          "receive": 0.6550000398419797,
+          "_blocked_queueing": 1.8610000261105597,
+          "_workerStart": -1,
+          "_workerReady": -1,
+          "_workerFetchStart": -1,
+          "_workerRespondWithSettled": -1
+        }
+      }
+    ]
+  }
+}
