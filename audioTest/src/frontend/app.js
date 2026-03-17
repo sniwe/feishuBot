@@ -953,12 +953,15 @@
     clearCheckpointDragState();
     state.checkpoints = [];
     state.subSegs = [];
+    state.subSegValueEntries = {};
+    state.activeSubSegValueKey = null;
     state.selectedSpanIndex = -1;
     clearTargetSpanLock({ preserveSelection: false });
     state.shiftHoldTss = null;
     state.markerSignature = "";
     state.subSegSignature = "";
     state.targetMarkerSignature = "";
+    renderSubSegValuePanel();
   }
 
   function dropCheckpoint() {
@@ -1243,6 +1246,8 @@
     renderCheckpointMarkers();
     renderSelectedSpanOverlay();
     renderTargetProgress();
+    syncSubSegValueSelectionToCurrentTarget();
+    renderSubSegValuePanel();
 
     if (isPlayerActive() && duration > 0 && !state.hasAutoFocusedProgress) {
       state.hasAutoFocusedProgress = true;
@@ -1600,6 +1605,22 @@
     return normalized;
   }
 
+  function normalizeSubSegValueEntries(rawEntries) {
+    const source = rawEntries && typeof rawEntries === "object" ? rawEntries : {};
+    const normalized = {};
+    Object.keys(source).forEach(function (key) {
+      const values = Array.isArray(source[key]) ? source[key] : [];
+      const cleaned = values
+        .map(function (v) { return String(v || "").trim(); })
+        .filter(function (v) { return v.length > 0; })
+        .slice(0, 200);
+      if (cleaned.length > 0) {
+        normalized[key] = cleaned;
+      }
+    });
+    return normalized;
+  }
+
   function getSubSegsForBounds(bounds) {
     if (!bounds) {
       return [];
@@ -1699,6 +1720,7 @@
     state.targetEnd = null;
     state.targetSubSegs = [];
     state.selectedTargetSubSegIndex = -1;
+    state.activeSubSegValueKey = null;
     state.shiftHoldTss = null;
     state.targetMarkerSignature = "";
     if (preserveSelection && priorIndex >= 0) {
@@ -1928,6 +1950,7 @@
         subSegs: state.subSegs.map(function (seg) {
           return { start: seg.start, end: seg.end };
         }),
+        subSegValueEntries: state.subSegValueEntries,
         selectedSpanIndex: -1,
         currentTime: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
         wasPlaying: !audio.paused
@@ -2011,6 +2034,8 @@
       ? savedPlayback.checkpoints.filter(function (v) { return Number.isFinite(v) && v >= 0; }).sort(function (a, b) { return a - b; })
       : [];
     state.subSegs = normalizeSubSegs(savedPlayback.subSegs);
+    state.subSegValueEntries = normalizeSubSegValueEntries(savedPlayback.subSegValueEntries);
+    state.activeSubSegValueKey = null;
 
     state.selectedSpanIndex = -1;
     clearTargetSpanLock({ preserveSelection: false });
