@@ -9,6 +9,7 @@
   const loginButton = document.getElementById("login-button");
   const loginStatus = document.getElementById("login-status");
   const libraryView = document.getElementById("library-view");
+  const logoutButton = document.getElementById("logout-button");
   const playerView = document.getElementById("player-view");
   const uploadButton = document.getElementById("upload-button");
   const backButton = document.getElementById("back-button");
@@ -101,6 +102,9 @@
   loginForm.addEventListener("submit", handleLoginSubmit);
   if (subSegValueForm) {
     subSegValueForm.addEventListener("submit", handleSubSegValueSubmit);
+  }
+  if (logoutButton) {
+    logoutButton.addEventListener("click", handleLogoutClick);
   }
   uploadButton.addEventListener("click", openFilePicker);
   backButton.addEventListener("click", goBackToLibrary);
@@ -207,6 +211,13 @@
   function openFilePicker() {
     input.value = "";
     input.click();
+  }
+
+  function handleLogoutClick() {
+    if (state.isPersisting) {
+      return;
+    }
+    clearLoginState("Logged out.");
   }
 
   async function handleFileChange(event) {

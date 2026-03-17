@@ -120,9 +120,27 @@ h1, p { margin: 0; }
   color: #a22c2c;
 }
 
-.upload-row {
+.library-head-row {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.logout-button {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fbff;
+  color: var(--ink);
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  padding: 7px 10px;
+}
+
+.logout-button:hover {
+  border-color: #b8c6dd;
 }
 
 .upload-button {
