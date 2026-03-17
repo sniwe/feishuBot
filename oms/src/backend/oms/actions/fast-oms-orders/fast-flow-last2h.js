@@ -8,6 +8,14 @@ const DEFAULT_OUTPUT_ROOT = path.resolve(__dirname, '..', '..', 'data', 'orders'
 const DEFAULT_LOGIN_URL = 'https://oms.xlwms.com/login';
 const DEFAULT_ORDERS_URL = 'https://oms.xlwms.com/platform/order/list';
 const WORKSPACE_ROOT = path.resolve(__dirname, '..', '..', '..', '..', '..');
+const PRESERVED_ROW_FIELDS = [
+  'original_total_product_price',
+  'sub_total',
+  'total_amount',
+  'giftBag',
+  'giftBagPolicyKey',
+  'giftBagPolicyDescription'
+];
 
 function stripBom(value) {
   return String(value || '').replace(/^\uFEFF/, '');
@@ -679,6 +687,68 @@ async function fetchOrderPayloadIndex(page) {
   return { payloadByKey, payloadRows: Array.from(uniqueByOrderNo.values()) };
 }
 
+function getRowMatchKeys(row) {
+  return [row?.platformOrderNo, row?.orderNo, row?.rowId].map((v) => String(v || '').trim()).filter(Boolean);
+}
+
+async function loadExistingRowsIndex(filePath) {
+  try {
+    const raw = await fs.readFile(filePath, 'utf8');
+    const parsed = JSON.parse(stripBom(raw));
+    const rows = Array.isArray(parsed?.rows) ? parsed.rows : [];
+    const map = new Map();
+    for (const row of rows) {
+      for (const key of getRowMatchKeys(row)) {
+        if (!map.has(key)) map.set(key, row);
+      }
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
+function applyPreservedFields(nextRows, existingIndex) {
+  return nextRows.map((row) => {
+    let existing = null;
+    for (const key of getRowMatchKeys(row)) {
+      if (existingIndex.has(key)) {
+        existing = existingIndex.get(key);
+        break;
+      }
+    }
+    if (!existing) return row;
+    const merged = { ...row };
+    for (const field of PRESERVED_ROW_FIELDS) {
+      const current = merged[field];
+      if (current == null || current === '') {
+        const preserved = existing[field];
+        if (preserved != null && preserved !== '') merged[field] = preserved;
+      }
+    }
+    return merged;
+  });
+}
+
+function getPrimaryRowKey(row) {
+  const keys = getRowMatchKeys(row);
+  if (keys.length > 0) return keys[0];
+  return `fallback:${String(row?.rowIndex ?? '')}:${String(row?.col21Parsed || '')}`;
+}
+
+function mergeRowsAppendHistory(existingRows, incomingRows) {
+  const mergedMap = new Map();
+  for (const row of existingRows || []) {
+    mergedMap.set(getPrimaryRowKey(row), row);
+  }
+  for (const row of incomingRows || []) {
+    const key = getPrimaryRowKey(row);
+    const prior = mergedMap.get(key);
+    mergedMap.set(key, prior ? { ...prior, ...row } : row);
+  }
+  return Array.from(mergedMap.values());
+}
+
 async function writeGroupedOutput(outputRoot, grouped, metadata) {
   const written = [];
   const entries = Object.entries(grouped);
@@ -717,6 +787,17 @@ async function writeGroupedOutput(outputRoot, grouped, metadata) {
     }
     for (const [prefix, prefRows] of Object.entries(byPrefix)) {
       const outPath = path.join(dir, `${prefix}.json`);
+      let existingRows = [];
+      const existingIndex = await loadExistingRowsIndex(outPath);
+      try {
+        const existingRaw = await fs.readFile(outPath, 'utf8');
+        const existingParsed = JSON.parse(stripBom(existingRaw));
+        existingRows = Array.isArray(existingParsed?.rows) ? existingParsed.rows : [];
+      } catch {
+        existingRows = [];
+      }
+      const mergedRows = applyPreservedFields(prefRows, existingIndex);
+      const historyRows = mergeRowsAppendHistory(existingRows, mergedRows);
       await fs.writeFile(
         outPath,
         JSON.stringify(
@@ -724,8 +805,8 @@ async function writeGroupedOutput(outputRoot, grouped, metadata) {
             ...metadata,
             orderDate: dateKey,
             col13Prefix: prefix,
-            matchedCount: prefRows.length,
-            rows: prefRows
+            matchedCount: historyRows.length,
+            rows: historyRows
           },
           null,
           2
@@ -823,7 +904,6 @@ async function main() {
           from: toIsoLocal(cutoff),
           to: toIsoLocal(now)
         },
-        stabilized: stable,
         scannedRowCount: scan.rows.length
       }
     );

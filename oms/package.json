@@ -8,7 +8,10 @@
     "action:fast-click-tab-1": "npm --prefix src/backend/oms/app run action:fast-click-tab-1",
     "action:fast-scan-col21-last2h": "npm --prefix src/backend/oms/app run action:fast-scan-col21-last2h",
     "action:fast-flow-last2h": "npm --prefix src/backend/oms/app run action:fast-flow-last2h",
-    "action:fast-flow-last2h:loop": "npm --prefix src/backend/oms/app run action:fast-flow-last2h:loop"
+    "action:fast-flow-last2h:loop": "npm --prefix src/backend/oms/app run action:fast-flow-last2h:loop",
+    "action:tiktok-orders-last-ndays": "npm --prefix src/backend/oms/app run action:tiktok-orders-last-ndays --",
+    "action:tiktok-augment-orders-pricing": "npm --prefix src/backend/oms/app run action:tiktok-augment-orders-pricing --",
+    "action:apply-freebie-giftbag-policy": "npm --prefix src/backend/oms/app run action:apply-freebie-giftbag-policy --"
   },
   "dependencies": {
     "puppeteer": "^24.39.1",

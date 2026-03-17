@@ -1,0 +1,27 @@
+{
+  "id": "feebie-config",
+  "name": "Gifts Bag Policy Config",
+  "currency": "USD",
+  "policies": [
+    {
+      "key": "smallGiftBag",
+      "targetSku": ["LB3050-1","LB4050-1"],
+      "minItems": 2,
+      "minSpendUsd": 60,
+      "giftValueUsd": 12.9,
+      "description": "Buy 2 or spend over $60 to get a small gift bag."
+    },
+    {
+      "key": "accessoryBag",
+      "targetSku": ["LB1057-3"],
+      "minItems": 3,
+      "minSpendUsd": 90,
+      "giftValueUsd": 29.9,
+      "description": "Buy 3 or spend over $90 to get a free accessory bag."
+    }
+  ],
+  "guardrails": {
+    "allowIncentivizedBulkGifting": false,
+    "note": "Do not encourage excessive purchasing with extra gifts for very high item counts."
+  }
+}

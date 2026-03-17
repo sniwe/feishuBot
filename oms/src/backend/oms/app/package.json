@@ -11,7 +11,10 @@
     "action:fast-click-tab-1": "node ../actions/fast-oms-orders/fast-click-tab-1.js",
     "action:fast-scan-col21-last2h": "node ../actions/fast-oms-orders/fast-scan-col21-last2h.js",
     "action:fast-flow-last2h": "node ../actions/fast-oms-orders/fast-flow-last2h.js",
-    "action:fast-flow-last2h:loop": "node ../actions/fast-oms-orders/loop-fast-flow-last2h.js"
+    "action:fast-flow-last2h:loop": "node ../actions/fast-oms-orders/loop-fast-flow-last2h.js",
+    "action:tiktok-orders-last-ndays": "node ../actions/tiktok-orders-last-ndays/fetch-allorders-last-ndays.js",
+    "action:tiktok-augment-orders-pricing": "node ../actions/tiktok-orders-last-ndays/augment-orders-with-tiktok-pricing.js",
+    "action:apply-freebie-giftbag-policy": "node ../actions/freebie-giftbag-policy/apply-freebie-giftbag-policy.js"
   },
   "dependencies": {
     "puppeteer": "^24.3.0",

@@ -1,0 +1,10 @@
+{
+  "requestedAt": "2026-03-17T04:46:26.278Z",
+  "method": "GET",
+  "url": "https://trendyadventurer.wixstudio.io/tb-redo/_functions/getAllOrdersLastNDays?shopRoomCode=LG401&days=1",
+  "shopRoomCode": "LG401",
+  "days": 1,
+  "ok": false,
+  "payload": null,
+  "error": "connect ETIMEDOUT 104.244.46.211:443"
+}

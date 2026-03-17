@@ -1,0 +1,3842 @@
+{
+  "ok": true,
+  "shopRoomCode": "LG401",
+  "days": 1,
+  "count": 31,
+  "orders": [
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/2001d1532850f84f74e97bcbc3ee61e3~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=07212bf2&x-expires=1773896400&x-signature=C8KESKv1227MaCohiUU2Si9ZDB0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AHTPUOTNUY3W24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Elisa",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773686897,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577311507408064547",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311507408326691",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "3.72",
+              "tax_rate": "0.0825",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "50.12",
+          "platform_discount": "0",
+          "product_id": "1729481140066555799",
+          "product_name": "24-inch Solid Near-black Espresso Brunette Undone Waves Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #16 FSGA",
+          "sale_price": "45.1",
+          "seller_discount": "5.02",
+          "seller_sku": "SWLC3137-1BR24",
+          "sku_id": "1729481141916702615",
+          "sku_image": "https://p16-oec-general-useast8.ttcdn-us.com/tos-useast8-i-rt0ujvrtvp-tx2/f3827b165c7642c483cb3404ca337204~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773686902,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.58",
+        "original_total_product_price": "50.12",
+        "platform_discount": "0",
+        "product_tax": "3.72",
+        "seller_discount": "5.02",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "4.58",
+        "shipping_fee_tax": "0",
+        "sub_total": "45.1",
+        "tax": "3.72",
+        "total_amount": "48.82"
+      },
+      "payment_method_name": "Venmo",
+      "recipient_address": {
+        "address_detail": "12041 Dessau Rd Apt 2711",
+        "address_line1": "12041 Dessau Rd Apt 2711",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Texas",
+            "iso_code": "TX"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Travis"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Austin"
+          }
+        ],
+        "first_name": "Claire",
+        "full_address": "United States, Texas, Travis, Austin,12041 Dessau Rd Apt 2711",
+        "last_name": "Kapolka",
+        "name": "Claire Kapolka",
+        "phone_number": "(+1)5128177586",
+        "postal_code": "78754",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773690503,
+      "user_id": "7493999507384862755",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p19-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/e1246731e19956dc34c9624284ff00cd~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=023cb9fa&x-expires=1773896400&x-signature=n3Bo3jMEuQyet73jiysNMEAppcM%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AGZP4C2VNSQ52E@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Anne Middleton",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773708967,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577311925881705101",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311925881836173",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.93",
+              "tax_rate": "0.0625",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "39.92",
+          "platform_discount": "0",
+          "product_id": "1731063489700205463",
+          "product_name": "22-Inch Off-White Blonde Reverse Ombré (No Root Color, Light Pastel Pink Ends) Straight Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGA",
+          "sale_price": "30.92",
+          "seller_discount": "9",
+          "seller_sku": "SWLC6324-2MU26",
+          "sku_id": "1731063536148321175",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/7a4b9ece62ea48d4920bf405703221de~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773708971,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.84",
+        "original_total_product_price": "39.92",
+        "platform_discount": "0",
+        "product_tax": "1.93",
+        "seller_discount": "9",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "4.84",
+        "shipping_fee_tax": "0",
+        "sub_total": "30.92",
+        "tax": "1.93",
+        "total_amount": "32.85"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "209 Quincy St Apt 3",
+        "address_line1": "209 Quincy St Apt 3",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Massachusetts",
+            "iso_code": "MA"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Suffolk"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Boston"
+          }
+        ],
+        "first_name": "Kristi",
+        "full_address": "United States, Massachusetts, Suffolk, Boston,209 Quincy St Apt 3",
+        "last_name": "Jalava",
+        "name": "Kristi Jalava",
+        "phone_number": "(+1)8572505817",
+        "postal_code": "02121",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773712572,
+      "user_id": "7495471983380564621",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p19-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/3668e53fd067434bbaca38d9606043c6~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=25c7ac48&x-expires=1773896400&x-signature=8RjkKjB%2F7qhHLxfERui4871ouq0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AGXPMOYKXCDR24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Elizabeth Zamudio",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773709127,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577311928270229897",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311928270360969",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.77",
+              "tax_rate": "0.1025",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "38.52",
+          "platform_discount": "0",
+          "product_id": "1731063504243299223",
+          "product_name": "13.5-Inch Deep Wine-Cheery Red Straight Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGA",
+          "sale_price": "26.97",
+          "seller_discount": "11.55",
+          "seller_sku": "SWLC8285-6RE14",
+          "sku_id": "1731063564132455319",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/2cec74d568554731830eb1451e268ee8~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        },
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311928270426505",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.2",
+              "tax_rate": "0.1025",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "12.99",
+          "platform_discount": "0",
+          "product_id": "1732154006411711383",
+          "product_name": "Lady Grayy Hangable Wig Storage Bag - Deconstructed Accessory Bag 2",
+          "sale_price": "11.68",
+          "seller_discount": "1.31",
+          "seller_sku": "LB2050-1",
+          "sku_id": "1732154006455620503",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/664b459b6f5d457883f819128d04c9d8~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773709130,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.69",
+        "original_total_product_price": "51.51",
+        "platform_discount": "0",
+        "product_tax": "3.97",
+        "seller_discount": "12.86",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "4.69",
+        "shipping_fee_tax": "0",
+        "sub_total": "38.65",
+        "tax": "3.97",
+        "total_amount": "42.62"
+      },
+      "payment_method_name": "ApplePay",
+      "recipient_address": {
+        "address_detail": "7634 S CHAMPLAIN AVE",
+        "address_line1": "7634 S CHAMPLAIN AVE",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Illinois",
+            "iso_code": "IL"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Cook"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Chicago"
+          }
+        ],
+        "first_name": "Elizabeth",
+        "full_address": "United States, Illinois, Cook, Chicago,7634 S CHAMPLAIN AVE",
+        "last_name": "Zamudio",
+        "name": "Elizabeth Zamudio",
+        "phone_number": "(+1)7737297126",
+        "postal_code": "60619",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773712731,
+      "user_id": "7494004031154325897",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7326170101181972485~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=76e59fb3&x-expires=1773896400&x-signature=0Klh9QxzZRDDREqTpJHwBPmaJSU%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AG5P4ND2FPCS24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "user6111747502546",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773709857,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577311945435484760",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311945435615832",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.41",
+              "tax_rate": "0.08875",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "32",
+          "platform_discount": "0",
+          "product_id": "1729438937115956119",
+          "product_name": "30-Inch Honey Wheat Brown with Dark Roots Body Wave Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGB",
+          "sale_price": "27.2",
+          "seller_discount": "4.8",
+          "seller_sku": "LC2039-1",
+          "sku_id": "1729438937116021655",
+          "sku_image": "https://p19-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/1bee087a0e064160b5ce530e34876f62~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        },
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311945435681368",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.6",
+              "tax_rate": "0.08875",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "29.9",
+          "platform_discount": "0",
+          "product_id": "1729663338077393815",
+          "product_name": "22.4-Inch Black to Fuscia Pink Ombré Wavy Synthetic Wig | 【Heat Resistant】【Cap Included】 | #20 FSGC",
+          "sale_price": "17.94",
+          "seller_discount": "11.96",
+          "seller_sku": "LC1171-1",
+          "sku_id": "1729663338077459351",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/88f3195c36b44d46954054ef0f939add~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        },
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311945435746904",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.15",
+              "tax_rate": "0.08875",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "34.7",
+          "platform_discount": "0",
+          "product_id": "1730926363787367319",
+          "product_name": "22-Inch Black (Scarlet Red Lowlights) Wavy Synthetic Wig | 【Heat Resistant】【Cap Included】 |  FSGA",
+          "sale_price": "24.29",
+          "seller_discount": "10.41",
+          "seller_sku": "SWLC3088-1RE26",
+          "sku_id": "1730926562441859991",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/adf0ca545ee643cca7c8005620c78d25~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773709861,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "7.74",
+        "original_total_product_price": "96.6",
+        "platform_discount": "0",
+        "product_tax": "6.16",
+        "seller_discount": "27.17",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "7.74",
+        "shipping_fee_tax": "0",
+        "sub_total": "69.43",
+        "tax": "6.16",
+        "total_amount": "75.59"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "700 E 141st St Apt 6a",
+        "address_line1": "700 E 141st St Apt 6a",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "New York",
+            "iso_code": "NY"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Bronx"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Bronx"
+          }
+        ],
+        "first_name": "nuvia",
+        "full_address": "United States, New York, Bronx, Bronx,700 E 141st St Apt 6a",
+        "last_name": "crespo",
+        "name": "nuvia crespo",
+        "phone_number": "(+1)3478332209",
+        "postal_code": "10454",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773713462,
+      "user_id": "7494167139714435672",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/48b8c49e472f3628e487a68b6d822913~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=79dbf223&x-expires=1773896400&x-signature=qV1nf%2FqWevsm3XBgWbUBEXe3z6o%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AG7PEA7NWVCP24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "KristenRenee",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773709973,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577311948050371561",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311948050568169",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.15",
+              "tax_rate": "0.07",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "36",
+          "platform_discount": "0",
+          "product_id": "1730593362429186967",
+          "product_name": "12-Inch Sand Blonde (Espresso Roots, Platinum Underlights) Cute Beach Wave Synthetic Wig | 【Heat Resistant】【Cap Included】 | #5 FSGB",
+          "sale_price": "30.6",
+          "seller_discount": "5.4",
+          "seller_sku": "LC1118-1",
+          "sku_id": "1730593494962836375",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/7ddc51e1ea914d5c8678f49d8d262364~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        },
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311948050633705",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.64",
+              "tax_rate": "0.07",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "53.9",
+          "platform_discount": "0",
+          "product_id": "1732137458122331031",
+          "product_name": "10-Inch Purple Burgandy Sombre (Fiery Underlights) Free Spirit Wavy Long Bob Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGA",
+          "sale_price": "37.73",
+          "seller_discount": "16.17",
+          "seller_sku": "SWLC3094-1MU12",
+          "sku_id": "1732137458639475607",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/d435920f74b340b78604f72964b73e16~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        },
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311948050502633",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.49",
+              "tax_rate": "0.07",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "25",
+          "platform_discount": "0",
+          "product_id": "1729406323083940759",
+          "product_name": "13-Inch Royal Purple Light Wave Synthetic Wig | 【Heat Resistant】【Cap Included】 | #25 FSGB",
+          "sale_price": "21.25",
+          "seller_discount": "3.75",
+          "seller_sku": "WL1006-3",
+          "sku_id": "1729406323084006295",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/558480b9c7b045c8b4f5c6a4b3384e02~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773710029,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "7.74",
+        "original_total_product_price": "114.9",
+        "platform_discount": "0",
+        "product_tax": "6.28",
+        "seller_discount": "25.32",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "7.74",
+        "shipping_fee_tax": "0",
+        "sub_total": "89.58",
+        "tax": "6.28",
+        "total_amount": "95.86"
+      },
+      "payment_method_name": "Affirm",
+      "recipient_address": {
+        "address_detail": "3309 Merita Dr",
+        "address_line1": "3309 Merita Dr",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Florida",
+            "iso_code": "FL"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Pasco"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Holiday"
+          }
+        ],
+        "first_name": "Kristen",
+        "full_address": "United States, Florida, Pasco, Holiday,3309 Merita Dr",
+        "last_name": "Mohn",
+        "name": "Kristen Mohn",
+        "phone_number": "(+1)7276210728",
+        "postal_code": "34691",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773713630,
+      "user_id": "7494007255724755945",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/musically-maliva-obj/1594805258216454~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=ceebc4bb&x-expires=1773896400&x-signature=QoiKOkO0sVH3pKbxPHmUg%2ByqEDU%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AHRJEIDMRESU3Q@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Kellina",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773710103,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577311947111567613",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311947111698685",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.81",
+              "tax_rate": "0.08875",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "29.9",
+          "platform_discount": "5.08",
+          "product_id": "1729406322649371543",
+          "product_name": "13-Inch Light Ash Blonde Reverse Ombré (Scorched Brown Roots) Straight Synthetic Wig | 【Heat Resistant】【Cap Included】 | #7 FSGB",
+          "sale_price": "20.34",
+          "seller_discount": "4.48",
+          "seller_sku": "LC2067-1",
+          "sku_id": "1729406322649437079",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/e1fd7e77ac894cecaf690c11b49d12fe~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773710107,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.84",
+        "original_total_product_price": "29.9",
+        "platform_discount": "5.08",
+        "product_tax": "1.81",
+        "seller_discount": "4.48",
+        "shipping_fee": "4.84",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "0",
+        "shipping_fee_tax": "0.43",
+        "sub_total": "20.34",
+        "tax": "2.24",
+        "total_amount": "27.42"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "413 City Island Ave Apt 1",
+        "address_line1": "413 City Island Ave Apt 1",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "New York",
+            "iso_code": "NY"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Bronx"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Bronx"
+          }
+        ],
+        "first_name": "Kelly",
+        "full_address": "United States, New York, Bronx, Bronx,413 City Island Ave Apt 1",
+        "last_name": "Seda",
+        "name": "Kelly Seda",
+        "phone_number": "(+1)3478433018",
+        "postal_code": "10464",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773713708,
+      "user_id": "7496201569856096509",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/27ef4c5fa4fa6a00ea9880a0f5fd5d17~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=3ac62c72&x-expires=1773896400&x-signature=gblVLVacUXFddKOiGyekwwAgZT0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AG5PMHHLERDQ24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Krys",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773710171,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577311951232143693",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311951232274765",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.24",
+              "tax_rate": "0.08",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "32.9",
+          "platform_discount": "0",
+          "product_id": "1729663341065704343",
+          "product_name": "21-Inch Dark Brunette (Light Auburn Highlights) Wavy Butterfly Cut Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #30 FSGB",
+          "sale_price": "27.97",
+          "seller_discount": "4.93",
+          "seller_sku": "SWLC1233-1BR26",
+          "sku_id": "1729663341065769879",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/983fad4f48974d36a77de3db8ce3a795~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773710176,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.84",
+        "original_total_product_price": "32.9",
+        "platform_discount": "0",
+        "product_tax": "2.24",
+        "seller_discount": "4.93",
+        "shipping_fee": "4.84",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "0",
+        "shipping_fee_tax": "0.38",
+        "sub_total": "27.97",
+        "tax": "2.62",
+        "total_amount": "35.43"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "300 LAKEVIEW DR",
+        "address_line1": "300 LAKEVIEW DR",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Georgia",
+            "iso_code": "GA"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Liberty"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Hinesville"
+          }
+        ],
+        "first_name": "Krys",
+        "full_address": "United States, Georgia, Liberty, Hinesville,300 LAKEVIEW DR",
+        "last_name": "Wosyk",
+        "name": "Krys Wosyk",
+        "phone_number": "(+1)7065771065",
+        "postal_code": "31313",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773713777,
+      "user_id": "7493997871272593741",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/18002f801d202b74547c27feee8b0145~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=09d1c7fe&x-expires=1773896400&x-signature=Wzd%2Bri8Mz4DpFzHcEb11WNo4QWQ%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AGZPUCFNPA2R24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "HeathaBeee",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773711234,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577311972842312114",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311972842443186",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "0.86",
+              "tax_rate": "0.0825",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "29.9",
+          "platform_discount": "15",
+          "product_id": "1729663340572742551",
+          "product_name": "23-Inch Neutral Dark Brown Wavy Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGB",
+          "sale_price": "10.42",
+          "seller_discount": "4.48",
+          "seller_sku": "LC1050-1",
+          "sku_id": "1729663340572808087",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/de5a5c8e89df4875b2e221b8806aed2b~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773711237,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.58",
+        "original_total_product_price": "29.9",
+        "platform_discount": "15",
+        "product_tax": "0.86",
+        "seller_discount": "4.48",
+        "shipping_fee": "4.58",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "0",
+        "shipping_fee_tax": "0.38",
+        "sub_total": "10.42",
+        "tax": "1.24",
+        "total_amount": "16.24"
+      },
+      "payment_method_name": "ApplePay",
+      "recipient_address": {
+        "address_detail": "3006 Franciscan Dr Ofc",
+        "address_line1": "3006 Franciscan Dr Ofc",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Texas",
+            "iso_code": "TX"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Tarrant"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Arlington"
+          }
+        ],
+        "first_name": "Heather",
+        "full_address": "United States, Texas, Tarrant, Arlington,3006 Franciscan Dr Ofc",
+        "last_name": "Bush",
+        "name": "Heather Bush",
+        "phone_number": "(+1)4848002853",
+        "postal_code": "76015",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773714838,
+      "user_id": "7494230684768373170",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/facbb1fd3ba162b4164dd5eb81bd012f~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=ed7eb479&x-expires=1773896400&x-signature=6uEZIT5EX2caIvQ8n5GFqVSIDKE%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AHVPEPP7T2RQ2E@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Jackie_official83 🇵🇷🌹",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773711424,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577311977275560540",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311977275691612",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "4.34",
+              "tax_rate": "0.0625",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "99.18",
+          "platform_discount": "0",
+          "product_id": "1732282483729994647",
+          "product_name": "'APRICOT KISSES' 21-inch Apricot Blonde Balayage (Dark Roots, Pink & Orange Tones) Straight w/ Face Framing Money Pieces Premium Japanese Fiber Blend Synthetic Wig | Free-part LaceHeat ResistantCap Included |",
+          "sale_price": "69.43",
+          "seller_discount": "29.75",
+          "seller_sku": "SWLF3022-1BL22",
+          "sku_id": "1732282492880196503",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/0344e2bd00234bb9bef6457e4e902589~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773711429,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.84",
+        "original_total_product_price": "99.18",
+        "platform_discount": "0",
+        "product_tax": "4.34",
+        "seller_discount": "29.75",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "4.84",
+        "shipping_fee_tax": "0",
+        "sub_total": "69.43",
+        "tax": "4.34",
+        "total_amount": "73.77"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "123 Garfield Ave",
+        "address_line1": "123 Garfield Ave",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Massachusetts",
+            "iso_code": "MA"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Suffolk"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Boston"
+          }
+        ],
+        "first_name": "Jacqueline",
+        "full_address": "United States, Massachusetts, Suffolk, Boston,123 Garfield Ave",
+        "last_name": "Marrero",
+        "name": "Jacqueline Marrero",
+        "phone_number": "(+1)8572774147",
+        "postal_code": "02136",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "seller_note": "coupon",
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773715030,
+      "user_id": "7495400731006765660",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/01f2f130f8758ac92e82506f9f205b7e~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=6336bd39&x-expires=1773896400&x-signature=ubtFiSboGoXWjM8kDDN6E6FMyMs%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AHRPUVPS3UBP24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Mema",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773711452,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577311982940230557",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311982940361629",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.79",
+              "tax_rate": "0.1",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "39.98",
+          "platform_discount": "0.1",
+          "product_id": "1731029429101433751",
+          "product_name": "24-Inch Warm Beach Blonde Reverse Ombré (No Root Color, Brunette Ends) Layered Loose Undone Waves Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGA",
+          "sale_price": "27.89",
+          "seller_discount": "11.99",
+          "seller_sku": "LC3037-1",
+          "sku_id": "1731029494804485015",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/e199224669224897a259b8cd0b64845e~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        },
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311982940427165",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "5.63",
+              "tax_rate": "0.1",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "89.75",
+          "platform_discount": "6.49",
+          "product_id": "1732125025444270999",
+          "product_name": "'Flame it Up' 24-Inch Solid Warm Copper-tinted Auburn Retro Glam Blowout Futura Synthetic Wig | 【Free-part 13*4\" Lace】【Heat Resistant】【Cap Included】 |",
+          "sale_price": "56.33",
+          "seller_discount": "26.93",
+          "seller_sku": "SWLF1065-6OR28",
+          "sku_id": "1732125167573898135",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/9e0dc9a41c1d4b3e86098d5e105b086c~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773711457,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "7.19",
+        "original_total_product_price": "129.73",
+        "platform_discount": "6.59",
+        "product_tax": "8.42",
+        "seller_discount": "38.92",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "7.19",
+        "shipping_fee_tax": "0",
+        "sub_total": "84.22",
+        "tax": "8.42",
+        "total_amount": "92.64"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "3353 Commercial Ave Apt 4",
+        "address_line1": "3353 Commercial Ave Apt 4",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "delivery_preferences": {
+          "drop_off_location": "Front door"
+        },
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Illinois",
+            "iso_code": "IL"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Cook"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "S Chicago Hts"
+          }
+        ],
+        "first_name": "Suleyma",
+        "full_address": "United States, Illinois, Cook, S Chicago Hts,3353 Commercial Ave Apt 4",
+        "last_name": "Serrano",
+        "name": "Suleyma Serrano",
+        "phone_number": "(+1)2192984563",
+        "postal_code": "60411",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773715058,
+      "user_id": "7494544947150424989",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7333511438940635141~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=036f2932&x-expires=1773896400&x-signature=ti6pXQNWm8K11JFD65%2B3sYqVLCs%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AGXPMH6DHC3R24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Amberly_j",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773711787,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577311987454611833",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311987454742905",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.32",
+              "tax_rate": "0.08",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "34.1",
+          "platform_discount": "2.37",
+          "product_id": "1729406323382653847",
+          "product_name": "26-Inch Chestnut Brown to Sandy Blonde Ombré Wavy Synthetic Wig | 【Heat Resistant】【Cap Included】 | #32 FSGB",
+          "sale_price": "26.62",
+          "seller_discount": "5.11",
+          "seller_sku": "LC5207-1",
+          "sku_id": "1729406323382719383",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/431f526bf2bd445db38255d54750f9fb~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        },
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311987454808441",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.58",
+              "tax_rate": "0.08",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "46.07",
+          "platform_discount": "2.63",
+          "product_id": "1729479477817218967",
+          "product_name": "20-Inch Blended Blonde Ombre (Dark Roots) Straight Synthetic Wig | Heat ResistantCap Included |  FSGA",
+          "sale_price": "29.62",
+          "seller_discount": "13.82",
+          "seller_sku": "SWLC1268-1BR22",
+          "sku_id": "1729479480198666135",
+          "sku_image": "https://p16-oec-general-useast8.ttcdn-us.com/tos-useast8-i-rt0ujvrtvp-tx2/35529d9be40c4430b652c021e073921c~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773711792,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "7.74",
+        "original_total_product_price": "80.17",
+        "platform_discount": "5",
+        "product_tax": "4.9",
+        "seller_discount": "18.93",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "7.74",
+        "shipping_fee_tax": "0",
+        "sub_total": "56.24",
+        "tax": "4.9",
+        "total_amount": "61.14"
+      },
+      "payment_method_name": "TikTok PayLater Powered by Klarna",
+      "recipient_address": {
+        "address_detail": "112 Smithwick Trl",
+        "address_line1": "112 Smithwick Trl",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Georgia",
+            "iso_code": "GA"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Effingham"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Guyton"
+          }
+        ],
+        "first_name": "amberly",
+        "full_address": "United States, Georgia, Effingham, Guyton,112 Smithwick Trl",
+        "last_name": "Ramirez",
+        "name": "amberly Ramirez",
+        "phone_number": "(+1)9107746939",
+        "postal_code": "31312",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773715394,
+      "user_id": "7493999451838646649",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/c48443311ce0e2910bc4b4ff3f91edf0~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=1d00031b&x-expires=1773896400&x-signature=Q71LJH1j85DtKdfJtZEHuuDl37s%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AG7P4EMOIRCN24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Elizabeth",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773711902,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577311991500607718",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577311991500738790",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "4.83",
+              "tax_rate": "0.0725",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "95.04",
+          "platform_discount": "0",
+          "product_id": "1729481604137457559",
+          "product_name": "14-inch Rich Chocolate Brunette (Caramel Brown Highlights) Voluminous Bouncy Curls (Side Part) Lace Front Synthetic Wig | 【360° Lace Cap Construction】【Heat Resistant】【Cap Included】 |  #25 FSGA",
+          "sale_price": "66.53",
+          "seller_discount": "28.51",
+          "seller_sku": "SWLP5001-1BR14",
+          "sku_id": "1729481616904656791",
+          "sku_image": "https://p16-oec-general-useast8.ttcdn-us.com/tos-useast8-i-rt0ujvrtvp-tx2/b4e6b591ebce40ffbd7cd05b4a9fe30d~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773711905,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.22",
+        "original_total_product_price": "95.04",
+        "platform_discount": "0",
+        "product_tax": "4.83",
+        "seller_discount": "28.51",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "4.22",
+        "shipping_fee_tax": "0",
+        "sub_total": "66.53",
+        "tax": "4.83",
+        "total_amount": "71.36"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "935 WALNUT ST",
+        "address_line1": "935 WALNUT ST",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Ohio",
+            "iso_code": "OH"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Henry"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "New Bavaria"
+          }
+        ],
+        "first_name": "Elizabeth",
+        "full_address": "United States, Ohio, Henry, New Bavaria,935 WALNUT ST",
+        "last_name": "Sabino",
+        "name": "Elizabeth Sabino",
+        "phone_number": "(+1)4197895372",
+        "postal_code": "43548",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773715507,
+      "user_id": "7493997571802171622",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/48b8c49e472f3628e487a68b6d822913~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=79dbf223&x-expires=1773896400&x-signature=qV1nf%2FqWevsm3XBgWbUBEXe3z6o%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AG7PEA7NWVCP24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "KristenRenee",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773712997,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312015172015081",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312015172146153",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "3.57",
+              "tax_rate": "0.07",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "72.96",
+          "platform_discount": "0",
+          "product_id": "1731513406227583895",
+          "product_name": "12-Inch Solid Matte Black Wavy A-Line Long Bob Lace Front Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGA",
+          "sale_price": "51.08",
+          "seller_discount": "21.88",
+          "seller_sku": "HC11089-1",
+          "sku_id": "1731513447994266519",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/cadc10e22b774ad0b68628596840e8d3~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773713001,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.84",
+        "original_total_product_price": "72.96",
+        "platform_discount": "0",
+        "product_tax": "3.57",
+        "seller_discount": "21.88",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "4.84",
+        "shipping_fee_tax": "0",
+        "sub_total": "51.08",
+        "tax": "3.57",
+        "total_amount": "54.65"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "3309 Merita Dr",
+        "address_line1": "3309 Merita Dr",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Florida",
+            "iso_code": "FL"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Pasco"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Holiday"
+          }
+        ],
+        "first_name": "Kristen",
+        "full_address": "United States, Florida, Pasco, Holiday,3309 Merita Dr",
+        "last_name": "Mohn",
+        "name": "Kristen Mohn",
+        "phone_number": "(+1)7276210728",
+        "postal_code": "34691",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773716602,
+      "user_id": "7494007255724755945",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/6cddc2e5772079a9a4a240727f43c220~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=97acd2db&x-expires=1773896400&x-signature=QaqBeBqs3NYuYtB6ERijqLK2ZJ4%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AG5JECVIF3NV2M@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Sheryl Roberts",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773713529,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312030264692857",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312030264823929",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.18",
+              "tax_rate": "0.08475",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "34.1",
+          "platform_discount": "15",
+          "product_id": "1729406323382653847",
+          "product_name": "26-Inch Chestnut Brown to Sandy Blonde Ombré Wavy Synthetic Wig | 【Heat Resistant】【Cap Included】 | #32 FSGB",
+          "sale_price": "13.99",
+          "seller_discount": "5.11",
+          "seller_sku": "LC5207-1",
+          "sku_id": "1729406323382719383",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/431f526bf2bd445db38255d54750f9fb~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773713533,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.1",
+        "original_total_product_price": "34.1",
+        "platform_discount": "15",
+        "product_tax": "1.18",
+        "seller_discount": "5.11",
+        "shipping_fee": "4.1",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "0",
+        "shipping_fee_tax": "0.34",
+        "sub_total": "13.99",
+        "tax": "1.52",
+        "total_amount": "19.61"
+      },
+      "payment_method_name": "PayPal",
+      "recipient_address": {
+        "address_detail": "225 S DENTON ST",
+        "address_line1": "225 S DENTON ST",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Missouri",
+            "iso_code": "MO"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Boone"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Centralia"
+          }
+        ],
+        "first_name": "Sheryl",
+        "full_address": "United States, Missouri, Boone, Centralia,225 S DENTON ST",
+        "last_name": "Roberts",
+        "name": "Sheryl Roberts",
+        "phone_number": "(+1)5738085925",
+        "postal_code": "65240",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773717134,
+      "user_id": "7496115811860646009",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7327227404032393222~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=e5c9b763&x-expires=1773896400&x-signature=b3MeRMf8mWZdQH7qxg4Xuk9GM0Q%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AHTP4O57AEDQ24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Brayton Ault",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773713627,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312031506665879",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312031506796951",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.84",
+              "tax_rate": "0.06",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "36",
+          "platform_discount": "0",
+          "product_id": "1730593362429186967",
+          "product_name": "12-Inch Sand Blonde (Espresso Roots, Platinum Underlights) Cute Beach Wave Synthetic Wig | 【Heat Resistant】【Cap Included】 | #5 FSGB",
+          "sale_price": "30.6",
+          "seller_discount": "5.4",
+          "seller_sku": "LC1118-1",
+          "sku_id": "1730593494962836375",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/7ddc51e1ea914d5c8678f49d8d262364~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773713632,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.84",
+        "original_total_product_price": "36",
+        "platform_discount": "0",
+        "product_tax": "1.84",
+        "seller_discount": "5.4",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "4.84",
+        "shipping_fee_tax": "0",
+        "sub_total": "30.6",
+        "tax": "1.84",
+        "total_amount": "32.44"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "3 Baldwin Ct",
+        "address_line1": "3 Baldwin Ct",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Pennsylvania",
+            "iso_code": "PA"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Adams"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "New Oxford"
+          }
+        ],
+        "first_name": "Brayton",
+        "full_address": "United States, Pennsylvania, Adams, New Oxford,3 Baldwin Ct",
+        "last_name": "Ault",
+        "name": "Brayton Ault",
+        "phone_number": "(+1)7176988349",
+        "postal_code": "17350",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773717233,
+      "user_id": "7494004432706439575",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/cbd27b455ecc16f8bb9d12cab1a12085~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=646bfbf5&x-expires=1773896400&x-signature=vo29iYVJhJYrz6yrrnlioos9EsI%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AGVJ4A3ZVXNS2I@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "lizzy1054",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773713992,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312045338104808",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312045338301416",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "0",
+              "tax_rate": "0",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "38.6",
+          "platform_discount": "0",
+          "product_id": "1730970943924376471",
+          "product_name": "28-Inch Cloud Cream Pink (Maroonish Brunette Ends, No Root Color) Undone Waves Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGA",
+          "sale_price": "24.56",
+          "seller_discount": "14.04",
+          "seller_sku": "SWLC8313-1PI28",
+          "sku_id": "1730971160958833559",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/14f42290b12840a2beff0997b6c20657~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        },
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312045338235880",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "0",
+              "tax_rate": "0",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "32.9",
+          "platform_discount": "0",
+          "product_id": "1729440304740799383",
+          "product_name": "26-Inch Pastel Smoke Silver Straight Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGB",
+          "sale_price": "25.43",
+          "seller_discount": "7.47",
+          "seller_sku": "WL1085-7",
+          "sku_id": "1729440304740864919",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/83ee1d1e413448acbc35b1da09307415~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773713994,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "6.22",
+        "original_total_product_price": "71.5",
+        "platform_discount": "0",
+        "product_tax": "0",
+        "seller_discount": "21.51",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "6.22",
+        "shipping_fee_tax": "0",
+        "sub_total": "49.99",
+        "tax": "0",
+        "total_amount": "49.99"
+      },
+      "payment_method_name": "TikTok Shop Balance",
+      "recipient_address": {
+        "address_detail": "7222 Se Iowa Ave",
+        "address_line1": "7222 Se Iowa Ave",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Oregon",
+            "iso_code": "OR"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Crook"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Prineville"
+          }
+        ],
+        "first_name": "Elizabeth",
+        "full_address": "United States, Oregon, Crook, Prineville,7222 Se Iowa Ave",
+        "last_name": "Pascuzzi",
+        "name": "Elizabeth Pascuzzi",
+        "phone_number": "(+1)5033201794",
+        "postal_code": "97754",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "seller_note": "coupon",
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773717595,
+      "user_id": "7495866544109030376",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/d81e354d048f940d60e570ccc0b2d0cd~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=4adbbcf3&x-expires=1773896400&x-signature=xnupFZIcoL%2Fu2dEbjoo1OeT%2FPBA%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5APPJMENRZ6AX3U@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Denise Pisaniello,RN",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773714024,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312043197239993",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312043197371065",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.8",
+              "tax_rate": "0.06625",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "32",
+          "platform_discount": "15",
+          "product_id": "1729406196670698391",
+          "product_name": "12-Inch Black (Toffee Highlights) Wavy Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #23 FSGB",
+          "sale_price": "12.2",
+          "seller_discount": "4.8",
+          "seller_sku": "LC8087-1",
+          "sku_id": "1729406323121296279",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/1f0aade189c645338d544c3d3b029da8~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773714027,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.84",
+        "original_total_product_price": "32",
+        "platform_discount": "15",
+        "product_tax": "1.8",
+        "seller_discount": "4.8",
+        "shipping_fee": "4.84",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "0",
+        "shipping_fee_tax": "0.32",
+        "sub_total": "12.2",
+        "tax": "2.12",
+        "total_amount": "19.16"
+      },
+      "payment_method_name": "ApplePay",
+      "recipient_address": {
+        "address_detail": "13 Walker St Apt A7",
+        "address_line1": "13 Walker St Apt A7",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "New Jersey",
+            "iso_code": "NJ"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Passaic"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Paterson"
+          }
+        ],
+        "first_name": "Denise Pisaniello,RN",
+        "full_address": "United States, New Jersey, Passaic, Paterson,13 Walker St Apt A7",
+        "last_name": "Pisaniello",
+        "name": "Denise Pisaniello,RN Pisaniello",
+        "phone_number": "(+1)8626685682",
+        "postal_code": "07501",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773717629,
+      "user_id": "7494378180574873273",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/b396adbda843ad12e75c6062b6ac23d0~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=364a5e65&x-expires=1773896400&x-signature=SnGfGZLALFQ6YOTbx6rY5WbCL94%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AHVPEGIN7CCI24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Demi Paulina💕",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773714045,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312046825444319",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312046825837535",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.04",
+              "tax_rate": "0.08875",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "12.99",
+          "platform_discount": "0",
+          "product_id": "1732154006411711383",
+          "product_name": "Lady Grayy Hangable Wig Storage Bag - Deconstructed Accessory Bag 2",
+          "sale_price": "11.68",
+          "seller_discount": "1.31",
+          "seller_sku": "LB2050-1",
+          "sku_id": "1732154006455620503",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/664b459b6f5d457883f819128d04c9d8~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        },
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312046825903071",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.04",
+              "tax_rate": "0.08875",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "12.99",
+          "platform_discount": "0",
+          "product_id": "1732154006411711383",
+          "product_name": "Lady Grayy Hangable Wig Storage Bag - Deconstructed Accessory Bag 2",
+          "sale_price": "11.68",
+          "seller_discount": "1.31",
+          "seller_sku": "LB2050-1",
+          "sku_id": "1732154006455620503",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/664b459b6f5d457883f819128d04c9d8~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        },
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312046825968607",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.03",
+              "tax_rate": "0.08875",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "12.99",
+          "platform_discount": "0",
+          "product_id": "1732154006411711383",
+          "product_name": "Lady Grayy Hangable Wig Storage Bag - Deconstructed Accessory Bag 2",
+          "sale_price": "11.68",
+          "seller_discount": "1.31",
+          "seller_sku": "LB2050-1",
+          "sku_id": "1732154006455620503",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/664b459b6f5d457883f819128d04c9d8~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773714049,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.22",
+        "original_total_product_price": "38.97",
+        "platform_discount": "0",
+        "product_tax": "3.11",
+        "seller_discount": "3.93",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "4.22",
+        "shipping_fee_tax": "0",
+        "sub_total": "35.04",
+        "tax": "3.11",
+        "total_amount": "38.15"
+      },
+      "payment_method_name": "ApplePay",
+      "recipient_address": {
+        "address_detail": "10864 45th Ave # 1b",
+        "address_line1": "10864 45th Ave # 1b",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "New York",
+            "iso_code": "NY"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Queens"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Corona"
+          }
+        ],
+        "first_name": "Demi",
+        "full_address": "United States, New York, Queens, Corona,10864 45th Ave # 1b",
+        "last_name": "Avendano",
+        "name": "Demi Avendano",
+        "phone_number": "(+1)9147202182",
+        "postal_code": "11368",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773717650,
+      "user_id": "7493991446921317343",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7336050419413549061~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=101a47d6&x-expires=1773896400&x-signature=mfNkrNdK3M%2BmlRMY%2B2W%2ByNfky5w%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AG7PUMKHR3SV24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "kendalltraceysmit",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773714803,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312057999069813",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312057999200885",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.1",
+              "tax_rate": "0.075",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "32.9",
+          "platform_discount": "0",
+          "product_id": "1729663341065704343",
+          "product_name": "21-Inch Dark Brunette (Light Auburn Highlights) Wavy Butterfly Cut Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #30 FSGB",
+          "sale_price": "27.97",
+          "seller_discount": "4.93",
+          "seller_sku": "SWLC1233-1BR26",
+          "sku_id": "1729663341065769879",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/983fad4f48974d36a77de3db8ce3a795~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        },
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312057999266421",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.01",
+              "tax_rate": "0.075",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "29.9",
+          "platform_discount": "0",
+          "product_id": "1731686819266532247",
+          "product_name": "'UP-GRAYYD'  Lady Grayy Deluxe 10-Piece Wig Apprentice Accessory Set with Wig Bag (remake)",
+          "sale_price": "26.9",
+          "seller_discount": "3",
+          "seller_sku": "LB1057-3",
+          "sku_id": "1731686869588808599",
+          "sku_image": "https://p19-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/587ffd1d24de4fcdbd99559e379ad4ba~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        },
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312057999331957",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.44",
+              "tax_rate": "0.075",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "46.54",
+          "platform_discount": "0",
+          "product_id": "1732020490514633623",
+          "product_name": "21-Inch Cinnamon Brown Sombre (Dark Roots, Blonde Underlights, Bang Highlights) Layered Curling Waves Cut Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGA",
+          "sale_price": "32.58",
+          "seller_discount": "13.96",
+          "seller_sku": "SWLC1261-1BR24",
+          "sku_id": "1732020504171484055",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/9fa2b6c9e920468f8c083808ad8a5a9f~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773714806,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "7.74",
+        "original_total_product_price": "109.34",
+        "platform_discount": "0",
+        "product_tax": "6.55",
+        "seller_discount": "21.89",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "7.74",
+        "shipping_fee_tax": "0",
+        "sub_total": "87.45",
+        "tax": "6.55",
+        "total_amount": "94"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "22922 Blackbeard Ln",
+        "address_line1": "22922 Blackbeard Ln",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Florida",
+            "iso_code": "FL"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Monroe"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Cudjoe Key"
+          }
+        ],
+        "first_name": "Tracey",
+        "full_address": "United States, Florida, Monroe, Cudjoe Key,22922 Blackbeard Ln",
+        "last_name": "Smith",
+        "name": "Tracey Smith",
+        "phone_number": "(+1)8642053623",
+        "postal_code": "33042",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773718408,
+      "user_id": "7494150900957416053",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/e0ab870ff3db21701f2066df280f9e7d~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=407be4f1&x-expires=1773896400&x-signature=S1xLTv3pIZVgHKx5ZiMeU5D3pVc%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AHRPMF2KZDDW24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Little Lisa ❌",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773714804,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312058129485915",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312058129616987",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.62",
+              "tax_rate": "0.08125",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "46.07",
+          "platform_discount": "0",
+          "product_id": "1729479477817218967",
+          "product_name": "20-Inch Blended Blonde Ombre (Dark Roots) Straight Synthetic Wig | Heat ResistantCap Included |  FSGA",
+          "retail_delivery_fee": "0",
+          "sale_price": "32.25",
+          "seller_discount": "13.82",
+          "seller_sku": "SWLC1268-1BR22",
+          "sku_id": "1729479480198666135",
+          "sku_image": "https://p16-oec-general-useast8.ttcdn-us.com/tos-useast8-i-rt0ujvrtvp-tx2/35529d9be40c4430b652c021e073921c~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        },
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312058129682523",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.64",
+              "tax_rate": "0.08125",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "46.54",
+          "platform_discount": "0",
+          "product_id": "1732020490514633623",
+          "product_name": "21-Inch Cinnamon Brown Sombre (Dark Roots, Blonde Underlights, Bang Highlights) Layered Curling Waves Cut Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGA",
+          "retail_delivery_fee": "0",
+          "sale_price": "32.58",
+          "seller_discount": "13.96",
+          "seller_sku": "SWLC1261-1BR24",
+          "sku_id": "1732020504171484055",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/9fa2b6c9e920468f8c083808ad8a5a9f~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        },
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312058129748059",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.52",
+              "tax_rate": "0.08125",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "44.2",
+          "platform_discount": "0",
+          "product_id": "1732020586237957015",
+          "product_name": "15-inch Shadow Grey/Dull Silver (Dark Espresso-tint Roots) Layered Soft Wolf Cut Synthetic Wig | 【Heat Resistant】【Cap Included】 |  FSGA",
+          "retail_delivery_fee": "0",
+          "sale_price": "30.94",
+          "seller_discount": "13.26",
+          "seller_sku": "SWLC3096-1GR18",
+          "sku_id": "1732020604239057815",
+          "sku_image": "https://p16-oec-general-useast8.ttcdn-us.com/tos-useast8-i-rt0ujvrtvp-tx2/a60997246d584833bf6472015c89f2d2~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773714808,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "7.19",
+        "original_total_product_price": "136.81",
+        "platform_discount": "0",
+        "product_tax": "7.78",
+        "retail_delivery_fee": "0",
+        "seller_discount": "41.04",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "7.19",
+        "shipping_fee_tax": "0",
+        "sub_total": "95.77",
+        "tax": "7.78",
+        "total_amount": "103.55"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "7535 Lakeside Rd NE",
+        "address_line1": "7535 Lakeside Rd NE",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Minnesota",
+            "iso_code": "MN"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Anoka"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Minneapolis"
+          }
+        ],
+        "first_name": "Malissa",
+        "full_address": "United States, Minnesota, Anoka, Minneapolis,7535 Lakeside Rd NE",
+        "last_name": "Adkins",
+        "name": "Malissa Adkins",
+        "phone_number": "(+1)6513871553",
+        "postal_code": "55432",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773718409,
+      "user_id": "7494732712348780635",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/d81e354d048f940d60e570ccc0b2d0cd~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=4adbbcf3&x-expires=1773896400&x-signature=xnupFZIcoL%2Fu2dEbjoo1OeT%2FPBA%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5APPJMENRZ6AX3U@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Denise Pisaniello,RN",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773714948,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312062427796153",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312062427927225",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.78",
+              "tax_rate": "0.06625",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "29.9",
+          "platform_discount": "9.95",
+          "product_id": "1731686819266532247",
+          "product_name": "'UP-GRAYYD'  Lady Grayy Deluxe 10-Piece Wig Apprentice Accessory Set with Wig Bag (remake)",
+          "sale_price": "16.95",
+          "seller_discount": "3",
+          "seller_sku": "LB1057-3",
+          "sku_id": "1731686869588808599",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/587ffd1d24de4fcdbd99559e379ad4ba~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773714951,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.84",
+        "original_total_product_price": "29.9",
+        "platform_discount": "9.95",
+        "product_tax": "1.78",
+        "seller_discount": "3",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "4.84",
+        "shipping_fee_seller_discount": "0",
+        "shipping_fee_tax": "0.32",
+        "sub_total": "16.95",
+        "tax": "2.1",
+        "total_amount": "19.05"
+      },
+      "payment_method_name": "ApplePay",
+      "recipient_address": {
+        "address_detail": "13 Walker St Apt A7",
+        "address_line1": "13 Walker St Apt A7",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "New Jersey",
+            "iso_code": "NJ"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Passaic"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Paterson"
+          }
+        ],
+        "first_name": "Denise Pisaniello,RN",
+        "full_address": "United States, New Jersey, Passaic, Paterson,13 Walker St Apt A7",
+        "last_name": "Pisaniello",
+        "name": "Denise Pisaniello,RN Pisaniello",
+        "phone_number": "(+1)8626685682",
+        "postal_code": "07501",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "seller_note": "coupion",
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773718553,
+      "user_id": "7494378180574873273",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/9b61fa522e5035faaed24b835c51227e~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=d0bc23ef&x-expires=1773896400&x-signature=LpiDb4ScxjEDOk20fWAqxQaD3J4%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AGTJUDZ2KEPG2I@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Jess",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773715023,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312066985956077",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312066986087149",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.34",
+              "tax_rate": "0.0975",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "34.41",
+          "platform_discount": "0",
+          "product_id": "1730700054901003159",
+          "product_name": "27-Inch Solid Mermaid Green Body Wave Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGA",
+          "sale_price": "24.09",
+          "seller_discount": "10.32",
+          "seller_sku": "LC8246-1",
+          "sku_id": "1730700262618928023",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/4b9abc4f0503428fbe3fe2d421a44dc9~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773715026,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.58",
+        "original_total_product_price": "34.41",
+        "platform_discount": "0",
+        "product_tax": "2.34",
+        "seller_discount": "10.32",
+        "shipping_fee": "4.58",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "0",
+        "shipping_fee_tax": "0",
+        "sub_total": "24.09",
+        "tax": "2.34",
+        "total_amount": "31.01"
+      },
+      "payment_method_name": "Google Pay",
+      "recipient_address": {
+        "address_detail": "112 N 5th St",
+        "address_line1": "112 N 5th St",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Oklahoma",
+            "iso_code": "OK"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Osage"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Barnsdall"
+          }
+        ],
+        "first_name": "Jessica",
+        "full_address": "United States, Oklahoma, Osage, Barnsdall,112 N 5th St",
+        "last_name": "Yocham",
+        "name": "Jessica Yocham",
+        "phone_number": "(+1)4055014227",
+        "postal_code": "74002",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773718628,
+      "user_id": "7495828128891308781",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/94ad4fcf6a66428bac77339ddf4e9541~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=88b33ea7&x-expires=1773896400&x-signature=nYh%2FPSsYNIT667b9FbS22g%2BmTMM%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AHVJMAGCXNW52M@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Brenda Lea",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773716127,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312089644569131",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312089644700203",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.6",
+              "tax_rate": "0.07975",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "31",
+          "platform_discount": "7.81",
+          "product_id": "1729406196624888727",
+          "product_name": "15-Inch Darkest Brown Wavy Synthetic Wig | 【Heat Resistant】【Cap Included】 | #25 FSGB",
+          "sale_price": "20.08",
+          "seller_discount": "3.11",
+          "seller_sku": "LC210-4",
+          "sku_id": "1729406196624954263",
+          "sku_image": "https://p19-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/0d281c28ed394cba861e847d23a185e1~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773716132,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.69",
+        "original_total_product_price": "31",
+        "platform_discount": "7.81",
+        "product_tax": "1.6",
+        "seller_discount": "3.11",
+        "shipping_fee": "4.69",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "0",
+        "shipping_fee_tax": "0.38",
+        "sub_total": "20.08",
+        "tax": "1.98",
+        "total_amount": "26.75"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "1909 WESTMOOR DR APT 6",
+        "address_line1": "1909 WESTMOOR DR",
+        "address_line2": "APT 6",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Missouri",
+            "iso_code": "MO"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Butler"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Poplar Bluff"
+          }
+        ],
+        "first_name": "Brenda",
+        "full_address": "United States, Missouri, Butler, Poplar Bluff,1909 WESTMOOR DR APT 6",
+        "last_name": "LaMay",
+        "name": "Brenda LaMay",
+        "phone_number": "(+1)5736602266",
+        "postal_code": "63901",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773719733,
+      "user_id": "7496096173832571435",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/94ad4fcf6a66428bac77339ddf4e9541~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=88b33ea7&x-expires=1773896400&x-signature=nYh%2FPSsYNIT667b9FbS22g%2BmTMM%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AHVJMAGCXNW52M@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "Brenda Lea",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773716221,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312095455253035",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312095455384107",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.61",
+              "tax_rate": "0.07975",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "36.08",
+          "platform_discount": "5.05",
+          "product_id": "1730917517763580823",
+          "product_name": "12-Inch Solid Light Icy Grey Straight Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGA",
+          "sale_price": "20.21",
+          "seller_discount": "10.82",
+          "seller_sku": "WL1209-1",
+          "sku_id": "1730917669075456919",
+          "sku_image": "https://p19-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/f278598b08cc4050baf8b6a9ed15eda3~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773716225,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.69",
+        "original_total_product_price": "36.08",
+        "platform_discount": "5.05",
+        "product_tax": "1.61",
+        "seller_discount": "10.82",
+        "shipping_fee": "4.69",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "0",
+        "shipping_fee_tax": "0.38",
+        "sub_total": "20.21",
+        "tax": "1.99",
+        "total_amount": "26.89"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "1909 WESTMOOR DR APT 6",
+        "address_line1": "1909 WESTMOOR DR",
+        "address_line2": "APT 6",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Missouri",
+            "iso_code": "MO"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Butler"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Poplar Bluff"
+          }
+        ],
+        "first_name": "Brenda",
+        "full_address": "United States, Missouri, Butler, Poplar Bluff,1909 WESTMOOR DR APT 6",
+        "last_name": "LaMay",
+        "name": "Brenda LaMay",
+        "phone_number": "(+1)5736602266",
+        "postal_code": "63901",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773719826,
+      "user_id": "7496096173832571435",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/87b0abe9bb24037bb11056ac5ff169c7~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=97da512f&x-expires=1773896400&x-signature=aSoChVHa319AUAxHtWZ02Msj10A%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AGZPMETYGYQI2A@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "ღღღ𝒥ℯ𝓃𝓃𝒶ღღღ ❌",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773716560,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312101613015063",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312101613146135",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.47",
+              "tax_rate": "0.053",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "46.54",
+          "platform_discount": "0",
+          "product_id": "1732020490514633623",
+          "product_name": "21-Inch Cinnamon Brown Sombre (Dark Roots, Blonde Underlights, Bang Highlights) Layered Curling Waves Cut Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGA",
+          "sale_price": "27.58",
+          "seller_discount": "18.96",
+          "seller_sku": "SWLC1261-1BR24",
+          "sku_id": "1732020504171484055",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/9fa2b6c9e920468f8c083808ad8a5a9f~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773716564,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.84",
+        "original_total_product_price": "46.54",
+        "platform_discount": "0",
+        "product_tax": "1.47",
+        "seller_discount": "18.96",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "4.84",
+        "shipping_fee_tax": "0",
+        "sub_total": "27.58",
+        "tax": "1.47",
+        "total_amount": "29.05"
+      },
+      "payment_method_name": "ApplePay",
+      "recipient_address": {
+        "address_detail": "13187 Rolling Hills dr",
+        "address_line1": "13187 Rolling Hills dr",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Virginia",
+            "iso_code": "VA"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Caroline"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Woodford"
+          }
+        ],
+        "first_name": "Jenna",
+        "full_address": "United States, Virginia, Caroline, Woodford,13187 Rolling Hills dr",
+        "last_name": "Espinosa",
+        "name": "Jenna Espinosa",
+        "phone_number": "(+1)2398884131",
+        "postal_code": "22580",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773720165,
+      "user_id": "7495073792072714263",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/7354153439246417962~tplv-tiktokx-cropcenter:300:300.jpeg?dr=9638&refresh_token=6d7e4859&x-expires=1773896400&x-signature=HIhWfCH9XWMnU%2BV4d2%2FNLwrkYYg%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=5d781b08&idc=useast5",
+      "buyer_email": "v4bDKX2CW7ZF2F5AGXPMHK3BRWI24@scs.tiktokw.us",
+      "buyer_message": "",
+      "buyer_nickname": "hazeljackson552",
+      "cancel_order_sla_time": 1774335599,
+      "create_time": 1773716564,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_sla_time": 1774421999,
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312100441887661",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "AWAITING_SHIPMENT",
+          "id": "577312100442018733",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.89",
+              "tax_rate": "0.07",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "31.8",
+          "platform_discount": "0",
+          "product_id": "1729443878575969175",
+          "product_name": "'PARIS' 11-Inch Solid Black Straight Synthetic Wig | 【Heat Resistant】【Cap Included】 | #27 FSGB",
+          "sale_price": "27.03",
+          "seller_discount": "4.77",
+          "seller_sku": "LC2049-1",
+          "sku_id": "1729443878576034711",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/15561428623f4e02b74f1ea266e9e54f~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL",
+          "tracking_number": ""
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773716568,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.22",
+        "original_total_product_price": "31.8",
+        "platform_discount": "0",
+        "product_tax": "1.89",
+        "seller_discount": "4.77",
+        "shipping_fee": "4.22",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "0",
+        "shipping_fee_tax": "0.3",
+        "sub_total": "27.03",
+        "tax": "2.19",
+        "total_amount": "33.44"
+      },
+      "payment_method_name": "PayPal",
+      "recipient_address": {
+        "address_detail": "280 COLLINS AVE",
+        "address_line1": "280 COLLINS AVE",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States",
+            "iso_code": "US"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Georgia",
+            "iso_code": "GA"
+          },
+          {
+            "address_level": "L2",
+            "address_level_name": "County",
+            "address_name": "Houston"
+          },
+          {
+            "address_level": "L3",
+            "address_level_name": "City",
+            "address_name": "Centerville"
+          }
+        ],
+        "first_name": "Hazel",
+        "full_address": "United States, Georgia, Houston, Centerville,280 COLLINS AVE",
+        "last_name": "Jackson",
+        "name": "Hazel Jackson",
+        "phone_number": "(+1)4789516655",
+        "postal_code": "31028",
+        "region_code": "US"
+      },
+      "rts_sla_time": 1773903599,
+      "shipping_due_time": 1774335599,
+      "shipping_type": "TIKTOK",
+      "status": "AWAITING_SHIPMENT",
+      "tts_sla_time": 1773903599,
+      "update_time": 1773720169,
+      "user_id": "7494882183301925805",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_email": "v4bDKX2CW7ZF2F5AGXP4PQN3HKM24@scs.tiktokw.us",
+      "buyer_message": "",
+      "create_time": 1773721578,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312207607534515",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": true,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "UNKNOWN",
+          "id": "577312207607665587",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "0",
+          "platform_discount": "0",
+          "product_id": "1729406323075814295",
+          "product_name": "25-Inch Straw Blonde Reverse Ombre (Scorched Brown Roots) Straight Synthetic Wig | 【Heat Resistant】【Cap Included】 | #10 FSGB",
+          "sale_price": "0",
+          "seller_discount": "0",
+          "seller_sku": "LC2068-9",
+          "sku_id": "1729406323075879831",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/32a493337003458f8d24567bb5d53c65~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "UNKNOWN"
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773721578,
+      "payment": {
+        "currency": "USD",
+        "original_shipping_fee": "0",
+        "original_total_product_price": "0",
+        "platform_discount": "0",
+        "seller_discount": "0",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "0",
+        "sub_total": "0",
+        "tax": "0",
+        "total_amount": "0"
+      },
+      "payment_method_name": "",
+      "recipient_address": {
+        "address_detail": "",
+        "address_line1": "",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "delivery_preferences": {
+          "drop_off_location": ""
+        },
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Ohio"
+          }
+        ],
+        "full_address": "",
+        "name": "",
+        "phone_number": "",
+        "postal_code": "",
+        "region_code": ""
+      },
+      "replaced_order_id": "576489846150371251",
+      "shipping_type": "TIKTOK",
+      "status": "ON_HOLD",
+      "update_time": 1773721698,
+      "user_id": "7494555145184119731",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_email": "v4bDKX2CW7ZF2F5AG5PMHCU4WSP24@scs.tiktokw.us",
+      "buyer_message": "",
+      "create_time": 1773721625,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312201494335939",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "UNKNOWN",
+          "id": "577312201494532547",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.82",
+              "tax_rate": "0.06",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "48.16",
+          "platform_discount": "3.37",
+          "product_id": "1731616617350140823",
+          "product_name": "21-Inch Platinum Balayage (Salt & Pepper Scorched Espresso Roots) Layered Butterfly Cut Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGA",
+          "sale_price": "30.35",
+          "seller_discount": "14.44",
+          "seller_sku": "SWLC3105-1GR22",
+          "sku_id": "1731616649787118487",
+          "sku_image": "https://p19-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/515e5063d6834f6cbec2ffd3597e3d0e~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL"
+        },
+        {
+          "currency": "USD",
+          "display_status": "UNKNOWN",
+          "id": "577312201494467011",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.31",
+              "tax_rate": "0.06",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "34.7",
+          "platform_discount": "2.43",
+          "product_id": "1730926363787367319",
+          "product_name": "22-Inch Black (Scarlet Red Lowlights) Wavy Synthetic Wig | 【Heat Resistant】【Cap Included】 |  FSGA",
+          "sale_price": "21.86",
+          "seller_discount": "10.41",
+          "seller_sku": "SWLC3088-1RE26",
+          "sku_id": "1730926562441859991",
+          "sku_image": "https://p19-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/adf0ca545ee643cca7c8005620c78d25~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL"
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773721629,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "7.74",
+        "original_total_product_price": "82.86",
+        "platform_discount": "5.8",
+        "product_tax": "3.13",
+        "seller_discount": "24.85",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "7.74",
+        "shipping_fee_tax": "0",
+        "sub_total": "52.21",
+        "tax": "3.13",
+        "total_amount": "55.34"
+      },
+      "payment_method_name": "PayPal",
+      "recipient_address": {
+        "address_detail": "",
+        "address_line1": "",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "delivery_preferences": {
+          "drop_off_location": ""
+        },
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "West Virginia"
+          }
+        ],
+        "full_address": "",
+        "name": "",
+        "phone_number": "",
+        "postal_code": "",
+        "region_code": ""
+      },
+      "shipping_type": "TIKTOK",
+      "status": "ON_HOLD",
+      "update_time": 1773721746,
+      "user_id": "7493991378577295811",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_email": "v4bDKX2CW7ZF2F5AHVPEOE7GD3W24@scs.tiktokw.us",
+      "buyer_message": "",
+      "create_time": 1773722011,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312211736892265",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "UNKNOWN",
+          "id": "577312211737023337",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "1.94",
+              "tax_rate": "0.07",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "32.6",
+          "platform_discount": "0",
+          "product_id": "1729444071557403543",
+          "product_name": "23-Inch Brown Straight Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGB",
+          "sale_price": "27.71",
+          "seller_discount": "4.89",
+          "seller_sku": "LC259-8",
+          "sku_id": "1729444071557469079",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/f71b31522cf44156aedcf0de453ee7ae~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL"
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773722031,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.84",
+        "original_total_product_price": "32.6",
+        "platform_discount": "0",
+        "product_tax": "1.94",
+        "seller_discount": "4.89",
+        "shipping_fee": "4.84",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "0",
+        "shipping_fee_tax": "0.34",
+        "sub_total": "27.71",
+        "tax": "2.28",
+        "total_amount": "34.83"
+      },
+      "payment_method_name": "PayPal",
+      "recipient_address": {
+        "address_detail": "",
+        "address_line1": "",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "delivery_preferences": {
+          "drop_off_location": ""
+        },
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Georgia"
+          }
+        ],
+        "full_address": "",
+        "name": "",
+        "phone_number": "",
+        "postal_code": "",
+        "region_code": ""
+      },
+      "shipping_type": "TIKTOK",
+      "status": "ON_HOLD",
+      "update_time": 1773722131,
+      "user_id": "7494019943476398953",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_email": "v4bDKX2CW7ZF2F5AG5P4GBQ2HQS2A@scs.tiktokw.us",
+      "buyer_message": "",
+      "create_time": 1773723045,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312225132712424",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "UNKNOWN",
+          "id": "577312225132843496",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.55",
+              "tax_rate": "0.0975",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "29",
+          "platform_discount": "0",
+          "product_id": "1729406196637406103",
+          "product_name": "26-Inch Jet Black Straight Synthetic Wig | 【Heat Resistant】【Cap Included】 | #18 FSGB",
+          "sale_price": "26.09",
+          "seller_discount": "2.91",
+          "seller_sku": "LC257-1",
+          "sku_id": "1729406196637471639",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/e96cfdfd64544c9f8d7bfb148c01a6ca~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL"
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773723049,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.2",
+        "original_total_product_price": "29",
+        "platform_discount": "0",
+        "product_tax": "2.55",
+        "seller_discount": "2.91",
+        "shipping_fee": "4.2",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "0",
+        "shipping_fee_tax": "0",
+        "sub_total": "26.09",
+        "tax": "2.55",
+        "total_amount": "32.84"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "",
+        "address_line1": "",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "delivery_preferences": {
+          "drop_off_location": ""
+        },
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "California"
+          }
+        ],
+        "full_address": "",
+        "name": "",
+        "phone_number": "",
+        "postal_code": "",
+        "region_code": ""
+      },
+      "shipping_type": "TIKTOK",
+      "status": "ON_HOLD",
+      "update_time": 1773723165,
+      "user_id": "7495084203173448168",
+      "warehouse_id": "7343098923153966894"
+    },
+    {
+      "buyer_email": "v4bDKX2CW7ZF2F5AG5PEC5DT7JF24@scs.tiktokw.us",
+      "buyer_message": "",
+      "create_time": 1773723214,
+      "delivery_option_id": "7480241405839968042",
+      "delivery_option_name": "Standard shipping",
+      "delivery_type": "HOME_DELIVERY",
+      "fulfillment_type": "FULFILLMENT_BY_SELLER",
+      "has_updated_recipient_address": false,
+      "id": "577312228872393343",
+      "is_cod": false,
+      "is_exchange_order": false,
+      "is_on_hold_order": true,
+      "is_replacement_order": false,
+      "is_sample_order": false,
+      "line_items": [
+        {
+          "currency": "USD",
+          "display_status": "UNKNOWN",
+          "id": "577312228872524415",
+          "is_dangerous_good": false,
+          "is_gift": false,
+          "item_tax": [
+            {
+              "tax_amount": "2.22",
+              "tax_rate": "0.0975",
+              "tax_type": "SALES_TAX"
+            }
+          ],
+          "original_price": "46.54",
+          "platform_discount": "9.77",
+          "product_id": "1732020490514633623",
+          "product_name": "21-Inch Cinnamon Brown Sombre (Dark Roots, Blonde Underlights, Bang Highlights) Layered Curling Waves Cut Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGA",
+          "sale_price": "22.81",
+          "seller_discount": "13.96",
+          "seller_sku": "SWLC1261-1BR24",
+          "sku_id": "1732020504171484055",
+          "sku_image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/9fa2b6c9e920468f8c083808ad8a5a9f~tplv-fhlh96nyum-origin-jpeg.jpeg?dr=12178&t=555f072d&ps=933b5bde&shp=5d781b08&shcp=54477afb&idc=useast5&from=1568152328",
+          "sku_name": "Default",
+          "sku_type": "NORMAL"
+        }
+      ],
+      "packages": [],
+      "paid_time": 1773723217,
+      "payment": {
+        "currency": "USD",
+        "item_insurance_tax": "0",
+        "original_shipping_fee": "4.69",
+        "original_total_product_price": "46.54",
+        "platform_discount": "9.77",
+        "product_tax": "2.22",
+        "seller_discount": "13.96",
+        "shipping_fee": "0",
+        "shipping_fee_cofunded_discount": "0",
+        "shipping_fee_platform_discount": "0",
+        "shipping_fee_seller_discount": "4.69",
+        "shipping_fee_tax": "0",
+        "sub_total": "22.81",
+        "tax": "2.22",
+        "total_amount": "25.03"
+      },
+      "payment_method_name": "Credit/debit card",
+      "recipient_address": {
+        "address_detail": "",
+        "address_line1": "",
+        "address_line2": "",
+        "address_line3": "",
+        "address_line4": "",
+        "delivery_preferences": {
+          "drop_off_location": ""
+        },
+        "district_info": [
+          {
+            "address_level": "L0",
+            "address_level_name": "Country",
+            "address_name": "United States"
+          },
+          {
+            "address_level": "L1",
+            "address_level_name": "State",
+            "address_name": "Tennessee"
+          }
+        ],
+        "full_address": "",
+        "name": "",
+        "phone_number": "",
+        "postal_code": "",
+        "region_code": ""
+      },
+      "shipping_type": "TIKTOK",
+      "status": "ON_HOLD",
+      "update_time": 1773723334,
+      "user_id": "7494127303440763519",
+      "warehouse_id": "7343098923153966894"
+    }
+  ]
+}
