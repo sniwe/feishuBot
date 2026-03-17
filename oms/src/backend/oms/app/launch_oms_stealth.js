@@ -59,17 +59,50 @@ async function fileExists(filePath) {
 }
 
 async function loadProjectConfig(configPath) {
-  if (!(await fileExists(configPath))) {
-    return { loaded: false, path: configPath, data: {} };
-  }
-  try {
-    const raw = await fs.readFile(configPath, 'utf8');
-    const parsed = JSON.parse(stripBom(raw));
-    return { loaded: true, path: configPath, data: parsed && typeof parsed === 'object' ? parsed : {} };
-  } catch (error) {
-    console.warn(`Failed to load OMS config from ${configPath}: ${error.message}`);
-    return { loaded: false, path: configPath, data: {} };
-  }
+  const localPath =
+    process.env.OMS_CONFIG_LOCAL_PATH || path.resolve(path.dirname(configPath), 'oms.config.local.json');
+
+  const readConfig = async (targetPath, label) => {
+    if (!(await fileExists(targetPath))) return { loaded: false, data: {} };
+    try {
+      const raw = await fs.readFile(targetPath, 'utf8');
+      const parsed = JSON.parse(stripBom(raw));
+      return { loaded: true, data: parsed && typeof parsed === 'object' ? parsed : {} };
+    } catch (error) {
+      console.warn(`Failed to load OMS ${label} config from ${targetPath}: ${error.message}`);
+      return { loaded: false, data: {} };
+    }
+  };
+
+  const mergeDeep = (baseValue, overrideValue) => {
+    if (Array.isArray(baseValue) || Array.isArray(overrideValue)) {
+      return Array.isArray(overrideValue) ? overrideValue : Array.isArray(baseValue) ? baseValue : [];
+    }
+    if (
+      baseValue &&
+      typeof baseValue === 'object' &&
+      overrideValue &&
+      typeof overrideValue === 'object'
+    ) {
+      const out = { ...baseValue };
+      for (const [key, value] of Object.entries(overrideValue)) {
+        out[key] = mergeDeep(baseValue[key], value);
+      }
+      return out;
+    }
+    return overrideValue !== undefined ? overrideValue : baseValue;
+  };
+
+  const baseCfg = await readConfig(configPath, 'base');
+  const localCfg = await readConfig(localPath, 'local');
+  const merged = mergeDeep(baseCfg.data, localCfg.data);
+  return {
+    loaded: baseCfg.loaded || localCfg.loaded,
+    path: configPath,
+    localPath,
+    localLoaded: localCfg.loaded,
+    data: merged && typeof merged === 'object' ? merged : {}
+  };
 }
 
 function resolvePathValue(pathValue, { fallbackPath, configPath }) {
@@ -517,6 +550,9 @@ async function main() {
   console.log(`OMS orders URL: ${ordersUrl}`);
   console.log(`Current page URL: ${landedUrl}`);
   console.log(`Config path: ${configPath}`);
+  if (projectConfigLoad.localLoaded) {
+    console.log(`Local config override: ${projectConfigLoad.localPath}`);
+  }
   console.log(`Config loaded: ${projectConfigLoad.loaded ? 'yes' : 'no'}`);
   console.log(`Cookies path: ${cookiesPath}`);
   console.log(`Storage path: ${storagePath}`);

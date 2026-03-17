@@ -3,8 +3,8 @@
                 "loginUrl":  "https://oms.xlwms.com/login",
                 "ordersUrl":  "https://oms.xlwms.com/platform/order/list",
                 "credentials":  {
-                                    "username":  "LM607",
-                                    "password":  "hx123456"
+                                    "username":  "",
+                                    "password":  ""
                                 },
                 "launch":  {
                                "hidden":  false,

@@ -13,6 +13,30 @@ function stripBom(value) {
   return String(value || '').replace(/^\uFEFF/, '');
 }
 
+function mergeDeep(baseValue, overrideValue) {
+  if (Array.isArray(baseValue) || Array.isArray(overrideValue)) {
+    return Array.isArray(overrideValue) ? overrideValue : Array.isArray(baseValue) ? baseValue : [];
+  }
+  if (baseValue && typeof baseValue === 'object' && overrideValue && typeof overrideValue === 'object') {
+    const out = { ...baseValue };
+    for (const [key, value] of Object.entries(overrideValue)) {
+      out[key] = mergeDeep(baseValue[key], value);
+    }
+    return out;
+  }
+  return overrideValue !== undefined ? overrideValue : baseValue;
+}
+
+function resolvePathValue(pathValue, { configPath }) {
+  const candidate = String(pathValue || '').trim();
+  if (!candidate) return '';
+  if (path.isAbsolute(candidate)) return candidate;
+  if (candidate.startsWith('./') || candidate.startsWith('.\\') || candidate.startsWith('..')) {
+    return path.resolve(path.dirname(configPath), candidate);
+  }
+  return path.resolve(WORKSPACE_ROOT, candidate);
+}
+
 function yyMMdd(date) {
   const yy = String(date.getFullYear()).slice(-2);
   const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -31,6 +55,34 @@ function col13Prefix(row) {
   const raw = String(row?.cols?.col_13 || '').trim();
   const first3 = Array.from(raw).slice(0, 3).join('');
   return sanitizeFilePart(first3 || 'UNK');
+}
+
+function getFallbackHeaderLabel(colId) {
+  const n = String(colId || '').replace(/^col_?/i, '').trim();
+  return n ? `Column ${n}` : 'Column';
+}
+
+function getUniqueHeaderKey(base, target) {
+  const keyBase = String(base || 'Column').trim() || 'Column';
+  if (!(keyBase in target)) return keyBase;
+  let i = 2;
+  while (`${keyBase} (${i})` in target) i += 1;
+  return `${keyBase} (${i})`;
+}
+
+function toHeaderKeyedRow(row, headerMap, extras = {}) {
+  const out = {
+    rowIndex: row.rowIndex,
+    rowId: row.rowId || null,
+    ...extras
+  };
+  const cols = row?.cols || {};
+  for (const [colId, value] of Object.entries(cols)) {
+    const label = String(headerMap?.[colId] || '').trim() || getFallbackHeaderLabel(colId);
+    const key = getUniqueHeaderKey(label, out);
+    out[key] = value;
+  }
+  return out;
 }
 
 function toIsoLocal(date) {
@@ -90,19 +142,35 @@ function parseCol21Time(raw, now) {
 }
 
 async function loadLaunchConfig(configPath) {
-  const raw = await fs.readFile(configPath, 'utf8');
-  const parsed = JSON.parse(stripBom(raw));
+  const resolvedConfigPath = path.isAbsolute(configPath) ? configPath : path.resolve(process.cwd(), configPath);
+  const localPath =
+    String(process.env.OMS_CONFIG_LOCAL_PATH || '').trim() ||
+    path.resolve(path.dirname(resolvedConfigPath), 'oms.config.local.json');
+  const raw = await fs.readFile(resolvedConfigPath, 'utf8');
+  const baseParsed = JSON.parse(stripBom(raw));
+  let localParsed = {};
+  try {
+    const localRaw = await fs.readFile(localPath, 'utf8');
+    localParsed = JSON.parse(stripBom(localRaw));
+  } catch {
+    localParsed = {};
+  }
+  const parsed = mergeDeep(baseParsed, localParsed);
   const launch = parsed?.oms?.launch || {};
   const credentials = parsed?.oms?.credentials || {};
   return {
-    configPath,
+    configPath: resolvedConfigPath,
     debugPort: Number(process.env.CDP_PORT || process.env.DEBUG_PORT || launch.debugPort || 9222),
     loginUrl: String(process.env.OMS_LOGIN_URL || parsed?.oms?.loginUrl || DEFAULT_LOGIN_URL),
     ordersUrl: String(process.env.OMS_ORDERS_URL || parsed?.oms?.ordersUrl || DEFAULT_ORDERS_URL),
     username: String(process.env.OMS_USERNAME || credentials.username || ''),
     password: String(process.env.OMS_PASSWORD || credentials.password || ''),
-    cookiesPath: String(process.env.OMS_COOKIES_PATH || parsed?.oms?.cookiesPath || ''),
-    storagePath: String(process.env.OMS_STORAGE_PATH || parsed?.oms?.storagePath || '')
+    cookiesPath: resolvePathValue(process.env.OMS_COOKIES_PATH || parsed?.oms?.cookiesPath || '', {
+      configPath: resolvedConfigPath
+    }),
+    storagePath: resolvePathValue(process.env.OMS_STORAGE_PATH || parsed?.oms?.storagePath || '', {
+      configPath: resolvedConfigPath
+    })
   };
 }
 
@@ -390,6 +458,7 @@ async function scanAllRowsFast(page) {
     };
 
     const rowMap = new Map();
+    const headerMap = {};
     let bottomStable = 0;
 
     for (let i = 0; i < 110; i += 1) {
@@ -419,6 +488,48 @@ async function scanAllRowsFast(page) {
         })
         .filter((r) => r.col21 || Object.keys(r.cols).length > 0);
 
+      const headerTitleSpans = Array.from(
+        table.querySelectorAll('tr.vxe-header--row .vxe-cell--title > span[title]')
+      );
+      for (const span of headerTitleSpans) {
+        const title = String(span.getAttribute('title') || '').replace(/\s+/g, ' ').trim();
+        if (!title) continue;
+        const container =
+          span.closest('th[colid], .vxe-header--column[colid], [role="columnheader"][colid], [colid]') || null;
+        const cid = container ? String(container.getAttribute('colid') || '').trim() : '';
+        if (!cid || headerMap[cid]) continue;
+        headerMap[cid] = title;
+      }
+
+      const headerCells = Array.from(
+        table.querySelectorAll(
+          'th[colid], .vxe-header--column[colid], .el-table__header [colid], [role="columnheader"][colid]'
+        )
+      );
+      for (const cell of headerCells) {
+        const cid = cell.getAttribute('colid');
+        if (!cid || headerMap[cid]) continue;
+        const text = String(cell.textContent || '').replace(/\s+/g, ' ').trim();
+        if (!text) continue;
+        headerMap[cid] = text;
+      }
+      if (rows.length > 0) {
+        const headerTexts = Array.from(
+          table.querySelectorAll('.vxe-header--row th, .el-table__header th, [role="columnheader"]')
+        )
+          .map((n) => String(n.textContent || '').replace(/\s+/g, ' ').trim())
+          .filter((t) => t.length > 0);
+        if (headerTexts.length > 0) {
+          const colOrder = Object.keys(rows[0].cols || {});
+          for (let i = 0; i < colOrder.length; i += 1) {
+            const cid = colOrder[i];
+            if (!cid || headerMap[cid]) continue;
+            const label = headerTexts[i];
+            if (label) headerMap[cid] = label;
+          }
+        }
+      }
+
       for (const row of rows) {
         const key = row.rowId || `${row.cols.col_21 || ''}|${row.cols.col_1 || ''}|${row.cols.col_2 || ''}|${row.rowIndex}`;
         if (!rowMap.has(key)) rowMap.set(key, row);
@@ -440,7 +551,7 @@ async function scanAllRowsFast(page) {
       await sleep(20);
     }
 
-    return { ok: true, reason: 'ok', rows: Array.from(rowMap.values()) };
+    return { ok: true, reason: 'ok', rows: Array.from(rowMap.values()), headerMap };
   });
 }
 
@@ -542,7 +653,12 @@ async function main() {
     const grouped = {};
     for (const row of matched) {
       if (!grouped[row.orderDateYYMMDD]) grouped[row.orderDateYYMMDD] = [];
-      grouped[row.orderDateYYMMDD].push(row);
+      grouped[row.orderDateYYMMDD].push(
+        toHeaderKeyedRow(row, scan.headerMap, {
+          col21Parsed: row.col21Parsed,
+          orderDateYYMMDD: row.orderDateYYMMDD
+        })
+      );
     }
 
     const writtenFiles = await writeGroupedOutput(

@@ -175,11 +175,14 @@ function Get-ManagedPathspecs {
         try {
             $idx = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json
             foreach ($p in @($idx.projects | Where-Object { $_.status -eq "active" })) {
-                $root = [string]$p.projectRoot
-                if ([string]::IsNullOrWhiteSpace($root)) { continue }
-                $leaf = Split-Path -Leaf $root
-                if (-not [string]::IsNullOrWhiteSpace($leaf)) {
-                    $specs += $leaf
+                $projectRoot = [string]$p.projectRoot
+                if ([string]::IsNullOrWhiteSpace($projectRoot)) { continue }
+                $fullProjectRoot = [IO.Path]::GetFullPath($projectRoot)
+                $fullRepoRoot = [IO.Path]::GetFullPath($REPO_ROOT)
+                if (-not $fullProjectRoot.StartsWith($fullRepoRoot, [System.StringComparison]::OrdinalIgnoreCase)) { continue }
+                $relative = $fullProjectRoot.Substring($fullRepoRoot.Length).TrimStart('\', '/')
+                if (-not [string]::IsNullOrWhiteSpace($relative)) {
+                    $specs += $relative
                 }
             }
         } catch {}

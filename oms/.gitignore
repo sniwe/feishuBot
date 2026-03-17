@@ -2,7 +2,15 @@
 mgmt/projMap/threads/current-thread.json
 mgmt/projMap/state/thread-map-deltas.json
 mgmt/projMap/state/ingest-report.json
+mgmt/projMap/state/*.log
 src/backend/oms/data/orders/
+mgmt/config/oms.config.local.json
+mgmt/config/oms.cookies.json
+mgmt/config/oms.cookies.storage.json
+oms.cookies.json
+oms.cookies.storage.json
+src/backend/oms/app/oms.cookies.json
+src/backend/oms/app/oms.cookies.storage.json
 .env
 .env.*
 *.local

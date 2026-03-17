@@ -34,6 +34,7 @@ npm run launch:oms:hidden
 
 ## Optional environment variables
 - `OMS_CONFIG_PATH` (default `${WORKSPACE_ROOT}\mgmt\config\oms.config.json`)
+- `OMS_CONFIG_LOCAL_PATH` (default `${WORKSPACE_ROOT}\mgmt\config\oms.config.local.json`)
 - `OMS_COOKIES_PATH` (default `${WORKSPACE_ROOT}\mgmt\config\oms.cookies.json`)
 - `OMS_STORAGE_PATH` (default `${WORKSPACE_ROOT}\mgmt\config\oms.cookies.storage.json`)
 - `OMS_LOGIN_URL` (default `https://oms.xlwms.com/login`)
@@ -42,5 +43,10 @@ npm run launch:oms:hidden
 - `OMS_HIDDEN=1` for hidden/headless mode
 - `DEBUG_PORT` preferred CDP port (defaults to `9222`, auto-increments if busy)
 - `CHROME_PATH` / `PUPPETEER_EXECUTABLE_PATH` / `BROWSER_PATH` to force browser binary
+
+## Cross-machine config
+- Keep shared defaults in `mgmt\config\oms.config.json`.
+- Put machine/local credentials in `mgmt\config\oms.config.local.json` (see `mgmt\config\oms.config.local.example.json`).
+- `oms.config.local.json` is git-ignored to avoid cross-machine breakage.
 
 

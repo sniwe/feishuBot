@@ -9,15 +9,41 @@ function stripBom(value) {
   return String(value || '').replace(/^\uFEFF/, '');
 }
 
+function mergeDeep(baseValue, overrideValue) {
+  if (Array.isArray(baseValue) || Array.isArray(overrideValue)) {
+    return Array.isArray(overrideValue) ? overrideValue : Array.isArray(baseValue) ? baseValue : [];
+  }
+  if (baseValue && typeof baseValue === 'object' && overrideValue && typeof overrideValue === 'object') {
+    const out = { ...baseValue };
+    for (const [key, value] of Object.entries(overrideValue)) {
+      out[key] = mergeDeep(baseValue[key], value);
+    }
+    return out;
+  }
+  return overrideValue !== undefined ? overrideValue : baseValue;
+}
+
 /**
  * @param {{ data?: object, ui?: object, deps: object }} ctx
  */
 async function loadLaunchConfig(ctx) {
   const { data = {}, deps } = ctx;
   const { fsApi } = deps;
-  const configPath = data.configPath || DEFAULT_CONFIG_PATH;
+  const requestedPath = String(data.configPath || DEFAULT_CONFIG_PATH);
+  const configPath = path.isAbsolute(requestedPath) ? requestedPath : path.resolve(process.cwd(), requestedPath);
+  const localPath =
+    String(data.localConfigPath || process.env.OMS_CONFIG_LOCAL_PATH || '').trim() ||
+    path.resolve(path.dirname(configPath), 'oms.config.local.json');
   const raw = await fsApi.readFile(configPath, 'utf8');
-  const parsed = JSON.parse(stripBom(raw));
+  const baseParsed = JSON.parse(stripBom(raw));
+  let localParsed = {};
+  try {
+    const localRaw = await fsApi.readFile(localPath, 'utf8');
+    localParsed = JSON.parse(stripBom(localRaw));
+  } catch {
+    localParsed = {};
+  }
+  const parsed = mergeDeep(baseParsed, localParsed);
   const launch = parsed?.oms?.launch || {};
   const debugPort = Number(process.env.CDP_PORT || process.env.DEBUG_PORT || launch.debugPort || 9222);
   const ordersUrl = String(process.env.OMS_ORDERS_URL || parsed?.oms?.ordersUrl || DEFAULT_ORDERS_URL);
@@ -131,4 +157,3 @@ main({
   console.error(error?.stack || String(error));
   process.exit(1);
 });
-

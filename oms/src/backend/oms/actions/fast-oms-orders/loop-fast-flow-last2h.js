@@ -49,39 +49,59 @@ function killProcessTree(pid) {
 
 function runFastFlowOnce() {
   return new Promise((resolve) => {
-    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     const startedAt = Date.now();
-    const child = spawn(npmCmd, ['--prefix', 'src/backend/oms/app', 'run', 'action:fast-flow-last2h'], {
-      cwd: WORKSPACE_ROOT,
-      stdio: 'inherit'
+    let settled = false;
+    let timedOut = false;
+    const child =
+      process.platform === 'win32'
+        ? spawn(
+            process.env.ComSpec || 'cmd.exe',
+            ['/d', '/s', '/c', 'npm.cmd --prefix src/backend/oms/app run action:fast-flow-last2h'],
+            {
+              cwd: WORKSPACE_ROOT,
+              stdio: ['ignore', 'pipe', 'pipe'],
+              windowsHide: true
+            }
+          )
+        : spawn('npm', ['--prefix', 'src/backend/oms/app', 'run', 'action:fast-flow-last2h'], {
+            cwd: WORKSPACE_ROOT,
+            stdio: ['ignore', 'pipe', 'pipe']
+          });
+
+    if (child.stdout) {
+      child.stdout.on('data', (chunk) => process.stdout.write(chunk));
+    }
+    if (child.stderr) {
+      child.stderr.on('data', (chunk) => process.stderr.write(chunk));
+    }
+
+    const timeout = setTimeout(() => {
+      timedOut = true;
+      killProcessTree(child.pid)
+        .catch(() => {})
+        .finally(() => {
+          if (!settled) {
+            settled = true;
+            resolve({ code: 124, timedOut: true, elapsedMs: Date.now() - startedAt });
+          }
+        });
+    }, RUN_TIMEOUT_MS);
+
+    child.on('close', (code) => {
+      clearTimeout(timeout);
+      if (!settled) {
+        settled = true;
+        resolve({ code: code || 0, timedOut, elapsedMs: Date.now() - startedAt });
+      }
     });
 
-    const childDone = new Promise((done) => {
-      child.on('close', (code) => {
-        done({ code: code || 0, timedOut: false, elapsedMs: Date.now() - startedAt });
-      });
-      child.on('error', () => {
-        done({ code: 1, timedOut: false, elapsedMs: Date.now() - startedAt });
-      });
+    child.on('error', () => {
+      clearTimeout(timeout);
+      if (!settled) {
+        settled = true;
+        resolve({ code: 1, timedOut, elapsedMs: Date.now() - startedAt });
+      }
     });
-
-    const timeoutDone = new Promise((done) => {
-      const t = setTimeout(() => {
-        done({ code: 124, timedOut: true, elapsedMs: Date.now() - startedAt });
-      }, RUN_TIMEOUT_MS);
-      t.unref();
-    });
-
-    Promise.race([childDone, timeoutDone])
-      .then(async (result) => {
-        if (result.timedOut) {
-          await killProcessTree(child.pid).catch(() => {});
-        }
-        resolve(result);
-      })
-      .catch(() => {
-        resolve({ code: 1, timedOut: false, elapsedMs: Date.now() - startedAt });
-      });
   });
 }
 

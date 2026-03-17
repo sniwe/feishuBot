@@ -21,6 +21,20 @@ function resolvePathValue(pathValue, { fallbackPath, configPath }) {
   return path.resolve(WORKSPACE_ROOT, candidate);
 }
 
+function mergeDeep(baseValue, overrideValue) {
+  if (Array.isArray(baseValue) || Array.isArray(overrideValue)) {
+    return Array.isArray(overrideValue) ? overrideValue : Array.isArray(baseValue) ? baseValue : [];
+  }
+  if (baseValue && typeof baseValue === 'object' && overrideValue && typeof overrideValue === 'object') {
+    const out = { ...baseValue };
+    for (const [key, value] of Object.entries(overrideValue)) {
+      out[key] = mergeDeep(baseValue[key], value);
+    }
+    return out;
+  }
+  return overrideValue !== undefined ? overrideValue : baseValue;
+}
+
 /**
  * @param {{ data?: object, ui?: object, deps: object }} ctx
  */
@@ -29,8 +43,22 @@ async function loadConfig(ctx) {
   const { fsApi } = deps;
   const requestedPath = String(data.configPath || DEFAULT_CONFIG_PATH);
   const configPath = path.isAbsolute(requestedPath) ? requestedPath : path.resolve(process.cwd(), requestedPath);
+  const localPath =
+    String(data.localConfigPath || process.env.OMS_CONFIG_LOCAL_PATH || '').trim() ||
+    path.resolve(path.dirname(configPath), 'oms.config.local.json');
+
   const raw = await fsApi.readFile(configPath, 'utf8');
-  const parsed = JSON.parse(stripBom(raw));
+  const baseParsed = JSON.parse(stripBom(raw));
+
+  let localParsed = {};
+  try {
+    const localRaw = await fsApi.readFile(localPath, 'utf8');
+    localParsed = JSON.parse(stripBom(localRaw));
+  } catch {
+    localParsed = {};
+  }
+
+  const parsed = mergeDeep(baseParsed, localParsed);
   const username = String(parsed?.oms?.credentials?.username || '');
   const password = String(parsed?.oms?.credentials?.password || '');
   if (!username || !password) {

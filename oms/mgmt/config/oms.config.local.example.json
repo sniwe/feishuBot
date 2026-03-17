@@ -1,0 +1,11 @@
+{
+  "oms": {
+    "credentials": {
+      "username": "YOUR_USERNAME",
+      "password": "YOUR_PASSWORD"
+    },
+    "launch": {
+      "debugPort": 9222
+    }
+  }
+}
