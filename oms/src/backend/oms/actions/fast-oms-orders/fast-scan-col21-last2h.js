@@ -233,7 +233,9 @@ async function scanTableRows(page) {
       const pageHeaderMap = {};
 
       const headerTitleSpans = Array.from(
-        table.querySelectorAll('tr.vxe-header--row .vxe-cell--title > span[title]')
+        document.querySelectorAll(
+          'div.vxe-table--header-wrapper tr.vxe-header--row .vxe-cell--title > span[title], tr.vxe-header--row .vxe-cell--title > span[title]'
+        )
       );
       for (const span of headerTitleSpans) {
         const title = String(span.getAttribute('title') || '').replace(/\s+/g, ' ').trim();
@@ -246,7 +248,7 @@ async function scanTableRows(page) {
       }
 
       const headerCells = Array.from(
-        table.querySelectorAll(
+        document.querySelectorAll(
           'th[colid], .vxe-header--column[colid], .el-table__header [colid], [role="columnheader"][colid]'
         )
       );
@@ -259,7 +261,9 @@ async function scanTableRows(page) {
       }
       if (rows.length > 0) {
         const headerTexts = Array.from(
-          table.querySelectorAll('.vxe-header--row th, .el-table__header th, [role="columnheader"]')
+          document.querySelectorAll(
+            'div.vxe-table--header-wrapper .vxe-header--row th, .vxe-header--row th, .el-table__header th, [role="columnheader"]'
+          )
         )
           .map((n) => String(n.textContent || '').replace(/\s+/g, ' ').trim())
           .filter((t) => t.length > 0);
