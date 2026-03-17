@@ -51,8 +51,21 @@ function sanitizeFilePart(value) {
   return cleaned || 'UNK';
 }
 
+function getStoreNameFromRow(row) {
+  if (!row || typeof row !== 'object') return '';
+  if (row['店铺']) return String(row['店铺']).trim();
+  for (const [key, value] of Object.entries(row)) {
+    if (String(key).includes('店铺')) {
+      return String(value || '').trim();
+    }
+  }
+  if (row['Column 13']) return String(row['Column 13']).trim();
+  const rawCol13 = row?.cols?.col_13;
+  return rawCol13 == null ? '' : String(rawCol13).trim();
+}
+
 function col13Prefix(row) {
-  const raw = String(row?.cols?.col_13 || '').trim();
+  const raw = getStoreNameFromRow(row);
   const first3 = Array.from(raw).slice(0, 3).join('');
   return sanitizeFilePart(first3 || 'UNK');
 }
