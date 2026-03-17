@@ -1,0 +1,20 @@
+{
+  "jsonlPath": "C:/Users/Qub/Downloads/lady.grayy.wig.jsonl",
+  "tiktokPayloadPath": "C:/Users/Qub/oms/mgmt/dev/tests/tiktok-allorderslastndays-LG402-days1-20260317-160111.json",
+  "orderCount": 64,
+  "checkedNames": 149,
+  "matchedNames": 1,
+  "matches": [
+    {
+      "sourceField": "commentUserName",
+      "sourceName": "Marley😀",
+      "matchedOrders": [
+        {
+          "field": "buyer_nickname",
+          "orderId": "577312152702521695",
+          "value": "Marley"
+        }
+      ]
+    }
+  ]
+}
