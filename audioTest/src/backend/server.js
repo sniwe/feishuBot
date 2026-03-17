@@ -24,6 +24,7 @@ const USER_CREDENTIALS = {
   zhaoying: String(process.env.USER_PASSWORD_ZHAOYING || "zhaoying123"),
   rhys: String(process.env.USER_PASSWORD_RHYS || "rhys123")
 };
+const AUTH_SESSIONS = new Map();
 
 startServer({ data: {}, deps: { http, fs, fsp, path } }).catch(function (error) {
   console.error(error);
@@ -58,12 +59,12 @@ async function routeRequest(ctx) {
   const requestPath = requestUrl.pathname;
 
   if (req.method === "GET" && requestPath === "/api/sessions") {
-    await handleGetSessions({ data: { res }, deps: { fsp: deps.fsp, path: deps.path } });
+    await handleGetSessions({ data: { req, res }, deps: { fsp: deps.fsp, path: deps.path } });
     return;
   }
 
   if (req.method === "GET" && requestPath === "/api/session") {
-    await handleGetSession({ data: { res, sessionId: requestUrl.searchParams.get("id") }, deps: { fsp: deps.fsp, path: deps.path } });
+    await handleGetSession({ data: { req, res, sessionId: requestUrl.searchParams.get("id") }, deps: { fsp: deps.fsp, path: deps.path } });
     return;
   }
 
@@ -83,7 +84,7 @@ async function routeRequest(ctx) {
   }
 
   if (req.method === "DELETE" && requestPath === "/api/session") {
-    await handleDeleteSession({ data: { res, sessionId: requestUrl.searchParams.get("id") }, deps: { fsp: deps.fsp, path: deps.path } });
+    await handleDeleteSession({ data: { req, res, sessionId: requestUrl.searchParams.get("id") }, deps: { fsp: deps.fsp, path: deps.path } });
     return;
   }
 
@@ -111,21 +112,29 @@ async function routeRequest(ctx) {
 
 async function handleGetSessions(ctx) {
   const { data, deps } = ctx;
-  const { res } = data;
+  const { req, res } = data;
+  const authUser = requireAuthUser({ data: { req, res }, deps: {} });
+  if (!authUser) {
+    return;
+  }
 
   const sessions = IS_REMOTE_STORAGE
-    ? await readRemoteSessionSummaries({ data: {}, deps: {} })
-    : await readSessionSummaries({ data: {}, deps: { fsp: deps.fsp, path: deps.path } });
+    ? await readRemoteSessionSummaries({ data: { username: authUser }, deps: {} })
+    : await readSessionSummaries({ data: { username: authUser }, deps: { fsp: deps.fsp, path: deps.path } });
   sendJson({ data: { res, status: 200, payload: { sessions } }, deps: {} });
 }
 
 async function handleGetSession(ctx) {
   const { data, deps } = ctx;
-  const { res, sessionId } = data;
+  const { req, res, sessionId } = data;
+  const authUser = requireAuthUser({ data: { req, res }, deps: {} });
+  if (!authUser) {
+    return;
+  }
 
   if (IS_REMOTE_STORAGE) {
     try {
-      const session = await getRemoteSession({ data: { sessionId }, deps: {} });
+      const session = await getRemoteSession({ data: { sessionId, username: authUser }, deps: {} });
       sendJson({ data: { res, status: 200, payload: session }, deps: {} });
     } catch (error) {
       if (error && error.code === "REMOTE_SESSION_NOT_FOUND") {
@@ -143,6 +152,10 @@ async function handleGetSession(ctx) {
     if (!resolvedSessionId) {
       const text = await deps.fsp.readFile(SESSION_PATH, "utf8");
       const parsed = JSON.parse(text);
+      if (!isOwnedByUser({ data: { record: parsed, username: authUser }, deps: {} })) {
+        sendJson({ data: { res, status: 404, payload: { error: "session_not_found" } }, deps: {} });
+        return;
+      }
       const normalized = await normalizeLoadedSession({ data: { record: parsed }, deps: { fsp: deps.fsp, path: deps.path } });
       sendJson({ data: { res, status: 200, payload: normalized }, deps: {} });
       return;
@@ -151,6 +164,10 @@ async function handleGetSession(ctx) {
     const sessionPath = getSessionFilePath({ data: { sessionId: resolvedSessionId }, deps: { path: deps.path } });
     const text = await deps.fsp.readFile(sessionPath, "utf8");
     const parsed = JSON.parse(text);
+    if (!isOwnedByUser({ data: { record: parsed, username: authUser }, deps: {} })) {
+      sendJson({ data: { res, status: 404, payload: { error: "session_not_found" } }, deps: {} });
+      return;
+    }
     const normalized = await normalizeLoadedSession({ data: { record: parsed }, deps: { fsp: deps.fsp, path: deps.path } });
     sendJson({ data: { res, status: 200, payload: normalized }, deps: {} });
   } catch (error) {
@@ -165,6 +182,10 @@ async function handleGetSession(ctx) {
 async function handlePostSession(ctx) {
   const { data, deps } = ctx;
   const { req, res } = data;
+  const authUser = requireAuthUser({ data: { req, res }, deps: {} });
+  if (!authUser) {
+    return;
+  }
 
   let payload;
   try {
@@ -180,7 +201,7 @@ async function handlePostSession(ctx) {
   }
 
   if (IS_REMOTE_STORAGE) {
-    const saved = await saveRemoteSession({ data: { payload }, deps: {} });
+    const saved = await saveRemoteSession({ data: { payload, username: authUser }, deps: {} });
     sendJson({
       data: {
         res,
@@ -194,9 +215,24 @@ async function handlePostSession(ctx) {
 
   const sessionId = normalizeSessionId({ data: { sessionId: payload.sessionId }, deps: {} }) || buildSessionId({ data: { fileName: payload.file && payload.file.name }, deps: {} });
   const sessionPath = getSessionFilePath({ data: { sessionId }, deps: { path: deps.path } });
+  if (normalizeSessionId({ data: { sessionId: payload.sessionId }, deps: {} })) {
+    try {
+      const existingText = await deps.fsp.readFile(sessionPath, "utf8");
+      const existingRecord = JSON.parse(existingText);
+      if (!isOwnedByUser({ data: { record: existingRecord, username: authUser }, deps: {} })) {
+        sendJson({ data: { res, status: 404, payload: { error: "session_not_found" } }, deps: {} });
+        return;
+      }
+    } catch (error) {
+      if (!error || error.code !== "ENOENT") {
+        throw error;
+      }
+    }
+  }
 
   const record = {
     id: sessionId,
+    owner: authUser,
     savedAt: new Date().toISOString(),
     file: payload.file,
     playback: payload.playback,
@@ -206,10 +242,20 @@ async function handlePostSession(ctx) {
 
   if (!record.audioId && payload.audioBase64) {
     const uploadedAudio = await saveLocalAudioFromBase64({
-      data: { payload },
+      data: { payload, owner: authUser },
       deps: { fsp: deps.fsp, path: deps.path }
     });
     record.audioId = uploadedAudio.id;
+  }
+  if (record.audioId) {
+    const audioMeta = await readAudioMetadata({
+      data: { audioId: record.audioId },
+      deps: { fsp: deps.fsp, path: deps.path }
+    });
+    if (!audioMeta || !isOwnedByUser({ data: { record: audioMeta, username: authUser }, deps: {} })) {
+      sendJson({ data: { res, status: 403, payload: { error: "forbidden_audio_owner" } }, deps: {} });
+      return;
+    }
   }
 
   if (!record.audioId && !record.audioUrl) {
@@ -248,6 +294,7 @@ async function handlePostLogin(ctx) {
     sendJson({ data: { res, status: 401, payload: { ok: false, error: "invalid_credentials" } }, deps: {} });
     return;
   }
+  const authSession = createAuthSession({ data: { username }, deps: {} });
 
   sendJson({
     data: {
@@ -256,7 +303,8 @@ async function handlePostLogin(ctx) {
       payload: {
         ok: true,
         username,
-        loggedInAt: Date.now(),
+        token: authSession.token,
+        loggedInAt: authSession.loggedInAt,
         ttlMs: LOGIN_TTL_MS
       }
     },
@@ -266,7 +314,11 @@ async function handlePostLogin(ctx) {
 
 async function handleDeleteSession(ctx) {
   const { data, deps } = ctx;
-  const { res, sessionId } = data;
+  const { req, res, sessionId } = data;
+  const authUser = requireAuthUser({ data: { req, res }, deps: {} });
+  if (!authUser) {
+    return;
+  }
   const resolvedSessionId = normalizeSessionId({ data: { sessionId }, deps: {} });
 
   if (!resolvedSessionId) {
@@ -275,7 +327,7 @@ async function handleDeleteSession(ctx) {
   }
 
   if (IS_REMOTE_STORAGE) {
-    const deleted = await deleteRemoteSession({ data: { sessionId: resolvedSessionId }, deps: {} });
+    const deleted = await deleteRemoteSession({ data: { sessionId: resolvedSessionId, username: authUser }, deps: {} });
     sendJson({ data: { res, status: 200, payload: deleted }, deps: {} });
     return;
   }
@@ -285,6 +337,10 @@ async function handleDeleteSession(ctx) {
   try {
     const text = await deps.fsp.readFile(sessionPath, "utf8");
     deletedRecord = JSON.parse(text);
+    if (!isOwnedByUser({ data: { record: deletedRecord, username: authUser }, deps: {} })) {
+      sendJson({ data: { res, status: 404, payload: { error: "session_not_found" } }, deps: {} });
+      return;
+    }
   } catch (error) {
     if (error && error.code === "ENOENT") {
       sendJson({ data: { res, status: 404, payload: { error: "session_not_found" } }, deps: {} });
@@ -311,7 +367,8 @@ async function handleDeleteSession(ctx) {
 }
 
 async function readSessionSummaries(ctx) {
-  const { deps } = ctx;
+  const { data, deps } = ctx;
+  const { username } = data;
 
   let fileEntries = [];
   try {
@@ -333,7 +390,7 @@ async function readSessionSummaries(ctx) {
     try {
       const text = await deps.fsp.readFile(filePath, "utf8");
       const parsed = JSON.parse(text);
-      if (parsed && typeof parsed === "object") {
+      if (parsed && typeof parsed === "object" && isOwnedByUser({ data: { record: parsed, username }, deps: {} })) {
         sessions.push(toSessionSummary({ data: { parsed, fallbackId: entry.name.slice(0, -5) }, deps: {} }));
       }
     } catch {
@@ -345,7 +402,12 @@ async function readSessionSummaries(ctx) {
     try {
       const latestText = await deps.fsp.readFile(SESSION_PATH, "utf8");
       const latest = JSON.parse(latestText);
-      if (latest && typeof latest === "object" && (latest.audioBase64 || latest.audioId || latest.audioUrl)) {
+      if (
+        latest &&
+        typeof latest === "object" &&
+        (latest.audioBase64 || latest.audioId || latest.audioUrl) &&
+        isOwnedByUser({ data: { record: latest, username }, deps: {} })
+      ) {
         sessions.push(toSessionSummary({ data: { parsed: latest, fallbackId: "session-latest" }, deps: {} }));
       }
     } catch {
@@ -381,11 +443,15 @@ function toSessionSummary(ctx) {
 async function handlePostAudio(ctx) {
   const { data, deps } = ctx;
   const { req, res, fileName, mimeType, lastModified } = data;
+  const authUser = requireAuthUser({ data: { req, res }, deps: {} });
+  if (!authUser) {
+    return;
+  }
 
   if (IS_REMOTE_STORAGE) {
     const bodyBuffer = await readBodyBuffer({ data: { req }, deps: {} });
     const result = await saveRemoteAudio({
-      data: { bodyBuffer, fileName, mimeType, lastModified },
+      data: { bodyBuffer, fileName, mimeType, lastModified, username: authUser },
       deps: {}
     });
     sendJson({ data: { res, status: 200, payload: result }, deps: {} });
@@ -409,6 +475,7 @@ async function handlePostAudio(ctx) {
   await deps.fsp.writeFile(binaryPath, bodyBuffer);
   await deps.fsp.writeFile(metadataPath, JSON.stringify({
     id: audioId,
+    owner: authUser,
     fileName: resolvedFileName,
     mimeType: resolvedMimeType,
     size: bodyBuffer.length,
@@ -439,6 +506,10 @@ async function handlePostAudio(ctx) {
 async function handleGetAudio(ctx) {
   const { data, deps } = ctx;
   const { req, res, audioId } = data;
+  const authUser = requireAuthUser({ data: { req, res }, deps: {} });
+  if (!authUser) {
+    return;
+  }
   const safeId = normalizeSessionId({ data: { sessionId: audioId }, deps: {} });
 
   if (!safeId) {
@@ -453,7 +524,11 @@ async function handleGetAudio(ctx) {
       headers.Range = rangeHeader;
     }
     const response = await remoteFetch({
-      data: { method: "GET", endpointPath: REMOTE_AUDIO_PATH + "?id=" + encodeURIComponent(safeId), headers },
+      data: {
+        method: "GET",
+        endpointPath: REMOTE_AUDIO_PATH + "?id=" + encodeURIComponent(safeId) + "&username=" + encodeURIComponent(authUser),
+        headers: withRemoteUserHeaders({ data: { username: authUser, headers }, deps: {} })
+      },
       deps: {}
     });
     res.writeHead(response.status, {
@@ -475,6 +550,10 @@ async function handleGetAudio(ctx) {
   try {
     const raw = await deps.fsp.readFile(metadataPath, "utf8");
     meta = JSON.parse(raw);
+    if (!isOwnedByUser({ data: { record: meta, username: authUser }, deps: {} })) {
+      sendJson({ data: { res, status: 404, payload: { error: "audio_not_found" } }, deps: {} });
+      return;
+    }
   } catch {
     sendJson({ data: { res, status: 404, payload: { error: "audio_not_found" } }, deps: {} });
     return;
@@ -649,6 +728,77 @@ function normalizeUsername(ctx) {
     return "";
   }
   return value.replace(/[^a-z0-9_-]/g, "");
+}
+
+function requireAuthUser(ctx) {
+  const { data } = ctx;
+  const { req, res } = data;
+  const user = resolveAuthenticatedUser({ data: { req }, deps: {} });
+  if (!user) {
+    sendJson({ data: { res, status: 401, payload: { error: "auth_required" } }, deps: {} });
+    return "";
+  }
+  return user;
+}
+
+function createAuthSession(ctx) {
+  const { data } = ctx;
+  const { username } = data;
+  const loggedInAt = Date.now();
+  const token = "tok_" + loggedInAt.toString(36) + "_" + Math.random().toString(36).slice(2, 12);
+  AUTH_SESSIONS.set(token, {
+    username,
+    expiresAt: loggedInAt + LOGIN_TTL_MS
+  });
+  return {
+    token,
+    loggedInAt
+  };
+}
+
+function resolveAuthenticatedUser(ctx) {
+  const { data } = ctx;
+  const { req } = data;
+  const requestUrl = parseRequestUrl({ data: { rawUrl: req && req.url ? req.url : "/" }, deps: {} });
+  const username = normalizeUsername({
+    data: {
+      username:
+        (req && req.headers ? req.headers["x-audio-user"] : "") ||
+        requestUrl.searchParams.get("username")
+    },
+    deps: {}
+  });
+  const token = String(
+    (req && req.headers ? req.headers["x-audio-auth"] || "" : "") ||
+    requestUrl.searchParams.get("authToken") ||
+    requestUrl.searchParams.get("token") ||
+    ""
+  ).trim();
+  if (!username || !token || !USER_CREDENTIALS[username]) {
+    return "";
+  }
+  const session = AUTH_SESSIONS.get(token);
+  if (!session || session.username !== username) {
+    return "";
+  }
+  if (Date.now() > session.expiresAt) {
+    AUTH_SESSIONS.delete(token);
+    return "";
+  }
+  return username;
+}
+
+function isOwnedByUser(ctx) {
+  const { data } = ctx;
+  const { record, username } = data;
+  if (!record || typeof record !== "object") {
+    return false;
+  }
+  const owner = normalizeUsername({ data: { username: record.owner }, deps: {} });
+  if (!owner || !username) {
+    return false;
+  }
+  return owner === username;
 }
 
 function buildSessionId(ctx) {
@@ -917,8 +1067,15 @@ function sendJson(ctx) {
 }
 
 async function readRemoteSessionSummaries(ctx) {
+  const { data } = ctx;
+  const { username } = data;
+  const query = username ? "?username=" + encodeURIComponent(username) : "";
   const payload = await remoteRequestJson({
-    data: { method: "GET", endpointPath: REMOTE_SESSIONS_PATH },
+    data: {
+      method: "GET",
+      endpointPath: REMOTE_SESSIONS_PATH + query,
+      headers: withRemoteUserHeaders({ data: { username }, deps: {} })
+    },
     deps: {}
   });
   if (!payload || !Array.isArray(payload.sessions)) {
@@ -929,11 +1086,22 @@ async function readRemoteSessionSummaries(ctx) {
 
 async function getRemoteSession(ctx) {
   const { data } = ctx;
-  const { sessionId } = data;
+  const { sessionId, username } = data;
   const resolvedSessionId = normalizeSessionId({ data: { sessionId }, deps: {} });
-  const query = resolvedSessionId ? "?id=" + encodeURIComponent(resolvedSessionId) : "";
+  const queryParams = new URLSearchParams();
+  if (resolvedSessionId) {
+    queryParams.set("id", resolvedSessionId);
+  }
+  if (username) {
+    queryParams.set("username", username);
+  }
+  const query = queryParams.toString() ? "?" + queryParams.toString() : "";
   const payload = await remoteRequestJson({
-    data: { method: "GET", endpointPath: REMOTE_SESSION_PATH + query },
+    data: {
+      method: "GET",
+      endpointPath: REMOTE_SESSION_PATH + query,
+      headers: withRemoteUserHeaders({ data: { username }, deps: {} })
+    },
     deps: {}
   });
   if (payload && payload.error === "session_not_found") {
@@ -957,9 +1125,18 @@ async function getRemoteSession(ctx) {
 
 async function saveRemoteSession(ctx) {
   const { data } = ctx;
-  const { payload } = data;
+  const { payload, username } = data;
+  const remotePayload = {
+    ...(payload || {}),
+    owner: username
+  };
   const result = await remoteRequestJson({
-    data: { method: "POST", endpointPath: REMOTE_SESSION_PATH, payload },
+    data: {
+      method: "POST",
+      endpointPath: REMOTE_SESSION_PATH,
+      payload: remotePayload,
+      headers: withRemoteUserHeaders({ data: { username }, deps: {} })
+    },
     deps: {}
   });
   if (!result || !result.ok) {
@@ -970,9 +1147,18 @@ async function saveRemoteSession(ctx) {
 
 async function deleteRemoteSession(ctx) {
   const { data } = ctx;
-  const { sessionId } = data;
+  const { sessionId, username } = data;
+  const query = new URLSearchParams();
+  query.set("id", sessionId);
+  if (username) {
+    query.set("username", username);
+  }
   const result = await remoteRequestJson({
-    data: { method: "DELETE", endpointPath: REMOTE_SESSION_PATH + "?id=" + encodeURIComponent(sessionId) },
+    data: {
+      method: "DELETE",
+      endpointPath: REMOTE_SESSION_PATH + "?" + query.toString(),
+      headers: withRemoteUserHeaders({ data: { username }, deps: {} })
+    },
     deps: {}
   });
   if (!result || !result.ok) {
@@ -983,13 +1169,29 @@ async function deleteRemoteSession(ctx) {
 
 async function saveRemoteAudio(ctx) {
   const { data } = ctx;
-  const { bodyBuffer, fileName, mimeType, lastModified } = data;
+  const { bodyBuffer, fileName, mimeType, lastModified, username } = data;
+  const query = new URLSearchParams();
+  if (fileName) {
+    query.set("name", String(fileName));
+  }
+  if (mimeType) {
+    query.set("type", String(mimeType));
+  }
+  if (lastModified) {
+    query.set("lastModified", String(lastModified));
+  }
+  if (username) {
+    query.set("username", username);
+  }
 
   const response = await remoteFetch({
     data: {
       method: "POST",
-      endpointPath: REMOTE_AUDIO_PATH + buildAudioUploadQuery({ data: { fileName, mimeType, lastModified }, deps: {} }),
-      headers: { "Content-Type": String(mimeType || "application/octet-stream") },
+      endpointPath: REMOTE_AUDIO_PATH + "?" + query.toString(),
+      headers: withRemoteUserHeaders({
+        data: { username, headers: { "Content-Type": String(mimeType || "application/octet-stream") } },
+        deps: {}
+      }),
       body: bodyBuffer
     },
     deps: {}
@@ -1020,7 +1222,7 @@ function buildAudioUploadQuery(ctx) {
 
 async function remoteRequestJson(ctx) {
   const { data } = ctx;
-  const { method, endpointPath, payload } = data;
+  const { method, endpointPath, payload, headers } = data;
   if (!REMOTE_BASE_URL) {
     throw new Error("REMOTE_BASE_URL is required when SESSION_STORE=remote");
   }
@@ -1033,7 +1235,7 @@ async function remoteRequestJson(ctx) {
       data: {
         method,
         endpointPath,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(headers || {}) },
         payload
       },
       deps: { controller }
@@ -1063,7 +1265,7 @@ async function remoteFetch(ctx) {
 
 async function saveLocalAudioFromBase64(ctx) {
   const { data, deps } = ctx;
-  const { payload } = data;
+  const { payload, owner } = data;
   const base64 = String(payload.audioBase64 || "");
   const marker = "base64,";
   const markerIndex = base64.indexOf(marker);
@@ -1076,6 +1278,7 @@ async function saveLocalAudioFromBase64(ctx) {
   await deps.fsp.writeFile(binaryPath, buffer);
   await deps.fsp.writeFile(metadataPath, JSON.stringify({
     id: audioId,
+    owner: normalizeUsername({ data: { username: owner }, deps: {} }),
     fileName: payload.file && payload.file.name ? String(payload.file.name) : "audio.bin",
     mimeType: payload.file && payload.file.type ? String(payload.file.type) : "application/octet-stream",
     size: buffer.length,
@@ -1083,6 +1286,33 @@ async function saveLocalAudioFromBase64(ctx) {
     savedAt: new Date().toISOString()
   }, null, 2), "utf8");
   return { id: audioId };
+}
+
+async function readAudioMetadata(ctx) {
+  const { data, deps } = ctx;
+  const { audioId } = data;
+  const safeId = normalizeSessionId({ data: { sessionId: audioId }, deps: {} });
+  if (!safeId) {
+    return null;
+  }
+  const metadataPath = getAudioMetadataPath({ data: { audioId: safeId }, deps: { path: deps.path } });
+  try {
+    const raw = await deps.fsp.readFile(metadataPath, "utf8");
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function withRemoteUserHeaders(ctx) {
+  const { data } = ctx;
+  const { username, headers } = data;
+  const merged = { ...(headers || {}) };
+  if (username) {
+    merged["x-audio-user"] = username;
+  }
+  return merged;
 }
 
 async function normalizeLoadedSession(ctx) {

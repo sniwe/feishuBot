@@ -35,6 +35,10 @@
   const targetCheckpointMarkers = document.getElementById("target-checkpoint-markers");
   const targetPlayhead = document.getElementById("target-playhead");
   const targetPlayheadTime = document.getElementById("target-playhead-time");
+  const subSegValuePanel = document.getElementById("subseg-value-panel");
+  const subSegValueForm = document.getElementById("subseg-value-form");
+  const subSegValueInput = document.getElementById("subseg-value-input");
+  const subSegValueList = document.getElementById("subseg-value-list");
 
   const state = {
     objectUrl: null,
@@ -54,6 +58,8 @@
     targetEnd: null,
     targetSubSegs: [],
     selectedTargetSubSegIndex: -1,
+    activeSubSegValueKey: null,
+    subSegValueEntries: {},
     shiftHoldTss: null,
     hasAutoFocusedProgress: false,
     markerSignature: "",
@@ -65,6 +71,7 @@
     checkpointPreviewTimerId: null,
     cycleLatch: { left: "", right: "" },
     authUser: null,
+    authToken: null,
     activeSessionId: null,
     saveQueue: Promise.resolve(),
     isPersisting: false
@@ -92,6 +99,9 @@
 
   input.addEventListener("change", handleFileChange);
   loginForm.addEventListener("submit", handleLoginSubmit);
+  if (subSegValueForm) {
+    subSegValueForm.addEventListener("submit", handleSubSegValueSubmit);
+  }
   uploadButton.addEventListener("click", openFilePicker);
   backButton.addEventListener("click", goBackToLibrary);
   audio.addEventListener("loadedmetadata", updateUi);
@@ -125,6 +135,7 @@
     const restored = restoreLoginFromStorage();
     if (restored) {
       state.authUser = restored.username;
+      state.authToken = restored.token;
       setLoginStatus("Welcome back, " + restored.username + ".");
       showLibraryView();
       await loadPersistedAudioCards();
@@ -167,7 +178,7 @@
       }
 
       const payload = await response.json();
-      if (!payload || !payload.ok || !payload.username) {
+      if (!payload || !payload.ok || !payload.username || !payload.token) {
         throw new Error("invalid_login_response");
       }
 
@@ -175,11 +186,13 @@
       const loggedInAt = Number.isFinite(Number(payload.loggedInAt)) ? Number(payload.loggedInAt) : Date.now();
       persistLogin({
         username: payload.username,
+        token: payload.token,
         loggedInAt,
         ttlMs: ttl
       });
 
       state.authUser = payload.username;
+      state.authToken = payload.token;
       loginPassword.value = "";
       setLoginStatus("Signed in as " + payload.username + ".");
       showLibraryView();
@@ -236,6 +249,7 @@
     const isSpaceKey = keyCode === "Space" || keyValue === " " || keyValue === "Spacebar";
     const isEnterKey = keyCode === "Enter" || keyValue === "Enter";
     const isShiftKey = keyCode === "ShiftLeft" || keyCode === "ShiftRight" || keyValue === "Shift";
+    const isSubSegInputFocused = document.activeElement === subSegValueInput;
     debugLog("keydown", {
       code: keyCode,
       key: keyValue,
@@ -260,6 +274,15 @@
     if ((event.ctrlKey || event.metaKey) && (keyCode === "Backspace" || keyValue === "Backspace")) {
       if (isPlayerActive()) {
         event.preventDefault();
+        if (state.activeSubSegValueKey) {
+          state.activeSubSegValueKey = null;
+          if (subSegValueInput) {
+            subSegValueInput.value = "";
+          }
+          renderSubSegValuePanel();
+          setSaveStatus("audSeg subSeg value selection cleared");
+          return;
+        }
         if (state.selectedTargetSubSegIndex >= 0) {
           state.selectedTargetSubSegIndex = -1;
           updateUi();
@@ -296,8 +319,16 @@
       return;
     }
 
+    if (isEnterKey && isSubSegInputFocused) {
+      return;
+    }
+
     if (isEnterKey) {
       event.preventDefault();
+      if (hasTargetSpan() && state.selectedTargetSubSegIndex >= 0) {
+        activateSubSegValueSelection();
+        return;
+      }
       lockSelectedSpanAsTarget();
       return;
     }
@@ -633,14 +664,19 @@
   }
 
   async function loadPersistedAudioCards() {
-    if (!state.authUser) {
+    if (!state.authUser || !state.authToken) {
       return;
     }
     try {
       const response = await fetch("/api/sessions", {
         method: "GET",
-        cache: "no-store"
+        cache: "no-store",
+        headers: buildAuthHeaders()
       });
+      if (response.status === 401) {
+        clearLoginState("Login expired. Please sign in again.");
+        return;
+      }
 
       if (response.status === 404) {
         renderAudioCards([]);
@@ -877,8 +913,13 @@
 
       const response = await fetch("/api/session?id=" + encodeURIComponent(sessionId), {
         method: "GET",
-        cache: "no-store"
+        cache: "no-store",
+        headers: buildAuthHeaders()
       });
+      if (response.status === 401) {
+        clearLoginState("Login expired. Please sign in again.");
+        return;
+      }
 
       if (!response.ok) {
         throw new Error("session_load_failed");
@@ -1655,8 +1696,13 @@
 
     try {
       const response = await fetch("/api/session?id=" + encodeURIComponent(sessionId), {
-        method: "DELETE"
+        method: "DELETE",
+        headers: buildAuthHeaders()
       });
+      if (response.status === 401) {
+        clearLoginState("Login expired. Please sign in again.");
+        return;
+      }
       if (!response.ok) {
         const detail = await response.text().catch(function () { return ""; });
         throw new Error("session_delete_failed status=" + String(response.status) + " detail=" + detail);
@@ -1700,6 +1746,7 @@
     try {
       const safe = {
         username: String(record.username || "").toLowerCase(),
+        token: String(record.token || ""),
         loggedInAt: Number(record.loggedInAt || Date.now()),
         ttlMs: Number(record.ttlMs || LOGIN_TTL_MS)
       };
@@ -1717,19 +1764,60 @@
       }
       const parsed = JSON.parse(raw);
       const username = String(parsed && parsed.username ? parsed.username : "").toLowerCase();
+      const token = String(parsed && parsed.token ? parsed.token : "");
       const loggedInAt = Number(parsed && parsed.loggedInAt);
       const ttlMs = Number(parsed && parsed.ttlMs ? parsed.ttlMs : LOGIN_TTL_MS);
-      if (ALLOWED_USERS.indexOf(username) < 0 || !Number.isFinite(loggedInAt) || !Number.isFinite(ttlMs) || ttlMs <= 0) {
+      if (ALLOWED_USERS.indexOf(username) < 0 || !token || !Number.isFinite(loggedInAt) || !Number.isFinite(ttlMs) || ttlMs <= 0) {
         return null;
       }
       if ((Date.now() - loggedInAt) > ttlMs) {
         window.localStorage.removeItem(LOGIN_STORAGE_KEY);
         return null;
       }
-      return { username, loggedInAt, ttlMs };
+      return { username, token, loggedInAt, ttlMs };
     } catch {
       return null;
     }
+  }
+
+  function buildAuthHeaders() {
+    if (!state.authUser || !state.authToken) {
+      return {};
+    }
+    return {
+      "x-audio-user": state.authUser,
+      "x-audio-auth": state.authToken
+    };
+  }
+
+  function buildAuthenticatedAudioUrl(audioId) {
+    const query = new URLSearchParams();
+    query.set("id", String(audioId || ""));
+    if (state.authUser) {
+      query.set("username", state.authUser);
+    }
+    if (state.authToken) {
+      query.set("authToken", state.authToken);
+    }
+    return "/api/audio?" + query.toString();
+  }
+
+  function clearLoginState(message) {
+    state.authUser = null;
+    state.authToken = null;
+    state.activeSessionId = null;
+    state.activeAudioId = null;
+    state.activeAudioUrl = null;
+    state.sessionsCache = [];
+    state.openMenuSessionId = null;
+    try {
+      window.localStorage.removeItem(LOGIN_STORAGE_KEY);
+    } catch {
+      // Ignore storage failures.
+    }
+    showLoginView();
+    renderAudioCards([]);
+    setLoginStatus(message || "Log in to continue.", true);
   }
 
   async function saveSessionState() {
@@ -1762,10 +1850,15 @@
     const response = await fetch("/api/session", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        ...buildAuthHeaders()
       },
       body: JSON.stringify(payload)
     });
+    if (response.status === 401) {
+      clearLoginState("Login expired. Please sign in again.");
+      throw new Error("auth_required");
+    }
 
     if (!response.ok) {
       const detail = await response.text().catch(function () { return ""; });
@@ -1799,7 +1892,7 @@
     if (saved && typeof saved.audioId === "string" && saved.audioId) {
       setAudioSourceFromRemoteUrl({
         data: {
-          url: "/api/audio?id=" + encodeURIComponent(saved.audioId),
+          url: buildAuthenticatedAudioUrl(saved.audioId),
           displayName: savedFile.name || "Restored audio",
           fileMeta: savedFile
         },
@@ -1934,7 +2027,7 @@
 
   async function ensureAudioUploaded() {
     if (state.activeAudioId) {
-      return { id: state.activeAudioId, url: state.activeAudioUrl || ("/api/audio?id=" + encodeURIComponent(state.activeAudioId)) };
+      return { id: state.activeAudioId, url: state.activeAudioUrl || buildAuthenticatedAudioUrl(state.activeAudioId) };
     }
     if (!state.currentFile) {
       throw new Error("missing_current_file");
@@ -1978,6 +2071,13 @@
       const xhr = new XMLHttpRequest();
       xhr.open("POST", "/api/audio?" + queryString);
       xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+      const authHeaders = buildAuthHeaders();
+      if (authHeaders["x-audio-user"]) {
+        xhr.setRequestHeader("x-audio-user", authHeaders["x-audio-user"]);
+      }
+      if (authHeaders["x-audio-auth"]) {
+        xhr.setRequestHeader("x-audio-auth", authHeaders["x-audio-auth"]);
+      }
 
       xhr.upload.onprogress = function (event) {
         if (!event.lengthComputable || !state.pendingUpload) {
@@ -2015,7 +2115,8 @@
     if (saved && typeof saved.audioId === "string" && saved.audioId) {
       const response = await fetch("/api/audio?id=" + encodeURIComponent(saved.audioId), {
         method: "GET",
-        cache: "no-store"
+        cache: "no-store",
+        headers: buildAuthHeaders()
       });
       if (!response.ok) {
         throw new Error("audio_fetch_failed");

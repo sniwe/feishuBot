@@ -4,7 +4,7 @@
     "name":  "audioTest",
     "summary":  "Toy browser audio checkpoint player with keyboard controls",
     "root":  "C:\\Users\\Qub\\audioTest",
-    "updated":  "2026-03-16T11:19:00.0000000+08:00",
+    "updated":  "2026-03-17T11:27:24.6935599+08:00",
     "nodes":  [
                   {
                       "id":  "control:ui",
@@ -35,10 +35,10 @@
                       "id":  "module:audio-control",
                       "type":  "module",
                       "name":  "src/frontend/app.js",
-                      "summary":  "Refactored audio controller with centralized state/UI updates, session save/restore via backend API, and audSeg target-lock playback mode",
+                      "summary":  "Refactored audio controller with centralized state/UI updates, session save/restore via backend API, audSeg target-lock playback mode, and auth-scoped requests",
                       "features":  [
                                        {
-                                           "summary":  "Keyboard controls and looping are preserved while Enter can lock a selected audSeg into target mode with a second loop progress bar, Shift hold plus Shift+Space creates subSegs that persist with checkpoints and render on both audEp and target bars, draggable checkpoint markers/tags support micro-adjust with magnifier and 500ms live preview, Ctrl+arrows cycle target-local subSegs, and startup restore waits for full audio metadata load via GET /api/session",
+                                           "summary":  "Keyboard controls and looping are preserved while Enter can lock a selected audSeg into target mode with a second loop progress bar, Shift hold plus Shift+Space creates subSegs that persist with checkpoints and render on both audEp and target bars, draggable checkpoint markers/tags support micro-adjust with magnifier and 500ms live preview, Ctrl+arrows cycle target-local subSegs, startup restore waits for full audio metadata load via GET /api/session, and all audEp API calls include per-user auth headers/token",
                                            "flow":  [
                                                         "e2",
                                                         "e3",
@@ -84,10 +84,10 @@
                       "id":  "module:session-backend",
                       "type":  "module",
                       "name":  "src/backend/server.js",
-                      "summary":  "Node HTTP server with persisted-audio list/detail APIs, payload validation, and hardened static path resolution",
+                      "summary":  "Node HTTP server with persisted-audio list/detail APIs, payload validation, hardened static path resolution, and owner-scoped auth for session/audio operations",
                       "features":  [
                                        {
-                                           "summary":  "GET /api/sessions and GET/POST /api/session persist and retrieve audio sessions from project data storage",
+                                           "summary":  "GET /api/sessions and GET/POST/DELETE /api/session plus GET/POST /api/audio now require authenticated user context and enforce owner-only visibility and interaction",
                                            "flow":  [
                                                         "e5",
                                                         "e6"

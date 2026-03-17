@@ -119,10 +119,10 @@ function formatSkuListForCell(list) {
     .join(' | ');
 }
 
-function resolvePayloadForRow(scanRow, payloadMap) {
+function resolvePayloadForRow(scanRow, payloadByKey) {
   const platformOrderNo = String(scanRow?.cols?.col_5 || '').trim();
   const orderNo = String(scanRow?.cols?.col_3 || '').trim() || String(scanRow?.rowId || '').trim();
-  return (platformOrderNo && payloadMap.get(platformOrderNo)) || (orderNo && payloadMap.get(orderNo)) || null;
+  return (platformOrderNo && payloadByKey.get(platformOrderNo)) || (orderNo && payloadByKey.get(orderNo)) || null;
 }
 
 function toPayloadKeyedRow(scanRow, payload, extras = {}) {
@@ -623,7 +623,7 @@ async function scanAllRowsFast(page) {
   });
 }
 
-async function fetchOrderPayloadMap(page) {
+async function fetchOrderPayloadIndex(page) {
   const records = await page.evaluate(async () => {
     const token = String(localStorage.getItem('oms-token') || '').trim();
     if (!token) return [];
@@ -662,22 +662,21 @@ async function fetchOrderPayloadMap(page) {
     }
     const data = json?.data || {};
     const rows = Array.isArray(data.records) ? data.records : Array.isArray(data.list) ? data.list : [];
-    return rows.map((r) => ({
-      orderNo: r?.orderNo || '',
-      platformOrderNo: r?.platformOrderNo || '',
-      platformSkuList: Array.isArray(r?.platformSkuList) ? r.platformSkuList : [],
-      skuList: Array.isArray(r?.skuList) ? r.skuList : []
-    }));
+    return rows;
   });
 
-  const out = new Map();
+  const payloadByKey = new Map();
+  const uniqueByOrderNo = new Map();
   for (const r of records) {
     const orderNo = String(r?.orderNo || '').trim();
     const platformOrderNo = String(r?.platformOrderNo || '').trim();
-    if (orderNo) out.set(orderNo, r);
-    if (platformOrderNo) out.set(platformOrderNo, r);
+    if (orderNo) {
+      payloadByKey.set(orderNo, r);
+      if (!uniqueByOrderNo.has(orderNo)) uniqueByOrderNo.set(orderNo, r);
+    }
+    if (platformOrderNo) payloadByKey.set(platformOrderNo, r);
   }
-  return out;
+  return { payloadByKey, payloadRows: Array.from(uniqueByOrderNo.values()) };
 }
 
 async function writeGroupedOutput(outputRoot, grouped, metadata) {
@@ -757,7 +756,7 @@ async function main() {
       await page.goto(launch.ordersUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
     }
     const sessionSaved = await persistSessionArtifacts(page, launch);
-    const payloadMap = await fetchOrderPayloadMap(page);
+    const { payloadByKey, payloadRows } = await fetchOrderPayloadIndex(page);
     await clickMainTabFast(page);
     const stable = await waitTableStabilityFast(page);
     const scan = await scanAllRowsFast(page);
@@ -779,13 +778,35 @@ async function main() {
     const grouped = {};
     for (const row of matched) {
       if (!grouped[row.orderDateYYMMDD]) grouped[row.orderDateYYMMDD] = [];
-      const payload = resolvePayloadForRow(row, payloadMap);
+      const payload = resolvePayloadForRow(row, payloadByKey);
       grouped[row.orderDateYYMMDD].push(
         toPayloadKeyedRow(row, payload, {
           col21Parsed: row.col21Parsed,
           orderDateYYMMDD: row.orderDateYYMMDD
         })
       );
+    }
+
+    // Fallback: if DOM scan yields no matches, derive directly from payload payTime.
+    if (matched.length === 0 && payloadRows.length > 0) {
+      for (const payload of payloadRows) {
+        const parsed = parseCol21Time(payload?.payTime, now);
+        if (!parsed) continue;
+        if (parsed < cutoff || parsed > now) continue;
+        const row = {
+          rowIndex: -1,
+          rowId: String(payload?.orderNo || payload?.platformOrderNo || ''),
+          col21Parsed: toIsoLocal(parsed),
+          orderDateYYMMDD: yyMMdd(parsed)
+        };
+        const outRow = toPayloadKeyedRow(row, payload, {
+          col21Parsed: row.col21Parsed,
+          orderDateYYMMDD: row.orderDateYYMMDD,
+          source: 'payload_fallback'
+        });
+        if (!grouped[row.orderDateYYMMDD]) grouped[row.orderDateYYMMDD] = [];
+        grouped[row.orderDateYYMMDD].push(outRow);
+      }
     }
 
     const writtenFiles = await writeGroupedOutput(
@@ -806,6 +827,7 @@ async function main() {
         scannedRowCount: scan.rows.length
       }
     );
+    const matchedRowCountFinal = Object.values(grouped).reduce((sum, rows) => sum + rows.length, 0);
 
     console.log(
       JSON.stringify(
@@ -821,7 +843,7 @@ async function main() {
           url: page.url(),
           stabilized: stable,
           scannedRowCount: scan.rows.length,
-          matchedRowCount: matched.length,
+          matchedRowCount: matchedRowCountFinal,
           outputRoot,
           writtenFiles
         },
