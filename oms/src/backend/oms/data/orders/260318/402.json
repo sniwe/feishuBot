@@ -4,15 +4,15 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-18T07:18:45.872Z",
+  "scannedAt": "2026-03-18T07:23:47.021Z",
   "window": {
-    "from": "2026-03-18 13:18:35",
-    "to": "2026-03-18 15:18:35"
+    "from": "2026-03-18 13:23:35",
+    "to": "2026-03-18 15:23:35"
   },
-  "scannedRowCount": 1,
+  "scannedRowCount": 763,
   "orderDate": "260318",
   "col13Prefix": "402",
-  "matchedCount": 31,
+  "matchedCount": 33,
   "rows": [
     {
       "rowIndex": 8,
@@ -1765,7 +1765,7 @@
       "skuListText": "SWLC1268-1BR22 * 1 (假发)"
     },
     {
-      "rowIndex": -1,
+      "rowIndex": 7,
       "rowId": "SO051260318000098",
       "col21Parsed": "2026-03-18 13:22:44",
       "orderDateYYMMDD": "260318",
@@ -1835,7 +1835,7 @@
       "skuListText": "LC2068-9 * 1 (假发)"
     },
     {
-      "rowIndex": -1,
+      "rowIndex": 5,
       "rowId": "SO051260318000097",
       "col21Parsed": "2026-03-18 13:25:28",
       "orderDateYYMMDD": "260318",
@@ -1905,7 +1905,7 @@
       "skuListText": "WL1085-7 * 1 (假发)"
     },
     {
-      "rowIndex": -1,
+      "rowIndex": 6,
       "rowId": "SO051260318000096",
       "col21Parsed": "2026-03-18 13:36:56",
       "orderDateYYMMDD": "260318",
@@ -1975,7 +1975,7 @@
       "skuListText": "SWLC3143-2BL30 * 1 (假发)"
     },
     {
-      "rowIndex": -1,
+      "rowIndex": 7,
       "rowId": "SO051260318000095",
       "col21Parsed": "2026-03-18 13:37:26",
       "orderDateYYMMDD": "260318",
@@ -2055,7 +2055,7 @@
       "skuListText": "LC2088-1 * 1 (假发) | LC2068-5 * 1 (假发)"
     },
     {
-      "rowIndex": -1,
+      "rowIndex": 8,
       "rowId": "SO051260318000094",
       "col21Parsed": "2026-03-18 13:37:53",
       "orderDateYYMMDD": "260318",
@@ -2125,7 +2125,7 @@
       "skuListText": "LC2068-1 * 1 (假发)"
     },
     {
-      "rowIndex": -1,
+      "rowIndex": 10,
       "rowId": "SO051260318000107",
       "col21Parsed": "2026-03-18 13:51:57",
       "orderDateYYMMDD": "260318",
@@ -2205,7 +2205,7 @@
       "skuListText": "SWLC8285-4BK14 * 1 (假发) | LC2067-5 * 1 (假发)"
     },
     {
-      "rowIndex": -1,
+      "rowIndex": 4,
       "rowId": "SO051260318000106",
       "col21Parsed": "2026-03-18 13:53:47",
       "orderDateYYMMDD": "260318",
@@ -2275,7 +2275,7 @@
       "skuListText": "SWLC1268-1BR22 * 1 (假发)"
     },
     {
-      "rowIndex": -1,
+      "rowIndex": 5,
       "rowId": "SO051260318000105",
       "col21Parsed": "2026-03-18 13:54:31",
       "orderDateYYMMDD": "260318",
@@ -2343,6 +2343,146 @@
       "storeShipmentBook": 0,
       "platformSkuListText": "LC2068-9 * 1 (25-Inch Straw Blonde Reverse Ombre (Scorched Brown Roots) Straight Synthetic Wig | 【Heat Resistant】【Cap Included】 | # FSGB)",
       "skuListText": "LC2068-9 * 1 (假发)"
+    },
+    {
+      "rowIndex": 4,
+      "rowId": "SO051260318000113",
+      "col21Parsed": "2026-03-18 14:06:10",
+      "orderDateYYMMDD": "260318",
+      "orderNo": "SO051260318000113",
+      "platformOrderNo": "577313520765146028",
+      "platformCode": "tiktok",
+      "platformSkuList": [
+        {
+          "sku": "SWLF1065-6OR28",
+          "qty": 1,
+          "productName": "'Flame it Up' 24-Inch Solid Warm Copper-tinted Auburn Retro Glam Blowout Wavy Cut Futura Synthetic Wig | 【Free-part 13*4\" Lace】【Heat Resistant】【Cap Included】 |"
+        }
+      ],
+      "skuList": [
+        {
+          "sku": "SWLF1065-6OR28",
+          "qty": 1,
+          "productName": "假发"
+        }
+      ],
+      "buyerName": "Liz Guzman Cole",
+      "buyerEmail": "v4bD3USEZMVGIMNCHTPEON3JIKL24@scs.tiktokw.us",
+      "receiver": "Liz Guzman Cole",
+      "telephone": "(+1)5126984355",
+      "receiptCountryCode": "US",
+      "receiptCountryName": "United States of America (USA)",
+      "provinceCode": "TX",
+      "provinceName": "Texas",
+      "city": "",
+      "postCode": "78741",
+      "houseNum": "",
+      "addressOne": "2013 WARELY LN",
+      "addressTwo": "",
+      "addressThi": "",
+      "storeCode": "USLCEAE2TRUS",
+      "storeName": "402-Lady Grayy USA_US",
+      "site": "Non-LOCAL-US",
+      "siteNameCn": "US-本土店铺",
+      "siteNameEn": "Non-LOCAL-US",
+      "sendWhCode": "USW01",
+      "sendWhName": "ZOO WAREHOUSE ⑥",
+      "trackNo": "",
+      "logisticsCarrier": "usps",
+      "logisticsCarrierName": "USPS",
+      "logisticsChannelCode": "USPS_PICKUP_C",
+      "logisticsChannelName": "USPS自提",
+      "orderTime": "2026-03-18 14:06:07",
+      "payTime": "2026-03-18 14:06:10",
+      "source": "线上订单",
+      "createTime": "2026-03-18 15:23:25",
+      "auditTime": "",
+      "shipTime": "",
+      "cancelTime": "",
+      "status": 0,
+      "exceptionCause": " ",
+      "auditCause": "",
+      "subStatus": 0,
+      "cancelWay": 2,
+      "markShipmentStatus": 5,
+      "markShipmentTime": "",
+      "markShipmentFailReason": "",
+      "deliveryOptionType": 2,
+      "platformOrderType": "",
+      "printingStatus": 0,
+      "storeShipmentBook": 0,
+      "platformSkuListText": "SWLF1065-6OR28 * 1 ('Flame it Up' 24-Inch Solid Warm Copper-tinted Auburn Retro Glam Blowout Wavy Cut Futura Synthetic Wig | 【Free-part 13*4\" Lace】【Heat Resistant】【Cap Included】 |)",
+      "skuListText": "SWLF1065-6OR28 * 1 (假发)"
+    },
+    {
+      "rowIndex": 5,
+      "rowId": "SO051260318000112",
+      "col21Parsed": "2026-03-18 14:06:33",
+      "orderDateYYMMDD": "260318",
+      "orderNo": "SO051260318000112",
+      "platformOrderNo": "577313520314060917",
+      "platformCode": "tiktok",
+      "platformSkuList": [
+        {
+          "sku": "LC8011-1",
+          "qty": 1,
+          "productName": "26.5-Inch Warm Orangey Brown Gentle Wave Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #18 FSGB"
+        }
+      ],
+      "skuList": [
+        {
+          "sku": "LC8011-1",
+          "qty": 1,
+          "productName": "假发"
+        }
+      ],
+      "buyerName": "Nohemi Teutli",
+      "buyerEmail": "v4bD3USEZMVGIMNCGXPUNU6FRDX24@scs.tiktokw.us",
+      "receiver": "Nohemi Teutli",
+      "telephone": "(+1)5303078967",
+      "receiptCountryCode": "US",
+      "receiptCountryName": "United States of America (USA)",
+      "provinceCode": "CA",
+      "provinceName": "California",
+      "city": "",
+      "postCode": "96150",
+      "houseNum": "",
+      "addressOne": "923 Alameda Ave Apt 1",
+      "addressTwo": "",
+      "addressThi": "",
+      "storeCode": "USLCEAE2TRUS",
+      "storeName": "402-Lady Grayy USA_US",
+      "site": "Non-LOCAL-US",
+      "siteNameCn": "US-本土店铺",
+      "siteNameEn": "Non-LOCAL-US",
+      "sendWhCode": "USW01",
+      "sendWhName": "ZOO WAREHOUSE ⑥",
+      "trackNo": "",
+      "logisticsCarrier": "usps",
+      "logisticsCarrierName": "USPS",
+      "logisticsChannelCode": "USPS_PICKUP_C",
+      "logisticsChannelName": "USPS自提",
+      "orderTime": "2026-03-18 14:06:29",
+      "payTime": "2026-03-18 14:06:33",
+      "source": "线上订单",
+      "createTime": "2026-03-18 15:23:25",
+      "auditTime": "",
+      "shipTime": "",
+      "cancelTime": "",
+      "status": 0,
+      "exceptionCause": " ",
+      "auditCause": "",
+      "subStatus": 0,
+      "cancelWay": 2,
+      "markShipmentStatus": 5,
+      "markShipmentTime": "",
+      "markShipmentFailReason": "",
+      "deliveryOptionType": 2,
+      "platformOrderType": "",
+      "printingStatus": 0,
+      "storeShipmentBook": 0,
+      "platformSkuListText": "LC8011-1 * 1 (26.5-Inch Warm Orangey Brown Gentle Wave Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #18 FSGB)",
+      "skuListText": "LC8011-1 * 1 (假发)"
     }
   ]
 }
