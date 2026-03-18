@@ -4,10 +4,10 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-18T07:58:47.087Z",
+  "scannedAt": "2026-03-18T08:03:48.183Z",
   "window": {
-    "from": "2026-03-18 13:58:35",
-    "to": "2026-03-18 15:58:35"
+    "from": "2026-03-18 14:03:35",
+    "to": "2026-03-18 16:03:35"
   },
   "scannedRowCount": 763,
   "orderDate": "260318",
@@ -2279,7 +2279,7 @@
       "sendWhName": "ZOO WAREHOUSE ⑥",
       "trackNo": "9234690389427704363647",
       "logisticsCarrier": "usps",
-      "logisticsCarrierName": "USPS",
+      "logisticsCarrierName": "LM-CUSTOMIZE",
       "logisticsChannelCode": "USPS_PICKUP_C",
       "logisticsChannelName": "USPS自提",
       "orderTime": "2026-03-18 14:06:42",
@@ -2354,7 +2354,7 @@
       "sendWhName": "ZOO WAREHOUSE ⑥",
       "trackNo": "9200190389427715663345",
       "logisticsCarrier": "usps",
-      "logisticsCarrierName": "USPS",
+      "logisticsCarrierName": "LM-CUSTOMIZE",
       "logisticsChannelCode": "USPS_PICKUP_C",
       "logisticsChannelName": "USPS自提",
       "orderTime": "2026-03-18 14:12:48",
