@@ -4,10 +4,10 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-18T08:43:44.943Z",
+  "scannedAt": "2026-03-18T08:48:45.277Z",
   "window": {
-    "from": "2026-03-18 14:43:34",
-    "to": "2026-03-18 16:43:34"
+    "from": "2026-03-18 14:48:34",
+    "to": "2026-03-18 16:48:34"
   },
   "scannedRowCount": 763,
   "orderDate": "260318",
@@ -2818,8 +2818,8 @@
       "createTime": "2026-03-18 16:08:29",
       "auditTime": "",
       "shipTime": "",
-      "cancelTime": "",
-      "status": 0,
+      "cancelTime": "2026-03-18 16:46:46",
+      "status": 4,
       "exceptionCause": " ",
       "auditCause": "",
       "subStatus": 0,
@@ -2858,12 +2858,17 @@
         {
           "sku": "LC2039-1",
           "qty": 1,
-          "productName": "假发"
+          "productName": ""
         },
         {
           "sku": "LC2068-9",
           "qty": 1,
-          "productName": "假发"
+          "productName": ""
+        },
+        {
+          "sku": "LB3050-1",
+          "qty": 1,
+          "productName": "发帽"
         }
       ],
       "buyerName": "Elisabeth Martínez",
@@ -2887,7 +2892,7 @@
       "siteNameEn": "Non-LOCAL-US",
       "sendWhCode": "USW01",
       "sendWhName": "ZOO WAREHOUSE ⑥",
-      "trackNo": "",
+      "trackNo": "9234690389427704367034",
       "logisticsCarrier": "usps",
       "logisticsCarrierName": "USPS",
       "logisticsChannelCode": "USPS_PICKUP_C",
@@ -2896,15 +2901,15 @@
       "payTime": "2026-03-18 15:01:43",
       "source": "线上订单",
       "createTime": "2026-03-18 16:08:29",
-      "auditTime": "",
+      "auditTime": "2026-03-18 16:48:31",
       "shipTime": "",
       "cancelTime": "",
-      "status": 0,
-      "exceptionCause": " ",
+      "status": 2,
+      "exceptionCause": "",
       "auditCause": "",
       "subStatus": 0,
       "cancelWay": 2,
-      "markShipmentStatus": 5,
+      "markShipmentStatus": 4,
       "markShipmentTime": "",
       "markShipmentFailReason": "",
       "deliveryOptionType": 2,
@@ -2912,7 +2917,7 @@
       "printingStatus": 0,
       "storeShipmentBook": 0,
       "platformSkuListText": "LC2068-9 * 1 (25-Inch Straw Blonde Reverse Ombre (Scorched Brown Roots) Straight Synthetic Wig | 【Heat Resistant】【Cap Included】 | # FSGB) | LC2039-1 * 1 (30-Inch Honey Wheat Brown with Dark Roots Body Wave Synthetic Wig | 【Heat Resistant】【Cap Included】 | #21 FSGB)",
-      "skuListText": "LC2039-1 * 1 (假发) | LC2068-9 * 1 (假发)"
+      "skuListText": "LC2039-1 * 1 | LC2068-9 * 1 | LB3050-1 * 1 (发帽)"
     },
     {
       "rowIndex": 10,
@@ -2931,6 +2936,11 @@
       ],
       "skuList": [
         {
+          "sku": "LC2088-1",
+          "qty": 1,
+          "productName": "假发"
+        },
+        {
           "sku": "LB4050-1",
           "qty": 1,
           "productName": "发带"
@@ -2938,7 +2948,7 @@
         {
           "sku": "SWLC1268-1BR22",
           "qty": 1,
-          "productName": "假发"
+          "productName": ""
         }
       ],
       "buyerName": "Gabriela Garcia",
@@ -2962,7 +2972,7 @@
       "siteNameEn": "Non-LOCAL-US",
       "sendWhCode": "USW01",
       "sendWhName": "ZOO WAREHOUSE ⑥",
-      "trackNo": "",
+      "trackNo": "9234690389427704367058",
       "logisticsCarrier": "usps",
       "logisticsCarrierName": "USPS",
       "logisticsChannelCode": "USPS_PICKUP_C",
@@ -2971,15 +2981,15 @@
       "payTime": "2026-03-18 15:04:47",
       "source": "线上订单",
       "createTime": "2026-03-18 16:08:29",
-      "auditTime": "",
+      "auditTime": "2026-03-18 16:48:31",
       "shipTime": "",
       "cancelTime": "",
-      "status": 0,
-      "exceptionCause": " ",
+      "status": 2,
+      "exceptionCause": "",
       "auditCause": "",
       "subStatus": 0,
       "cancelWay": 2,
-      "markShipmentStatus": 5,
+      "markShipmentStatus": 4,
       "markShipmentTime": "",
       "markShipmentFailReason": "",
       "deliveryOptionType": 2,
@@ -2987,7 +2997,7 @@
       "printingStatus": 0,
       "storeShipmentBook": 0,
       "platformSkuListText": "SWLC1268-1BR22 * 1 (20-Inch Blended Blonde Ombre (Dark Roots) Straight Synthetic Wig | Heat ResistantCap Included |  FSGA)",
-      "skuListText": "LB4050-1 * 1 (发带) | SWLC1268-1BR22 * 1 (假发)"
+      "skuListText": "LC2088-1 * 1 (假发) | LB4050-1 * 1 (发带) | SWLC1268-1BR22 * 1"
     },
     {
       "rowIndex": 4,
@@ -3008,7 +3018,7 @@
         {
           "sku": "SWLC3088-1RE26",
           "qty": 1,
-          "productName": "假发"
+          "productName": ""
         }
       ],
       "buyerName": "Kodi Martinez",
@@ -3032,7 +3042,7 @@
       "siteNameEn": "Non-LOCAL-US",
       "sendWhCode": "USW01",
       "sendWhName": "ZOO WAREHOUSE ⑥",
-      "trackNo": "",
+      "trackNo": "9200190389427715670732",
       "logisticsCarrier": "usps",
       "logisticsCarrierName": "USPS",
       "logisticsChannelCode": "USPS_PICKUP_C",
@@ -3041,15 +3051,15 @@
       "payTime": "2026-03-18 15:05:18",
       "source": "线上订单",
       "createTime": "2026-03-18 16:08:29",
-      "auditTime": "",
+      "auditTime": "2026-03-18 16:48:31",
       "shipTime": "",
       "cancelTime": "",
-      "status": 0,
-      "exceptionCause": " ",
+      "status": 2,
+      "exceptionCause": "",
       "auditCause": "",
       "subStatus": 0,
       "cancelWay": 2,
-      "markShipmentStatus": 5,
+      "markShipmentStatus": 4,
       "markShipmentTime": "",
       "markShipmentFailReason": "",
       "deliveryOptionType": 2,
@@ -3057,7 +3067,7 @@
       "printingStatus": 0,
       "storeShipmentBook": 0,
       "platformSkuListText": "SWLC3088-1RE26 * 1 (22-Inch Black (Scarlet Red Lowlights) Wavy Synthetic Wig | 【Heat Resistant】【Cap Included】 |  FSGA)",
-      "skuListText": "SWLC3088-1RE26 * 1 (假发)"
+      "skuListText": "SWLC3088-1RE26 * 1"
     },
     {
       "rowIndex": 4,
@@ -3113,8 +3123,8 @@
       "createTime": "2026-03-18 16:30:30",
       "auditTime": "",
       "shipTime": "",
-      "cancelTime": "",
-      "status": 0,
+      "cancelTime": "2026-03-18 16:46:21",
+      "status": 4,
       "exceptionCause": " ",
       "auditCause": "",
       "subStatus": 0,
@@ -3130,7 +3140,7 @@
       "skuListText": "SWLC3137-1BR24 * 1 (假发)"
     },
     {
-      "rowIndex": 5,
+      "rowIndex": 6,
       "rowId": "SO051260318000130",
       "col21Parsed": "2026-03-18 15:13:17",
       "orderDateYYMMDD": "260318",
@@ -3146,9 +3156,14 @@
       ],
       "skuList": [
         {
-          "sku": "LC2039-1",
+          "sku": "SWLC3137-1BR24",
           "qty": 1,
           "productName": "假发"
+        },
+        {
+          "sku": "LC2039-1",
+          "qty": 1,
+          "productName": ""
         },
         {
           "sku": "LB3050-1",
@@ -3177,7 +3192,7 @@
       "siteNameEn": "Non-LOCAL-US",
       "sendWhCode": "USW01",
       "sendWhName": "ZOO WAREHOUSE ⑥",
-      "trackNo": "",
+      "trackNo": "9234690389427704367041",
       "logisticsCarrier": "usps",
       "logisticsCarrierName": "USPS",
       "logisticsChannelCode": "USPS_PICKUP_C",
@@ -3186,15 +3201,15 @@
       "payTime": "2026-03-18 15:13:17",
       "source": "线上订单",
       "createTime": "2026-03-18 16:30:30",
-      "auditTime": "",
+      "auditTime": "2026-03-18 16:48:31",
       "shipTime": "",
       "cancelTime": "",
-      "status": 0,
-      "exceptionCause": " ",
+      "status": 2,
+      "exceptionCause": "",
       "auditCause": "",
       "subStatus": 0,
       "cancelWay": 2,
-      "markShipmentStatus": 5,
+      "markShipmentStatus": 4,
       "markShipmentTime": "",
       "markShipmentFailReason": "",
       "deliveryOptionType": 2,
@@ -3202,10 +3217,10 @@
       "printingStatus": 0,
       "storeShipmentBook": 0,
       "platformSkuListText": "LC2039-1 * 1 (30-Inch Honey Wheat Brown with Dark Roots Body Wave Synthetic Wig | 【Heat Resistant】【Cap Included】 | #21 FSGB)",
-      "skuListText": "LC2039-1 * 1 (假发) | LB3050-1 * 1 (发帽)"
+      "skuListText": "SWLC3137-1BR24 * 1 (假发) | LC2039-1 * 1 | LB3050-1 * 1 (发帽)"
     },
     {
-      "rowIndex": 6,
+      "rowIndex": 5,
       "rowId": "SO051260318000129",
       "col21Parsed": "2026-03-18 15:17:33",
       "orderDateYYMMDD": "260318",
@@ -3258,8 +3273,8 @@
       "createTime": "2026-03-18 16:30:30",
       "auditTime": "",
       "shipTime": "",
-      "cancelTime": "",
-      "status": 0,
+      "cancelTime": "2026-03-18 16:45:55",
+      "status": 4,
       "exceptionCause": " ",
       "auditCause": "",
       "subStatus": 0,
@@ -3293,7 +3308,7 @@
         {
           "sku": "LC2094-2",
           "qty": 1,
-          "productName": "假发"
+          "productName": ""
         }
       ],
       "buyerName": "Lorraine Limon",
@@ -3317,7 +3332,7 @@
       "siteNameEn": "Non-LOCAL-US",
       "sendWhCode": "USW01",
       "sendWhName": "ZOO WAREHOUSE ⑥",
-      "trackNo": "",
+      "trackNo": "9200190389427715670664",
       "logisticsCarrier": "usps",
       "logisticsCarrierName": "USPS",
       "logisticsChannelCode": "USPS_PICKUP_C",
@@ -3326,15 +3341,15 @@
       "payTime": "2026-03-18 15:18:03",
       "source": "线上订单",
       "createTime": "2026-03-18 16:30:30",
-      "auditTime": "",
+      "auditTime": "2026-03-18 16:48:32",
       "shipTime": "",
       "cancelTime": "",
-      "status": 0,
-      "exceptionCause": " ",
+      "status": 2,
+      "exceptionCause": "",
       "auditCause": "",
       "subStatus": 0,
       "cancelWay": 2,
-      "markShipmentStatus": 5,
+      "markShipmentStatus": 4,
       "markShipmentTime": "",
       "markShipmentFailReason": "",
       "deliveryOptionType": 2,
@@ -3342,7 +3357,7 @@
       "printingStatus": 0,
       "storeShipmentBook": 0,
       "platformSkuListText": "LC2094-2 * 1 (27-Inch Solid Dark Brown Long Graceful Waves Synthetic Wig | 【Heat Resistant】【Cap Included】 | #40 FSGB)",
-      "skuListText": "LC2094-2 * 1 (假发)"
+      "skuListText": "LC2094-2 * 1"
     },
     {
       "rowIndex": 8,
@@ -3362,6 +3377,11 @@
       "skuList": [
         {
           "sku": "LC2088-3",
+          "qty": 1,
+          "productName": ""
+        },
+        {
+          "sku": "LC2068-5",
           "qty": 1,
           "productName": "假发"
         },
@@ -3392,7 +3412,7 @@
       "siteNameEn": "Non-LOCAL-US",
       "sendWhCode": "USW01",
       "sendWhName": "ZOO WAREHOUSE ⑥",
-      "trackNo": "",
+      "trackNo": "9234690389427704367065",
       "logisticsCarrier": "usps",
       "logisticsCarrierName": "USPS",
       "logisticsChannelCode": "USPS_PICKUP_C",
@@ -3401,15 +3421,15 @@
       "payTime": "2026-03-18 15:22:15",
       "source": "线上订单",
       "createTime": "2026-03-18 16:30:30",
-      "auditTime": "",
+      "auditTime": "2026-03-18 16:48:31",
       "shipTime": "",
       "cancelTime": "",
-      "status": 0,
-      "exceptionCause": " ",
+      "status": 2,
+      "exceptionCause": "",
       "auditCause": "",
       "subStatus": 0,
       "cancelWay": 2,
-      "markShipmentStatus": 5,
+      "markShipmentStatus": 4,
       "markShipmentTime": "",
       "markShipmentFailReason": "",
       "deliveryOptionType": 2,
@@ -3417,7 +3437,7 @@
       "printingStatus": 0,
       "storeShipmentBook": 0,
       "platformSkuListText": "LC2088-3 * 1 (27-Inch Solid Champagne Brown Body Wave Curl Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGB)",
-      "skuListText": "LC2088-3 * 1 (假发) | LB3050-1 * 1 (发帽)"
+      "skuListText": "LC2088-3 * 1 | LC2068-5 * 1 (假发) | LB3050-1 * 1 (发帽)"
     },
     {
       "rowIndex": 9,
@@ -3438,7 +3458,7 @@
         {
           "sku": "LC2074-7",
           "qty": 1,
-          "productName": "假发"
+          "productName": ""
         }
       ],
       "buyerName": "Liseth Mendoza",
@@ -3474,10 +3494,10 @@
       "auditTime": "",
       "shipTime": "",
       "cancelTime": "",
-      "status": 0,
-      "exceptionCause": " ",
+      "status": 1,
+      "exceptionCause": "",
       "auditCause": "",
-      "subStatus": 0,
+      "subStatus": 11,
       "cancelWay": 2,
       "markShipmentStatus": 5,
       "markShipmentTime": "",
@@ -3487,10 +3507,10 @@
       "printingStatus": 0,
       "storeShipmentBook": 0,
       "platformSkuListText": "LC2074-7 * 1 (27-Inch Dark Cherry Wine (Frontal Highlights) Undone Waves Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #14 FSGB)",
-      "skuListText": "LC2074-7 * 1 (假发)"
+      "skuListText": "LC2074-7 * 1"
     },
     {
-      "rowIndex": 2,
+      "rowIndex": 0,
       "rowId": "SO051260318000132",
       "col21Parsed": "2026-03-18 15:36:12",
       "orderDateYYMMDD": "260318",
@@ -3508,7 +3528,7 @@
         {
           "sku": "LC2039-1",
           "qty": 1,
-          "productName": "假发"
+          "productName": ""
         }
       ],
       "buyerName": "holly jimenez",
@@ -3532,7 +3552,7 @@
       "siteNameEn": "Non-LOCAL-US",
       "sendWhCode": "USW01",
       "sendWhName": "ZOO WAREHOUSE ⑥",
-      "trackNo": "",
+      "trackNo": "9200190389427715670701",
       "logisticsCarrier": "usps",
       "logisticsCarrierName": "USPS",
       "logisticsChannelCode": "USPS_PICKUP_C",
@@ -3541,15 +3561,15 @@
       "payTime": "2026-03-18 15:36:12",
       "source": "线上订单",
       "createTime": "2026-03-18 16:37:43",
-      "auditTime": "",
+      "auditTime": "2026-03-18 16:48:31",
       "shipTime": "",
       "cancelTime": "",
-      "status": 0,
-      "exceptionCause": " ",
+      "status": 2,
+      "exceptionCause": "",
       "auditCause": "",
       "subStatus": 0,
       "cancelWay": 2,
-      "markShipmentStatus": 5,
+      "markShipmentStatus": 4,
       "markShipmentTime": "",
       "markShipmentFailReason": "",
       "deliveryOptionType": 2,
@@ -3557,7 +3577,7 @@
       "printingStatus": 0,
       "storeShipmentBook": 0,
       "platformSkuListText": "LC2039-1 * 1 (30-Inch Honey Wheat Brown with Dark Roots Body Wave Synthetic Wig | 【Heat Resistant】【Cap Included】 | #21 FSGB)",
-      "skuListText": "LC2039-1 * 1 (假发)"
+      "skuListText": "LC2039-1 * 1"
     }
   ]
 }
