@@ -4,10 +4,10 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-18T07:23:47.021Z",
+  "scannedAt": "2026-03-18T07:28:47.154Z",
   "window": {
-    "from": "2026-03-18 13:23:35",
-    "to": "2026-03-18 15:23:35"
+    "from": "2026-03-18 13:28:35",
+    "to": "2026-03-18 15:28:35"
   },
   "scannedRowCount": 763,
   "orderDate": "260318",
@@ -1905,7 +1905,7 @@
       "skuListText": "WL1085-7 * 1 (假发)"
     },
     {
-      "rowIndex": 6,
+      "rowIndex": 7,
       "rowId": "SO051260318000096",
       "col21Parsed": "2026-03-18 13:36:56",
       "orderDateYYMMDD": "260318",
@@ -1975,7 +1975,7 @@
       "skuListText": "SWLC3143-2BL30 * 1 (假发)"
     },
     {
-      "rowIndex": 7,
+      "rowIndex": 8,
       "rowId": "SO051260318000095",
       "col21Parsed": "2026-03-18 13:37:26",
       "orderDateYYMMDD": "260318",
@@ -2055,7 +2055,7 @@
       "skuListText": "LC2088-1 * 1 (假发) | LC2068-5 * 1 (假发)"
     },
     {
-      "rowIndex": 8,
+      "rowIndex": 9,
       "rowId": "SO051260318000094",
       "col21Parsed": "2026-03-18 13:37:53",
       "orderDateYYMMDD": "260318",
@@ -2125,7 +2125,7 @@
       "skuListText": "LC2068-1 * 1 (假发)"
     },
     {
-      "rowIndex": 10,
+      "rowIndex": 4,
       "rowId": "SO051260318000107",
       "col21Parsed": "2026-03-18 13:51:57",
       "orderDateYYMMDD": "260318",
@@ -2205,7 +2205,7 @@
       "skuListText": "SWLC8285-4BK14 * 1 (假发) | LC2067-5 * 1 (假发)"
     },
     {
-      "rowIndex": 4,
+      "rowIndex": 5,
       "rowId": "SO051260318000106",
       "col21Parsed": "2026-03-18 13:53:47",
       "orderDateYYMMDD": "260318",
@@ -2275,7 +2275,7 @@
       "skuListText": "SWLC1268-1BR22 * 1 (假发)"
     },
     {
-      "rowIndex": 5,
+      "rowIndex": 6,
       "rowId": "SO051260318000105",
       "col21Parsed": "2026-03-18 13:54:31",
       "orderDateYYMMDD": "260318",
@@ -2345,7 +2345,7 @@
       "skuListText": "LC2068-9 * 1 (假发)"
     },
     {
-      "rowIndex": 4,
+      "rowIndex": 5,
       "rowId": "SO051260318000113",
       "col21Parsed": "2026-03-18 14:06:10",
       "orderDateYYMMDD": "260318",
@@ -2415,7 +2415,7 @@
       "skuListText": "SWLF1065-6OR28 * 1 (假发)"
     },
     {
-      "rowIndex": 5,
+      "rowIndex": 6,
       "rowId": "SO051260318000112",
       "col21Parsed": "2026-03-18 14:06:33",
       "orderDateYYMMDD": "260318",

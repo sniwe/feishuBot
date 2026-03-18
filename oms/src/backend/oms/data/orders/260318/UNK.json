@@ -1,0 +1,53 @@
+{
+  "ok": true,
+  "mode": "fast-flow-last2h",
+  "cdpPort": 9222,
+  "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
+  "url": "https://oms.xlwms.com/platform/order/list",
+  "scannedAt": "2026-03-18T07:28:47.154Z",
+  "window": {
+    "from": "2026-03-18 13:28:35",
+    "to": "2026-03-18 15:28:35"
+  },
+  "scannedRowCount": 763,
+  "orderDate": "260318",
+  "col13Prefix": "UNK",
+  "matchedCount": 1,
+  "rows": [
+    {
+      "rowIndex": 0,
+      "rowId": "SO051260318000114",
+      "col21Parsed": "2026-03-18 14:14:36",
+      "orderDateYYMMDD": "260318",
+      "orderNo": "SO051260318000114",
+      "platformOrderNo": "577313527587836881",
+      "rawCols": {
+        "col_2": "",
+        "col_3": "",
+        "col_5": "577313527587836881",
+        "col_6": "tiktok",
+        "col_7": "SWLC1233-1BR26 * 1",
+        "col_8": "SWLC1233-1BR26 * 1",
+        "col_10": "Gina Cazabon cazabon",
+        "col_11": "United States of America (USA)(US)",
+        "col_12": "70037",
+        "col_13": "403-Lady Grayy Wigs USA_US(USLCREE2BFUS)",
+        "col_14": "US-本土店铺(Non-LOCAL-US)",
+        "col_15": "ZOO WAREHOUSE ⑥(USW01)",
+        "col_16": "USPS自提(USPS_PICKUP_C)",
+        "col_17": "-",
+        "col_18": "usps",
+        "col_19": "平台面单",
+        "col_20": "2026-03-18 14:14:32",
+        "col_21": "2026-03-18 14:14:36",
+        "col_22": "线上订单",
+        "col_23": "未打印",
+        "col_24": "2026-03-18 15:28:34",
+        "col_26": "-",
+        "col_27": "-",
+        "col_28": "",
+        "col_25": ""
+      }
+    }
+  ]
+}
