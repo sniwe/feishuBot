@@ -4,12 +4,12 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-18T07:13:45.626Z",
+  "scannedAt": "2026-03-18T07:18:45.872Z",
   "window": {
-    "from": "2026-03-18 13:13:35",
-    "to": "2026-03-18 15:13:35"
+    "from": "2026-03-18 13:18:35",
+    "to": "2026-03-18 15:18:35"
   },
-  "scannedRowCount": 763,
+  "scannedRowCount": 1,
   "orderDate": "260318",
   "col13Prefix": "403",
   "matchedCount": 13,
@@ -885,7 +885,7 @@
       "skuListText": "LC8066-1 * 1 (假发)"
     },
     {
-      "rowIndex": 8,
+      "rowIndex": -1,
       "rowId": "SO051260318000108",
       "col21Parsed": "2026-03-18 13:46:42",
       "orderDateYYMMDD": "260318",
