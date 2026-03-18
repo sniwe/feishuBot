@@ -4,10 +4,10 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-18T07:48:47.664Z",
+  "scannedAt": "2026-03-18T07:53:47.388Z",
   "window": {
-    "from": "2026-03-18 13:48:35",
-    "to": "2026-03-18 15:48:35"
+    "from": "2026-03-18 13:53:35",
+    "to": "2026-03-18 15:53:35"
   },
   "scannedRowCount": 763,
   "orderDate": "260318",
@@ -2075,7 +2075,7 @@
       "skuListText": "SWLC1261-1BR24 * 1 (假发)"
     },
     {
-      "rowIndex": 6,
+      "rowIndex": 7,
       "rowId": "SO051260318000111",
       "col21Parsed": "2026-03-18 13:53:34",
       "orderDateYYMMDD": "260318",
@@ -2155,7 +2155,7 @@
       "skuListText": "LC8011-1 * 1 (假发) | SWLC1261-1BR24 * 1 (假发)"
     },
     {
-      "rowIndex": 7,
+      "rowIndex": 8,
       "rowId": "SO051260318000110",
       "col21Parsed": "2026-03-18 14:02:50",
       "orderDateYYMMDD": "260318",
@@ -2208,8 +2208,8 @@
       "createTime": "2026-03-18 15:07:00",
       "auditTime": "",
       "shipTime": "",
-      "cancelTime": "",
-      "status": 0,
+      "cancelTime": "2026-03-18 15:51:44",
+      "status": 4,
       "exceptionCause": " ",
       "auditCause": "",
       "subStatus": 0,
@@ -2225,7 +2225,7 @@
       "skuListText": "BL66110-1 * 1 (假发)"
     },
     {
-      "rowIndex": 8,
+      "rowIndex": 9,
       "rowId": "SO051260318000109",
       "col21Parsed": "2026-03-18 14:06:46",
       "orderDateYYMMDD": "260318",
@@ -2241,9 +2241,19 @@
       ],
       "skuList": [
         {
-          "sku": "SWLC1233-1BR26",
+          "sku": "BL66110-1",
           "qty": 1,
           "productName": "假发"
+        },
+        {
+          "sku": "LB4050-1",
+          "qty": 1,
+          "productName": "发带"
+        },
+        {
+          "sku": "SWLC1233-1BR26",
+          "qty": 1,
+          "productName": ""
         }
       ],
       "buyerName": "Erika Arriola",
@@ -2267,7 +2277,7 @@
       "siteNameEn": "Non-LOCAL-US",
       "sendWhCode": "USW01",
       "sendWhName": "ZOO WAREHOUSE ⑥",
-      "trackNo": "",
+      "trackNo": "9234690389427704363647",
       "logisticsCarrier": "usps",
       "logisticsCarrierName": "USPS",
       "logisticsChannelCode": "USPS_PICKUP_C",
@@ -2276,15 +2286,15 @@
       "payTime": "2026-03-18 14:06:46",
       "source": "线上订单",
       "createTime": "2026-03-18 15:07:00",
-      "auditTime": "",
+      "auditTime": "2026-03-18 15:51:40",
       "shipTime": "",
       "cancelTime": "",
-      "status": 0,
-      "exceptionCause": " ",
+      "status": 2,
+      "exceptionCause": "",
       "auditCause": "",
       "subStatus": 0,
       "cancelWay": 2,
-      "markShipmentStatus": 5,
+      "markShipmentStatus": 4,
       "markShipmentTime": "",
       "markShipmentFailReason": "",
       "deliveryOptionType": 2,
@@ -2292,10 +2302,10 @@
       "printingStatus": 0,
       "storeShipmentBook": 0,
       "platformSkuListText": "SWLC1233-1BR26 * 1 (21-Inch Dark Brunette (Light Auburn Highlights) Wavy Butterfly Cut Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #30 FSGB)",
-      "skuListText": "SWLC1233-1BR26 * 1 (假发)"
+      "skuListText": "BL66110-1 * 1 (假发) | LB4050-1 * 1 (发带) | SWLC1233-1BR26 * 1"
     },
     {
-      "rowIndex": 7,
+      "rowIndex": 8,
       "rowId": "SO051260318000115",
       "col21Parsed": "2026-03-18 14:12:51",
       "orderDateYYMMDD": "260318",
