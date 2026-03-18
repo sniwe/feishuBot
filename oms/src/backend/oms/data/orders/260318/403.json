@@ -4,15 +4,15 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-18T05:20:25.759Z",
+  "scannedAt": "2026-03-18T07:08:49.750Z",
   "window": {
-    "from": "2026-03-18 11:20:16",
-    "to": "2026-03-18 13:20:16"
+    "from": "2026-03-18 13:08:35",
+    "to": "2026-03-18 15:08:35"
   },
-  "scannedRowCount": 1,
+  "scannedRowCount": 763,
   "orderDate": "260318",
   "col13Prefix": "403",
-  "matchedCount": 12,
+  "matchedCount": 13,
   "rows": [
     {
       "rowIndex": 10,
@@ -883,6 +883,76 @@
       "storeShipmentBook": 0,
       "platformSkuListText": "LC8066-1 * 1 (24-Inch Platinum Blonde Ombré (Dark Roots, Ash Brown) Curling Waves Synthetic Wig | 【Heat Resistant】【Cap Included】 | *18 @15 FSGB)",
       "skuListText": "LC8066-1 * 1 (假发)"
+    },
+    {
+      "rowIndex": 8,
+      "rowId": "SO051260318000108",
+      "col21Parsed": "2026-03-18 13:46:42",
+      "orderDateYYMMDD": "260318",
+      "source": "线上订单",
+      "orderNo": "SO051260318000108",
+      "platformOrderNo": "577313507649032334",
+      "platformCode": "tiktok",
+      "platformSkuList": [
+        {
+          "sku": "SWLC1222-3BR30",
+          "qty": 1,
+          "productName": "'RAPUNZEL' 31-Inch Warm Brown Full-bodied Waves Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #39 @37 *42 FSGB"
+        }
+      ],
+      "skuList": [
+        {
+          "sku": "SWLC1222-3BR30",
+          "qty": 1,
+          "productName": "假发"
+        }
+      ],
+      "buyerName": "Lisbeth Hernández",
+      "buyerEmail": "v4bDYU6EZK4KHT5CG5P4C3OV4HF2A@scs.tiktokw.us",
+      "receiver": "Lisbeth Hernández",
+      "telephone": "(+1)2024860006",
+      "receiptCountryCode": "US",
+      "receiptCountryName": "United States of America (USA)",
+      "provinceCode": "DC",
+      "provinceName": "District of Columbia",
+      "city": "",
+      "postCode": "20010",
+      "houseNum": "",
+      "addressOne": "1451 Park Rd Nw Apt 410",
+      "addressTwo": "",
+      "addressThi": "",
+      "storeCode": "USLCREE2BFUS",
+      "storeName": "403-Lady Grayy Wigs USA_US",
+      "site": "Non-LOCAL-US",
+      "siteNameCn": "US-本土店铺",
+      "siteNameEn": "Non-LOCAL-US",
+      "sendWhCode": "USW01",
+      "sendWhName": "ZOO WAREHOUSE ⑥",
+      "trackNo": "",
+      "logisticsCarrier": "usps",
+      "logisticsCarrierName": "USPS",
+      "logisticsChannelCode": "USPS_PICKUP_C",
+      "logisticsChannelName": "USPS自提",
+      "orderTime": "2026-03-18 13:46:39",
+      "payTime": "2026-03-18 13:46:42",
+      "createTime": "2026-03-18 15:06:33",
+      "auditTime": "",
+      "shipTime": "",
+      "cancelTime": "",
+      "status": 0,
+      "exceptionCause": " ",
+      "auditCause": "",
+      "subStatus": 0,
+      "cancelWay": 2,
+      "markShipmentStatus": 5,
+      "markShipmentTime": "",
+      "markShipmentFailReason": "",
+      "deliveryOptionType": 2,
+      "platformOrderType": "",
+      "printingStatus": 0,
+      "storeShipmentBook": 0,
+      "platformSkuListText": "SWLC1222-3BR30 * 1 ('RAPUNZEL' 31-Inch Warm Brown Full-bodied Waves Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #39 @37 *42 FSGB)",
+      "skuListText": "SWLC1222-3BR30 * 1 (假发)"
     }
   ]
 }
