@@ -4,10 +4,10 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-18T08:38:45.088Z",
+  "scannedAt": "2026-03-18T08:43:44.943Z",
   "window": {
-    "from": "2026-03-18 14:38:34",
-    "to": "2026-03-18 16:38:34"
+    "from": "2026-03-18 14:43:34",
+    "to": "2026-03-18 16:43:34"
   },
   "scannedRowCount": 763,
   "orderDate": "260318",
@@ -2931,6 +2931,11 @@
       ],
       "skuList": [
         {
+          "sku": "LB4050-1",
+          "qty": 1,
+          "productName": "发带"
+        },
+        {
           "sku": "SWLC1268-1BR22",
           "qty": 1,
           "productName": "假发"
@@ -2982,7 +2987,7 @@
       "printingStatus": 0,
       "storeShipmentBook": 0,
       "platformSkuListText": "SWLC1268-1BR22 * 1 (20-Inch Blended Blonde Ombre (Dark Roots) Straight Synthetic Wig | Heat ResistantCap Included |  FSGA)",
-      "skuListText": "SWLC1268-1BR22 * 1 (假发)"
+      "skuListText": "LB4050-1 * 1 (发带) | SWLC1268-1BR22 * 1 (假发)"
     },
     {
       "rowIndex": 4,
@@ -3144,6 +3149,11 @@
           "sku": "LC2039-1",
           "qty": 1,
           "productName": "假发"
+        },
+        {
+          "sku": "LB3050-1",
+          "qty": 1,
+          "productName": "发帽"
         }
       ],
       "buyerName": "Paris Falloon",
@@ -3192,7 +3202,7 @@
       "printingStatus": 0,
       "storeShipmentBook": 0,
       "platformSkuListText": "LC2039-1 * 1 (30-Inch Honey Wheat Brown with Dark Roots Body Wave Synthetic Wig | 【Heat Resistant】【Cap Included】 | #21 FSGB)",
-      "skuListText": "LC2039-1 * 1 (假发)"
+      "skuListText": "LC2039-1 * 1 (假发) | LB3050-1 * 1 (发帽)"
     },
     {
       "rowIndex": 6,
@@ -3354,6 +3364,11 @@
           "sku": "LC2088-3",
           "qty": 1,
           "productName": "假发"
+        },
+        {
+          "sku": "LB3050-1",
+          "qty": 1,
+          "productName": "发帽"
         }
       ],
       "buyerName": "Marie  Lourde Leandre Jolicoeur",
@@ -3402,7 +3417,7 @@
       "printingStatus": 0,
       "storeShipmentBook": 0,
       "platformSkuListText": "LC2088-3 * 1 (27-Inch Solid Champagne Brown Body Wave Curl Synthetic Wig | 【Heat Resistant】【Cap Included】 | FSGB)",
-      "skuListText": "LC2088-3 * 1 (假发)"
+      "skuListText": "LC2088-3 * 1 (假发) | LB3050-1 * 1 (发帽)"
     },
     {
       "rowIndex": 9,
