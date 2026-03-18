@@ -4,10 +4,10 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-18T07:53:47.388Z",
+  "scannedAt": "2026-03-18T07:58:47.087Z",
   "window": {
-    "from": "2026-03-18 13:53:35",
-    "to": "2026-03-18 15:53:35"
+    "from": "2026-03-18 13:58:35",
+    "to": "2026-03-18 15:58:35"
   },
   "scannedRowCount": 763,
   "orderDate": "260318",

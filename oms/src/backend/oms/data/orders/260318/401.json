@@ -4,10 +4,10 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-18T07:53:47.388Z",
+  "scannedAt": "2026-03-18T07:58:47.087Z",
   "window": {
-    "from": "2026-03-18 13:53:35",
-    "to": "2026-03-18 15:53:35"
+    "from": "2026-03-18 13:58:35",
+    "to": "2026-03-18 15:58:35"
   },
   "scannedRowCount": 763,
   "orderDate": "260318",
@@ -2155,7 +2155,7 @@
       "skuListText": "LC8011-1 * 1 (假发) | SWLC1261-1BR24 * 1 (假发)"
     },
     {
-      "rowIndex": 8,
+      "rowIndex": 7,
       "rowId": "SO051260318000110",
       "col21Parsed": "2026-03-18 14:02:50",
       "orderDateYYMMDD": "260318",
@@ -2225,7 +2225,7 @@
       "skuListText": "BL66110-1 * 1 (假发)"
     },
     {
-      "rowIndex": 9,
+      "rowIndex": 8,
       "rowId": "SO051260318000109",
       "col21Parsed": "2026-03-18 14:06:46",
       "orderDateYYMMDD": "260318",
@@ -2323,7 +2323,12 @@
         {
           "sku": "BL66110-1",
           "qty": 1,
-          "productName": "假发"
+          "productName": ""
+        },
+        {
+          "sku": "LB4050-1",
+          "qty": 1,
+          "productName": "发带"
         }
       ],
       "buyerName": "Clarissa Archuleta-Jones",
@@ -2347,7 +2352,7 @@
       "siteNameEn": "Non-LOCAL-US",
       "sendWhCode": "USW01",
       "sendWhName": "ZOO WAREHOUSE ⑥",
-      "trackNo": "",
+      "trackNo": "9200190389427715663345",
       "logisticsCarrier": "usps",
       "logisticsCarrierName": "USPS",
       "logisticsChannelCode": "USPS_PICKUP_C",
@@ -2356,15 +2361,15 @@
       "payTime": "2026-03-18 14:12:51",
       "source": "线上订单",
       "createTime": "2026-03-18 15:31:01",
-      "auditTime": "",
+      "auditTime": "2026-03-18 15:56:34",
       "shipTime": "",
       "cancelTime": "",
-      "status": 0,
-      "exceptionCause": " ",
+      "status": 2,
+      "exceptionCause": "",
       "auditCause": "",
       "subStatus": 0,
       "cancelWay": 2,
-      "markShipmentStatus": 5,
+      "markShipmentStatus": 4,
       "markShipmentTime": "",
       "markShipmentFailReason": "",
       "deliveryOptionType": 2,
@@ -2372,7 +2377,7 @@
       "printingStatus": 0,
       "storeShipmentBook": 0,
       "platformSkuListText": "BL66110-1 * 1 (28-Inch Dark Ash Brown Ombré (Golden Blonde Ends) Wavy Lace Front Synthetic Wig | 【Heat Resistant】【Cap Included】 |)",
-      "skuListText": "BL66110-1 * 1 (假发)"
+      "skuListText": "BL66110-1 * 1 | LB4050-1 * 1 (发带)"
     }
   ]
 }
