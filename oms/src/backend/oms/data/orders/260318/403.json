@@ -4,15 +4,15 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-18T07:28:47.154Z",
+  "scannedAt": "2026-03-18T07:33:46.375Z",
   "window": {
-    "from": "2026-03-18 13:28:35",
-    "to": "2026-03-18 15:28:35"
+    "from": "2026-03-18 13:33:35",
+    "to": "2026-03-18 15:33:35"
   },
   "scannedRowCount": 763,
   "orderDate": "260318",
   "col13Prefix": "403",
-  "matchedCount": 13,
+  "matchedCount": 14,
   "rows": [
     {
       "rowIndex": 10,
@@ -885,7 +885,7 @@
       "skuListText": "LC8066-1 * 1 (假发)"
     },
     {
-      "rowIndex": 10,
+      "rowIndex": 6,
       "rowId": "SO051260318000108",
       "col21Parsed": "2026-03-18 13:46:42",
       "orderDateYYMMDD": "260318",
@@ -953,6 +953,76 @@
       "storeShipmentBook": 0,
       "platformSkuListText": "SWLC1222-3BR30 * 1 ('RAPUNZEL' 31-Inch Warm Brown Full-bodied Waves Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #39 @37 *42 FSGB)",
       "skuListText": "SWLC1222-3BR30 * 1 (假发)"
+    },
+    {
+      "rowIndex": 7,
+      "rowId": "SO051260318000114",
+      "col21Parsed": "2026-03-18 14:14:36",
+      "orderDateYYMMDD": "260318",
+      "source": "线上订单",
+      "orderNo": "SO051260318000114",
+      "platformOrderNo": "577313527587836881",
+      "platformCode": "tiktok",
+      "platformSkuList": [
+        {
+          "sku": "SWLC1233-1BR26",
+          "qty": 1,
+          "productName": "21-Inch Dark Brunette (Light Auburn Highlights) Wavy Butterfly Cut Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #65 FSGB"
+        }
+      ],
+      "skuList": [
+        {
+          "sku": "SWLC1233-1BR26",
+          "qty": 1,
+          "productName": "假发"
+        }
+      ],
+      "buyerName": "Gina Cazabon cazabon",
+      "buyerEmail": "v4bDYU6EZK4KHT5CHTJEFSHCB6W2E@scs.tiktokw.us",
+      "receiver": "Gina Cazabon cazabon",
+      "telephone": "(+1)5044464740",
+      "receiptCountryCode": "US",
+      "receiptCountryName": "United States of America (USA)",
+      "provinceCode": "LA",
+      "provinceName": "Louisiana",
+      "city": "",
+      "postCode": "70037",
+      "houseNum": "",
+      "addressOne": "110 WOODLAND HWY",
+      "addressTwo": "",
+      "addressThi": "",
+      "storeCode": "USLCREE2BFUS",
+      "storeName": "403-Lady Grayy Wigs USA_US",
+      "site": "Non-LOCAL-US",
+      "siteNameCn": "US-本土店铺",
+      "siteNameEn": "Non-LOCAL-US",
+      "sendWhCode": "USW01",
+      "sendWhName": "ZOO WAREHOUSE ⑥",
+      "trackNo": "",
+      "logisticsCarrier": "usps",
+      "logisticsCarrierName": "USPS",
+      "logisticsChannelCode": "USPS_PICKUP_C",
+      "logisticsChannelName": "USPS自提",
+      "orderTime": "2026-03-18 14:14:32",
+      "payTime": "2026-03-18 14:14:36",
+      "createTime": "2026-03-18 15:28:34",
+      "auditTime": "",
+      "shipTime": "",
+      "cancelTime": "",
+      "status": 0,
+      "exceptionCause": " ",
+      "auditCause": "",
+      "subStatus": 0,
+      "cancelWay": 2,
+      "markShipmentStatus": 5,
+      "markShipmentTime": "",
+      "markShipmentFailReason": "",
+      "deliveryOptionType": 2,
+      "platformOrderType": "",
+      "printingStatus": 0,
+      "storeShipmentBook": 0,
+      "platformSkuListText": "SWLC1233-1BR26 * 1 (21-Inch Dark Brunette (Light Auburn Highlights) Wavy Butterfly Cut Synthetic Wig | 【Heat Resistant】【Cap Included】 |  #65 FSGB)",
+      "skuListText": "SWLC1233-1BR26 * 1 (假发)"
     }
   ]
 }
