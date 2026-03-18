@@ -4,10 +4,10 @@
   "cdpPort": 9222,
   "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
   "url": "https://oms.xlwms.com/platform/order/list",
-  "scannedAt": "2026-03-18T08:33:45.034Z",
+  "scannedAt": "2026-03-18T08:38:45.088Z",
   "window": {
-    "from": "2026-03-18 14:33:34",
-    "to": "2026-03-18 16:33:34"
+    "from": "2026-03-18 14:38:34",
+    "to": "2026-03-18 16:38:34"
   },
   "scannedRowCount": 763,
   "orderDate": "260318",
@@ -1025,7 +1025,7 @@
       "skuListText": "SWLC1233-1BR26 * 1 (假发)"
     },
     {
-      "rowIndex": 8,
+      "rowIndex": 5,
       "rowId": "SO051260318000125",
       "col21Parsed": "2026-03-18 14:52:05",
       "orderDateYYMMDD": "260318",
@@ -1095,7 +1095,7 @@
       "skuListText": "SWLC1233-1BR26 * 1"
     },
     {
-      "rowIndex": 9,
+      "rowIndex": 6,
       "rowId": "SO051260318000124",
       "col21Parsed": "2026-03-18 14:54:14",
       "orderDateYYMMDD": "260318",
