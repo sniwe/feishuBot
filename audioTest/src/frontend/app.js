@@ -261,6 +261,7 @@
     const isArrowLeft = keyCode === "ArrowLeft" || keyValue === "ArrowLeft" || keyValue === "Left";
     const isArrowUp = keyCode === "ArrowUp" || keyValue === "ArrowUp" || keyValue === "Up";
     const isArrowDown = keyCode === "ArrowDown" || keyValue === "ArrowDown" || keyValue === "Down";
+    const isDeleteKey = keyCode === "Delete" || keyValue === "Delete" || keyValue === "Del";
     const isSpaceKey = keyCode === "Space" || keyValue === " " || keyValue === "Spacebar";
     const isEnterKey = keyCode === "Enter" || keyValue === "Enter";
     const isShiftKey = keyCode === "ShiftLeft" || keyCode === "ShiftRight" || keyValue === "Shift";
@@ -307,6 +308,13 @@
         event.preventDefault();
         event.stopPropagation();
         moveFocusFromTopSubSegInput(isArrowDown ? 1 : -1);
+      } else if ((event.ctrlKey || event.metaKey) && isDeleteKey) {
+        event.preventDefault();
+        event.stopPropagation();
+        state.activeSubSegValueKey = null;
+        state.subSegCardDeleteDialogKey = null;
+        renderSubSegValuePanel();
+        setSaveStatus("audSeg subSeg value selection exited");
       }
       return;
     }
