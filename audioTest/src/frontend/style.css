@@ -831,6 +831,31 @@ h1, p { margin: 0; }
   cursor: default;
 }
 
+.subseg-value-delete-row {
+  margin-top: 6px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.subseg-value-delete-cancel,
+.subseg-value-delete-confirm {
+  border: 1px solid #b8c6dd;
+  border-radius: 6px;
+  background: #f8fbff;
+  color: #243a59;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.subseg-value-delete-confirm {
+  border-color: #d8b7b7;
+  background: #fff5f5;
+  color: #8d2d2d;
+}
+
 .playhead {
   position: absolute;
   left: 0;

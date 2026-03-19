@@ -62,6 +62,7 @@
     activeSubSegValueKey: null,
     subSegValueEntries: {},
     subSegCardRecallPositions: {},
+    subSegCardDeleteDialogKey: null,
     shiftHoldTss: null,
     hasAutoFocusedProgress: false,
     markerSignature: "",
@@ -991,6 +992,7 @@
     state.subSegs = [];
     state.subSegValueEntries = {};
     state.subSegCardRecallPositions = {};
+    state.subSegCardDeleteDialogKey = null;
     state.activeSubSegValueKey = null;
     state.selectedSpanIndex = -1;
     clearTargetSpanLock({ preserveSelection: false });
@@ -1252,6 +1254,40 @@
       }
       input.addEventListener("change", handleSubSegCardInputChange);
       card.appendChild(input);
+
+      const deleteDialogKey = getSubSegCardRecallStateKey(selectedKey, entryIndex);
+      if (state.subSegCardDeleteDialogKey === deleteDialogKey) {
+        const actions = document.createElement("div");
+        actions.className = "subseg-value-delete-row";
+
+        const cancelButton = document.createElement("button");
+        cancelButton.type = "button";
+        cancelButton.className = "subseg-value-delete-cancel";
+        cancelButton.dataset.subSegValueDeleteCancel = "1";
+        cancelButton.dataset.subSegValueKey = selectedKey;
+        cancelButton.dataset.subSegValueIndex = String(entryIndex);
+        cancelButton.textContent = "Cancel";
+        cancelButton.addEventListener("click", function () {
+          state.subSegCardDeleteDialogKey = null;
+          renderSubSegValuePanel();
+          focusSubSegCardInput(selectedKey, entryIndex, isRecalling);
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "subseg-value-delete-confirm";
+        deleteButton.dataset.subSegValueDeleteConfirm = "1";
+        deleteButton.dataset.subSegValueKey = selectedKey;
+        deleteButton.dataset.subSegValueIndex = String(entryIndex);
+        deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click", function () {
+          deleteSubSegValueCard(selectedKey, entryIndex);
+        });
+
+        actions.appendChild(cancelButton);
+        actions.appendChild(deleteButton);
+        card.appendChild(actions);
+      }
       subSegValueList.appendChild(card);
     });
   }
@@ -1368,8 +1404,10 @@
     const isArrowLeft = keyCode === "ArrowLeft" || keyValue === "ArrowLeft" || keyValue === "Left";
     const isArrowUp = keyCode === "ArrowUp" || keyValue === "ArrowUp" || keyValue === "Up";
     const isArrowDown = keyCode === "ArrowDown" || keyValue === "ArrowDown" || keyValue === "Down";
+    const isSpace = keyCode === "Space" || keyValue === " " || keyValue === "Spacebar";
     const isBackspace = keyCode === "Backspace" || keyValue === "Backspace";
     const isCtrl = Boolean(event.ctrlKey || event.metaKey);
+    const isShift = Boolean(event.shiftKey);
     if (!isCtrl) {
       return false;
     }
@@ -1382,6 +1420,24 @@
     }
     const currentPos = getCardCurrentPosition(entry);
     let recallPos = getCardRecallPosition(key, index, entry);
+
+    if (isSpace && (isCtrl || isShift)) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (audio.paused) {
+        audio.play().catch(function () {});
+      } else {
+        audio.pause();
+      }
+      return true;
+    }
+
+    if (isBackspace && isCtrl) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleSubSegCardDeleteDialog(key, index);
+      return true;
+    }
 
     if (isArrowUp || isArrowDown) {
       event.preventDefault();
@@ -1402,15 +1458,6 @@
       const isRecalling = recallPos < currentPos;
       renderSubSegValuePanel();
       focusSubSegCardInput(key, index, isRecalling);
-      return true;
-    }
-
-    if (isBackspace && recallPos < currentPos) {
-      event.preventDefault();
-      event.stopPropagation();
-      setCardRecallPosition(key, index, currentPos);
-      renderSubSegValuePanel();
-      focusSubSegCardInput(key, index, false);
       return true;
     }
 
@@ -1496,6 +1543,54 @@
 
   function cssEscapeAttr(value) {
     return String(value).replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
+  }
+
+  function toggleSubSegCardDeleteDialog(key, index) {
+    const dialogKey = getSubSegCardRecallStateKey(key, index);
+    if (state.subSegCardDeleteDialogKey === dialogKey) {
+      state.subSegCardDeleteDialogKey = null;
+      renderSubSegValuePanel();
+      focusSubSegCardInput(key, index, false);
+      return;
+    }
+    state.subSegCardDeleteDialogKey = dialogKey;
+    renderSubSegValuePanel();
+    focusSubSegDeleteCancel(key, index);
+  }
+
+  function focusSubSegDeleteCancel(key, index) {
+    requestAnimationFrame(function () {
+      const selector = "button[data-sub-seg-value-delete-cancel=\"1\"][data-sub-seg-value-key=\"" + cssEscapeAttr(key) + "\"][data-sub-seg-value-index=\"" + String(index) + "\"]";
+      const btn = subSegValueList ? subSegValueList.querySelector(selector) : null;
+      if (!btn) {
+        return;
+      }
+      try {
+        btn.focus({ preventScroll: true });
+      } catch {
+        btn.focus();
+      }
+    });
+  }
+
+  function deleteSubSegValueCard(key, index) {
+    const list = Array.isArray(state.subSegValueEntries[key]) ? state.subSegValueEntries[key] : null;
+    if (!list || index < 0 || index >= list.length) {
+      return;
+    }
+    list.splice(index, 1);
+    if (!list.length) {
+      delete state.subSegValueEntries[key];
+    }
+    state.subSegCardDeleteDialogKey = null;
+    const recallKeys = Object.keys(state.subSegCardRecallPositions);
+    recallKeys.forEach(function (k) {
+      if (k.startsWith(key + "#")) {
+        delete state.subSegCardRecallPositions[k];
+      }
+    });
+    renderSubSegValuePanel();
+    enqueueAutoSave();
   }
 
   function seekBy(deltaSeconds) {
@@ -2066,6 +2161,7 @@
     state.targetSubSegs = [];
     state.selectedTargetSubSegIndex = -1;
     state.subSegCardRecallPositions = {};
+    state.subSegCardDeleteDialogKey = null;
     state.activeSubSegValueKey = null;
     state.shiftHoldTss = null;
     state.targetMarkerSignature = "";
