@@ -261,7 +261,13 @@
     const isSpaceKey = keyCode === "Space" || keyValue === " " || keyValue === "Spacebar";
     const isEnterKey = keyCode === "Enter" || keyValue === "Enter";
     const isShiftKey = keyCode === "ShiftLeft" || keyCode === "ShiftRight" || keyValue === "Shift";
-    const isSubSegInputFocused = document.activeElement === subSegValueInput;
+    const activeElement = document.activeElement;
+    const isSubSegInputFocused = activeElement === subSegValueInput;
+    const isSubSegCardInputFocused = Boolean(
+      activeElement &&
+      activeElement.classList &&
+      activeElement.classList.contains("subseg-value-card-input")
+    );
     debugLog("keydown", {
       code: keyCode,
       key: keyValue,
@@ -276,7 +282,10 @@
       shiftHoldTss: state.shiftHoldTss
     });
 
-    if (handleFocusedSubSegCardKeyDown(event)) {
+    if (isSubSegCardInputFocused) {
+      if (handleFocusedSubSegCardKeyDown(event)) {
+        return;
+      }
       return;
     }
 
