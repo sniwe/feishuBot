@@ -271,6 +271,12 @@
       activeElement.classList &&
       activeElement.classList.contains("subseg-value-card-input")
     );
+    const isSubSegDeleteDialogButtonFocused = Boolean(
+      activeElement &&
+      activeElement.tagName === "BUTTON" &&
+      activeElement.dataset &&
+      (activeElement.dataset.subSegValueDeleteCancel === "1" || activeElement.dataset.subSegValueDeleteConfirm === "1")
+    );
     debugLog("keydown", {
       code: keyCode,
       key: keyValue,
@@ -289,6 +295,10 @@
       if (handleFocusedSubSegCardKeyDown(event)) {
         return;
       }
+      return;
+    }
+
+    if (isSubSegDeleteDialogButtonFocused) {
       return;
     }
 
