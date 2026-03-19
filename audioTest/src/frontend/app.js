@@ -1600,6 +1600,7 @@
       }
     });
     renderSubSegValuePanel();
+    focusTopSubSegInput();
     enqueueAutoSave();
   }
 
