@@ -1230,12 +1230,14 @@
       const recallPosition = getCardRecallPosition(selectedKey, entryIndex, entry);
       const isRecalling = recallPosition < getCardCurrentPosition(entry);
       const recallMeta = getCardRecallMeta(entry, recallPosition);
+      const version = document.createElement("div");
+      version.className = "subseg-value-version";
       if (isRecalling && recallMeta) {
-        const version = document.createElement("div");
-        version.className = "subseg-value-version";
         version.textContent = "current -" + String(recallMeta.offset) + " | " + formatSavedAt(recallMeta.createdAt);
-        card.appendChild(version);
+      } else {
+        version.textContent = "current -0 | " + formatSavedAt(entry && entry.createdAt ? entry.createdAt : "");
       }
+      card.appendChild(version);
       input.value = isRecalling ? getCardValueAtPosition(entry, recallPosition) : String(entry.value || "");
       input.readOnly = isRecalling;
       if (isRecalling) {
