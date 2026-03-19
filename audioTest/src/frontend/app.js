@@ -61,6 +61,7 @@
     selectedTargetSubSegIndex: -1,
     activeSubSegValueKey: null,
     subSegValueEntries: {},
+    subSegCardRecallPositions: {},
     shiftHoldTss: null,
     hasAutoFocusedProgress: false,
     markerSignature: "",
@@ -274,6 +275,10 @@
       selectedTargetSubSegIndex: state.selectedTargetSubSegIndex,
       shiftHoldTss: state.shiftHoldTss
     });
+
+    if (handleFocusedSubSegCardKeyDown(event)) {
+      return;
+    }
 
     if (isShiftKey && isPlayerActive() && hasTargetSpan() && !Number.isFinite(state.shiftHoldTss)) {
       state.shiftHoldTss = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
@@ -965,6 +970,7 @@
     state.checkpoints = [];
     state.subSegs = [];
     state.subSegValueEntries = {};
+    state.subSegCardRecallPositions = {};
     state.activeSubSegValueKey = null;
     state.selectedSpanIndex = -1;
     clearTargetSpanLock({ preserveSelection: false });
@@ -1175,7 +1181,10 @@
     if (!Array.isArray(state.subSegValueEntries[key])) {
       state.subSegValueEntries[key] = [];
     }
-    state.subSegValueEntries[key].push(text);
+    state.subSegValueEntries[key].push({
+      value: text,
+      history: []
+    });
     subSegValueInput.value = "";
     renderSubSegValuePanel();
     enqueueAutoSave();
@@ -1195,12 +1204,154 @@
 
     const values = Array.isArray(state.subSegValueEntries[selectedKey]) ? state.subSegValueEntries[selectedKey] : [];
     subSegValueList.innerHTML = "";
-    values.forEach(function (value) {
+    values.forEach(function (entry, entryIndex) {
       const card = document.createElement("div");
       card.className = "subseg-value-card";
-      card.textContent = value;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "subseg-value-card-input";
+      input.dataset.subSegValueKey = selectedKey;
+      input.dataset.subSegValueIndex = String(entryIndex);
+      const recallPosition = getCardRecallPosition(selectedKey, entryIndex, entry);
+      const isRecalling = recallPosition < getCardCurrentPosition(entry);
+      input.value = isRecalling ? getCardValueAtPosition(entry, recallPosition) : String(entry.value || "");
+      input.readOnly = isRecalling;
+      if (isRecalling) {
+        input.classList.add("is-recalling");
+      }
+      input.addEventListener("change", handleSubSegCardInputChange);
+      card.appendChild(input);
       subSegValueList.appendChild(card);
     });
+  }
+
+  function handleSubSegCardInputChange(event) {
+    const inputEl = event.target;
+    const key = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValueKey || "" : "");
+    const index = Number(inputEl && inputEl.dataset ? inputEl.dataset.subSegValueIndex : NaN);
+    const entry = getSubSegValueEntry(key, index);
+    if (!entry) {
+      return;
+    }
+    const currentPos = getCardCurrentPosition(entry);
+    const recallPos = getCardRecallPosition(key, index, entry);
+    if (recallPos < currentPos) {
+      inputEl.value = getCardValueAtPosition(entry, recallPos);
+      return;
+    }
+    const nextValue = String(inputEl.value || "").trim();
+    const prevValue = String(entry.value || "");
+    if (!nextValue || nextValue === prevValue) {
+      inputEl.value = prevValue;
+      return;
+    }
+    if (!Array.isArray(entry.history)) {
+      entry.history = [];
+    }
+    entry.history.push(prevValue);
+    if (entry.history.length > 200) {
+      entry.history = entry.history.slice(entry.history.length - 200);
+    }
+    entry.value = nextValue;
+    inputEl.value = nextValue;
+    enqueueAutoSave();
+  }
+
+  function getSubSegValueEntry(key, index) {
+    if (!key || !Number.isFinite(index)) {
+      return null;
+    }
+    const list = Array.isArray(state.subSegValueEntries[key]) ? state.subSegValueEntries[key] : null;
+    if (!list || index < 0 || index >= list.length) {
+      return null;
+    }
+    return list[index];
+  }
+
+  function getSubSegCardRecallStateKey(key, index) {
+    return key + "#" + String(index);
+  }
+
+  function getCardCurrentPosition(entry) {
+    const historyLen = Array.isArray(entry && entry.history) ? entry.history.length : 0;
+    return historyLen;
+  }
+
+  function getCardRecallPosition(key, index, entry) {
+    const stateKey = getSubSegCardRecallStateKey(key, index);
+    const currentPos = getCardCurrentPosition(entry);
+    const stored = Number(state.subSegCardRecallPositions[stateKey]);
+    if (!Number.isFinite(stored) || stored < 0 || stored > currentPos) {
+      return currentPos;
+    }
+    return stored;
+  }
+
+  function setCardRecallPosition(key, index, position) {
+    const stateKey = getSubSegCardRecallStateKey(key, index);
+    state.subSegCardRecallPositions[stateKey] = position;
+  }
+
+  function getCardValueAtPosition(entry, position) {
+    const history = Array.isArray(entry && entry.history) ? entry.history : [];
+    const currentPos = history.length;
+    if (position < currentPos) {
+      return String(history[position] || "");
+    }
+    return String(entry && entry.value ? entry.value : "");
+  }
+
+  function handleFocusedSubSegCardKeyDown(event) {
+    const active = document.activeElement;
+    if (!active || !active.classList || !active.classList.contains("subseg-value-card-input")) {
+      return false;
+    }
+    const keyCode = String(event.code || "");
+    const keyValue = String(event.key || "");
+    const isArrowRight = keyCode === "ArrowRight" || keyValue === "ArrowRight" || keyValue === "Right";
+    const isArrowLeft = keyCode === "ArrowLeft" || keyValue === "ArrowLeft" || keyValue === "Left";
+    const isBackspace = keyCode === "Backspace" || keyValue === "Backspace";
+    const isCtrl = Boolean(event.ctrlKey || event.metaKey);
+    if (!isCtrl) {
+      return false;
+    }
+
+    const key = String(active.dataset.subSegValueKey || "");
+    const index = Number(active.dataset.subSegValueIndex);
+    const entry = getSubSegValueEntry(key, index);
+    if (!entry) {
+      return false;
+    }
+    const currentPos = getCardCurrentPosition(entry);
+    let recallPos = getCardRecallPosition(key, index, entry);
+
+    if ((isArrowLeft || isArrowRight)) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (isArrowLeft) {
+        recallPos = Math.max(0, recallPos - 1);
+      } else {
+        recallPos = Math.min(currentPos, recallPos + 1);
+      }
+      setCardRecallPosition(key, index, recallPos);
+      const isRecalling = recallPos < currentPos;
+      active.value = getCardValueAtPosition(entry, recallPos);
+      active.readOnly = isRecalling;
+      active.classList.toggle("is-recalling", isRecalling);
+      return true;
+    }
+
+    if (isBackspace && recallPos < currentPos) {
+      event.preventDefault();
+      event.stopPropagation();
+      setCardRecallPosition(key, index, currentPos);
+      active.value = getCardValueAtPosition(entry, currentPos);
+      active.readOnly = false;
+      active.classList.remove("is-recalling");
+      return true;
+    }
+
+    return false;
   }
 
   function seekBy(deltaSeconds) {
@@ -1622,8 +1773,26 @@
     Object.keys(source).forEach(function (key) {
       const values = Array.isArray(source[key]) ? source[key] : [];
       const cleaned = values
-        .map(function (v) { return String(v || "").trim(); })
-        .filter(function (v) { return v.length > 0; })
+        .map(function (entry) {
+          if (entry && typeof entry === "object") {
+            const value = String(entry.value || "").trim();
+            const historyRaw = Array.isArray(entry.history) ? entry.history : [];
+            const history = historyRaw
+              .map(function (h) { return String(h || "").trim(); })
+              .filter(function (h) { return h.length > 0; })
+              .slice(0, 200);
+            if (!value) {
+              return null;
+            }
+            return { value, history };
+          }
+          const value = String(entry || "").trim();
+          if (!value) {
+            return null;
+          }
+          return { value, history: [] };
+        })
+        .filter(function (v) { return Boolean(v); })
         .slice(0, 200);
       if (cleaned.length > 0) {
         normalized[key] = cleaned;
@@ -1731,6 +1900,7 @@
     state.targetEnd = null;
     state.targetSubSegs = [];
     state.selectedTargetSubSegIndex = -1;
+    state.subSegCardRecallPositions = {};
     state.activeSubSegValueKey = null;
     state.shiftHoldTss = null;
     state.targetMarkerSignature = "";
