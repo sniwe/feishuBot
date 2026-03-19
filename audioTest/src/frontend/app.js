@@ -289,6 +289,10 @@
       return;
     }
 
+    if (isSubSegInputFocused) {
+      return;
+    }
+
     if (isShiftKey && isPlayerActive() && hasTargetSpan() && !Number.isFinite(state.shiftHoldTss)) {
       state.shiftHoldTss = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
       debugLog("target:shiftHoldStart", { tss: state.shiftHoldTss });
