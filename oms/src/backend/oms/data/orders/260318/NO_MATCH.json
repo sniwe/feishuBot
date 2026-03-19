@@ -1,0 +1,17 @@
+{
+  "ok": true,
+  "mode": "fast-flow-last2h",
+  "cdpPort": 9222,
+  "configPath": "C:\\Users\\Qub\\oms\\mgmt\\config\\oms.config.json",
+  "url": "https://oms.xlwms.com/platform/order/list",
+  "scannedAt": "2026-03-18T11:12:26.011Z",
+  "window": {
+    "from": "2026-03-18 17:12:11",
+    "to": "2026-03-18 19:12:11"
+  },
+  "scannedRowCount": 453,
+  "orderDate": "260318",
+  "col13Prefix": "NO_MATCH",
+  "matchedCount": 0,
+  "rows": []
+}
