@@ -1190,8 +1190,10 @@
     if (!Array.isArray(state.subSegValueEntries[key])) {
       state.subSegValueEntries[key] = [];
     }
+    const createdAt = new Date().toISOString();
     state.subSegValueEntries[key].push({
       value: text,
+      createdAt,
       history: []
     });
     subSegValueInput.value = "";
@@ -1223,6 +1225,13 @@
       input.dataset.subSegValueIndex = String(entryIndex);
       const recallPosition = getCardRecallPosition(selectedKey, entryIndex, entry);
       const isRecalling = recallPosition < getCardCurrentPosition(entry);
+      const recallMeta = getCardRecallMeta(entry, recallPosition);
+      if (isRecalling && recallMeta) {
+        const version = document.createElement("div");
+        version.className = "subseg-value-version";
+        version.textContent = "current -" + String(recallMeta.offset) + " | " + formatSavedAt(recallMeta.createdAt);
+        card.appendChild(version);
+      }
       input.value = isRecalling ? getCardValueAtPosition(entry, recallPosition) : String(entry.value || "");
       input.readOnly = isRecalling;
       if (isRecalling) {
@@ -1257,11 +1266,15 @@
     if (!Array.isArray(entry.history)) {
       entry.history = [];
     }
-    entry.history.push(prevValue);
+    entry.history.push({
+      value: prevValue,
+      createdAt: entry.createdAt || new Date().toISOString()
+    });
     if (entry.history.length > 200) {
       entry.history = entry.history.slice(entry.history.length - 200);
     }
     entry.value = nextValue;
+    entry.createdAt = new Date().toISOString();
     inputEl.value = nextValue;
     enqueueAutoSave();
   }
@@ -1305,9 +1318,30 @@
     const history = Array.isArray(entry && entry.history) ? entry.history : [];
     const currentPos = history.length;
     if (position < currentPos) {
-      return String(history[position] || "");
+      const item = history[position];
+      if (item && typeof item === "object") {
+        return String(item.value || "");
+      }
+      return String(item || "");
     }
     return String(entry && entry.value ? entry.value : "");
+  }
+
+  function getCardRecallMeta(entry, position) {
+    const history = Array.isArray(entry && entry.history) ? entry.history : [];
+    const currentPos = history.length;
+    if (position >= currentPos) {
+      return null;
+    }
+    const offset = currentPos - position;
+    const item = history[position];
+    const createdAt = item && typeof item === "object"
+      ? String(item.createdAt || "")
+      : "";
+    return {
+      offset,
+      createdAt
+    };
   }
 
   function handleFocusedSubSegCardKeyDown(event) {
@@ -1779,27 +1813,48 @@
   function normalizeSubSegValueEntries(rawEntries) {
     const source = rawEntries && typeof rawEntries === "object" ? rawEntries : {};
     const normalized = {};
+    const nowIso = new Date().toISOString();
     Object.keys(source).forEach(function (key) {
       const values = Array.isArray(source[key]) ? source[key] : [];
       const cleaned = values
         .map(function (entry) {
           if (entry && typeof entry === "object") {
             const value = String(entry.value || "").trim();
+            const createdAt = String(entry.createdAt || nowIso);
             const historyRaw = Array.isArray(entry.history) ? entry.history : [];
             const history = historyRaw
-              .map(function (h) { return String(h || "").trim(); })
-              .filter(function (h) { return h.length > 0; })
+              .map(function (h) {
+                if (h && typeof h === "object") {
+                  const hv = String(h.value || "").trim();
+                  if (!hv) {
+                    return null;
+                  }
+                  return {
+                    value: hv,
+                    createdAt: String(h.createdAt || nowIso)
+                  };
+                }
+                const hv = String(h || "").trim();
+                if (!hv) {
+                  return null;
+                }
+                return {
+                  value: hv,
+                  createdAt: nowIso
+                };
+              })
+              .filter(function (h) { return Boolean(h); })
               .slice(0, 200);
             if (!value) {
               return null;
             }
-            return { value, history };
+            return { value, createdAt, history };
           }
           const value = String(entry || "").trim();
           if (!value) {
             return null;
           }
-          return { value, history: [] };
+          return { value, createdAt: nowIso, history: [] };
         })
         .filter(function (v) { return Boolean(v); })
         .slice(0, 200);
