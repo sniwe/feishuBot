@@ -262,6 +262,7 @@
     const isArrowUp = keyCode === "ArrowUp" || keyValue === "ArrowUp" || keyValue === "Up";
     const isArrowDown = keyCode === "ArrowDown" || keyValue === "ArrowDown" || keyValue === "Down";
     const isDeleteKey = keyCode === "Delete" || keyValue === "Delete" || keyValue === "Del";
+    const isBackspaceKey = keyCode === "Backspace" || keyValue === "Backspace";
     const isSpaceKey = keyCode === "Space" || keyValue === " " || keyValue === "Spacebar";
     const isEnterKey = keyCode === "Enter" || keyValue === "Enter";
     const isShiftKey = keyCode === "ShiftLeft" || keyCode === "ShiftRight" || keyValue === "Shift";
@@ -291,6 +292,16 @@
       selectedTargetSubSegIndex: state.selectedTargetSubSegIndex,
       shiftHoldTss: state.shiftHoldTss
     });
+
+    if ((event.ctrlKey || event.metaKey) && isSubSegInputFocused && (isBackspaceKey || isDeleteKey)) {
+      event.preventDefault();
+      event.stopPropagation();
+      state.activeSubSegValueKey = null;
+      state.subSegCardDeleteDialogKey = null;
+      renderSubSegValuePanel();
+      setSaveStatus("audSeg subSeg value selection exited");
+      return;
+    }
 
     if (isSubSegCardInputFocused) {
       if (handleFocusedSubSegCardKeyDown(event)) {
@@ -326,7 +337,7 @@
       return;
     }
 
-    if ((event.ctrlKey || event.metaKey) && (keyCode === "Backspace" || keyValue === "Backspace")) {
+    if ((event.ctrlKey || event.metaKey) && isBackspaceKey) {
       if (isPlayerActive()) {
         event.preventDefault();
         if (state.activeSubSegValueKey) {
