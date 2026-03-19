@@ -1359,6 +1359,8 @@
     const keyValue = String(event.key || "");
     const isArrowRight = keyCode === "ArrowRight" || keyValue === "ArrowRight" || keyValue === "Right";
     const isArrowLeft = keyCode === "ArrowLeft" || keyValue === "ArrowLeft" || keyValue === "Left";
+    const isArrowUp = keyCode === "ArrowUp" || keyValue === "ArrowUp" || keyValue === "Up";
+    const isArrowDown = keyCode === "ArrowDown" || keyValue === "ArrowDown" || keyValue === "Down";
     const isBackspace = keyCode === "Backspace" || keyValue === "Backspace";
     const isCtrl = Boolean(event.ctrlKey || event.metaKey);
     if (!isCtrl) {
@@ -1373,6 +1375,27 @@
     }
     const currentPos = getCardCurrentPosition(entry);
     let recallPos = getCardRecallPosition(key, index, entry);
+
+    if (isArrowUp || isArrowDown) {
+      event.preventDefault();
+      event.stopPropagation();
+      const list = Array.isArray(state.subSegValueEntries[key]) ? state.subSegValueEntries[key] : [];
+      const total = list.length;
+      if (total <= 1) {
+        return true;
+      }
+      const delta = isArrowDown ? 1 : -1;
+      const nextIndex = (index + delta + total) % total;
+      const nextEntry = getSubSegValueEntry(key, nextIndex);
+      if (!nextEntry) {
+        return true;
+      }
+      const nextCurrentPos = getCardCurrentPosition(nextEntry);
+      const nextRecallPos = getCardRecallPosition(key, nextIndex, nextEntry);
+      const nextIsRecalling = nextRecallPos < nextCurrentPos;
+      focusSubSegCardInput(key, nextIndex, nextIsRecalling);
+      return true;
+    }
 
     if ((isArrowLeft || isArrowRight)) {
       event.preventDefault();
