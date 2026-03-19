@@ -258,6 +258,8 @@
     const keyValue = String(event.key || "");
     const isArrowRight = keyCode === "ArrowRight" || keyValue === "ArrowRight" || keyValue === "Right";
     const isArrowLeft = keyCode === "ArrowLeft" || keyValue === "ArrowLeft" || keyValue === "Left";
+    const isArrowUp = keyCode === "ArrowUp" || keyValue === "ArrowUp" || keyValue === "Up";
+    const isArrowDown = keyCode === "ArrowDown" || keyValue === "ArrowDown" || keyValue === "Down";
     const isSpaceKey = keyCode === "Space" || keyValue === " " || keyValue === "Spacebar";
     const isEnterKey = keyCode === "Enter" || keyValue === "Enter";
     const isShiftKey = keyCode === "ShiftLeft" || keyCode === "ShiftRight" || keyValue === "Shift";
@@ -290,6 +292,11 @@
     }
 
     if (isSubSegInputFocused) {
+      if ((event.ctrlKey || event.metaKey) && (isArrowUp || isArrowDown)) {
+        event.preventDefault();
+        event.stopPropagation();
+        moveFocusFromTopSubSegInput(isArrowDown ? 1 : -1);
+      }
       return;
     }
 
@@ -1379,21 +1386,7 @@
     if (isArrowUp || isArrowDown) {
       event.preventDefault();
       event.stopPropagation();
-      const list = Array.isArray(state.subSegValueEntries[key]) ? state.subSegValueEntries[key] : [];
-      const total = list.length;
-      if (total <= 1) {
-        return true;
-      }
-      const delta = isArrowDown ? 1 : -1;
-      const nextIndex = (index + delta + total) % total;
-      const nextEntry = getSubSegValueEntry(key, nextIndex);
-      if (!nextEntry) {
-        return true;
-      }
-      const nextCurrentPos = getCardCurrentPosition(nextEntry);
-      const nextRecallPos = getCardRecallPosition(key, nextIndex, nextEntry);
-      const nextIsRecalling = nextRecallPos < nextCurrentPos;
-      focusSubSegCardInput(key, nextIndex, nextIsRecalling);
+      moveFocusFromSubSegCardInput(key, index, isArrowDown ? 1 : -1);
       return true;
     }
 
@@ -1439,6 +1432,66 @@
         input.focus();
       }
     });
+  }
+
+  function focusTopSubSegInput() {
+    if (!subSegValueInput) {
+      return;
+    }
+    requestAnimationFrame(function () {
+      try {
+        subSegValueInput.focus({ preventScroll: true });
+      } catch {
+        subSegValueInput.focus();
+      }
+    });
+  }
+
+  function moveFocusFromTopSubSegInput(delta) {
+    const key = state.activeSubSegValueKey;
+    const list = key && Array.isArray(state.subSegValueEntries[key]) ? state.subSegValueEntries[key] : [];
+    const totalCards = list.length;
+    if (totalCards <= 0) {
+      return;
+    }
+    const totalSlots = totalCards + 1;
+    const currentSlot = 0;
+    const nextSlot = (currentSlot + delta + totalSlots) % totalSlots;
+    if (nextSlot === 0) {
+      focusTopSubSegInput();
+      return;
+    }
+    const nextIndex = nextSlot - 1;
+    const nextEntry = getSubSegValueEntry(key, nextIndex);
+    if (!nextEntry) {
+      return;
+    }
+    const nextCurrentPos = getCardCurrentPosition(nextEntry);
+    const nextRecallPos = getCardRecallPosition(key, nextIndex, nextEntry);
+    focusSubSegCardInput(key, nextIndex, nextRecallPos < nextCurrentPos);
+  }
+
+  function moveFocusFromSubSegCardInput(key, index, delta) {
+    const list = Array.isArray(state.subSegValueEntries[key]) ? state.subSegValueEntries[key] : [];
+    const totalCards = list.length;
+    if (totalCards <= 0) {
+      return;
+    }
+    const totalSlots = totalCards + 1;
+    const currentSlot = index + 1;
+    const nextSlot = (currentSlot + delta + totalSlots) % totalSlots;
+    if (nextSlot === 0) {
+      focusTopSubSegInput();
+      return;
+    }
+    const nextIndex = nextSlot - 1;
+    const nextEntry = getSubSegValueEntry(key, nextIndex);
+    if (!nextEntry) {
+      return;
+    }
+    const nextCurrentPos = getCardCurrentPosition(nextEntry);
+    const nextRecallPos = getCardRecallPosition(key, nextIndex, nextEntry);
+    focusSubSegCardInput(key, nextIndex, nextRecallPos < nextCurrentPos);
   }
 
   function cssEscapeAttr(value) {
