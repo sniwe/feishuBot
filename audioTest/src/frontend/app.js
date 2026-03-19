@@ -40,6 +40,16 @@
   const subSegValueForm = document.getElementById("subseg-value-form");
   const subSegValueInput = document.getElementById("subseg-value-input");
   const subSegValueList = document.getElementById("subseg-value-list");
+  const guideButton = document.getElementById("guide-button");
+  const guideOverlay = document.getElementById("guide-overlay");
+  const guideSpotlight = document.getElementById("guide-spotlight");
+  const guideTooltip = document.getElementById("guide-tooltip");
+  const guideCloseButton = document.getElementById("guide-close-button");
+  const guideStepTitle = document.getElementById("guide-step-title");
+  const guideStepText = document.getElementById("guide-step-text");
+  const guidePrevButton = document.getElementById("guide-prev-button");
+  const guideNextButton = document.getElementById("guide-next-button");
+  const guideStepCounter = document.getElementById("guide-step-counter");
 
   const state = {
     objectUrl: null,
@@ -77,7 +87,11 @@
     authToken: null,
     activeSessionId: null,
     saveQueue: Promise.resolve(),
-    isPersisting: false
+    isPersisting: false,
+    isGuideMode: false,
+    guideStepIndex: -1,
+    guideSteps: [],
+    guideRafId: null
   };
 
   const DEBUG_AUDIO = (function () {
@@ -110,6 +124,29 @@
   }
   uploadButton.addEventListener("click", openFilePicker);
   backButton.addEventListener("click", goBackToLibrary);
+  if (guideButton) {
+    guideButton.addEventListener("click", function () {
+      startGuideMode({ deps: {} });
+    });
+  }
+  if (guideCloseButton) {
+    guideCloseButton.addEventListener("click", function () {
+      stopGuideMode({ data: { reason: "closed" }, deps: {} });
+    });
+  }
+  if (guidePrevButton) {
+    guidePrevButton.addEventListener("click", function () {
+      moveGuideStep({ data: { delta: -1 }, deps: {} });
+    });
+  }
+  if (guideNextButton) {
+    guideNextButton.addEventListener("click", function () {
+      moveGuideStep({ data: { delta: 1 }, deps: {} });
+    });
+  }
+  if (guideOverlay) {
+    guideOverlay.addEventListener("click", handleGuideOverlayClick);
+  }
   audio.addEventListener("loadedmetadata", updateUi);
   audio.addEventListener("timeupdate", updateUi);
   audio.addEventListener("durationchange", updateUi);
@@ -129,6 +166,8 @@
   window.addEventListener("keyup", handleKeyUp, { capture: true });
   window.addEventListener("mousemove", handleCheckpointDragMove, { capture: true });
   window.addEventListener("mouseup", handleCheckpointDragEnd, { capture: true });
+  window.addEventListener("resize", handleGuideViewportChanged);
+  window.addEventListener("scroll", handleGuideViewportChanged, { capture: true });
   document.addEventListener("click", handleGlobalClick);
 
   initialize();
@@ -265,6 +304,7 @@
     const isBackspaceKey = keyCode === "Backspace" || keyValue === "Backspace";
     const isSpaceKey = keyCode === "Space" || keyValue === " " || keyValue === "Spacebar";
     const isEnterKey = keyCode === "Enter" || keyValue === "Enter";
+    const isEscapeKey = keyCode === "Escape" || keyValue === "Escape" || keyValue === "Esc";
     const isShiftKey = keyCode === "ShiftLeft" || keyCode === "ShiftRight" || keyValue === "Shift";
     const activeElement = document.activeElement;
     const isSubSegInputFocused = activeElement === subSegValueInput;
@@ -292,6 +332,27 @@
       selectedTargetSubSegIndex: state.selectedTargetSubSegIndex,
       shiftHoldTss: state.shiftHoldTss
     });
+
+    if (state.isGuideMode) {
+      if (isEscapeKey) {
+        event.preventDefault();
+        event.stopPropagation();
+        stopGuideMode({ data: { reason: "escape" }, deps: {} });
+        return;
+      }
+      if (isArrowLeft) {
+        event.preventDefault();
+        event.stopPropagation();
+        moveGuideStep({ data: { delta: -1 }, deps: {} });
+        return;
+      }
+      if (isArrowRight || isEnterKey || isSpaceKey) {
+        event.preventDefault();
+        event.stopPropagation();
+        moveGuideStep({ data: { delta: 1 }, deps: {} });
+        return;
+      }
+    }
 
     if ((event.ctrlKey || event.metaKey) && isSubSegInputFocused && (isBackspaceKey || isDeleteKey)) {
       event.preventDefault();
@@ -635,6 +696,7 @@
   }
 
   function showLibraryView() {
+    stopGuideMode({ data: { reason: "view-hidden", silent: true }, deps: {} });
     blurActiveEditable();
     clearCheckpointDragState();
     loginView.classList.add("hidden");
@@ -653,6 +715,7 @@
   }
 
   function showLoginView() {
+    stopGuideMode({ data: { reason: "view-hidden", silent: true }, deps: {} });
     blurActiveEditable();
     clearCheckpointDragState();
     loginView.classList.remove("hidden");
@@ -727,6 +790,294 @@
       state.openMenuSessionId = null;
       renderAudioCards(state.sessionsCache);
     }
+  }
+
+  function handleGuideOverlayClick(event) {
+    if (!state.isGuideMode || !guideOverlay || !guideTooltip) {
+      return;
+    }
+    const target = event.target;
+    const withinTooltip = target && target.closest && target.closest("#guide-tooltip");
+    if (!withinTooltip) {
+      stopGuideMode({ data: { reason: "backdrop" }, deps: {} });
+    }
+  }
+
+  function handleGuideViewportChanged() {
+    scheduleGuideStepRender({ deps: {} });
+  }
+
+  function startGuideMode(ctx) {
+    const { deps } = ctx;
+    void deps;
+    if (!isPlayerActive()) {
+      setSaveStatus("Open audEp first, then start Guide.");
+      return;
+    }
+    if (!guideOverlay || !guideSpotlight || !guideTooltip || !guideStepTitle || !guideStepText || !guideStepCounter) {
+      return;
+    }
+    state.guideSteps = buildGuideSteps({ deps: {} });
+    if (!Array.isArray(state.guideSteps) || state.guideSteps.length === 0) {
+      return;
+    }
+    state.isGuideMode = true;
+    state.guideStepIndex = 0;
+    guideOverlay.classList.remove("hidden");
+    renderGuideStep({ deps: {} });
+  }
+
+  function stopGuideMode(ctx) {
+    const { data = {}, deps } = ctx;
+    void deps;
+    if (!state.isGuideMode && (!guideOverlay || guideOverlay.classList.contains("hidden"))) {
+      return;
+    }
+    state.isGuideMode = false;
+    state.guideStepIndex = -1;
+    state.guideSteps = [];
+    if (state.guideRafId) {
+      cancelAnimationFrame(state.guideRafId);
+      state.guideRafId = null;
+    }
+    if (guideOverlay) {
+      guideOverlay.classList.add("hidden");
+    }
+    if (!data.silent) {
+      setSaveStatus("Guide mode closed");
+    }
+  }
+
+  function moveGuideStep(ctx) {
+    const { data = {}, deps } = ctx;
+    void deps;
+    if (!state.isGuideMode || !Array.isArray(state.guideSteps) || state.guideSteps.length === 0) {
+      return;
+    }
+    const delta = Number.isFinite(data.delta) ? data.delta : 0;
+    if (!delta) {
+      return;
+    }
+    const nextIndex = state.guideStepIndex + delta;
+    if (nextIndex < 0) {
+      state.guideStepIndex = 0;
+      renderGuideStep({ deps: {} });
+      return;
+    }
+    if (nextIndex >= state.guideSteps.length) {
+      stopGuideMode({ data: { reason: "complete", silent: true }, deps: {} });
+      setSaveStatus("Guide complete");
+      return;
+    }
+    state.guideStepIndex = nextIndex;
+    renderGuideStep({ deps: {} });
+  }
+
+  function scheduleGuideStepRender(ctx) {
+    const { deps } = ctx;
+    void deps;
+    if (!state.isGuideMode) {
+      return;
+    }
+    if (state.guideRafId) {
+      cancelAnimationFrame(state.guideRafId);
+      state.guideRafId = null;
+    }
+    state.guideRafId = requestAnimationFrame(function () {
+      state.guideRafId = null;
+      renderGuideStep({ deps: {} });
+    });
+  }
+
+  function renderGuideStep(ctx) {
+    const { deps } = ctx;
+    void deps;
+    if (!state.isGuideMode || !Array.isArray(state.guideSteps) || state.guideSteps.length === 0) {
+      return;
+    }
+    const safeIndex = Math.max(0, Math.min(state.guideSteps.length - 1, state.guideStepIndex));
+    state.guideStepIndex = safeIndex;
+    const step = state.guideSteps[safeIndex];
+    if (!step) {
+      return;
+    }
+
+    const resolved = resolveGuideStepTarget({ data: { step }, deps: {} });
+    if (!resolved) {
+      return;
+    }
+
+    const targetRect = resolved.getBoundingClientRect();
+    const isOffscreen = targetRect.bottom < 0 || targetRect.top > window.innerHeight;
+    if (isOffscreen && resolved.scrollIntoView) {
+      resolved.scrollIntoView({ block: "center", inline: "nearest" });
+      scheduleGuideStepRender({ deps: {} });
+      return;
+    }
+
+    const titleText = step.title || "Guide";
+    const bodyText = typeof step.text === "function"
+      ? String(step.text({ data: { target: resolved }, deps: {} }) || "")
+      : String(step.text || "");
+    guideStepTitle.textContent = titleText;
+    guideStepText.textContent = bodyText;
+    guideStepCounter.textContent = String(safeIndex + 1) + " / " + String(state.guideSteps.length);
+    if (guidePrevButton) {
+      guidePrevButton.disabled = safeIndex <= 0;
+    }
+    if (guideNextButton) {
+      guideNextButton.textContent = safeIndex >= state.guideSteps.length - 1 ? "Finish" : "Next";
+    }
+    positionGuideSpotlight({ data: { rect: targetRect }, deps: {} });
+    positionGuideTooltip({ data: { rect: targetRect }, deps: {} });
+  }
+
+  function resolveGuideStepTarget(ctx) {
+    const { data, deps } = ctx;
+    void deps;
+    const { step } = data;
+    if (!step) {
+      return null;
+    }
+    const target = step.getTarget ? step.getTarget({ deps: {} }) : null;
+    if (target && isGuideElementVisible({ data: { element: target }, deps: {} })) {
+      return target;
+    }
+    return progressTrackMain || backButton || playerView;
+  }
+
+  function isGuideElementVisible(ctx) {
+    const { data, deps } = ctx;
+    void deps;
+    const { element } = data;
+    if (!element || !element.getBoundingClientRect || !element.isConnected) {
+      return false;
+    }
+    if (element.classList && element.classList.contains("hidden")) {
+      return false;
+    }
+    const rect = element.getBoundingClientRect();
+    return rect.width > 1 && rect.height > 1;
+  }
+
+  function positionGuideSpotlight(ctx) {
+    const { data, deps } = ctx;
+    void deps;
+    const { rect } = data;
+    if (!guideSpotlight || !rect) {
+      return;
+    }
+    const pad = 8;
+    const top = Math.max(0, rect.top - pad);
+    const left = Math.max(0, rect.left - pad);
+    const width = Math.max(24, rect.width + pad * 2);
+    const height = Math.max(24, rect.height + pad * 2);
+    guideSpotlight.style.top = String(top) + "px";
+    guideSpotlight.style.left = String(left) + "px";
+    guideSpotlight.style.width = String(width) + "px";
+    guideSpotlight.style.height = String(height) + "px";
+  }
+
+  function positionGuideTooltip(ctx) {
+    const { data, deps } = ctx;
+    void deps;
+    const { rect } = data;
+    if (!guideTooltip || !rect) {
+      return;
+    }
+    const viewportPad = 12;
+    const width = Math.max(220, Math.min(320, window.innerWidth - viewportPad * 2));
+    guideTooltip.style.width = String(width) + "px";
+    const tipRect = guideTooltip.getBoundingClientRect();
+    const idealTop = rect.bottom + 12;
+    const top = idealTop + tipRect.height <= window.innerHeight - viewportPad
+      ? idealTop
+      : Math.max(viewportPad, rect.top - tipRect.height - 12);
+    const left = Math.max(viewportPad, Math.min(window.innerWidth - tipRect.width - viewportPad, rect.left));
+    guideTooltip.style.top = String(top) + "px";
+    guideTooltip.style.left = String(left) + "px";
+  }
+
+  function buildGuideSteps(ctx) {
+    const { deps } = ctx;
+    void deps;
+    return [
+      {
+        title: "Guide Button",
+        text: "Use this button anytime to restart guided mode.",
+        getTarget: function () { return guideButton; }
+      },
+      {
+        title: "Back",
+        text: "Back returns to the audio card list. Use Ctrl+Backspace as a keyboard shortcut.",
+        getTarget: function () { return backButton; }
+      },
+      {
+        title: "File Header",
+        text: "This row confirms which audEp file is currently loaded.",
+        getTarget: function () { return fileName; }
+      },
+      {
+        title: "Main audEp Timeline",
+        text: "The main bar controls playback position and displays selected audSeg span, subSeg overlays, checkpoints, and playhead time.",
+        getTarget: function () { return progressTrackMain; }
+      },
+      {
+        title: "Checkpoint Markers",
+        text: "Shift+Space adds checkpoints. Drag markers to micro-adjust timing while preview audio loops briefly.",
+        getTarget: function () { return checkpointMarkers; }
+      },
+      {
+        title: "Target audSeg Bar",
+        text: function () {
+          if (isGuideElementVisible({ data: { element: targetProgressWrap }, deps: {} })) {
+            return "After selecting an audSeg, Enter locks target mode and this bar lets you work inside the target span.";
+          }
+          return "This appears after selecting an audSeg and pressing Enter to lock target mode.";
+        },
+        getTarget: function () {
+          if (isGuideElementVisible({ data: { element: targetProgressWrap }, deps: {} })) {
+            return targetProgressWrap;
+          }
+          return progressTrackMain;
+        }
+      },
+      {
+        title: "SubSeg Input",
+        text: function () {
+          if (isGuideElementVisible({ data: { element: subSegValueInput }, deps: {} })) {
+            return "With a target subSeg selected, type here and press Enter to create a value card.";
+          }
+          return "Input opens after selecting a target subSeg (Ctrl+Left/Right), then activating value entry.";
+        },
+        getTarget: function () {
+          if (isGuideElementVisible({ data: { element: subSegValueInput }, deps: {} })) {
+            return subSegValueInput;
+          }
+          return progressTrackMain;
+        }
+      },
+      {
+        title: "Input Cards",
+        text: function () {
+          const firstCardInput = subSegValueList ? subSegValueList.querySelector(".subseg-value-card-input") : null;
+          if (firstCardInput) {
+            return "Each card stores a versioned value for the selected subSeg. Edit, recall history, or delete from card actions.";
+          }
+          return "Cards appear below the input after values are submitted for the selected target subSeg.";
+        },
+        getTarget: function () {
+          const firstCardInput = subSegValueList ? subSegValueList.querySelector(".subseg-value-card-input") : null;
+          if (firstCardInput) {
+            return firstCardInput;
+          }
+          if (isGuideElementVisible({ data: { element: subSegValuePanel }, deps: {} })) {
+            return subSegValuePanel;
+          }
+          return progressTrackMain;
+        }
+      }
+    ];
   }
 
   async function loadPersistedAudioCards() {
@@ -1252,6 +1603,7 @@
     subSegValuePanel.classList.toggle("hidden", !isVisible);
     if (!isVisible) {
       subSegValueList.innerHTML = "";
+      scheduleGuideStepRender({ deps: {} });
       return;
     }
 
@@ -1319,6 +1671,7 @@
       }
       subSegValueList.appendChild(card);
     });
+    scheduleGuideStepRender({ deps: {} });
   }
 
   function handleSubSegCardInputChange(event) {
@@ -1684,6 +2037,7 @@
       state.hasAutoFocusedProgress = true;
       focusProgressControl();
     }
+    scheduleGuideStepRender({ deps: {} });
   }
 
   function clampCurrentTimeWithinSelectedSpan(ctx) {

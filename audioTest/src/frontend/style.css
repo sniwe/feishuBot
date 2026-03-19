@@ -353,6 +353,8 @@ h1, p { margin: 0; }
 .player-head {
   display: flex;
   justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
 }
 
 .back-button {
@@ -369,6 +371,22 @@ h1, p { margin: 0; }
 
 .back-button:hover {
   border-color: #b8c6dd;
+}
+
+.guide-button {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ecf8f7;
+  color: var(--accent-strong);
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+.guide-button:hover {
+  border-color: #97c7c4;
 }
 
 .file-name {
@@ -854,6 +872,91 @@ h1, p { margin: 0; }
   border-color: #d8b7b7;
   background: #fff5f5;
   color: #8d2d2d;
+}
+
+.guide-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  pointer-events: auto;
+}
+
+.guide-spotlight {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 120px;
+  height: 50px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 100vmax rgba(9, 15, 24, 0.72);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  transition: top 120ms ease, left 120ms ease, width 120ms ease, height 120ms ease;
+  pointer-events: none;
+}
+
+.guide-tooltip {
+  position: fixed;
+  width: min(320px, calc(100vw - 24px));
+  border: 1px solid #b6c5de;
+  border-radius: 10px;
+  background: #fdfefe;
+  box-shadow: 0 14px 32px rgba(11, 24, 42, 0.3);
+  padding: 10px 11px;
+  display: grid;
+  gap: 8px;
+}
+
+.guide-close-button {
+  justify-self: end;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f8fbff;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 5px 8px;
+}
+
+.guide-step-title {
+  color: var(--ink);
+  font-size: 0.91rem;
+  font-weight: 700;
+}
+
+.guide-step-text {
+  color: #344865;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.guide-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.guide-nav-button {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f6faff;
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+
+.guide-nav-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.guide-step-counter {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .playhead {

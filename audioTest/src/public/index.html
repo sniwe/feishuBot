@@ -37,6 +37,7 @@
     <section id="player-view" class="player-view hidden">
       <div class="player-head">
         <button id="back-button" class="back-button" type="button" aria-label="Back to audio list">Back</button>
+        <button id="guide-button" class="guide-button" type="button" aria-label="Start guide mode">Guide</button>
       </div>
       <section class="player" aria-live="polite">
         <audio id="audio" preload="metadata"></audio>
@@ -83,6 +84,19 @@
           <div id="subseg-value-list" class="subseg-value-list"></div>
         </div>
       </section>
+      <div id="guide-overlay" class="guide-overlay hidden" aria-live="polite">
+        <div id="guide-spotlight" class="guide-spotlight" aria-hidden="true"></div>
+        <div id="guide-tooltip" class="guide-tooltip" role="dialog" aria-modal="false" aria-label="Guide mode">
+          <button id="guide-close-button" class="guide-close-button" type="button" aria-label="Close guide mode">Close</button>
+          <p id="guide-step-title" class="guide-step-title"></p>
+          <p id="guide-step-text" class="guide-step-text"></p>
+          <div class="guide-actions">
+            <button id="guide-prev-button" class="guide-nav-button" type="button">Prev</button>
+            <span id="guide-step-counter" class="guide-step-counter"></span>
+            <button id="guide-next-button" class="guide-nav-button" type="button">Next</button>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 
