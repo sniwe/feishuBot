@@ -1382,9 +1382,8 @@
       }
       setCardRecallPosition(key, index, recallPos);
       const isRecalling = recallPos < currentPos;
-      active.value = getCardValueAtPosition(entry, recallPos);
-      active.readOnly = isRecalling;
-      active.classList.toggle("is-recalling", isRecalling);
+      renderSubSegValuePanel();
+      focusSubSegCardInput(key, index, isRecalling);
       return true;
     }
 
@@ -1392,13 +1391,33 @@
       event.preventDefault();
       event.stopPropagation();
       setCardRecallPosition(key, index, currentPos);
-      active.value = getCardValueAtPosition(entry, currentPos);
-      active.readOnly = false;
-      active.classList.remove("is-recalling");
+      renderSubSegValuePanel();
+      focusSubSegCardInput(key, index, false);
       return true;
     }
 
     return false;
+  }
+
+  function focusSubSegCardInput(key, index, isRecalling) {
+    requestAnimationFrame(function () {
+      const selector = ".subseg-value-card-input[data-sub-seg-value-key=\"" + cssEscapeAttr(key) + "\"][data-sub-seg-value-index=\"" + String(index) + "\"]";
+      const input = subSegValueList ? subSegValueList.querySelector(selector) : null;
+      if (!input) {
+        return;
+      }
+      input.readOnly = Boolean(isRecalling);
+      input.classList.toggle("is-recalling", Boolean(isRecalling));
+      try {
+        input.focus({ preventScroll: true });
+      } catch {
+        input.focus();
+      }
+    });
+  }
+
+  function cssEscapeAttr(value) {
+    return String(value).replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
   }
 
   function seekBy(deltaSeconds) {
