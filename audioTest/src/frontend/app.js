@@ -1102,6 +1102,9 @@
     if (!guideOverlay || !guideSpotlight || !guideTooltip || !guideStepTitle || !guideStepText || !guideStepCounter) {
       return;
     }
+    if (!audio.paused) {
+      audio.pause();
+    }
     showLibraryView();
     state.guideSteps = buildGuideSteps({ deps: {} });
     if (!Array.isArray(state.guideSteps) || state.guideSteps.length === 0) {
