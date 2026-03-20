@@ -127,6 +127,12 @@ h1, p { margin: 0; }
   gap: 10px;
 }
 
+.library-head-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .logout-button {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -928,6 +934,31 @@ h1, p { margin: 0; }
   color: #344865;
   font-size: 0.82rem;
   line-height: 1.35;
+}
+
+.guide-language-picker {
+  display: flex;
+  gap: 8px;
+}
+
+.guide-lang-button {
+  border: 1px solid #b7c8df;
+  border-radius: 7px;
+  background: #f4f8fd;
+  color: #1f395f;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+
+.guide-lang-button:hover {
+  border-color: #95afd1;
+}
+
+.guide-lang-button.is-active {
+  border-color: #6b8fbe;
+  background: #e8f1ff;
 }
 
 .guide-actions {
