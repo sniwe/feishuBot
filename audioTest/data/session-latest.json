@@ -1,111 +1,21 @@
 {
-  "id": "ai-mp3-mmu2a3kg-h4jpfn",
+  "id": "ep-ai-mp3-mmym2vf9-1im9hc",
   "owner": "rhys",
-  "savedAt": "2026-03-20T10:06:40.599Z",
+  "savedAt": "2026-03-20T10:19:12.351Z",
   "file": {
-    "name": "AI的胡说八道，为什么比人类骗子“更危险”？.mp3",
+    "name": "ep：AI危机如何看待.mp3",
     "type": "audio/mpeg",
-    "size": 11253803,
-    "lastModified": 1749090197714
+    "size": 13401278,
+    "lastModified": 1722994654242
   },
   "playback": {
-    "checkpoints": [
-      82.773824,
-      168.603169,
-      359.202853,
-      494.202853
-    ],
-    "subSegs": [
-      {
-        "start": 7.044739,
-        "end": 9.05202
-      },
-      {
-        "start": 10.563998,
-        "end": 12.415793
-      },
-      {
-        "start": 15.453381,
-        "end": 19.233435
-      },
-      {
-        "start": 33.296642,
-        "end": 34.142893
-      },
-      {
-        "start": 40.938971,
-        "end": 48.26449
-      },
-      {
-        "start": 56.330202,
-        "end": 60.297027
-      },
-      {
-        "start": 74.305848,
-        "end": 77.401328
-      }
-    ],
-    "subSegValueEntries": {
-      "74.306|77.401": [
-        {
-          "value": "以一种一项不到的方式boji到你",
-          "createdAt": "2026-03-19T02:51:00.754Z",
-          "history": []
-        }
-      ],
-      "7.045|9.052": [
-        {
-          "value": "input1 is new, and you are a poo",
-          "createdAt": "2026-03-19T02:51:12.489Z",
-          "history": [
-            {
-              "value": "input1",
-              "createdAt": "2026-03-19T02:51:00.754Z"
-            },
-            {
-              "value": "input1is",
-              "createdAt": "2026-03-19T02:51:00.754Z"
-            },
-            {
-              "value": "input1isnew",
-              "createdAt": "2026-03-19T02:51:00.754Z"
-            },
-            {
-              "value": "input1 is new",
-              "createdAt": "2026-03-19T02:51:00.754Z"
-            }
-          ]
-        }
-      ],
-      "10.564|12.416": [
-        {
-          "value": "test the second one again",
-          "createdAt": "2026-03-19T03:20:06.529Z",
-          "history": [
-            {
-              "value": "test the second one",
-              "createdAt": "2026-03-19T03:20:02.407Z"
-            }
-          ]
-        }
-      ],
-      "15.453|19.233": [
-        {
-          "value": "am i losign all control?",
-          "createdAt": "2026-03-20T10:06:19.171Z",
-          "history": []
-        },
-        {
-          "value": "test 2",
-          "createdAt": "2026-03-20T10:06:40.231Z",
-          "history": []
-        }
-      ]
-    },
+    "checkpoints": [],
+    "subSegs": [],
+    "subSegValueEntries": {},
     "selectedSpanIndex": -1,
-    "currentTime": 15.453381,
+    "currentTime": 54.429106,
     "wasPlaying": false
   },
-  "audioId": "ai-mp3-mmu2a3b9-i7zysw",
+  "audioId": "ep-ai-mp3-mmym2ury-vz23m9",
   "audioUrl": ""
 }

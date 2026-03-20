@@ -12,7 +12,7 @@ const AUDIO_DIR = path.join(DATA_DIR, "audio");
 const SESSION_PATH = path.join(DATA_DIR, "session-latest.json");
 const PORT = Number(process.env.PORT || 8787);
 const MAX_BODY_SIZE = 1024 * 1024 * 500;
-const LOGIN_TTL_MS = 10 * 60 * 1000;
+const LOGIN_TTL_MS = Number(process.env.LOGIN_IDLE_TTL_MS || (5 * 60 * 1000));
 const STORAGE_PROVIDER = String(process.env.SESSION_STORE || "local").trim().toLowerCase();
 const REMOTE_BASE_URL = String(process.env.REMOTE_BASE_URL || "https://braggadocian-osteometrical-petronila.ngrok-free.dev").trim().replace(/\/+$/g, "");
 const REMOTE_TIMEOUT_MS = Number(process.env.REMOTE_TIMEOUT_MS || 60000);
@@ -80,6 +80,11 @@ async function routeRequest(ctx) {
 
   if (req.method === "POST" && requestPath === "/api/login") {
     await handlePostLogin({ data: { req, res }, deps: {} });
+    return;
+  }
+
+  if (req.method === "POST" && requestPath === "/api/auth/ping") {
+    await handlePostAuthPing({ data: { req, res }, deps: {} });
     return;
   }
 
@@ -748,12 +753,29 @@ function createAuthSession(ctx) {
   const token = "tok_" + loggedInAt.toString(36) + "_" + Math.random().toString(36).slice(2, 12);
   AUTH_SESSIONS.set(token, {
     username,
-    expiresAt: loggedInAt + LOGIN_TTL_MS
+    lastActivityAt: loggedInAt
   });
   return {
     token,
     loggedInAt
   };
+}
+
+async function handlePostAuthPing(ctx) {
+  const { data } = ctx;
+  const { req, res } = data;
+  const authUser = requireAuthUser({ data: { req, res }, deps: {} });
+  if (!authUser) {
+    return;
+  }
+  sendJson({
+    data: {
+      res,
+      status: 200,
+      payload: { ok: true, username: authUser, serverNow: Date.now(), ttlMs: LOGIN_TTL_MS }
+    },
+    deps: {}
+  });
 }
 
 function resolveAuthenticatedUser(ctx) {
@@ -781,10 +803,13 @@ function resolveAuthenticatedUser(ctx) {
   if (!session || session.username !== username) {
     return "";
   }
-  if (Date.now() > session.expiresAt) {
+  const now = Date.now();
+  if (!Number.isFinite(session.lastActivityAt) || (now - session.lastActivityAt) > LOGIN_TTL_MS) {
     AUTH_SESSIONS.delete(token);
     return "";
   }
+  session.lastActivityAt = now;
+  AUTH_SESSIONS.set(token, session);
   return username;
 }
 

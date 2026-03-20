@@ -1,6 +1,7 @@
 (function () {
   const LOGIN_STORAGE_KEY = "audioTest.auth";
-  const LOGIN_TTL_MS = 10 * 60 * 1000;
+  const LOGIN_TTL_MS = 5 * 60 * 1000;
+  const AUTH_PING_MIN_INTERVAL_MS = 30 * 1000;
   const ALLOWED_USERS = ["zhaoying", "rhys"];
   const loginView = document.getElementById("login-view");
   const loginForm = document.getElementById("login-form");
@@ -105,7 +106,10 @@
     guideTooltipLocked: false,
     deleteTargetType: "",
     deleteTargetIndex: -1,
-    deleteConfirmOpen: false
+    deleteConfirmOpen: false,
+    authInactivityTimerId: null,
+    lastActivityAt: 0,
+    lastAuthPingAt: 0
   };
 
   const DEBUG_AUDIO = (function () {
@@ -209,6 +213,9 @@
   window.addEventListener("resize", handleGuideViewportChanged);
   window.addEventListener("scroll", handleGuideViewportChanged, { capture: true });
   document.addEventListener("click", handleGlobalClick);
+  ["pointerdown", "keydown", "input", "wheel", "touchstart"].forEach(function (eventName) {
+    window.addEventListener(eventName, handleAuthActivity, { capture: true });
+  });
 
   initialize();
 
@@ -221,6 +228,9 @@
     if (restored) {
       state.authUser = restored.username;
       state.authToken = restored.token;
+      state.lastActivityAt = Number(restored.lastActivityAt || Date.now());
+      state.lastAuthPingAt = 0;
+      scheduleInactivityLogout();
       setLoginStatus("Welcome back, " + restored.username + ".");
       showLibraryView();
       await loadPersistedAudioCards();
@@ -273,11 +283,15 @@
         username: payload.username,
         token: payload.token,
         loggedInAt,
-        ttlMs: ttl
+        ttlMs: ttl,
+        lastActivityAt: Date.now()
       });
 
       state.authUser = payload.username;
       state.authToken = payload.token;
+      state.lastActivityAt = Date.now();
+      state.lastAuthPingAt = 0;
+      scheduleInactivityLogout();
       loginPassword.value = "";
       setLoginStatus("Signed in as " + payload.username + ".");
       showLibraryView();
@@ -3945,7 +3959,8 @@
         username: String(record.username || "").toLowerCase(),
         token: String(record.token || ""),
         loggedInAt: Number(record.loggedInAt || Date.now()),
-        ttlMs: Number(record.ttlMs || LOGIN_TTL_MS)
+        ttlMs: Number(record.ttlMs || LOGIN_TTL_MS),
+        lastActivityAt: Number(record.lastActivityAt || Date.now())
       };
       window.localStorage.setItem(LOGIN_STORAGE_KEY, JSON.stringify(safe));
     } catch {
@@ -3964,17 +3979,81 @@
       const token = String(parsed && parsed.token ? parsed.token : "");
       const loggedInAt = Number(parsed && parsed.loggedInAt);
       const ttlMs = Number(parsed && parsed.ttlMs ? parsed.ttlMs : LOGIN_TTL_MS);
-      if (ALLOWED_USERS.indexOf(username) < 0 || !token || !Number.isFinite(loggedInAt) || !Number.isFinite(ttlMs) || ttlMs <= 0) {
+      const lastActivityAt = Number(parsed && parsed.lastActivityAt ? parsed.lastActivityAt : loggedInAt);
+      if (
+        ALLOWED_USERS.indexOf(username) < 0 ||
+        !token ||
+        !Number.isFinite(loggedInAt) ||
+        !Number.isFinite(ttlMs) ||
+        ttlMs <= 0 ||
+        !Number.isFinite(lastActivityAt)
+      ) {
         return null;
       }
-      if ((Date.now() - loggedInAt) > ttlMs) {
+      if ((Date.now() - lastActivityAt) > ttlMs) {
         window.localStorage.removeItem(LOGIN_STORAGE_KEY);
         return null;
       }
-      return { username, token, loggedInAt, ttlMs };
+      return { username, token, loggedInAt, ttlMs, lastActivityAt };
     } catch {
       return null;
     }
+  }
+
+  function persistCurrentLoginActivity() {
+    if (!state.authUser || !state.authToken) {
+      return;
+    }
+    persistLogin({
+      username: state.authUser,
+      token: state.authToken,
+      loggedInAt: Date.now(),
+      ttlMs: LOGIN_TTL_MS,
+      lastActivityAt: state.lastActivityAt || Date.now()
+    });
+  }
+
+  function scheduleInactivityLogout() {
+    if (state.authInactivityTimerId) {
+      window.clearTimeout(state.authInactivityTimerId);
+      state.authInactivityTimerId = null;
+    }
+    if (!state.authUser || !state.authToken) {
+      return;
+    }
+    const last = Number.isFinite(state.lastActivityAt) && state.lastActivityAt > 0 ? state.lastActivityAt : Date.now();
+    const remaining = Math.max(0, LOGIN_TTL_MS - (Date.now() - last));
+    state.authInactivityTimerId = window.setTimeout(function () {
+      clearLoginState("Logged out due to inactivity.");
+    }, remaining);
+  }
+
+  function maybePingAuthActivity() {
+    if (!state.authUser || !state.authToken) {
+      return;
+    }
+    const now = Date.now();
+    if ((now - state.lastAuthPingAt) < AUTH_PING_MIN_INTERVAL_MS) {
+      return;
+    }
+    state.lastAuthPingAt = now;
+    fetch("/api/auth/ping", {
+      method: "POST",
+      cache: "no-store",
+      headers: buildAuthHeaders()
+    }).catch(function () {
+      // Ignore ping failure; normal auth checks still apply on real requests.
+    });
+  }
+
+  function handleAuthActivity() {
+    if (!state.authUser || !state.authToken) {
+      return;
+    }
+    state.lastActivityAt = Date.now();
+    persistCurrentLoginActivity();
+    scheduleInactivityLogout();
+    maybePingAuthActivity();
   }
 
   function buildAuthHeaders() {
@@ -4007,6 +4086,12 @@
     state.activeAudioUrl = null;
     state.sessionsCache = [];
     state.openMenuSessionId = null;
+    state.lastActivityAt = 0;
+    state.lastAuthPingAt = 0;
+    if (state.authInactivityTimerId) {
+      window.clearTimeout(state.authInactivityTimerId);
+      state.authInactivityTimerId = null;
+    }
     try {
       window.localStorage.removeItem(LOGIN_STORAGE_KEY);
     } catch {
