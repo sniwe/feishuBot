@@ -886,7 +886,7 @@
         cardDeleteText: "On a focused card input, press Ctrl+Backspace to open card delete actions.",
         cardDeleteConfirmTitle: "Card Delete Actions",
         cardDeleteConfirmText: "Use Cancel to close the dialog or Delete to remove the current card.",
-        exitValueModeTitle: "Exit Value Mode",
+        exitValueModeTitle: "Exit Input Mode",
         exitValueModeText: "Press Ctrl+Backspace while in top value input mode to exit value-entry mode.",
         exitSubSegTitle: "Exit subSeg Selection",
         exitSubSegText: "Press Ctrl+Backspace again to clear current subSeg selection.",
@@ -934,7 +934,7 @@
         cardDeleteText: "\u5728\u5df2\u805a\u7126\u7684\u5361\u7247\u8f93\u5165\u6846\u4e0a\u6309 Ctrl+Backspace\uff0c\u6253\u5f00\u8be5\u5361\u7247\u7684\u5220\u9664\u64cd\u4f5c\u3002",
         cardDeleteConfirmTitle: "\u5361\u7247\u5220\u9664\u64cd\u4f5c",
         cardDeleteConfirmText: "\u70b9 Cancel \u5173\u95ed\u5bf9\u8bdd\uff0c\u70b9 Delete \u5220\u9664\u5f53\u524d\u5361\u7247\u3002",
-        exitValueModeTitle: "\u9000\u51fa\u503c\u8f93\u5165\u6a21\u5f0f",
+        exitValueModeTitle: "\u9000\u51fa\u8f93\u5165\u6a21\u5f0f",
         exitValueModeText: "\u5728\u9876\u90e8\u503c\u8f93\u5165\u6a21\u5f0f\u4e0b\u6309 Ctrl+Backspace\uff0c\u9000\u51fa\u503c\u8f93\u5165\u6a21\u5f0f\u3002",
         exitSubSegTitle: "\u9000\u51fa subSeg \u9009\u4e2d",
         exitSubSegText: "\u518d\u6309\u4e00\u6b21 Ctrl+Backspace\uff0c\u6e05\u9664\u5f53\u524d subSeg \u9009\u4e2d\u3002",
@@ -1163,6 +1163,20 @@
     }
   }
 
+  function renderGuideMainSubSegOverlay(ctx) {
+    const { deps } = ctx;
+    void deps;
+    if (!subSegOverlays) {
+      return;
+    }
+    subSegOverlays.innerHTML = "";
+    const span = document.createElement("span");
+    span.className = "subseg-main-span";
+    span.style.left = "44%";
+    span.style.width = "7%";
+    subSegOverlays.appendChild(span);
+  }
+
   function renderGuidePlayerState(ctx) {
     const { data = {}, deps } = ctx;
     void deps;
@@ -1173,6 +1187,9 @@
     progress.style.setProperty("--progress-pct", "32%");
     playhead.style.left = "32%";
     playheadTime.textContent = "01:12";
+    if (subSegOverlays) {
+      subSegOverlays.innerHTML = "";
+    }
     selectedSpanOverlay.style.display = "none";
     selectedSpanOverlay.style.left = "0%";
     selectedSpanOverlay.style.width = "0%";
@@ -1268,9 +1285,10 @@
       phase === "player-exit-list"
     ) {
       renderGuideTargetSubSeg({ deps: {} });
+      renderGuideMainSubSegOverlay({ deps: {} });
     }
 
-    if (phase === "player-exit-target" || phase === "player-exit-audseg" || phase === "player-exit-list") {
+    if (phase === "player-exit-audseg" || phase === "player-exit-list") {
       if (targetSubSegActiveFill) {
         targetSubSegActiveFill.style.display = "none";
       }
@@ -1313,50 +1331,58 @@
       phase === "player-exit-subseg"
     ) {
       subSegValueList.innerHTML = "";
-      const demoValues = [
-        { version: "previous version", text: "前后两清" },
-        { version: "current version", text: "钱货两清" }
-      ];
-      demoValues.forEach(function (entry, index) {
-        const card = document.createElement("div");
-        card.className = "subseg-value-card";
-        const version = document.createElement("div");
-        version.className = "subseg-value-version";
-        version.textContent = String(entry.version || "version " + String(index + 1));
-        const inputEl = document.createElement("input");
-        inputEl.type = "text";
-        inputEl.className = "subseg-value-card-input";
-        inputEl.value = entry.text;
-        inputEl.readOnly = true;
-        if (phase === "player-card-delete" || phase === "player-card-delete-confirm") {
-          if (index === 1) {
-            inputEl.style.outline = "2px solid #6e92c9";
-            inputEl.style.borderRadius = "4px";
-            inputEl.id = "guide-card-delete-target";
-          }
-        }
-        card.appendChild(version);
-        card.appendChild(inputEl);
-        if ((phase === "player-card-delete" || phase === "player-card-delete-confirm") && index === 1) {
-          const actions = document.createElement("div");
-          actions.className = "subseg-value-delete-row";
-          actions.id = "guide-card-delete-actions";
-          const cancelButton = document.createElement("button");
-          cancelButton.type = "button";
-          cancelButton.className = "subseg-value-delete-cancel";
-          cancelButton.id = "guide-delete-cancel";
-          cancelButton.textContent = "Cancel";
-          const deleteButton = document.createElement("button");
-          deleteButton.type = "button";
-          deleteButton.className = "subseg-value-delete-confirm";
-          deleteButton.id = "guide-delete-confirm";
-          deleteButton.textContent = "Delete";
-          actions.appendChild(cancelButton);
-          actions.appendChild(deleteButton);
-          card.appendChild(actions);
-        }
-        subSegValueList.appendChild(card);
-      });
+      const card = document.createElement("div");
+      card.className = "subseg-value-card";
+      const recalled = phase === "player-card-nav";
+
+      const version = document.createElement("div");
+      version.className = "subseg-value-version";
+      version.textContent = recalled ? "current -1 | previous version" : "current -0 | current version";
+
+      const inputEl = document.createElement("input");
+      inputEl.type = "text";
+      inputEl.className = "subseg-value-card-input";
+      inputEl.value = recalled ? "\u524d\u540e\u4e24\u6e05" : "\u94b1\u8d27\u4e24\u6e05";
+      inputEl.readOnly = true;
+      if (recalled) {
+        inputEl.classList.add("is-recalling");
+      }
+      if (phase === "player-card-delete" || phase === "player-card-delete-confirm") {
+        inputEl.style.outline = "2px solid #6e92c9";
+        inputEl.style.borderRadius = "4px";
+        inputEl.id = "guide-card-delete-target";
+      }
+
+      card.appendChild(version);
+      card.appendChild(inputEl);
+
+      if (!recalled) {
+        const historyHint = document.createElement("div");
+        historyHint.className = "subseg-value-version";
+        historyHint.textContent = "history: \u524d\u540e\u4e24\u6e05";
+        card.appendChild(historyHint);
+      }
+
+      if (phase === "player-card-delete" || phase === "player-card-delete-confirm") {
+        const actions = document.createElement("div");
+        actions.className = "subseg-value-delete-row";
+        actions.id = "guide-card-delete-actions";
+        const cancelButton = document.createElement("button");
+        cancelButton.type = "button";
+        cancelButton.className = "subseg-value-delete-cancel";
+        cancelButton.id = "guide-delete-cancel";
+        cancelButton.textContent = "Cancel";
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "subseg-value-delete-confirm";
+        deleteButton.id = "guide-delete-confirm";
+        deleteButton.textContent = "Delete";
+        actions.appendChild(cancelButton);
+        actions.appendChild(deleteButton);
+        card.appendChild(actions);
+      }
+
+      subSegValueList.appendChild(card);
     }
   }
 

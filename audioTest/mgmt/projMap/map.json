@@ -1,198 +1,155 @@
 {
-    "id":  "map:audioTest",
-    "type":  "project-map",
-    "name":  "audioTest",
-    "summary":  "Toy browser audio checkpoint player with keyboard controls",
-    "root":  "C:\\Users\\Qub\\audioTest",
-    "updated":  "2026-03-20T12:00:54.0756600+08:00",
-    "nodes":  [
-                  {
-                      "id":  "control:ui",
-                      "type":  "control",
-                      "name":  "src/public/index.html",
-                      "summary":  "Two-phase UI with persisted-audio card library, upload trigger, and player with checkpoint/subSeg overlays, load-state indicator, and custom playhead",
-                      "features":  [
-                                       {
-                                           "summary":  "Render persisted-audio card list with queued auto-save on upload/checkpoint/subSeg updates, keep uploads in phase one until persistence completes, disable card selection during save, and show a player loading bar while audEp restore completes",
-                                           "flow":  [
-                                                        "e1"
-                                                    ]
-                                       }
-                                   ],
-                      "edges":  [
-                                    "e1"
-                                ],
-                      "critical":  true,
-                      "files":  [
-                                    "src/public/index.html",
-                                    "src/frontend/style.css"
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "module:audio-control",
-                      "type":  "module",
-                      "name":  "src/frontend/app.js",
-                      "summary":  "Refactored audio controller with centralized state/UI updates, session save/restore via backend API, audSeg target-lock playback mode, and auth-scoped requests",
-                      "features":  [
-                                       {
-                                           "summary":  "Keyboard controls and looping are preserved while Enter can lock a selected audSeg into target mode with a second loop progress bar, Shift hold plus Shift+Space creates subSegs that persist with checkpoints and render on both audEp and target bars, draggable checkpoint markers/tags support micro-adjust with magnifier and 500ms live preview, Ctrl+arrows cycle target-local subSegs, startup restore waits for full audio metadata load via GET /api/session, and all audEp API calls include per-user auth headers/token",
-                                           "flow":  [
-                                                        "e2",
-                                                        "e3",
-                                                        "e4",
-                                                        "e5"
-                                                    ]
-                                       }
-                                   ],
-                      "edges":  [
-                                    "e2",
-                                    "e3",
-                                    "e4",
-                                    "e5"
-                                ],
-                      "critical":  true,
-                      "files":  [
-                                    "src/frontend/app.js"
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "io:file-url",
-                      "type":  "io",
-                      "name":  "URL.createObjectURL",
-                      "summary":  "In-memory object URL used for selected local audio file",
-                      "features":  [
-
-                                   ],
-                      "edges":  [
-
-                                ],
-                      "critical":  false,
-                      "files":  [
-
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "module:session-backend",
-                      "type":  "module",
-                      "name":  "src/backend/server.js",
-                      "summary":  "Node HTTP server with persisted-audio list/detail APIs, payload validation, hardened static path resolution, and owner-scoped auth for session/audio operations",
-                      "features":  [
-                                       {
-                                           "summary":  "GET /api/sessions and GET/POST/DELETE /api/session plus GET/POST /api/audio now require authenticated user context and enforce owner-only visibility and interaction",
-                                           "flow":  [
-                                                        "e5",
-                                                        "e6"
-                                                    ]
-                                       }
-                                   ],
-                      "edges":  [
-                                    "e5",
-                                    "e6"
-                                ],
-                      "critical":  true,
-                      "files":  [
-                                    "src/backend/server.js",
-                                    "package.json"
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "io:session-file",
-                      "type":  "io",
-                      "name":  "data/session-latest.json",
-                      "summary":  "Project-local persisted session record including audio payload and playback state",
-                      "features":  [
-
-                                   ],
-                      "edges":  [
-
-                                ],
-                      "critical":  false,
-                      "files":  [
-                                    "data/session-latest.json"
-                                ],
-                      "children":  [
-
-                                   ]
-                  }
-              ],
-    "edges":  [
-                  {
-                      "id":  "e1",
-                      "kind":  "control",
-                      "from":  "control:ui",
-                      "to":  "module:audio-control",
-                      "note":  "UI loads audio behavior module"
-                  },
-                  {
-                      "id":  "e2",
-                      "kind":  "io",
-                      "from":  "module:audio-control",
-                      "to":  "io:file-url",
-                      "via":  "handleFileChange"
-                  },
-                  {
-                      "id":  "e3",
-                      "kind":  "control",
-                      "from":  "module:audio-control",
-                      "to":  "module:audio-control",
-                      "note":  "Space toggles playback and arrows perform relative seeking"
-                  },
-                  {
-                      "id":  "e4",
-                      "kind":  "control",
-                      "from":  "module:audio-control",
-                      "to":  "module:audio-control",
-                      "note":  "Shift+Space creates checkpoints in normal mode; in target mode Shift hold arms tss and Shift+Space commits subSegs while Ctrl+arrows cycle only target subSegs; checkpoint drag updates audSeg/subSeg membership immediately"
-                  },
-                  {
-                      "id":  "e5",
-                      "kind":  "control",
-                      "from":  "module:audio-control",
-                      "to":  "module:session-backend",
-                      "note":  "Frontend persists and restores session via /api/session"
-                  },
-                  {
-                      "id":  "e6",
-                      "kind":  "io",
-                      "from":  "module:session-backend",
-                      "to":  "io:session-file",
-                      "via":  "SESSION_PATH"
-                  }
-              ],
-    "children":  [
-
-                 ]
+    "id": "map:audioTest",
+    "type": "project-map",
+    "name": "audioTest",
+    "summary": "Toy browser audio checkpoint player with keyboard controls",
+    "root": "C:\\Users\\Qub\\audioTest",
+    "updated": "2026-03-20T04:11:05.661Z",
+    "nodes": [
+        {
+            "id": "control:ui",
+            "type": "control",
+            "name": "src/public/index.html",
+            "summary": "Two-phase UI with persisted-audio card library, upload trigger, and player with checkpoint/subSeg overlays, load-state indicator, and custom playhead",
+            "features": [
+                {
+                    "summary": "Render persisted-audio card list with queued auto-save on upload/checkpoint/subSeg updates, keep uploads in phase one until persistence completes, disable card selection during save, and show a player loading bar while audEp restore completes",
+                    "flow": [
+                        "e1"
+                    ]
+                }
+            ],
+            "edges": [
+                "e1"
+            ],
+            "critical": true,
+            "files": [
+                "src/public/index.html",
+                "src/frontend/style.css"
+            ],
+            "children": []
+        },
+        {
+            "id": "module:audio-control",
+            "type": "module",
+            "name": "src/frontend/app.js",
+            "summary": "Refactored audio controller with centralized state/UI updates, session save/restore via backend API, audSeg target-lock playback mode, and auth-scoped requests",
+            "features": [
+                {
+                    "summary": "Keyboard controls and looping are preserved while Enter can lock a selected audSeg into target mode with a second loop progress bar, Shift hold plus Shift+Space creates subSegs that persist with checkpoints and render on both audEp and target bars, draggable checkpoint markers/tags support micro-adjust with magnifier and 500ms live preview, Ctrl+arrows cycle target-local subSegs, startup restore waits for full audio metadata load via GET /api/session, and all audEp API calls include per-user auth headers/token",
+                    "flow": [
+                        "e2",
+                        "e3",
+                        "e4",
+                        "e5"
+                    ]
+                }
+            ],
+            "edges": [
+                "e2",
+                "e3",
+                "e4",
+                "e5"
+            ],
+            "critical": true,
+            "files": [
+                "src/frontend/app.js"
+            ],
+            "children": []
+        },
+        {
+            "id": "io:file-url",
+            "type": "io",
+            "name": "URL.createObjectURL",
+            "summary": "In-memory object URL used for selected local audio file",
+            "features": [],
+            "edges": [],
+            "critical": false,
+            "files": [],
+            "children": []
+        },
+        {
+            "id": "module:session-backend",
+            "type": "module",
+            "name": "src/backend/server.js",
+            "summary": "Node HTTP server with persisted-audio list/detail APIs, payload validation, hardened static path resolution, and owner-scoped auth for session/audio operations",
+            "features": [
+                {
+                    "summary": "GET /api/sessions and GET/POST/DELETE /api/session plus GET/POST /api/audio now require authenticated user context and enforce owner-only visibility and interaction",
+                    "flow": [
+                        "e5",
+                        "e6"
+                    ]
+                }
+            ],
+            "edges": [
+                "e5",
+                "e6"
+            ],
+            "critical": true,
+            "files": [
+                "src/backend/server.js",
+                "package.json"
+            ],
+            "children": []
+        },
+        {
+            "id": "io:session-file",
+            "type": "io",
+            "name": "data/session-latest.json",
+            "summary": "Project-local persisted session record including audio payload and playback state",
+            "features": [],
+            "edges": [],
+            "critical": false,
+            "files": [
+                "data/session-latest.json"
+            ],
+            "children": []
+        }
+    ],
+    "edges": [
+        {
+            "id": "e1",
+            "kind": "control",
+            "from": "control:ui",
+            "to": "module:audio-control",
+            "note": "UI loads audio behavior module"
+        },
+        {
+            "id": "e2",
+            "kind": "io",
+            "from": "module:audio-control",
+            "to": "io:file-url",
+            "via": "handleFileChange"
+        },
+        {
+            "id": "e3",
+            "kind": "control",
+            "from": "module:audio-control",
+            "to": "module:audio-control",
+            "note": "Space toggles playback and arrows perform relative seeking"
+        },
+        {
+            "id": "e4",
+            "kind": "control",
+            "from": "module:audio-control",
+            "to": "module:audio-control",
+            "note": "Shift+Space creates checkpoints in normal mode; in target mode Shift hold arms tss and Shift+Space commits subSegs while Ctrl+arrows cycle only target subSegs; checkpoint drag updates audSeg/subSeg membership immediately"
+        },
+        {
+            "id": "e5",
+            "kind": "control",
+            "from": "module:audio-control",
+            "to": "module:session-backend",
+            "note": "Frontend persists and restores session via /api/session"
+        },
+        {
+            "id": "e6",
+            "kind": "io",
+            "from": "module:session-backend",
+            "to": "io:session-file",
+            "via": "SESSION_PATH"
+        }
+    ],
+    "children": []
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
