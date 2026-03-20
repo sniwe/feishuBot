@@ -1355,7 +1355,7 @@
           deps: {}
         });
       } else {
-        positionGuideSpotlight({ data: { rect: targetRect }, deps: {} });
+        positionGuideSpotlight({ data: { rect: targetRect, element: resolved }, deps: {} });
       }
     }
     if (step.id === "language") {
@@ -1400,15 +1400,23 @@
   function positionGuideSpotlight(ctx) {
     const { data, deps } = ctx;
     void deps;
-    const { rect } = data;
+    const { rect, element } = data;
     if (!guideSpotlight || !rect) {
       return;
     }
-    const pad = 8;
-    const top = Math.max(0, rect.top - pad);
-    const left = Math.max(0, rect.left - pad);
-    const width = Math.max(24, rect.width + pad * 2);
-    const height = Math.max(24, rect.height + pad * 2);
+    const hasTags = Boolean(
+      element &&
+      element.querySelector &&
+      element.querySelector(".checkpoint-tag, .target-subseg-tag")
+    );
+    const padTop = hasTags ? 34 : 10;
+    const padRight = 12;
+    const padBottom = 12;
+    const padLeft = 12;
+    const top = Math.max(0, rect.top - padTop);
+    const left = Math.max(0, rect.left - padLeft);
+    const width = Math.max(24, rect.width + padLeft + padRight);
+    const height = Math.max(24, rect.height + padTop + padBottom);
     guideSpotlight.style.top = String(top) + "px";
     guideSpotlight.style.left = String(left) + "px";
     guideSpotlight.style.width = String(width) + "px";
