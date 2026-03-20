@@ -97,7 +97,8 @@
     guideSteps: [],
     guideRafId: null,
     guideLanguage: "en",
-    guidePhase: "list-language"
+    guidePhase: "list-language",
+    guideTooltipLocked: false
   };
 
   const DEBUG_AUDIO = (function () {
@@ -1180,6 +1181,7 @@
     state.isGuideMode = true;
     state.guideStepIndex = 0;
     state.guidePhase = "list-language";
+    state.guideTooltipLocked = false;
     guideOverlay.classList.remove("hidden");
     renderGuideLanguagePicker({ deps: {} });
     renderGuideStep({ deps: {} });
@@ -1194,6 +1196,7 @@
     state.isGuideMode = false;
     state.guideStepIndex = -1;
     state.guideSteps = [];
+    state.guideTooltipLocked = false;
     if (state.guideRafId) {
       cancelAnimationFrame(state.guideRafId);
       state.guideRafId = null;
@@ -1299,22 +1302,36 @@
     if (guideNextButton) {
       guideNextButton.textContent = safeIndex >= state.guideSteps.length - 1 ? copy.finish : copy.next;
     }
-    if (step.fullViewport) {
-      positionGuideSpotlight({
-        data: {
-          rect: {
-            top: 0,
-            left: 0,
-            width: window.innerWidth,
-            height: window.innerHeight
-          }
-        },
-        deps: {}
-      });
-    } else {
-      positionGuideSpotlight({ data: { rect: targetRect }, deps: {} });
+    const noSpotlight = Boolean(step.noSpotlight);
+    if (guideSpotlight) {
+      guideSpotlight.classList.toggle("hidden", noSpotlight);
     }
-    positionGuideTooltip({ data: { rect: targetRect }, deps: {} });
+    if (!noSpotlight) {
+      if (step.fullViewport) {
+        positionGuideSpotlight({
+          data: {
+            rect: {
+              top: 0,
+              left: 0,
+              width: window.innerWidth,
+              height: window.innerHeight
+            }
+          },
+          deps: {}
+        });
+      } else {
+        positionGuideSpotlight({ data: { rect: targetRect }, deps: {} });
+      }
+    }
+    if (step.id === "language") {
+      if (!state.guideTooltipLocked) {
+        positionGuideTooltipCentered({ deps: {} });
+        state.guideTooltipLocked = true;
+      }
+    } else {
+      state.guideTooltipLocked = false;
+      positionGuideTooltip({ data: { rect: targetRect }, deps: {} });
+    }
   }
 
   function resolveGuideStepTarget(ctx) {
@@ -1383,6 +1400,22 @@
     guideTooltip.style.left = String(left) + "px";
   }
 
+  function positionGuideTooltipCentered(ctx) {
+    const { deps } = ctx;
+    void deps;
+    if (!guideTooltip) {
+      return;
+    }
+    const viewportPad = 12;
+    const width = Math.max(220, Math.min(320, window.innerWidth - viewportPad * 2));
+    guideTooltip.style.width = String(width) + "px";
+    const tipRect = guideTooltip.getBoundingClientRect();
+    const top = Math.max(viewportPad, Math.round((window.innerHeight - tipRect.height) / 2));
+    const left = Math.max(viewportPad, Math.round((window.innerWidth - tipRect.width) / 2));
+    guideTooltip.style.top = String(top) + "px";
+    guideTooltip.style.left = String(left) + "px";
+  }
+
   function buildGuideSteps(ctx) {
     const { deps } = ctx;
     void deps;
@@ -1392,6 +1425,7 @@
         phase: "list-language",
         titleKey: "languageTitle",
         textKey: "languageText",
+        noSpotlight: true,
         getTarget: function () { return guideLanguagePicker || guideTooltip; }
       },
       {
