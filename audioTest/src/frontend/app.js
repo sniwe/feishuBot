@@ -1318,7 +1318,7 @@
         phase: "list-overview",
         titleKey: "listHeaderTitle",
         textKey: "listHeaderText",
-        getTarget: function () { return libraryView.querySelector(".library-head-row"); }
+        getTarget: function () { return uploadButton || libraryView.querySelector(".library-head-row"); }
       },
       {
         id: "list-card-ready",
