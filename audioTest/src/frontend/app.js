@@ -1082,6 +1082,31 @@
     });
   }
 
+  function renderGuideBoundaryTagMarkers(ctx) {
+    const { data = {}, deps } = ctx;
+    void deps;
+    const container = data.container;
+    const startLabel = String(data.startLabel || "");
+    const endLabel = String(data.endLabel || "");
+    const tagExtraClass = String(data.tagExtraClass || "");
+    if (!container) {
+      return;
+    }
+    [
+      { pct: 0, label: startLabel },
+      { pct: 100, label: endLabel }
+    ].forEach(function (item) {
+      const marker = document.createElement("span");
+      marker.className = "checkpoint-marker";
+      marker.style.left = String(item.pct) + "%";
+      const tag = document.createElement("span");
+      tag.className = "checkpoint-tag" + (tagExtraClass ? " " + tagExtraClass : "");
+      tag.textContent = item.label;
+      marker.appendChild(tag);
+      container.appendChild(marker);
+    });
+  }
+
   function renderGuideTargetSubSeg(ctx) {
     const { deps } = ctx;
     void deps;
@@ -1092,6 +1117,15 @@
     }
     if (targetCheckpointMarkers) {
       targetCheckpointMarkers.innerHTML = "";
+      renderGuideBoundaryTagMarkers({
+        data: {
+          container: targetCheckpointMarkers,
+          startLabel: "01:05",
+          endLabel: "01:37",
+          tagExtraClass: "target-subseg-tag"
+        },
+        deps: {}
+      });
       [34, 52].forEach(function (pct, idx) {
         const marker = document.createElement("span");
         marker.className = "checkpoint-marker";
@@ -1121,6 +1155,14 @@
 
     if (phase === "player-main" || phase === "player-overview") {
       checkpointMarkers.innerHTML = "";
+      renderGuideBoundaryTagMarkers({
+        data: {
+          container: checkpointMarkers,
+          startLabel: "00:00",
+          endLabel: "03:45"
+        },
+        deps: {}
+      });
       targetProgressWrap.classList.add("hidden");
       subSegValuePanel.classList.add("hidden");
       subSegValueList.innerHTML = "";
@@ -1136,6 +1178,14 @@
             { pct: 61, label: "Example End", boundary: "end" },
             { pct: 84, label: "Summary Start" }
           ]
+        },
+        deps: {}
+      });
+      renderGuideBoundaryTagMarkers({
+        data: {
+          container: checkpointMarkers,
+          startLabel: "00:00",
+          endLabel: "03:45"
         },
         deps: {}
       });
@@ -1163,6 +1213,15 @@
     }
     if (targetCheckpointMarkers) {
       targetCheckpointMarkers.innerHTML = "";
+      renderGuideBoundaryTagMarkers({
+        data: {
+          container: targetCheckpointMarkers,
+          startLabel: "01:05",
+          endLabel: "01:37",
+          tagExtraClass: "target-subseg-tag"
+        },
+        deps: {}
+      });
     }
 
     if (phase === "player-focus") {
