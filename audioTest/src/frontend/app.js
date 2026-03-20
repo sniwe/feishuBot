@@ -1541,12 +1541,23 @@
               left: 0,
               width: window.innerWidth,
               height: window.innerHeight
-            }
+            },
+            minWidth: window.innerWidth,
+            minHeight: window.innerHeight
           },
           deps: {}
         });
       } else {
-        positionGuideSpotlight({ data: { rect: targetRect, element: resolved }, deps: {} });
+        positionGuideSpotlight({
+          data: {
+            rect: targetRect,
+            element: resolved,
+            padding: step.spotlightPadding || null,
+            minWidth: step.spotlightMinWidth || null,
+            minHeight: step.spotlightMinHeight || null
+          },
+          deps: {}
+        });
       }
     }
     if (step.id === "language") {
@@ -1591,7 +1602,7 @@
   function positionGuideSpotlight(ctx) {
     const { data, deps } = ctx;
     void deps;
-    const { rect, element } = data;
+    const { rect, element, padding, minWidth, minHeight } = data;
     if (!guideSpotlight || !rect) {
       return;
     }
@@ -1600,14 +1611,14 @@
       element.querySelector &&
       element.querySelector(".checkpoint-tag, .target-subseg-tag")
     );
-    const padTop = hasTags ? 34 : 10;
-    const padRight = 12;
-    const padBottom = 12;
-    const padLeft = 12;
+    const padTop = padding && Number.isFinite(Number(padding.top)) ? Number(padding.top) : (hasTags ? 34 : 10);
+    const padRight = padding && Number.isFinite(Number(padding.right)) ? Number(padding.right) : 12;
+    const padBottom = padding && Number.isFinite(Number(padding.bottom)) ? Number(padding.bottom) : 12;
+    const padLeft = padding && Number.isFinite(Number(padding.left)) ? Number(padding.left) : 12;
     const top = Math.max(0, rect.top - padTop);
     const left = Math.max(0, rect.left - padLeft);
-    const width = Math.max(24, rect.width + padLeft + padRight);
-    const height = Math.max(24, rect.height + padTop + padBottom);
+    const width = Math.max(24, Number.isFinite(Number(minWidth)) ? Number(minWidth) : 24, rect.width + padLeft + padRight);
+    const height = Math.max(24, Number.isFinite(Number(minHeight)) ? Number(minHeight) : 24, rect.height + padTop + padBottom);
     guideSpotlight.style.top = String(top) + "px";
     guideSpotlight.style.left = String(left) + "px";
     guideSpotlight.style.width = String(width) + "px";
@@ -1752,6 +1763,8 @@
         phase: "player-card-nav",
         titleKey: "cardNavTitle",
         textKey: "cardNavText",
+        spotlightPadding: { top: 18, right: 18, bottom: 18, left: 18 },
+        spotlightMinWidth: 360,
         getTarget: function () { return subSegValueList || subSegValuePanel; }
       },
       {
