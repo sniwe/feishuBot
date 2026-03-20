@@ -717,7 +717,9 @@
   }
 
   function showLibraryView() {
-    stopGuideMode({ data: { reason: "view-hidden", silent: true }, deps: {} });
+    if (state.isGuideMode && state.guidePhase.indexOf("list-") !== 0) {
+      stopGuideMode({ data: { reason: "view-hidden", silent: true }, deps: {} });
+    }
     blurActiveEditable();
     clearCheckpointDragState();
     loginView.classList.add("hidden");
@@ -736,7 +738,9 @@
   }
 
   function showLoginView() {
-    stopGuideMode({ data: { reason: "view-hidden", silent: true }, deps: {} });
+    if (state.isGuideMode) {
+      stopGuideMode({ data: { reason: "view-hidden", silent: true }, deps: {} });
+    }
     blurActiveEditable();
     clearCheckpointDragState();
     loginView.classList.remove("hidden");
