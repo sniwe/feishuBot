@@ -109,6 +109,8 @@
     deleteTargetType: "",
     deleteTargetIndex: -1,
     deleteConfirmOpen: false,
+    guideFeatureBadgeVisible: false,
+    guideFeatureSpotlightTimerId: null,
     authInactivityTimerId: null,
     lastActivityAt: 0,
     lastAuthPingAt: 0
