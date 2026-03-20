@@ -861,33 +861,32 @@
         cardsText: "Each card stores one saved note entry and can be revised later."
       },
       zh: {
-        next: "下一步",
-        finish: "完成",
-        closed: "引导模式已关闭",
-        complete: "引导完成",
-        languageTitle: "语言",
-        languageText: "请选择引导语言。你可以在本步骤随时切换。",
-        listHeaderTitle: "音频列表页",
-        listHeaderText: "这里显示已保存的音频条目。引导模式只使用演示数据，不影响真实数据。",
-        demoCardReadyTitle: "演示卡片",
-        demoCardReadyText: "这个卡片仅用于教学。点击“下一步”可模拟进入处理状态。",
-        demoCardUploadTitle: "上传阶段",
-        demoCardUploadText: "现在卡片进入进度状态，模拟新文件上传中的样子。",
-        demoCardLoadingTitle: "打开阶段",
-        demoCardLoadingText: "现在卡片模拟“正在打开”。下一步将进入播放器页面。",
-        playerMainTitle: "主时间轴",
-        playerMainText: "这是主时间轴，用于显示播放位置和标记。",
-        playerFocusTitle: "聚焦范围条",
-        playerFocusText: "锁定聚焦范围后，下方会出现这个范围条用于精细查看。",
-        inputTitle: "文本输入框",
-        inputText: "在这里可以为当前聚焦的小范围输入简短说明。",
-        cardsTitle: "说明卡片",
-        cardsText: "每张卡片是一条已保存说明，后续可以继续修改。"
+        next: "\u4e0b\u4e00\u6b65",
+        finish: "\u5b8c\u6210",
+        closed: "\u5f15\u5bfc\u6a21\u5f0f\u5df2\u5173\u95ed",
+        complete: "\u5f15\u5bfc\u5b8c\u6210",
+        languageTitle: "\u8bed\u8a00",
+        languageText: "\u8bf7\u9009\u62e9\u5f15\u5bfc\u8bed\u8a00\u3002\u4f60\u53ef\u4ee5\u5728\u672c\u6b65\u9aa4\u968f\u65f6\u5207\u6362\u3002",
+        listHeaderTitle: "\u97f3\u9891\u5217\u8868\u9875",
+        listHeaderText: "\u8fd9\u91cc\u663e\u793a\u5df2\u4fdd\u5b58\u7684\u97f3\u9891\u6761\u76ee\u3002\u5f15\u5bfc\u6a21\u5f0f\u53ea\u4f7f\u7528\u6f14\u793a\u6570\u636e\uff0c\u4e0d\u5f71\u54cd\u771f\u5b9e\u6570\u636e\u3002",
+        demoCardReadyTitle: "\u6f14\u793a\u5361\u7247",
+        demoCardReadyText: "\u8fd9\u4e2a\u5361\u7247\u4ec5\u7528\u4e8e\u6559\u5b66\u3002\u70b9\u51fb\u201c\u4e0b\u4e00\u6b65\u201d\u53ef\u6a21\u62df\u8fdb\u5165\u5904\u7406\u72b6\u6001\u3002",
+        demoCardUploadTitle: "\u4e0a\u4f20\u9636\u6bb5",
+        demoCardUploadText: "\u73b0\u5728\u5361\u7247\u8fdb\u5165\u8fdb\u5ea6\u72b6\u6001\uff0c\u6a21\u62df\u65b0\u6587\u4ef6\u4e0a\u4f20\u4e2d\u7684\u6837\u5b50\u3002",
+        demoCardLoadingTitle: "\u6253\u5f00\u9636\u6bb5",
+        demoCardLoadingText: "\u73b0\u5728\u5361\u7247\u6a21\u62df\u201c\u6b63\u5728\u6253\u5f00\u201d\u3002\u4e0b\u4e00\u6b65\u5c06\u8fdb\u5165\u64ad\u653e\u5668\u9875\u9762\u3002",
+        playerMainTitle: "\u4e3b\u65f6\u95f4\u8f74",
+        playerMainText: "\u8fd9\u662f\u4e3b\u65f6\u95f4\u8f74\uff0c\u7528\u4e8e\u663e\u793a\u64ad\u653e\u4f4d\u7f6e\u548c\u6807\u8bb0\u3002",
+        playerFocusTitle: "\u805a\u7126\u8303\u56f4\u6761",
+        playerFocusText: "\u9501\u5b9a\u805a\u7126\u8303\u56f4\u540e\uff0c\u4e0b\u65b9\u4f1a\u51fa\u73b0\u8fd9\u4e2a\u8303\u56f4\u6761\u7528\u4e8e\u7cbe\u7ec6\u67e5\u770b\u3002",
+        inputTitle: "\u6587\u672c\u8f93\u5165\u6846",
+        inputText: "\u5728\u8fd9\u91cc\u53ef\u4ee5\u4e3a\u5f53\u524d\u805a\u7126\u7684\u5c0f\u8303\u56f4\u8f93\u5165\u7b80\u77ed\u8bf4\u660e\u3002",
+        cardsTitle: "\u8bf4\u660e\u5361\u7247",
+        cardsText: "\u6bcf\u5f20\u5361\u7247\u662f\u4e00\u6761\u5df2\u4fdd\u5b58\u8bf4\u660e\uff0c\u540e\u7eed\u53ef\u4ee5\u7ee7\u7eed\u4fee\u6539\u3002"
       }
     };
     return copy[state.guideLanguage] || copy.en;
   }
-
   function setGuideLanguage(ctx) {
     const { data = {}, deps } = ctx;
     void deps;
