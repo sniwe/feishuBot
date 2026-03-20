@@ -355,10 +355,22 @@
     });
 
     if (state.isGuideMode) {
+      const guideControlFocus = Boolean(
+        activeElement &&
+        activeElement.closest &&
+        activeElement.closest("#guide-tooltip") &&
+        (activeElement.tagName === "BUTTON" ||
+          activeElement.tagName === "INPUT" ||
+          activeElement.tagName === "TEXTAREA" ||
+          activeElement.tagName === "SELECT")
+      );
       if (isEscapeKey) {
         event.preventDefault();
         event.stopPropagation();
         stopGuideMode({ data: { reason: "escape" }, deps: {} });
+        return;
+      }
+      if (guideControlFocus) {
         return;
       }
       if (isArrowLeft) {
