@@ -882,8 +882,20 @@
         cardsText: "Versions are on the same card. Example: previous '前后两清' -> current '钱货两清'.",
         cardNavTitle: "Navigate Between Cards",
         cardNavText: "Focus the top input, press Ctrl+Down to enter first card. Then use Ctrl+Up/Down across cards, and Ctrl+Left/Right to recall older/newer versions on that same focused card.",
-        exitShortcutTitle: "Exit Shortcut",
-        exitShortcutText: "Use Ctrl+Backspace to exit step-by-step: card delete dialog -> value mode -> subSeg selection -> target audSeg -> audSeg -> back to list."
+        cardDeleteTitle: "Card Delete Dialog",
+        cardDeleteText: "On a focused card input, press Ctrl+Backspace to open card delete actions.",
+        cardDeleteConfirmTitle: "Card Delete Actions",
+        cardDeleteConfirmText: "Use Cancel to close the dialog or Delete to remove the current card.",
+        exitValueModeTitle: "Exit Value Mode",
+        exitValueModeText: "Press Ctrl+Backspace while in top value input mode to exit value-entry mode.",
+        exitSubSegTitle: "Exit subSeg Selection",
+        exitSubSegText: "Press Ctrl+Backspace again to clear current subSeg selection.",
+        exitTargetTitle: "Exit target audSeg",
+        exitTargetText: "Press Ctrl+Backspace again to unlock and exit target audSeg mode.",
+        exitAudSegTitle: "Exit audSeg Selection",
+        exitAudSegText: "Press Ctrl+Backspace again to clear current audSeg selection on the main timeline.",
+        exitListTitle: "Return to List",
+        exitListText: "Press Ctrl+Backspace once more (with no selection active) to return to the list page."
       },
       zh: {
         next: "\u4e0b\u4e00\u6b65",
@@ -918,8 +930,20 @@
         cardsText: "\u7248\u672c\u90fd\u5728\u540c\u4e00\u5f20\u5361\u7247\u4e0a\u67e5\u770b\u3002\u793a\u4f8b\uff1a\u524d\u4e00\u7248\u201c\u524d\u540e\u4e24\u6e05\u201d\uff0c\u5f53\u524d\u7248\u201c\u94b1\u8d27\u4e24\u6e05\u201d\u3002",
         cardNavTitle: "\u5361\u7247\u5bfc\u822a",
         cardNavText: "\u5148\u805a\u7126\u9876\u90e8\u8f93\u5165\u6846\uff0c\u6309 Ctrl+\u4e0b \u8fdb\u5165\u7b2c\u4e00\u5f20\u5361\u7247\u3002\u7136\u540e\u7528 Ctrl+\u4e0a/\u4e0b \u5728\u5361\u7247\u95f4\u79fb\u52a8\uff0c\u7528 Ctrl+\u5de6/\u53f3 \u5728\u5f53\u524d\u5361\u7247\u4e0a\u67e5\u770b\u66f4\u65e9/\u66f4\u65b0\u7248\u672c\u3002",
-        exitShortcutTitle: "\u9000\u51fa\u5feb\u6377\u952e",
-        exitShortcutText: "\u4f7f\u7528 Ctrl+Backspace \u53ef\u9010\u5c42\u9000\u51fa\uff1a\u5220\u9664\u5bf9\u8bdd -> \u503c\u8f93\u5165\u6a21\u5f0f -> subSeg \u9009\u4e2d -> target audSeg -> audSeg -> \u5217\u8868\u9875\u3002"
+        cardDeleteTitle: "\u6253\u5f00\u5361\u7247\u5220\u9664\u5bf9\u8bdd",
+        cardDeleteText: "\u5728\u5df2\u805a\u7126\u7684\u5361\u7247\u8f93\u5165\u6846\u4e0a\u6309 Ctrl+Backspace\uff0c\u6253\u5f00\u8be5\u5361\u7247\u7684\u5220\u9664\u64cd\u4f5c\u3002",
+        cardDeleteConfirmTitle: "\u5361\u7247\u5220\u9664\u64cd\u4f5c",
+        cardDeleteConfirmText: "\u70b9 Cancel \u5173\u95ed\u5bf9\u8bdd\uff0c\u70b9 Delete \u5220\u9664\u5f53\u524d\u5361\u7247\u3002",
+        exitValueModeTitle: "\u9000\u51fa\u503c\u8f93\u5165\u6a21\u5f0f",
+        exitValueModeText: "\u5728\u9876\u90e8\u503c\u8f93\u5165\u6a21\u5f0f\u4e0b\u6309 Ctrl+Backspace\uff0c\u9000\u51fa\u503c\u8f93\u5165\u6a21\u5f0f\u3002",
+        exitSubSegTitle: "\u9000\u51fa subSeg \u9009\u4e2d",
+        exitSubSegText: "\u518d\u6309\u4e00\u6b21 Ctrl+Backspace\uff0c\u6e05\u9664\u5f53\u524d subSeg \u9009\u4e2d\u3002",
+        exitTargetTitle: "\u9000\u51fa target audSeg",
+        exitTargetText: "\u518d\u6309\u4e00\u6b21 Ctrl+Backspace\uff0c\u89e3\u9501\u5e76\u9000\u51fa target audSeg \u6a21\u5f0f\u3002",
+        exitAudSegTitle: "\u9000\u51fa audSeg \u9009\u4e2d",
+        exitAudSegText: "\u518d\u6309\u4e00\u6b21 Ctrl+Backspace\uff0c\u6e05\u9664\u4e3b\u65f6\u95f4\u8f74\u4e0a\u5f53\u524d audSeg \u9009\u4e2d\u3002",
+        exitListTitle: "\u8fd4\u56de\u5217\u8868\u9875",
+        exitListText: "\u65e0\u4efb\u4f55\u9009\u4e2d\u65f6\uff0c\u518d\u6309\u4e00\u6b21 Ctrl+Backspace \u8fd4\u56de\u5217\u8868\u9875\u3002"
       }
     };
     return copy[state.guideLanguage] || copy.en;
@@ -1235,9 +1259,35 @@
       phase === "player-input" ||
       phase === "player-cards" ||
       phase === "player-card-nav" ||
-      phase === "player-exit-shortcut"
+      phase === "player-card-delete" ||
+      phase === "player-card-delete-confirm" ||
+      phase === "player-exit-value-mode" ||
+      phase === "player-exit-subseg" ||
+      phase === "player-exit-target" ||
+      phase === "player-exit-audseg" ||
+      phase === "player-exit-list"
     ) {
       renderGuideTargetSubSeg({ deps: {} });
+    }
+
+    if (phase === "player-exit-target" || phase === "player-exit-audseg" || phase === "player-exit-list") {
+      if (targetSubSegActiveFill) {
+        targetSubSegActiveFill.style.display = "none";
+      }
+      if (targetCheckpointMarkers) {
+        targetCheckpointMarkers.innerHTML = "";
+      }
+    }
+
+    if (phase === "player-exit-audseg" || phase === "player-exit-list") {
+      targetProgressWrap.classList.add("hidden");
+      selectedSpanOverlay.style.display = "block";
+      selectedSpanOverlay.style.left = "38%";
+      selectedSpanOverlay.style.width = "23%";
+    }
+
+    if (phase === "player-exit-list") {
+      selectedSpanOverlay.style.display = "none";
     }
 
     if (phase === "player-subseg-create") {
@@ -1254,7 +1304,14 @@
       return;
     }
 
-    if (phase === "player-cards" || phase === "player-card-nav" || phase === "player-exit-shortcut") {
+    if (
+      phase === "player-cards" ||
+      phase === "player-card-nav" ||
+      phase === "player-card-delete" ||
+      phase === "player-card-delete-confirm" ||
+      phase === "player-exit-value-mode" ||
+      phase === "player-exit-subseg"
+    ) {
       subSegValueList.innerHTML = "";
       const demoValues = [
         { version: "previous version", text: "前后两清" },
@@ -1271,8 +1328,33 @@
         inputEl.className = "subseg-value-card-input";
         inputEl.value = entry.text;
         inputEl.readOnly = true;
+        if (phase === "player-card-delete" || phase === "player-card-delete-confirm") {
+          if (index === 1) {
+            inputEl.style.outline = "2px solid #6e92c9";
+            inputEl.style.borderRadius = "4px";
+            inputEl.id = "guide-card-delete-target";
+          }
+        }
         card.appendChild(version);
         card.appendChild(inputEl);
+        if ((phase === "player-card-delete" || phase === "player-card-delete-confirm") && index === 1) {
+          const actions = document.createElement("div");
+          actions.className = "subseg-value-delete-row";
+          actions.id = "guide-card-delete-actions";
+          const cancelButton = document.createElement("button");
+          cancelButton.type = "button";
+          cancelButton.className = "subseg-value-delete-cancel";
+          cancelButton.id = "guide-delete-cancel";
+          cancelButton.textContent = "Cancel";
+          const deleteButton = document.createElement("button");
+          deleteButton.type = "button";
+          deleteButton.className = "subseg-value-delete-confirm";
+          deleteButton.id = "guide-delete-confirm";
+          deleteButton.textContent = "Delete";
+          actions.appendChild(cancelButton);
+          actions.appendChild(deleteButton);
+          card.appendChild(actions);
+        }
         subSegValueList.appendChild(card);
       });
     }
@@ -1647,10 +1729,52 @@
         getTarget: function () { return subSegValueList || subSegValuePanel; }
       },
       {
-        id: "player-exit-shortcut",
-        phase: "player-exit-shortcut",
-        titleKey: "exitShortcutTitle",
-        textKey: "exitShortcutText",
+        id: "player-card-delete",
+        phase: "player-card-delete",
+        titleKey: "cardDeleteTitle",
+        textKey: "cardDeleteText",
+        getTarget: function () { return document.getElementById("guide-card-delete-target") || subSegValueList; }
+      },
+      {
+        id: "player-card-delete-confirm",
+        phase: "player-card-delete-confirm",
+        titleKey: "cardDeleteConfirmTitle",
+        textKey: "cardDeleteConfirmText",
+        getTarget: function () { return document.getElementById("guide-card-delete-actions") || subSegValueList; }
+      },
+      {
+        id: "player-exit-value-mode",
+        phase: "player-exit-value-mode",
+        titleKey: "exitValueModeTitle",
+        textKey: "exitValueModeText",
+        getTarget: function () { return subSegValueInput || subSegValuePanel; }
+      },
+      {
+        id: "player-exit-subseg",
+        phase: "player-exit-subseg",
+        titleKey: "exitSubSegTitle",
+        textKey: "exitSubSegText",
+        getTarget: function () { return targetProgressWrap; }
+      },
+      {
+        id: "player-exit-target",
+        phase: "player-exit-target",
+        titleKey: "exitTargetTitle",
+        textKey: "exitTargetText",
+        getTarget: function () { return targetProgressWrap; }
+      },
+      {
+        id: "player-exit-audseg",
+        phase: "player-exit-audseg",
+        titleKey: "exitAudSegTitle",
+        textKey: "exitAudSegText",
+        getTarget: function () { return progressTrackMain; }
+      },
+      {
+        id: "player-exit-list",
+        phase: "player-exit-list",
+        titleKey: "exitListTitle",
+        textKey: "exitListText",
         getTarget: function () { return backButton || playerView; }
       }
     ];
