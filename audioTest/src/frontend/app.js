@@ -130,8 +130,13 @@
   }
   uploadButton.addEventListener("click", openFilePicker);
   backButton.addEventListener("click", goBackToLibrary);
-  if (guideButton) {
-    guideButton.addEventListener("click", function () {
+  if (guideButtonList) {
+    guideButtonList.addEventListener("click", function () {
+      startGuideMode({ deps: {} });
+    });
+  }
+  if (guideButtonPlayer) {
+    guideButtonPlayer.addEventListener("click", function () {
       startGuideMode({ deps: {} });
     });
   }
@@ -152,6 +157,16 @@
   }
   if (guideOverlay) {
     guideOverlay.addEventListener("click", handleGuideOverlayClick);
+  }
+  if (guideLangEn) {
+    guideLangEn.addEventListener("click", function () {
+      setGuideLanguage({ data: { language: "en" }, deps: {} });
+    });
+  }
+  if (guideLangZh) {
+    guideLangZh.addEventListener("click", function () {
+      setGuideLanguage({ data: { language: "zh" }, deps: {} });
+    });
   }
   audio.addEventListener("loadedmetadata", updateUi);
   audio.addEventListener("timeupdate", updateUi);
