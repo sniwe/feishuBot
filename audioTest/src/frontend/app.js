@@ -863,6 +863,8 @@
         demoCardUploadText: "The card now shows a progress state, like a new upload moving forward.",
         demoCardLoadingTitle: "Opening Phase",
         demoCardLoadingText: "Now the card simulates opening. Next will move into the player screen.",
+        playerOverviewTitle: "Player Screen",
+        playerOverviewText: "This is the full player workspace. Next, we will focus on the main timeline.",
         playerMainTitle: "Main Timeline",
         playerMainText: "This is the main timeline for play position and markers.",
         playerFocusTitle: "Focused Range Bar",
@@ -887,6 +889,8 @@
         demoCardUploadText: "\u73b0\u5728\u5361\u7247\u8fdb\u5165\u8fdb\u5ea6\u72b6\u6001\uff0c\u6a21\u62df\u65b0\u6587\u4ef6\u4e0a\u4f20\u4e2d\u7684\u6837\u5b50\u3002",
         demoCardLoadingTitle: "\u6253\u5f00\u9636\u6bb5",
         demoCardLoadingText: "\u73b0\u5728\u5361\u7247\u6a21\u62df\u201c\u6b63\u5728\u6253\u5f00\u201d\u3002\u4e0b\u4e00\u6b65\u5c06\u8fdb\u5165\u64ad\u653e\u5668\u9875\u9762\u3002",
+        playerOverviewTitle: "\u64ad\u653e\u5668\u9875\u9762",
+        playerOverviewText: "\u8fd9\u91cc\u662f\u5b8c\u6574\u7684\u64ad\u653e\u5de5\u4f5c\u533a\u3002\u4e0b\u4e00\u6b65\u6211\u4eec\u4f1a\u805a\u7126\u4e3b\u65f6\u95f4\u8f74\u3002",
         playerMainTitle: "\u4e3b\u65f6\u95f4\u8f74",
         playerMainText: "\u8fd9\u662f\u4e3b\u65f6\u95f4\u8f74\uff0c\u7528\u4e8e\u663e\u793a\u64ad\u653e\u4f4d\u7f6e\u548c\u6807\u8bb0\u3002",
         playerFocusTitle: "\u805a\u7126\u8303\u56f4\u6761",
@@ -1052,7 +1056,7 @@
       checkpointMarkers.appendChild(marker);
     });
 
-    if (phase === "player-main") {
+    if (phase === "player-main" || phase === "player-overview") {
       targetProgressWrap.classList.add("hidden");
       subSegValuePanel.classList.add("hidden");
       subSegValueList.innerHTML = "";
@@ -1244,7 +1248,21 @@
     if (guideNextButton) {
       guideNextButton.textContent = safeIndex >= state.guideSteps.length - 1 ? copy.finish : copy.next;
     }
-    positionGuideSpotlight({ data: { rect: targetRect }, deps: {} });
+    if (step.fullViewport) {
+      positionGuideSpotlight({
+        data: {
+          rect: {
+            top: 0,
+            left: 0,
+            width: window.innerWidth,
+            height: window.innerHeight
+          }
+        },
+        deps: {}
+      });
+    } else {
+      positionGuideSpotlight({ data: { rect: targetRect }, deps: {} });
+    }
     positionGuideTooltip({ data: { rect: targetRect }, deps: {} });
   }
 
@@ -1352,6 +1370,14 @@
         titleKey: "demoCardLoadingTitle",
         textKey: "demoCardLoadingText",
         getTarget: function () { return document.getElementById("guide-demo-card") || cards; }
+      },
+      {
+        id: "player-overview",
+        phase: "player-overview",
+        titleKey: "playerOverviewTitle",
+        textKey: "playerOverviewText",
+        fullViewport: true,
+        getTarget: function () { return playerView || progressTrackMain; }
       },
       {
         id: "player-main",
