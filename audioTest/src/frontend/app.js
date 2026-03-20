@@ -879,9 +879,9 @@
         inputTitle: "Text Input",
         inputText: "Purpose: write your best attempt of the target subSeg audio. If words are uncertain, approximate from hearing only. Do not use dictionary or outside sources.",
         cardsTitle: "Note Cards",
-        cardsText: "Example card evolution: previous version '前后两清' -> current version '钱货两清'.",
+        cardsText: "Versions are on the same card. Example: previous '前后两清' -> current '钱货两清'.",
         cardNavTitle: "Navigate Between Cards",
-        cardNavText: "Use Ctrl+Up/Down to move focus across cards, and Ctrl+Left/Right to review older/newer versions on a card.",
+        cardNavText: "Focus the top input, press Ctrl+Down to enter first card. Then use Ctrl+Up/Down across cards, and Ctrl+Left/Right to recall older/newer versions on that same focused card.",
         exitShortcutTitle: "Exit Shortcut",
         exitShortcutText: "Use Ctrl+Backspace to exit step-by-step: card delete dialog -> value mode -> subSeg selection -> target audSeg -> audSeg -> back to list."
       },
@@ -915,9 +915,9 @@
         inputTitle: "\u6587\u672c\u8f93\u5165\u6846",
         inputText: "\u76ee\u7684\uff1a\u5c06 target subSeg \u7684\u97f3\u9891\u5185\u5bb9\u5c3d\u529b\u5199\u4e0b\u6765\u3002\u4e0d\u786e\u5b9a\u7684\u8bcd\u8bf7\u6309\u542c\u611f\u8fd1\u4f3c\u62fc\u5199\uff0c\u4e0d\u8981\u67e5\u5b57\u5178\uff0c\u4e5f\u4e0d\u8981\u4f9d\u8d56\u5916\u90e8\u8d44\u6e90\u3002",
         cardsTitle: "\u8bf4\u660e\u5361\u7247",
-        cardsText: "\u793a\u4f8b\uff1a\u524d\u4e00\u7248\u672c\u201c\u524d\u540e\u4e24\u6e05\u201d\uff0c\u5f53\u524d\u7248\u672c\u201c\u94b1\u8d27\u4e24\u6e05\u201d\u3002",
+        cardsText: "\u7248\u672c\u90fd\u5728\u540c\u4e00\u5f20\u5361\u7247\u4e0a\u67e5\u770b\u3002\u793a\u4f8b\uff1a\u524d\u4e00\u7248\u201c\u524d\u540e\u4e24\u6e05\u201d\uff0c\u5f53\u524d\u7248\u201c\u94b1\u8d27\u4e24\u6e05\u201d\u3002",
         cardNavTitle: "\u5361\u7247\u5bfc\u822a",
-        cardNavText: "\u4f7f\u7528 Ctrl+\u4e0a/\u4e0b \u5728\u5361\u7247\u95f4\u79fb\u52a8\u7126\u70b9\uff0c\u4f7f\u7528 Ctrl+\u5de6/\u53f3 \u67e5\u770b\u8be5\u5361\u7247\u7684\u66f4\u65e9/\u66f4\u65b0\u7248\u672c\u3002",
+        cardNavText: "\u5148\u805a\u7126\u9876\u90e8\u8f93\u5165\u6846\uff0c\u6309 Ctrl+\u4e0b \u8fdb\u5165\u7b2c\u4e00\u5f20\u5361\u7247\u3002\u7136\u540e\u7528 Ctrl+\u4e0a/\u4e0b \u5728\u5361\u7247\u95f4\u79fb\u52a8\uff0c\u7528 Ctrl+\u5de6/\u53f3 \u5728\u5f53\u524d\u5361\u7247\u4e0a\u67e5\u770b\u66f4\u65e9/\u66f4\u65b0\u7248\u672c\u3002",
         exitShortcutTitle: "\u9000\u51fa\u5feb\u6377\u952e",
         exitShortcutText: "\u4f7f\u7528 Ctrl+Backspace \u53ef\u9010\u5c42\u9000\u51fa\uff1a\u5220\u9664\u5bf9\u8bdd -> \u503c\u8f93\u5165\u6a21\u5f0f -> subSeg \u9009\u4e2d -> target audSeg -> audSeg -> \u5217\u8868\u9875\u3002"
       }
