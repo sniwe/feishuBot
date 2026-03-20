@@ -1074,6 +1074,29 @@
     });
   }
 
+  function renderGuideTargetSubSeg(ctx) {
+    const { deps } = ctx;
+    void deps;
+    if (targetSubSegActiveFill) {
+      targetSubSegActiveFill.style.display = "block";
+      targetSubSegActiveFill.style.left = "34%";
+      targetSubSegActiveFill.style.width = "18%";
+    }
+    if (targetCheckpointMarkers) {
+      targetCheckpointMarkers.innerHTML = "";
+      [34, 52].forEach(function (pct, idx) {
+        const marker = document.createElement("span");
+        marker.className = "checkpoint-marker";
+        marker.style.left = String(pct) + "%";
+        const tag = document.createElement("span");
+        tag.className = "checkpoint-tag target-subseg-tag";
+        tag.textContent = idx === 0 ? "subSeg start" : "subSeg end";
+        marker.appendChild(tag);
+        targetCheckpointMarkers.appendChild(marker);
+      });
+    }
+  }
+
   function renderGuidePlayerState(ctx) {
     const { data = {}, deps } = ctx;
     void deps;
@@ -1140,24 +1163,11 @@
       return;
     }
 
+    if (phase === "player-subseg-create" || phase === "player-input" || phase === "player-cards") {
+      renderGuideTargetSubSeg({ deps: {} });
+    }
+
     if (phase === "player-subseg-create") {
-      if (targetSubSegActiveFill) {
-        targetSubSegActiveFill.style.display = "block";
-        targetSubSegActiveFill.style.left = "34%";
-        targetSubSegActiveFill.style.width = "18%";
-      }
-      if (targetCheckpointMarkers) {
-        [34, 52].forEach(function (pct, idx) {
-          const marker = document.createElement("span");
-          marker.className = "checkpoint-marker";
-          marker.style.left = String(pct) + "%";
-          const tag = document.createElement("span");
-          tag.className = "checkpoint-tag target-subseg-tag";
-          tag.textContent = idx === 0 ? "subSeg start" : "subSeg end";
-          marker.appendChild(tag);
-          targetCheckpointMarkers.appendChild(marker);
-        });
-      }
       subSegValuePanel.classList.add("hidden");
       subSegValueList.innerHTML = "";
       return;
