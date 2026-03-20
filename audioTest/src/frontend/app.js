@@ -40,13 +40,17 @@
   const subSegValueForm = document.getElementById("subseg-value-form");
   const subSegValueInput = document.getElementById("subseg-value-input");
   const subSegValueList = document.getElementById("subseg-value-list");
-  const guideButton = document.getElementById("guide-button");
+  const guideButtonList = document.getElementById("guide-button-list");
+  const guideButtonPlayer = document.getElementById("guide-button-player");
   const guideOverlay = document.getElementById("guide-overlay");
   const guideSpotlight = document.getElementById("guide-spotlight");
   const guideTooltip = document.getElementById("guide-tooltip");
   const guideCloseButton = document.getElementById("guide-close-button");
   const guideStepTitle = document.getElementById("guide-step-title");
   const guideStepText = document.getElementById("guide-step-text");
+  const guideLanguagePicker = document.getElementById("guide-language-picker");
+  const guideLangEn = document.getElementById("guide-lang-en");
+  const guideLangZh = document.getElementById("guide-lang-zh");
   const guidePrevButton = document.getElementById("guide-prev-button");
   const guideNextButton = document.getElementById("guide-next-button");
   const guideStepCounter = document.getElementById("guide-step-counter");
@@ -91,7 +95,9 @@
     isGuideMode: false,
     guideStepIndex: -1,
     guideSteps: [],
-    guideRafId: null
+    guideRafId: null,
+    guideLanguage: "en",
+    guidePhase: "list-language"
   };
 
   const DEBUG_AUDIO = (function () {
