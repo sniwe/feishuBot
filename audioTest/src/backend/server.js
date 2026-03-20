@@ -430,15 +430,32 @@ async function readSessionSummaries(ctx) {
 function toSessionSummary(ctx) {
   const { data } = ctx;
   const { parsed, fallbackId } = data;
+  const checkpoints = Array.isArray(parsed.playback && parsed.playback.checkpoints)
+    ? parsed.playback.checkpoints
+    : [];
+  const subSegs = Array.isArray(parsed.playback && parsed.playback.subSegs)
+    ? parsed.playback.subSegs
+    : [];
+  const subSegValueEntries = parsed && parsed.playback && parsed.playback.subSegValueEntries && typeof parsed.playback.subSegValueEntries === "object"
+    ? parsed.playback.subSegValueEntries
+    : {};
+  const inputCardCount = Object.keys(subSegValueEntries).reduce(function (sum, key) {
+    const list = Array.isArray(subSegValueEntries[key]) ? subSegValueEntries[key] : [];
+    return sum + list.length;
+  }, 0);
 
   return {
     id: normalizeSessionId({ data: { sessionId: parsed.id }, deps: {} }) || fallbackId,
     savedAt: parsed.savedAt,
     file: parsed.file || {},
     playback: {
-      checkpoints: Array.isArray(parsed.playback && parsed.playback.checkpoints)
-        ? parsed.playback.checkpoints
-        : []
+      checkpoints,
+      subSegs,
+      stats: {
+        audSegs: Math.max(0, checkpoints.length + 1),
+        subSegs: subSegs.length,
+        inputCards: inputCardCount
+      }
     },
     audioId: normalizeSessionId({ data: { sessionId: parsed.audioId }, deps: {} }) || "",
     audioUrl: typeof parsed.audioUrl === "string" ? parsed.audioUrl : ""

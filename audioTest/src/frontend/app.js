@@ -2368,14 +2368,28 @@
   }
 
   function buildSessionMeta(session, mode) {
-    const checkpointCount = Array.isArray(session.playback && session.playback.checkpoints)
-      ? session.playback.checkpoints.length
-      : 0;
+    const playback = session && session.playback ? session.playback : {};
+    const checkpointCount = Array.isArray(playback.checkpoints) ? playback.checkpoints.length : 0;
+    const subSegCount = Array.isArray(playback.subSegs) ? playback.subSegs.length : 0;
+    const subSegValueEntries = playback.subSegValueEntries && typeof playback.subSegValueEntries === "object"
+      ? playback.subSegValueEntries
+      : {};
+    const fallbackInputCardCount = Object.keys(subSegValueEntries).reduce(function (sum, key) {
+      const list = Array.isArray(subSegValueEntries[key]) ? subSegValueEntries[key] : [];
+      return sum + list.length;
+    }, 0);
+    const stats = playback.stats && typeof playback.stats === "object" ? playback.stats : {};
+    const audSegCount = Number.isFinite(Number(stats.audSegs)) ? Number(stats.audSegs) : Math.max(0, checkpointCount + 1);
+    const resolvedSubSegCount = Number.isFinite(Number(stats.subSegs)) ? Number(stats.subSegs) : subSegCount;
+    const inputCardCount = Number.isFinite(Number(stats.inputCards)) ? Number(stats.inputCards) : fallbackInputCardCount;
+    const countsText = "audSegs: " + String(audSegCount) +
+      "  |  subSegs: " + String(resolvedSubSegCount) +
+      "  |  cards: " + String(inputCardCount);
     const when = formatSavedAt(session.savedAt);
     if (mode === "loading") {
-      return "Opening...  |  checkpoints: " + String(checkpointCount);
+      return "Opening...  |  " + countsText;
     }
-    return when + "  |  checkpoints: " + String(checkpointCount);
+    return when + "  |  " + countsText;
   }
 
   function formatSavedAt(savedAt) {
