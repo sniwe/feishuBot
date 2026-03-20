@@ -828,23 +828,287 @@
     scheduleGuideStepRender({ deps: {} });
   }
 
+  function getGuideCopy(ctx) {
+    const { deps } = ctx;
+    void deps;
+    const copy = {
+      en: {
+        next: "Next",
+        finish: "Finish",
+        closed: "Guide mode closed",
+        complete: "Guide complete",
+        languageTitle: "Language",
+        languageText: "Choose guide language. You can switch later in this same step.",
+        listHeaderTitle: "Audio List",
+        listHeaderText: "This page shows saved audio items. Use Guide to learn safely with demo data only.",
+        demoCardReadyTitle: "Demo Card",
+        demoCardReadyText: "This sample card is for training only. Click Next to simulate a processing state.",
+        demoCardUploadTitle: "Upload Phase",
+        demoCardUploadText: "The card now shows a progress state, like a new upload moving forward.",
+        demoCardLoadingTitle: "Opening Phase",
+        demoCardLoadingText: "Now the card simulates opening. Next will move into the player screen.",
+        playerMainTitle: "Main Timeline",
+        playerMainText: "This is the main timeline for play position and markers.",
+        playerFocusTitle: "Focused Range Bar",
+        playerFocusText: "This lower bar appears when you lock a focused range for detailed review.",
+        inputTitle: "Text Input",
+        inputText: "Type short notes for the currently focused small range.",
+        cardsTitle: "Note Cards",
+        cardsText: "Each card stores one saved note entry and can be revised later."
+      },
+      zh: {
+        next: "下一步",
+        finish: "完成",
+        closed: "引导模式已关闭",
+        complete: "引导完成",
+        languageTitle: "语言",
+        languageText: "请选择引导语言。你可以在本步骤随时切换。",
+        listHeaderTitle: "音频列表页",
+        listHeaderText: "这里显示已保存的音频条目。引导模式只使用演示数据，不影响真实数据。",
+        demoCardReadyTitle: "演示卡片",
+        demoCardReadyText: "这个卡片仅用于教学。点击“下一步”可模拟进入处理状态。",
+        demoCardUploadTitle: "上传阶段",
+        demoCardUploadText: "现在卡片进入进度状态，模拟新文件上传中的样子。",
+        demoCardLoadingTitle: "打开阶段",
+        demoCardLoadingText: "现在卡片模拟“正在打开”。下一步将进入播放器页面。",
+        playerMainTitle: "主时间轴",
+        playerMainText: "这是主时间轴，用于显示播放位置和标记。",
+        playerFocusTitle: "聚焦范围条",
+        playerFocusText: "锁定聚焦范围后，下方会出现这个范围条用于精细查看。",
+        inputTitle: "文本输入框",
+        inputText: "在这里可以为当前聚焦的小范围输入简短说明。",
+        cardsTitle: "说明卡片",
+        cardsText: "每张卡片是一条已保存说明，后续可以继续修改。"
+      }
+    };
+    return copy[state.guideLanguage] || copy.en;
+  }
+
+  function setGuideLanguage(ctx) {
+    const { data = {}, deps } = ctx;
+    void deps;
+    const next = data.language === "zh" ? "zh" : "en";
+    state.guideLanguage = next;
+    renderGuideLanguagePicker({ deps: {} });
+    if (state.isGuideMode) {
+      renderGuideStep({ deps: {} });
+    }
+  }
+
+  function renderGuideLanguagePicker(ctx) {
+    const { deps } = ctx;
+    void deps;
+    if (!guideLanguagePicker || !guideLangEn || !guideLangZh) {
+      return;
+    }
+    guideLangEn.classList.toggle("is-active", state.guideLanguage === "en");
+    guideLangZh.classList.toggle("is-active", state.guideLanguage === "zh");
+  }
+
+  function isGuideListPhase(ctx) {
+    const { deps } = ctx;
+    void deps;
+    return state.guidePhase.indexOf("list-") === 0;
+  }
+
+  function applyGuidePhase(ctx) {
+    const { data = {}, deps } = ctx;
+    void deps;
+    const phase = String(data.phase || "");
+    state.guidePhase = phase;
+
+    if (phase.indexOf("list-") === 0) {
+      showLibraryView();
+      state.openMenuSessionId = null;
+      cards.innerHTML = "";
+      renderGuideAudioCards({ deps: {} });
+      return;
+    }
+
+    showPlayerView();
+    setPlayerLoading(false);
+    renderGuidePlayerState({ data: { phase }, deps: {} });
+  }
+
+  function renderGuideAudioCards(ctx) {
+    const { deps } = ctx;
+    void deps;
+    cards.innerHTML = "";
+    emptyState.classList.add("hidden");
+    const phase = state.guidePhase;
+
+    if (phase === "list-language" || phase === "list-overview" || phase === "list-card-ready") {
+      cards.appendChild(createGuideReadyCard({ deps: {} }));
+      return;
+    }
+
+    if (phase === "list-card-upload") {
+      cards.appendChild(createPendingAudioCard({
+        file: { name: "Guide Demo - New Recording.mp3" },
+        phase: "uploading",
+        progress: 0.62
+      }));
+      return;
+    }
+
+    if (phase === "list-card-loading") {
+      cards.appendChild(createGuideLoadingCard({ deps: {} }));
+      return;
+    }
+
+    cards.appendChild(createGuideReadyCard({ deps: {} }));
+  }
+
+  function createGuideReadyCard(ctx) {
+    const { deps } = ctx;
+    void deps;
+    const row = document.createElement("div");
+    row.className = "audio-card-row";
+    row.id = "guide-demo-card-row";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "audio-card audio-card-main";
+    button.id = "guide-demo-card";
+
+    const title = document.createElement("span");
+    title.className = "audio-card-title";
+    title.textContent = "Guide Demo - Episode 01.mp3";
+
+    const meta = document.createElement("span");
+    meta.className = "audio-card-meta";
+    meta.textContent = "Guide sample  |  checkpoints: 6";
+
+    button.appendChild(title);
+    button.appendChild(meta);
+    row.appendChild(button);
+
+    const settingsButton = document.createElement("button");
+    settingsButton.type = "button";
+    settingsButton.className = "item-settings-button";
+    settingsButton.textContent = "...";
+    settingsButton.disabled = true;
+    row.appendChild(settingsButton);
+    return row;
+  }
+
+  function createGuideLoadingCard(ctx) {
+    const { deps } = ctx;
+    void deps;
+    const row = document.createElement("div");
+    row.className = "audio-card-row";
+    row.id = "guide-demo-card-row";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "audio-card audio-card-main is-loading";
+    button.id = "guide-demo-card";
+    button.disabled = true;
+
+    const title = document.createElement("span");
+    title.className = "audio-card-title";
+    title.textContent = "Guide Demo - Episode 01.mp3";
+    const meta = document.createElement("span");
+    meta.className = "audio-card-meta";
+    meta.textContent = "Opening...";
+    button.appendChild(title);
+    button.appendChild(meta);
+    button.appendChild(createProgressRow({ mode: "indeterminate", label: "Loading audio..." }));
+    row.appendChild(button);
+    return row;
+  }
+
+  function renderGuidePlayerState(ctx) {
+    const { data = {}, deps } = ctx;
+    void deps;
+    const phase = String(data.phase || "");
+    fileName.textContent = "Guide Demo - Episode 01.mp3";
+    progress.disabled = true;
+    progress.value = 320;
+    progress.style.setProperty("--progress-pct", "32%");
+    playhead.style.left = "32%";
+    playheadTime.textContent = "01:12";
+
+    checkpointMarkers.innerHTML = "";
+    [8, 22, 47, 63, 81].forEach(function (pct) {
+      const marker = document.createElement("span");
+      marker.className = "checkpoint-marker";
+      marker.style.left = String(pct) + "%";
+      checkpointMarkers.appendChild(marker);
+    });
+
+    if (phase === "player-main") {
+      targetProgressWrap.classList.add("hidden");
+      subSegValuePanel.classList.add("hidden");
+      subSegValueList.innerHTML = "";
+      return;
+    }
+
+    targetProgressWrap.classList.remove("hidden");
+    targetProgress.disabled = true;
+    targetProgress.value = 460;
+    targetProgress.style.setProperty("--progress-pct", "46%");
+    targetPlayhead.style.left = "46%";
+    targetPlayheadTime.textContent = "00:19";
+
+    if (phase === "player-focus") {
+      subSegValuePanel.classList.add("hidden");
+      subSegValueList.innerHTML = "";
+      return;
+    }
+
+    subSegValuePanel.classList.remove("hidden");
+    subSegValueInput.value = "";
+
+    if (phase === "player-input") {
+      subSegValueList.innerHTML = "";
+      return;
+    }
+
+    if (phase === "player-cards") {
+      subSegValueList.innerHTML = "";
+      const demoValues = [
+        { when: "2026-03-20 09:30", text: "Speaker shifts topic at this point." },
+        { when: "2026-03-20 09:33", text: "Background sound rises briefly." }
+      ];
+      demoValues.forEach(function (entry, index) {
+        const card = document.createElement("div");
+        card.className = "subseg-value-card";
+        const version = document.createElement("div");
+        version.className = "subseg-value-version";
+        version.textContent = "current -" + String(index) + " | " + entry.when;
+        const inputEl = document.createElement("input");
+        inputEl.type = "text";
+        inputEl.className = "subseg-value-card-input";
+        inputEl.value = entry.text;
+        inputEl.readOnly = true;
+        card.appendChild(version);
+        card.appendChild(inputEl);
+        subSegValueList.appendChild(card);
+      });
+    }
+  }
+
   function startGuideMode(ctx) {
     const { deps } = ctx;
     void deps;
-    if (!isPlayerActive()) {
-      setSaveStatus("Open audEp first, then start Guide.");
+    if (loginView && !loginView.classList.contains("hidden")) {
+      setLoginStatus("Log in first, then start Guide.", true);
       return;
     }
     if (!guideOverlay || !guideSpotlight || !guideTooltip || !guideStepTitle || !guideStepText || !guideStepCounter) {
       return;
     }
+    showLibraryView();
     state.guideSteps = buildGuideSteps({ deps: {} });
     if (!Array.isArray(state.guideSteps) || state.guideSteps.length === 0) {
       return;
     }
     state.isGuideMode = true;
     state.guideStepIndex = 0;
+    state.guidePhase = "list-language";
     guideOverlay.classList.remove("hidden");
+    renderGuideLanguagePicker({ deps: {} });
     renderGuideStep({ deps: {} });
   }
 
@@ -864,8 +1128,16 @@
     if (guideOverlay) {
       guideOverlay.classList.add("hidden");
     }
+    if (guideLanguagePicker) {
+      guideLanguagePicker.classList.add("hidden");
+    }
+    targetProgressWrap.classList.add("hidden");
+    subSegValuePanel.classList.add("hidden");
+    subSegValueList.innerHTML = "";
+    showLibraryView();
+    renderAudioCards(state.sessionsCache);
     if (!data.silent) {
-      setSaveStatus("Guide mode closed");
+      setSaveStatus(getGuideCopy({ deps: {} }).closed);
     }
   }
 
@@ -887,7 +1159,7 @@
     }
     if (nextIndex >= state.guideSteps.length) {
       stopGuideMode({ data: { reason: "complete", silent: true }, deps: {} });
-      setSaveStatus("Guide complete");
+      setSaveStatus(getGuideCopy({ deps: {} }).complete);
       return;
     }
     state.guideStepIndex = nextIndex;
@@ -922,6 +1194,12 @@
     if (!step) {
       return;
     }
+    applyGuidePhase({ data: { phase: step.phase }, deps: {} });
+
+    if (guideLanguagePicker) {
+      guideLanguagePicker.classList.toggle("hidden", step.id !== "language");
+    }
+    renderGuideLanguagePicker({ deps: {} });
 
     const resolved = resolveGuideStepTarget({ data: { step }, deps: {} });
     if (!resolved) {
@@ -936,10 +1214,9 @@
       return;
     }
 
-    const titleText = step.title || "Guide";
-    const bodyText = typeof step.text === "function"
-      ? String(step.text({ data: { target: resolved }, deps: {} }) || "")
-      : String(step.text || "");
+    const copy = getGuideCopy({ deps: {} });
+    const titleText = copy[step.titleKey] || "Guide";
+    const bodyText = copy[step.textKey] || "";
     guideStepTitle.textContent = titleText;
     guideStepText.textContent = bodyText;
     guideStepCounter.textContent = String(safeIndex + 1) + " / " + String(state.guideSteps.length);
@@ -947,7 +1224,7 @@
       guidePrevButton.disabled = safeIndex <= 0;
     }
     if (guideNextButton) {
-      guideNextButton.textContent = safeIndex >= state.guideSteps.length - 1 ? "Finish" : "Next";
+      guideNextButton.textContent = safeIndex >= state.guideSteps.length - 1 ? copy.finish : copy.next;
     }
     positionGuideSpotlight({ data: { rect: targetRect }, deps: {} });
     positionGuideTooltip({ data: { rect: targetRect }, deps: {} });
@@ -964,7 +1241,7 @@
     if (target && isGuideElementVisible({ data: { element: target }, deps: {} })) {
       return target;
     }
-    return progressTrackMain || backButton || playerView;
+    return cards || progressTrackMain || libraryView || playerView;
   }
 
   function isGuideElementVisible(ctx) {
@@ -1024,79 +1301,67 @@
     void deps;
     return [
       {
-        title: "Guide Button",
-        text: "Use this button anytime to restart guided mode.",
-        getTarget: function () { return guideButton; }
+        id: "language",
+        phase: "list-language",
+        titleKey: "languageTitle",
+        textKey: "languageText",
+        getTarget: function () { return guideLanguagePicker || guideTooltip; }
       },
       {
-        title: "Back",
-        text: "Back returns to the audio card list. Use Ctrl+Backspace as a keyboard shortcut.",
-        getTarget: function () { return backButton; }
+        id: "list-overview",
+        phase: "list-overview",
+        titleKey: "listHeaderTitle",
+        textKey: "listHeaderText",
+        getTarget: function () { return libraryView.querySelector(".library-head-row"); }
       },
       {
-        title: "File Header",
-        text: "This row confirms which audEp file is currently loaded.",
-        getTarget: function () { return fileName; }
+        id: "list-card-ready",
+        phase: "list-card-ready",
+        titleKey: "demoCardReadyTitle",
+        textKey: "demoCardReadyText",
+        getTarget: function () { return document.getElementById("guide-demo-card") || cards; }
       },
       {
-        title: "Main audEp Timeline",
-        text: "The main bar controls playback position and displays selected audSeg span, subSeg overlays, checkpoints, and playhead time.",
+        id: "list-card-upload",
+        phase: "list-card-upload",
+        titleKey: "demoCardUploadTitle",
+        textKey: "demoCardUploadText",
+        getTarget: function () { return cards.querySelector(".audio-card"); }
+      },
+      {
+        id: "list-card-loading",
+        phase: "list-card-loading",
+        titleKey: "demoCardLoadingTitle",
+        textKey: "demoCardLoadingText",
+        getTarget: function () { return document.getElementById("guide-demo-card") || cards; }
+      },
+      {
+        id: "player-main",
+        phase: "player-main",
+        titleKey: "playerMainTitle",
+        textKey: "playerMainText",
         getTarget: function () { return progressTrackMain; }
       },
       {
-        title: "Checkpoint Markers",
-        text: "Shift+Space adds checkpoints. Drag markers to micro-adjust timing while preview audio loops briefly.",
-        getTarget: function () { return checkpointMarkers; }
+        id: "player-focus",
+        phase: "player-focus",
+        titleKey: "playerFocusTitle",
+        textKey: "playerFocusText",
+        getTarget: function () { return targetProgressWrap; }
       },
       {
-        title: "Target audSeg Bar",
-        text: function () {
-          if (isGuideElementVisible({ data: { element: targetProgressWrap }, deps: {} })) {
-            return "After selecting an audSeg, Enter locks target mode and this bar lets you work inside the target span.";
-          }
-          return "This appears after selecting an audSeg and pressing Enter to lock target mode.";
-        },
-        getTarget: function () {
-          if (isGuideElementVisible({ data: { element: targetProgressWrap }, deps: {} })) {
-            return targetProgressWrap;
-          }
-          return progressTrackMain;
-        }
+        id: "player-input",
+        phase: "player-input",
+        titleKey: "inputTitle",
+        textKey: "inputText",
+        getTarget: function () { return subSegValueInput || subSegValuePanel; }
       },
       {
-        title: "SubSeg Input",
-        text: function () {
-          if (isGuideElementVisible({ data: { element: subSegValueInput }, deps: {} })) {
-            return "With a target subSeg selected, type here and press Enter to create a value card.";
-          }
-          return "Input opens after selecting a target subSeg (Ctrl+Left/Right), then activating value entry.";
-        },
-        getTarget: function () {
-          if (isGuideElementVisible({ data: { element: subSegValueInput }, deps: {} })) {
-            return subSegValueInput;
-          }
-          return progressTrackMain;
-        }
-      },
-      {
-        title: "Input Cards",
-        text: function () {
-          const firstCardInput = subSegValueList ? subSegValueList.querySelector(".subseg-value-card-input") : null;
-          if (firstCardInput) {
-            return "Each card stores a versioned value for the selected subSeg. Edit, recall history, or delete from card actions.";
-          }
-          return "Cards appear below the input after values are submitted for the selected target subSeg.";
-        },
-        getTarget: function () {
-          const firstCardInput = subSegValueList ? subSegValueList.querySelector(".subseg-value-card-input") : null;
-          if (firstCardInput) {
-            return firstCardInput;
-          }
-          if (isGuideElementVisible({ data: { element: subSegValuePanel }, deps: {} })) {
-            return subSegValuePanel;
-          }
-          return progressTrackMain;
-        }
+        id: "player-cards",
+        phase: "player-cards",
+        titleKey: "cardsTitle",
+        textKey: "cardsText",
+        getTarget: function () { return subSegValueList.querySelector(".subseg-value-card-input") || subSegValuePanel; }
       }
     ];
   }
@@ -1137,6 +1402,10 @@
 
   function renderAudioCards(sessions) {
     state.sessionsCache = Array.isArray(sessions) ? sessions : [];
+    if (state.isGuideMode && isGuideListPhase({ deps: {} })) {
+      renderGuideAudioCards({ deps: {} });
+      return;
+    }
     cards.innerHTML = "";
 
     const hasPending = Boolean(state.pendingUpload);
