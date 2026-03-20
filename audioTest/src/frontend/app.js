@@ -1,5 +1,7 @@
 (function () {
   const LOGIN_STORAGE_KEY = "audioTest.auth";
+  const GUIDE_SEEN_STORAGE_KEY = "audioTest.guideSeenByUser";
+  const GUIDE_FEATURE_VERSION = "cards-feature-pack-2026-03-20";
   const LOGIN_TTL_MS = 5 * 60 * 1000;
   const AUTH_PING_MIN_INTERVAL_MS = 30 * 1000;
   const ALLOWED_USERS = ["zhaoying", "rhys"];
@@ -231,11 +233,13 @@
       state.lastActivityAt = Number(restored.lastActivityAt || Date.now());
       state.lastAuthPingAt = 0;
       scheduleInactivityLogout();
+      renderGuideFeatureBadge();
       setLoginStatus("Welcome back, " + restored.username + ".");
       showLibraryView();
       await loadPersistedAudioCards();
       return;
     }
+    renderGuideFeatureBadge();
     setLoginStatus("Log in to continue.");
   }
 
@@ -292,6 +296,7 @@
       state.lastActivityAt = Date.now();
       state.lastAuthPingAt = 0;
       scheduleInactivityLogout();
+      renderGuideFeatureBadge();
       loginPassword.value = "";
       setLoginStatus("Signed in as " + payload.username + ".");
       showLibraryView();
@@ -1663,6 +1668,8 @@
     state.guideStepIndex = 0;
     state.guidePhase = "list-language";
     state.guideTooltipLocked = false;
+    markGuideFeatureSeenForCurrentUser();
+    renderGuideFeatureBadge();
     guideOverlay.classList.remove("hidden");
     renderGuideLanguagePicker({ deps: {} });
     renderGuideStep({ deps: {} });
@@ -4016,6 +4023,60 @@
     }
   }
 
+  function readGuideSeenVersionMap() {
+    try {
+      const raw = window.localStorage.getItem(GUIDE_SEEN_STORAGE_KEY);
+      if (!raw) {
+        return {};
+      }
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") {
+        return {};
+      }
+      return parsed;
+    } catch {
+      return {};
+    }
+  }
+
+  function writeGuideSeenVersionMap(map) {
+    try {
+      window.localStorage.setItem(GUIDE_SEEN_STORAGE_KEY, JSON.stringify(map || {}));
+    } catch {
+      // Ignore storage failures.
+    }
+  }
+
+  function hasUnseenGuideFeatureForUser(username) {
+    const user = String(username || "").trim().toLowerCase();
+    if (!user) {
+      return false;
+    }
+    const map = readGuideSeenVersionMap();
+    return String(map[user] || "") !== GUIDE_FEATURE_VERSION;
+  }
+
+  function markGuideFeatureSeenForCurrentUser() {
+    const user = String(state.authUser || "").trim().toLowerCase();
+    if (!user) {
+      return;
+    }
+    const map = readGuideSeenVersionMap();
+    map[user] = GUIDE_FEATURE_VERSION;
+    writeGuideSeenVersionMap(map);
+  }
+
+  function renderGuideFeatureBadge() {
+    const showBadge = hasUnseenGuideFeatureForUser(state.authUser);
+    [guideButtonList, guideButtonPlayer].forEach(function (btn) {
+      if (!btn) {
+        return;
+      }
+      btn.classList.toggle("has-new-guide-feature", showBadge);
+      btn.setAttribute("aria-label", showBadge ? "Start guide mode (new feature added)" : "Start guide mode");
+    });
+  }
+
   function persistCurrentLoginActivity() {
     if (!state.authUser || !state.authToken) {
       return;
@@ -4115,6 +4176,7 @@
     }
     showLoginView();
     renderAudioCards([]);
+    renderGuideFeatureBadge();
     setLoginStatus(message || "Log in to continue.", true);
   }
 

@@ -380,6 +380,7 @@ h1, p { margin: 0; }
 }
 
 .guide-button {
+  position: relative;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #ecf8f7;
@@ -393,6 +394,23 @@ h1, p { margin: 0; }
 
 .guide-button:hover {
   border-color: #97c7c4;
+}
+
+.guide-button.has-new-guide-feature::after {
+  content: "+";
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 1px solid #5b8fd4;
+  background: #ffffff;
+  color: #1e4f95;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 12px;
+  text-align: center;
 }
 
 .file-name {
