@@ -439,6 +439,7 @@ function toSessionSummary(ctx) {
   const subSegValueEntries = parsed && parsed.playback && parsed.playback.subSegValueEntries && typeof parsed.playback.subSegValueEntries === "object"
     ? parsed.playback.subSegValueEntries
     : {};
+  const subSegValueKeyCount = Object.keys(subSegValueEntries).length;
   const inputCardCount = Object.keys(subSegValueEntries).reduce(function (sum, key) {
     const list = Array.isArray(subSegValueEntries[key]) ? subSegValueEntries[key] : [];
     return sum + list.length;
@@ -453,7 +454,7 @@ function toSessionSummary(ctx) {
       subSegs,
       stats: {
         audSegs: Math.max(0, checkpoints.length + 1),
-        subSegs: subSegs.length,
+        subSegs: Math.max(subSegs.length, subSegValueKeyCount),
         inputCards: inputCardCount
       }
     },

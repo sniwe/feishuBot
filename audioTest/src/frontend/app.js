@@ -2378,9 +2378,11 @@
       const list = Array.isArray(subSegValueEntries[key]) ? subSegValueEntries[key] : [];
       return sum + list.length;
     }, 0);
+    const subSegEntryKeyCount = Object.keys(subSegValueEntries).length;
     const stats = playback.stats && typeof playback.stats === "object" ? playback.stats : {};
     const audSegCount = Number.isFinite(Number(stats.audSegs)) ? Number(stats.audSegs) : Math.max(0, checkpointCount + 1);
-    const resolvedSubSegCount = Number.isFinite(Number(stats.subSegs)) ? Number(stats.subSegs) : subSegCount;
+    const statsSubSegCount = Number.isFinite(Number(stats.subSegs)) ? Number(stats.subSegs) : 0;
+    const resolvedSubSegCount = Math.max(statsSubSegCount, subSegCount, subSegEntryKeyCount);
     const inputCardCount = Number.isFinite(Number(stats.inputCards)) ? Number(stats.inputCards) : fallbackInputCardCount;
     const countsText = "audSegs: " + String(audSegCount) +
       "  |  subSegs: " + String(resolvedSubSegCount) +
