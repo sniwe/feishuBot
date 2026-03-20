@@ -874,8 +874,12 @@
         checkpointCycleText: "Use Ctrl+Left/Right to cycle checkpoint spans, then press Enter to lock the current span as target audSeg.",
         playerFocusTitle: "Target audSeg Bar",
         playerFocusText: "This lower bar shows the target audSeg you locked with Enter, so you can work inside that exact span.",
-        subSegCreateTitle: "Create subSeg inside target audSeg",
-        subSegCreateText: "Use subSeg for short unclear audio you want to understand better (or cannot fully catch). Keep it very short, usually less than one sentence.",
+        subSegCardTitle: "subSeg Purpose",
+        subSegCardText: "Use subSeg for short unclear audio you want to understand better (or cannot fully catch). Keep it very short, usually less than one sentence.",
+        subSegStartTitle: "Set subSeg Start",
+        subSegStartText: "At the beginning of unclear audio, hold Shift to set subSeg start, then keep listening for the end point.",
+        subSegEndTitle: "Set subSeg End",
+        subSegEndText: "At the end of that unclear audio, press Shift+Space to set subSeg end and finalize the subSeg.",
         inputTitle: "Text Input",
         inputText: "Purpose: write your best attempt of the target subSeg audio. If words are uncertain, approximate from hearing only. Do not use dictionary or outside sources.",
         cardsTitle: "Note Cards",
@@ -922,8 +926,12 @@
         checkpointCycleText: "\u4f7f\u7528 Ctrl+\u5de6/\u53f3 \u5728\u68c0\u67e5\u70b9\u5206\u6bb5\u95f4\u5faa\u73af\u9009\u62e9\uff0c\u7136\u540e\u6309 Enter \u5c06\u5f53\u524d\u5206\u6bb5\u9501\u5b9a\u4e3a target audSeg\u3002",
         playerFocusTitle: "\u76ee\u6807 audSeg \u8303\u56f4\u6761",
         playerFocusText: "\u8fd9\u4e2a\u4e0b\u65b9\u8303\u56f4\u6761\u5c31\u662f\u4f60\u7528 Enter \u9501\u5b9a\u7684 target audSeg\uff0c\u7528\u4e8e\u5728\u8be5\u8303\u56f4\u5185\u7cbe\u7ec6\u64cd\u4f5c\u3002",
-        subSegCreateTitle: "\u5728 target audSeg \u5185\u521b\u5efa subSeg",
-        subSegCreateText: "subSeg \u7528\u4e8e\u622a\u53d6\u4f60\u542c\u4e0d\u592a\u61c2\u3001\u60f3\u8fdb\u4e00\u6b65\u7406\u89e3\u6216\u65e0\u6cd5\u786e\u5b9a\u7684\u77ed\u97f3\u9891\u7247\u6bb5\u3002\u5c3d\u91cf\u4fdd\u6301\u5f88\u77ed\uff0c\u901a\u5e38\u5c11\u4e8e\u4e00\u53e5\u8bdd\u3002",
+        subSegCardTitle: "subSeg \u7528\u9014",
+        subSegCardText: "subSeg \u7528\u4e8e\u622a\u53d6\u4f60\u542c\u4e0d\u592a\u61c2\u3001\u60f3\u8fdb\u4e00\u6b65\u7406\u89e3\u6216\u65e0\u6cd5\u786e\u5b9a\u7684\u77ed\u97f3\u9891\u7247\u6bb5\u3002\u5c3d\u91cf\u4fdd\u6301\u5f88\u77ed\uff0c\u901a\u5e38\u5c11\u4e8e\u4e00\u53e5\u8bdd\u3002",
+        subSegStartTitle: "\u8bbe\u7f6e subSeg \u8d77\u70b9",
+        subSegStartText: "\u5728\u542c\u4e0d\u6e05\u5185\u5bb9\u7684\u8d77\u70b9\u6309\u4f4f Shift \u8bbe\u5b9a subSeg \u5f00\u59cb\uff0c\u7136\u540e\u7ee7\u7eed\u542c\u5230\u7ed3\u675f\u70b9\u3002",
+        subSegEndTitle: "\u8bbe\u7f6e subSeg \u7ec8\u70b9",
+        subSegEndText: "\u5728\u8be5\u542c\u4e0d\u6e05\u7247\u6bb5\u7684\u7ed3\u675f\u70b9\u6309 Shift+Space\uff0c\u8bbe\u7f6e subSeg \u7ec8\u70b9\u5e76\u5b8c\u6210 subSeg\u3002",
         inputTitle: "\u6587\u672c\u8f93\u5165\u6846",
         inputText: "\u76ee\u7684\uff1a\u5c06 target subSeg \u7684\u97f3\u9891\u5185\u5bb9\u5c3d\u529b\u5199\u4e0b\u6765\u3002\u4e0d\u786e\u5b9a\u7684\u8bcd\u8bf7\u6309\u542c\u611f\u8fd1\u4f3c\u62fc\u5199\uff0c\u4e0d\u8981\u67e5\u5b57\u5178\uff0c\u4e5f\u4e0d\u8981\u4f9d\u8d56\u5916\u90e8\u8d44\u6e90\u3002",
         cardsTitle: "\u8bf4\u660e\u5361\u7247",
@@ -1132,12 +1140,17 @@
   }
 
   function renderGuideTargetSubSeg(ctx) {
-    const { deps } = ctx;
+    const { data = {}, deps } = ctx;
     void deps;
+    const mode = String(data.mode || "complete");
     if (targetSubSegActiveFill) {
-      targetSubSegActiveFill.style.display = "block";
-      targetSubSegActiveFill.style.left = "34%";
-      targetSubSegActiveFill.style.width = "18%";
+      if (mode === "complete") {
+        targetSubSegActiveFill.style.display = "block";
+        targetSubSegActiveFill.style.left = "34%";
+        targetSubSegActiveFill.style.width = "18%";
+      } else {
+        targetSubSegActiveFill.style.display = "none";
+      }
     }
     if (targetCheckpointMarkers) {
       targetCheckpointMarkers.innerHTML = "";
@@ -1150,13 +1163,16 @@
         },
         deps: {}
       });
-      [34, 52].forEach(function (pct, idx) {
+      const subSegPoints = mode === "start-only"
+        ? [{ pct: 34, label: "subSeg start" }]
+        : [{ pct: 34, label: "subSeg start" }, { pct: 52, label: "subSeg end" }];
+      subSegPoints.forEach(function (point) {
         const marker = document.createElement("span");
         marker.className = "checkpoint-marker";
-        marker.style.left = String(pct) + "%";
+        marker.style.left = String(point.pct) + "%";
         const tag = document.createElement("span");
         tag.className = "checkpoint-tag target-subseg-tag";
-        tag.textContent = idx === 0 ? "subSeg start" : "subSeg end";
+        tag.textContent = point.label;
         marker.appendChild(tag);
         targetCheckpointMarkers.appendChild(marker);
       });
@@ -1272,7 +1288,8 @@
     }
 
     if (
-      phase === "player-subseg-create" ||
+      phase === "player-subseg-start" ||
+      phase === "player-subseg-end" ||
       phase === "player-input" ||
       phase === "player-cards" ||
       phase === "player-card-nav" ||
@@ -1284,8 +1301,11 @@
       phase === "player-exit-audseg" ||
       phase === "player-exit-list"
     ) {
-      renderGuideTargetSubSeg({ deps: {} });
-      renderGuideMainSubSegOverlay({ deps: {} });
+      const targetMode = phase === "player-subseg-start" ? "start-only" : "complete";
+      renderGuideTargetSubSeg({ data: { mode: targetMode }, deps: {} });
+      if (targetMode === "complete") {
+        renderGuideMainSubSegOverlay({ deps: {} });
+      }
     }
 
     if (phase === "player-exit-audseg" || phase === "player-exit-list") {
@@ -1308,7 +1328,7 @@
       selectedSpanOverlay.style.display = "none";
     }
 
-    if (phase === "player-subseg-create") {
+    if (phase === "player-subseg-card" || phase === "player-subseg-start" || phase === "player-subseg-end") {
       subSegValuePanel.classList.add("hidden");
       subSegValueList.innerHTML = "";
       return;
@@ -1738,10 +1758,24 @@
         getTarget: function () { return targetProgressWrap; }
       },
       {
-        id: "player-subseg-create",
-        phase: "player-subseg-create",
-        titleKey: "subSegCreateTitle",
-        textKey: "subSegCreateText",
+        id: "player-subseg-card",
+        phase: "player-subseg-card",
+        titleKey: "subSegCardTitle",
+        textKey: "subSegCardText",
+        getTarget: function () { return targetProgressWrap; }
+      },
+      {
+        id: "player-subseg-start",
+        phase: "player-subseg-start",
+        titleKey: "subSegStartTitle",
+        textKey: "subSegStartText",
+        getTarget: function () { return targetProgressWrap; }
+      },
+      {
+        id: "player-subseg-end",
+        phase: "player-subseg-end",
+        titleKey: "subSegEndTitle",
+        textKey: "subSegEndText",
         getTarget: function () { return targetProgressWrap; }
       },
       {
@@ -1756,6 +1790,8 @@
         phase: "player-cards",
         titleKey: "cardsTitle",
         textKey: "cardsText",
+        spotlightPadding: { top: 20, right: 20, bottom: 20, left: 20 },
+        spotlightMinWidth: 380,
         getTarget: function () { return subSegValueList.querySelector(".subseg-value-card-input") || subSegValuePanel; }
       },
       {
@@ -1772,6 +1808,8 @@
         phase: "player-card-delete",
         titleKey: "cardDeleteTitle",
         textKey: "cardDeleteText",
+        spotlightPadding: { top: 20, right: 20, bottom: 20, left: 20 },
+        spotlightMinWidth: 380,
         getTarget: function () { return document.getElementById("guide-card-delete-target") || subSegValueList; }
       },
       {
