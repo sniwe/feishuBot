@@ -875,9 +875,9 @@
         playerFocusTitle: "Target audSeg Bar",
         playerFocusText: "This lower bar shows the target audSeg you locked with Enter, so you can work inside that exact span.",
         subSegCreateTitle: "Create subSeg inside target audSeg",
-        subSegCreateText: "A subSeg is a smaller segment inside the target audSeg. Hold Shift to mark start, then press Shift+Space at end to create it.",
+        subSegCreateText: "Use subSeg for short unclear audio you want to understand better (or cannot fully catch). Keep it very short, usually less than one sentence.",
         inputTitle: "Text Input",
-        inputText: "After selecting a subSeg, type value text here and press Enter to save.",
+        inputText: "Purpose: write your best attempt of the target subSeg audio. If words are uncertain, approximate from hearing only. Do not use dictionary or outside sources.",
         cardsTitle: "Note Cards",
         cardsText: "Review saved values here. You can edit, recall history, or delete entries."
       },
@@ -907,9 +907,9 @@
         playerFocusTitle: "\u76ee\u6807 audSeg \u8303\u56f4\u6761",
         playerFocusText: "\u8fd9\u4e2a\u4e0b\u65b9\u8303\u56f4\u6761\u5c31\u662f\u4f60\u7528 Enter \u9501\u5b9a\u7684 target audSeg\uff0c\u7528\u4e8e\u5728\u8be5\u8303\u56f4\u5185\u7cbe\u7ec6\u64cd\u4f5c\u3002",
         subSegCreateTitle: "\u5728 target audSeg \u5185\u521b\u5efa subSeg",
-        subSegCreateText: "subSeg \u662f target audSeg \u5185\u7684\u66f4\u5c0f\u7247\u6bb5\u3002\u6309\u4f4f Shift \u8bb0\u5f55\u8d77\u70b9\uff0c\u5728\u7ec8\u70b9\u6309 Shift+Space \u521b\u5efa subSeg\u3002",
+        subSegCreateText: "subSeg \u7528\u4e8e\u622a\u53d6\u4f60\u542c\u4e0d\u592a\u61c2\u3001\u60f3\u8fdb\u4e00\u6b65\u7406\u89e3\u6216\u65e0\u6cd5\u786e\u5b9a\u7684\u77ed\u97f3\u9891\u7247\u6bb5\u3002\u5c3d\u91cf\u4fdd\u6301\u5f88\u77ed\uff0c\u901a\u5e38\u5c11\u4e8e\u4e00\u53e5\u8bdd\u3002",
         inputTitle: "\u6587\u672c\u8f93\u5165\u6846",
-        inputText: "\u9009\u4e2d subSeg \u540e\uff0c\u5728\u8fd9\u91cc\u8f93\u5165\u5185\u5bb9\uff0c\u6309 Enter \u4fdd\u5b58\u3002",
+        inputText: "\u76ee\u7684\uff1a\u5c06 target subSeg \u7684\u97f3\u9891\u5185\u5bb9\u5c3d\u529b\u5199\u4e0b\u6765\u3002\u4e0d\u786e\u5b9a\u7684\u8bcd\u8bf7\u6309\u542c\u611f\u8fd1\u4f3c\u62fc\u5199\uff0c\u4e0d\u8981\u67e5\u5b57\u5178\uff0c\u4e5f\u4e0d\u8981\u4f9d\u8d56\u5916\u90e8\u8d44\u6e90\u3002",
         cardsTitle: "\u8bf4\u660e\u5361\u7247",
         cardsText: "\u8fd9\u91cc\u663e\u793a\u5df2\u4fdd\u5b58\u7684\u503c\u3002\u4f60\u53ef\u4ee5\u7f16\u8f91\u3001\u56de\u6eaf\u5386\u53f2\u6216\u5220\u9664\u6761\u76ee\u3002"
       }
