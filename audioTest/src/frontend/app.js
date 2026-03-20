@@ -1175,19 +1175,26 @@
         },
         deps: {}
       });
-      const subSegPoints = mode === "start-only"
-        ? [{ pct: 34, label: "subSeg start" }]
-        : [{ pct: 34, label: "subSeg start" }, { pct: 52, label: "subSeg end" }];
-      subSegPoints.forEach(function (point) {
+      if (mode === "start-only") {
         const marker = document.createElement("span");
-        marker.className = "checkpoint-marker";
-        marker.style.left = String(point.pct) + "%";
+        marker.className = "checkpoint-marker is-cycle-target-start";
+        marker.style.left = "34.4%";
         const tag = document.createElement("span");
-        tag.className = "checkpoint-tag target-subseg-tag";
-        tag.textContent = point.label;
+        tag.className = "checkpoint-tag cycle-target-tag cycle-target-tag-start checkpoint-tag-target-start";
+        tag.textContent = "subSeg start";
         marker.appendChild(tag);
         targetCheckpointMarkers.appendChild(marker);
-      });
+      } else {
+        const span = document.createElement("span");
+        span.className = "target-subseg-span selected";
+        span.style.left = "34.4%";
+        span.style.width = "18.7%";
+        const tag = document.createElement("span");
+        tag.className = "checkpoint-tag target-subseg-tag";
+        tag.textContent = "01:41-49";
+        span.appendChild(tag);
+        targetCheckpointMarkers.appendChild(span);
+      }
     }
   }
 
