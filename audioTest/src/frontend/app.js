@@ -866,7 +866,11 @@
         playerOverviewTitle: "Player Screen",
         playerOverviewText: "This is the full player workspace. Next, we will focus on the main timeline.",
         playerMainTitle: "Main Timeline",
-        playerMainText: "This is the main timeline for play position and markers.",
+        playerMainText: "Timeline starts clean with no checkpoints yet.",
+        checkpointAddTitle: "Add Logical Checkpoints",
+        checkpointAddText: "Now checkpoints are added at content breaks: intro end, example start, and example end.",
+        checkpointCycleTitle: "Cycle-Select Span",
+        checkpointCycleText: "This highlighted range shows cycling between checkpoint spans for focused review.",
         playerFocusTitle: "Focused Range Bar",
         playerFocusText: "This lower bar appears when you lock a focused range for detailed review.",
         inputTitle: "Text Input",
@@ -892,7 +896,11 @@
         playerOverviewTitle: "\u64ad\u653e\u5668\u9875\u9762",
         playerOverviewText: "\u8fd9\u91cc\u662f\u5b8c\u6574\u7684\u64ad\u653e\u5de5\u4f5c\u533a\u3002\u4e0b\u4e00\u6b65\u6211\u4eec\u4f1a\u805a\u7126\u4e3b\u65f6\u95f4\u8f74\u3002",
         playerMainTitle: "\u4e3b\u65f6\u95f4\u8f74",
-        playerMainText: "\u8fd9\u662f\u4e3b\u65f6\u95f4\u8f74\uff0c\u7528\u4e8e\u663e\u793a\u64ad\u653e\u4f4d\u7f6e\u548c\u6807\u8bb0\u3002",
+        playerMainText: "\u65f6\u95f4\u8f74\u4ece\u7a7a\u72b6\u6001\u5f00\u59cb\uff0c\u8fd8\u6ca1\u6709\u68c0\u67e5\u70b9\u3002",
+        checkpointAddTitle: "\u6dfb\u52a0\u903b\u8f91\u68c0\u67e5\u70b9",
+        checkpointAddText: "\u73b0\u5728\u5728\u5185\u5bb9\u5206\u6bb5\u5904\u6dfb\u52a0\u68c0\u67e5\u70b9\uff1a\u5f15\u8a00\u7ed3\u675f\u3001\u793a\u4f8b\u5f00\u59cb\u3001\u793a\u4f8b\u7ed3\u675f\u3002",
+        checkpointCycleTitle: "\u5faa\u73af\u9009\u62e9\u8303\u56f4",
+        checkpointCycleText: "\u8fd9\u4e2a\u9ad8\u4eae\u8303\u56f4\u6f14\u793a\u4e86\u5728\u68c0\u67e5\u70b9\u5206\u6bb5\u95f4\u7684\u5faa\u73af\u9009\u62e9\u3002",
         playerFocusTitle: "\u805a\u7126\u8303\u56f4\u6761",
         playerFocusText: "\u9501\u5b9a\u805a\u7126\u8303\u56f4\u540e\uff0c\u4e0b\u65b9\u4f1a\u51fa\u73b0\u8fd9\u4e2a\u8303\u56f4\u6761\u7528\u4e8e\u7cbe\u7ec6\u67e5\u770b\u3002",
         inputTitle: "\u6587\u672c\u8f93\u5165\u6846",
@@ -1037,6 +1045,30 @@
     return row;
   }
 
+  function renderGuideCheckpointMarkers(ctx) {
+    const { data = {}, deps } = ctx;
+    void deps;
+    const markers = Array.isArray(data.markers) ? data.markers : [];
+    checkpointMarkers.innerHTML = "";
+    markers.forEach(function (markerDef) {
+      const marker = document.createElement("span");
+      marker.className = "checkpoint-marker";
+      if (markerDef.boundary === "start" || markerDef.boundary === "end") {
+        marker.classList.add("is-cycle-target-" + markerDef.boundary);
+      }
+      marker.style.left = String(markerDef.pct || 0) + "%";
+
+      const tag = document.createElement("span");
+      tag.className = "checkpoint-tag";
+      if (markerDef.boundary === "start" || markerDef.boundary === "end") {
+        tag.classList.add("cycle-target-tag", "cycle-target-tag-" + markerDef.boundary);
+      }
+      tag.textContent = String(markerDef.label || "");
+      marker.appendChild(tag);
+      checkpointMarkers.appendChild(marker);
+    });
+  }
+
   function renderGuidePlayerState(ctx) {
     const { data = {}, deps } = ctx;
     void deps;
@@ -1047,16 +1079,35 @@
     progress.style.setProperty("--progress-pct", "32%");
     playhead.style.left = "32%";
     playheadTime.textContent = "01:12";
-
-    checkpointMarkers.innerHTML = "";
-    [8, 22, 47, 63, 81].forEach(function (pct) {
-      const marker = document.createElement("span");
-      marker.className = "checkpoint-marker";
-      marker.style.left = String(pct) + "%";
-      checkpointMarkers.appendChild(marker);
-    });
+    selectedSpanOverlay.style.display = "none";
+    selectedSpanOverlay.style.left = "0%";
+    selectedSpanOverlay.style.width = "0%";
 
     if (phase === "player-main" || phase === "player-overview") {
+      checkpointMarkers.innerHTML = "";
+      targetProgressWrap.classList.add("hidden");
+      subSegValuePanel.classList.add("hidden");
+      subSegValueList.innerHTML = "";
+      return;
+    }
+
+    if (phase === "player-checkpoint-add" || phase === "player-checkpoint-cycle") {
+      renderGuideCheckpointMarkers({
+        data: {
+          markers: [
+            { pct: 14, label: "Intro End" },
+            { pct: 38, label: "Example Start", boundary: "start" },
+            { pct: 61, label: "Example End", boundary: "end" },
+            { pct: 84, label: "Summary Start" }
+          ]
+        },
+        deps: {}
+      });
+      if (phase === "player-checkpoint-cycle") {
+        selectedSpanOverlay.style.display = "block";
+        selectedSpanOverlay.style.left = "38%";
+        selectedSpanOverlay.style.width = "23%";
+      }
       targetProgressWrap.classList.add("hidden");
       subSegValuePanel.classList.add("hidden");
       subSegValueList.innerHTML = "";
@@ -1385,6 +1436,20 @@
         titleKey: "playerMainTitle",
         textKey: "playerMainText",
         getTarget: function () { return progressTrackMain; }
+      },
+      {
+        id: "player-checkpoint-add",
+        phase: "player-checkpoint-add",
+        titleKey: "checkpointAddTitle",
+        textKey: "checkpointAddText",
+        getTarget: function () { return checkpointMarkers || progressTrackMain; }
+      },
+      {
+        id: "player-checkpoint-cycle",
+        phase: "player-checkpoint-cycle",
+        titleKey: "checkpointCycleTitle",
+        textKey: "checkpointCycleText",
+        getTarget: function () { return selectedSpanOverlay || progressTrackMain; }
       },
       {
         id: "player-focus",
