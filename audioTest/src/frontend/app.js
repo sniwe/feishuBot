@@ -868,8 +868,10 @@
         playerOverviewText: "This is where playback editing happens. Follow the next steps in order during real work.",
         playerMainTitle: "Main Timeline",
         playerMainText: "Press Space to toggle play/pause on this timeline, then listen for structure points before adding checkpoints. Each span between two checkpoints is an audSeg.",
-        checkpointAddTitle: "Add Logical Checkpoints",
-        checkpointAddText: "Add checkpoints with Shift+Space at logical breaks in content, such as intro end or example start/end.",
+        checkpointSetTitle: "Add Checkpoint At Cursor",
+        checkpointSetText: "Move playback to a logical boundary. Here the cursor is at 01:25. Press Shift+Space to add a checkpoint at this exact time.",
+        checkpointAddTitle: "Checkpoint Timestamps",
+        checkpointAddText: "Checkpoint tags are shown as timestamps, matching runtime view. Each pair of timestamps defines one audSeg boundary.",
         checkpointCycleTitle: "Cycle-Select Span",
         checkpointCycleText: "Use Ctrl+Left/Right to cycle checkpoint spans, then press Enter to lock the current span as target audSeg.",
         playerFocusTitle: "Target audSeg Bar",
@@ -920,8 +922,10 @@
         playerOverviewText: "\u8fd9\u91cc\u662f\u64ad\u653e\u4e0e\u6807\u6ce8\u7684\u4e3b\u5de5\u4f5c\u533a\u3002\u6309\u7167\u540e\u7eed\u6b65\u9aa4\u5373\u53ef\u5b8c\u6210\u5b9e\u9645\u64cd\u4f5c\u3002",
         playerMainTitle: "\u4e3b\u65f6\u95f4\u8f74",
         playerMainText: "\u5728\u4e3b\u65f6\u95f4\u8f74\u6309 Space \u5207\u6362\u64ad\u653e/\u6682\u505c\uff0c\u5148\u542c\u51fa\u5185\u5bb9\u7ed3\u6784\u65ad\u70b9\uff0c\u518d\u6dfb\u52a0\u68c0\u67e5\u70b9\u3002\u6bcf\u4e24\u4e2a\u68c0\u67e5\u70b9\u4e4b\u95f4\u7684\u7247\u6bb5\u79f0\u4e3a audSeg\u3002",
-        checkpointAddTitle: "\u6dfb\u52a0\u903b\u8f91\u68c0\u67e5\u70b9",
-        checkpointAddText: "\u4f7f\u7528 Shift+Space \u6dfb\u52a0\u68c0\u67e5\u70b9\uff0c\u653e\u5728\u5185\u5bb9\u903b\u8f91\u5206\u6bb5\u5904\uff0c\u5982\u5f15\u8a00\u7ed3\u675f\u3001\u793a\u4f8b\u5f00\u59cb/\u7ed3\u675f\u3002",
+        checkpointSetTitle: "\u5728\u5149\u6807\u5904\u6dfb\u52a0\u68c0\u67e5\u70b9",
+        checkpointSetText: "\u5c06\u64ad\u653e\u5b9a\u4f4d\u5230\u903b\u8f91\u8fb9\u754c\u3002\u6b64\u5904\u5149\u6807\u5728 01:25\uff0c\u6309 Shift+Space \u5373\u53ef\u5728\u8be5\u65f6\u95f4\u6dfb\u52a0\u68c0\u67e5\u70b9\u3002",
+        checkpointAddTitle: "\u68c0\u67e5\u70b9\u65f6\u95f4\u6233",
+        checkpointAddText: "\u68c0\u67e5\u70b9\u6807\u7b7e\u4ee5\u65f6\u95f4\u6233\u663e\u793a\uff08\u4e0e\u8fd0\u884c\u754c\u9762\u4e00\u81f4\uff09\u3002\u6bcf\u4e24\u4e2a\u65f6\u95f4\u6233\u5b9a\u4e49\u4e00\u4e2a audSeg \u8fb9\u754c\u3002",
         checkpointCycleTitle: "\u5faa\u73af\u9009\u62e9\u8303\u56f4",
         checkpointCycleText: "\u4f7f\u7528 Ctrl+\u5de6/\u53f3 \u5728\u68c0\u67e5\u70b9\u5206\u6bb5\u95f4\u5faa\u73af\u9009\u62e9\uff0c\u7136\u540e\u6309 Enter \u5c06\u5f53\u524d\u5206\u6bb5\u9501\u5b9a\u4e3a target audSeg\u3002",
         playerFocusTitle: "\u76ee\u6807 audSeg \u8303\u56f4\u6761",
@@ -1226,15 +1230,27 @@
       return;
     }
 
-    if (phase === "player-checkpoint-add" || phase === "player-checkpoint-cycle") {
+    if (phase === "player-checkpoint-set" || phase === "player-checkpoint-add" || phase === "player-checkpoint-cycle") {
+      if (phase === "player-checkpoint-set") {
+        progress.value = 333;
+        progress.style.setProperty("--progress-pct", "33.3%");
+        playhead.style.left = "33.3%";
+        playheadTime.textContent = "01:25";
+      }
       renderGuideCheckpointMarkers({
         data: {
-          markers: [
-            { pct: 14, label: "Intro End" },
-            { pct: 38, label: "Example Start", boundary: "start" },
-            { pct: 61, label: "Example End", boundary: "end" },
-            { pct: 84, label: "Summary Start" }
-          ]
+          markers: phase === "player-checkpoint-set"
+            ? [
+              { pct: 14, label: "00:31" },
+              { pct: 58, label: "02:12" },
+              { pct: 84, label: "03:09" }
+            ]
+            : [
+              { pct: 14, label: "00:31" },
+              { pct: 33, label: "01:25", boundary: "start" },
+              { pct: 58, label: "02:12", boundary: "end" },
+              { pct: 84, label: "03:09" }
+            ]
         },
         deps: {}
       });
@@ -1248,8 +1264,8 @@
       });
       if (phase === "player-checkpoint-cycle") {
         selectedSpanOverlay.style.display = "block";
-        selectedSpanOverlay.style.left = "38%";
-        selectedSpanOverlay.style.width = "23%";
+        selectedSpanOverlay.style.left = "33%";
+        selectedSpanOverlay.style.width = "25%";
       }
       targetProgressWrap.classList.add("hidden");
       subSegValuePanel.classList.add("hidden");
@@ -1259,27 +1275,27 @@
 
     targetProgressWrap.classList.remove("hidden");
     targetProgress.disabled = true;
-    targetProgress.value = 460;
-    targetProgress.style.setProperty("--progress-pct", "46%");
-    targetPlayhead.style.left = "46%";
-    targetPlayheadTime.textContent = "00:19";
+    targetProgress.value = 219;
+    targetProgress.style.setProperty("--progress-pct", "21.9%");
+    targetPlayhead.style.left = "21.9%";
+    targetPlayheadTime.textContent = "01:12";
     if (phase === "player-subseg-start") {
       progress.value = 338;
       progress.style.setProperty("--progress-pct", "33.8%");
       playhead.style.left = "33.8%";
       playheadTime.textContent = "01:16";
-      targetProgress.value = 340;
-      targetProgress.style.setProperty("--progress-pct", "34%");
-      targetPlayhead.style.left = "34%";
+      targetProgress.value = 344;
+      targetProgress.style.setProperty("--progress-pct", "34.4%");
+      targetPlayhead.style.left = "34.4%";
       targetPlayheadTime.textContent = "01:16";
     } else if (phase === "player-subseg-end") {
       progress.value = 364;
       progress.style.setProperty("--progress-pct", "36.4%");
       playhead.style.left = "36.4%";
       playheadTime.textContent = "01:22";
-      targetProgress.value = 520;
-      targetProgress.style.setProperty("--progress-pct", "52%");
-      targetPlayhead.style.left = "52%";
+      targetProgress.value = 531;
+      targetProgress.style.setProperty("--progress-pct", "53.1%");
+      targetPlayhead.style.left = "53.1%";
       targetPlayheadTime.textContent = "01:22";
     }
     if (targetSubSegActiveFill) {
@@ -1339,8 +1355,8 @@
     if (phase === "player-exit-audseg" || phase === "player-exit-list") {
       targetProgressWrap.classList.add("hidden");
       selectedSpanOverlay.style.display = "block";
-      selectedSpanOverlay.style.left = "38%";
-      selectedSpanOverlay.style.width = "23%";
+      selectedSpanOverlay.style.left = "33%";
+      selectedSpanOverlay.style.width = "25%";
     }
 
     if (phase === "player-exit-list") {
@@ -1753,6 +1769,13 @@
         phase: "player-main",
         titleKey: "playerMainTitle",
         textKey: "playerMainText",
+        getTarget: function () { return progressTrackMain; }
+      },
+      {
+        id: "player-checkpoint-set",
+        phase: "player-checkpoint-set",
+        titleKey: "checkpointSetTitle",
+        textKey: "checkpointSetText",
         getTarget: function () { return progressTrackMain; }
       },
       {
