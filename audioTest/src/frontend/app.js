@@ -884,8 +884,12 @@
         subSegEndText: "At the end of that unclear audio, press Shift+Space to set subSeg end and finalize the subSeg.",
         inputTitle: "Text Input",
         inputText: "Purpose: write your best attempt of the target subSeg audio. If words are uncertain, approximate from hearing only. Do not use dictionary or outside sources.",
-        cardsTitle: "Note Cards",
-        cardsText: "Versions are on the same card. Example: previous '前后两清' -> current '钱货两清'.",
+        firstCardInputTitle: "Enter First Card Value",
+        firstCardInputText: "Type your first best-attempt text (example: '前后两清') in the top input and press Enter to create the first card version.",
+        cardsTitle: "First Version Saved",
+        cardsText: "After Enter, the first input becomes the first version on this card.",
+        cardEditTitle: "Edit To New Version",
+        cardEditText: "Focus this card, update your text after re-listening (example now: '钱货两清'), then save. The prior text remains as version history on the same card.",
         cardNavTitle: "Navigate Between Cards",
         cardNavText: "Focus the top input, press Ctrl+Down to enter first card. Then use Ctrl+Up/Down across cards, and Ctrl+Left/Right to recall older/newer versions on that same focused card.",
         cardDeleteTitle: "Card Delete Dialog",
@@ -938,8 +942,12 @@
         subSegEndText: "\u5728\u8be5\u542c\u4e0d\u6e05\u7247\u6bb5\u7684\u7ed3\u675f\u70b9\u6309 Shift+Space\uff0c\u8bbe\u7f6e subSeg \u7ec8\u70b9\u5e76\u5b8c\u6210 subSeg\u3002",
         inputTitle: "\u6587\u672c\u8f93\u5165\u6846",
         inputText: "\u76ee\u7684\uff1a\u5c06 target subSeg \u7684\u97f3\u9891\u5185\u5bb9\u5c3d\u529b\u5199\u4e0b\u6765\u3002\u4e0d\u786e\u5b9a\u7684\u8bcd\u8bf7\u6309\u542c\u611f\u8fd1\u4f3c\u62fc\u5199\uff0c\u4e0d\u8981\u67e5\u5b57\u5178\uff0c\u4e5f\u4e0d\u8981\u4f9d\u8d56\u5916\u90e8\u8d44\u6e90\u3002",
-        cardsTitle: "\u8bf4\u660e\u5361\u7247",
-        cardsText: "\u7248\u672c\u90fd\u5728\u540c\u4e00\u5f20\u5361\u7247\u4e0a\u67e5\u770b\u3002\u793a\u4f8b\uff1a\u524d\u4e00\u7248\u201c\u524d\u540e\u4e24\u6e05\u201d\uff0c\u5f53\u524d\u7248\u201c\u94b1\u8d27\u4e24\u6e05\u201d\u3002",
+        firstCardInputTitle: "\u8f93\u5165\u7b2c\u4e00\u7248\u5361\u7247\u5185\u5bb9",
+        firstCardInputText: "\u5728\u9876\u90e8\u8f93\u5165\u6846\u8f93\u5165\u7b2c\u4e00\u6b21\u542c\u5199\uff08\u793a\u4f8b\uff1a\u201c\u524d\u540e\u4e24\u6e05\u201d\uff09\uff0c\u7136\u540e\u6309 Enter \u521b\u5efa\u7b2c\u4e00\u7248\u3002",
+        cardsTitle: "\u7b2c\u4e00\u7248\u5df2\u4fdd\u5b58",
+        cardsText: "\u6309 Enter \u540e\uff0c\u8f93\u5165\u5185\u5bb9\u4f1a\u4f5c\u4e3a\u8fd9\u5f20\u5361\u7684\u7b2c\u4e00\u4e2a\u7248\u672c\u3002",
+        cardEditTitle: "\u4fee\u6539\u4e3a\u65b0\u7248\u672c",
+        cardEditText: "\u805a\u7126\u8be5\u5361\u540e\uff0c\u91cd\u542c\u97f3\u9891\u5e76\u4fee\u6539\u6587\u5b57\uff08\u793a\u4f8b\u66f4\u65b0\u4e3a\u201c\u94b1\u8d27\u4e24\u6e05\u201d\uff09\uff0c\u518d\u4fdd\u5b58\u3002\u65e7\u7248\u672c\u4f1a\u7559\u5728\u540c\u4e00\u5f20\u5361\u7684\u5386\u53f2\u4e2d\u3002",
         cardNavTitle: "\u5361\u7247\u5bfc\u822a",
         cardNavText: "\u5148\u805a\u7126\u9876\u90e8\u8f93\u5165\u6846\uff0c\u6309 Ctrl+\u4e0b \u8fdb\u5165\u7b2c\u4e00\u5f20\u5361\u7247\u3002\u7136\u540e\u7528 Ctrl+\u4e0a/\u4e0b \u5728\u5361\u7247\u95f4\u79fb\u52a8\uff0c\u7528 Ctrl+\u5de6/\u53f3 \u5728\u5f53\u524d\u5361\u7247\u4e0a\u67e5\u770b\u66f4\u65e9/\u66f4\u65b0\u7248\u672c\u3002",
         cardDeleteTitle: "\u6253\u5f00\u5361\u7247\u5220\u9664\u5bf9\u8bdd",
@@ -1326,7 +1334,9 @@
       phase === "player-subseg-start" ||
       phase === "player-subseg-end" ||
       phase === "player-input" ||
+      phase === "player-card-first-input" ||
       phase === "player-cards" ||
+      phase === "player-card-edit" ||
       phase === "player-card-nav" ||
       phase === "player-card-delete" ||
       phase === "player-card-delete-confirm" ||
@@ -1376,8 +1386,14 @@
       subSegValueList.innerHTML = "";
       return;
     }
+    if (phase === "player-card-first-input") {
+      subSegValueInput.value = "前后两清";
+      subSegValueList.innerHTML = "";
+      return;
+    }
 
     if (
+      phase === "player-card-edit" ||
       phase === "player-cards" ||
       phase === "player-card-nav" ||
       phase === "player-card-delete" ||
@@ -1389,6 +1405,7 @@
       const card = document.createElement("div");
       card.className = "subseg-value-card";
       const recalled = phase === "player-card-nav";
+      const editing = phase === "player-card-edit";
 
       const version = document.createElement("div");
       version.className = "subseg-value-version";
@@ -1407,6 +1424,10 @@
         inputEl.style.borderRadius = "4px";
         inputEl.id = "guide-card-delete-target";
       }
+      if (editing) {
+        inputEl.style.outline = "2px solid #6e92c9";
+        inputEl.style.borderRadius = "4px";
+      }
 
       card.appendChild(version);
       card.appendChild(inputEl);
@@ -1414,7 +1435,9 @@
       if (!recalled) {
         const historyHint = document.createElement("div");
         historyHint.className = "subseg-value-version";
-        historyHint.textContent = "history: \u524d\u540e\u4e24\u6e05";
+        historyHint.textContent = editing
+          ? "history: \u524d\u540e\u4e24\u6e05 | current: \u94b1\u8d27\u4e24\u6e05"
+          : "history: \u524d\u540e\u4e24\u6e05";
         card.appendChild(historyHint);
       }
 
@@ -1828,10 +1851,26 @@
         getTarget: function () { return subSegValueInput || subSegValuePanel; }
       },
       {
+        id: "player-card-first-input",
+        phase: "player-card-first-input",
+        titleKey: "firstCardInputTitle",
+        textKey: "firstCardInputText",
+        getTarget: function () { return subSegValueInput || subSegValuePanel; }
+      },
+      {
         id: "player-cards",
         phase: "player-cards",
         titleKey: "cardsTitle",
         textKey: "cardsText",
+        spotlightPadding: { top: 20, right: 20, bottom: 20, left: 20 },
+        spotlightMinWidth: 380,
+        getTarget: function () { return subSegValueList.querySelector(".subseg-value-card-input") || subSegValuePanel; }
+      },
+      {
+        id: "player-card-edit",
+        phase: "player-card-edit",
+        titleKey: "cardEditTitle",
+        textKey: "cardEditText",
         spotlightPadding: { top: 20, right: 20, bottom: 20, left: 20 },
         spotlightMinWidth: 380,
         getTarget: function () { return subSegValueList.querySelector(".subseg-value-card-input") || subSegValuePanel; }
