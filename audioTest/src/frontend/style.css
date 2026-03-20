@@ -657,6 +657,30 @@ h1, p { margin: 0; }
   pointer-events: none;
 }
 
+.checkpoint-tag.is-delete-target {
+  border-color: #c45454;
+  background: rgba(255, 240, 240, 0.98);
+  color: #7d2222;
+  box-shadow: 0 0 0 1px rgba(196, 84, 84, 0.22);
+}
+
+.checkpoint-tag.is-delete-target::after {
+  content: "x";
+  position: absolute;
+  right: -7px;
+  top: -7px;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid #c45454;
+  background: #ffffff;
+  color: #8a2525;
+  font-size: 0.58rem;
+  font-weight: 700;
+  line-height: 10px;
+  text-align: center;
+}
+
 .checkpoint-tag.cycle-target-tag {
   border-color: #9eb6da;
   background: rgba(236, 244, 255, 0.98);
@@ -875,6 +899,46 @@ h1, p { margin: 0; }
 }
 
 .subseg-value-delete-confirm {
+  border-color: #d8b7b7;
+  background: #fff5f5;
+  color: #8d2d2d;
+}
+
+.delete-confirm-dialog {
+  border: 1px solid #d8b7b7;
+  border-radius: 8px;
+  background: #fff9f9;
+  padding: 8px;
+  display: grid;
+  gap: 8px;
+}
+
+.delete-confirm-text {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #3d2a2a;
+  line-height: 1.25;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.delete-confirm-cancel,
+.delete-confirm-delete {
+  border: 1px solid #b8c6dd;
+  border-radius: 6px;
+  background: #f8fbff;
+  color: #243a59;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.delete-confirm-delete {
   border-color: #d8b7b7;
   background: #fff5f5;
   color: #8d2d2d;

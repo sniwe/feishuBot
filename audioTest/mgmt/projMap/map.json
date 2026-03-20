@@ -4,7 +4,7 @@
     "name": "audioTest",
     "summary": "Toy browser audio checkpoint player with keyboard controls",
     "root": "C:\\Users\\Qub\\audioTest",
-    "updated": "2026-03-20T04:58:01.553Z",
+    "updated": "2026-03-20T10:03:38.9741359Z",
     "nodes": [
         {
             "id": "control:ui",
@@ -36,7 +36,7 @@
             "summary": "Refactored audio controller with centralized state/UI updates, session save/restore via backend API, audSeg target-lock playback mode, and auth-scoped requests",
             "features": [
                 {
-                    "summary": "Keyboard controls and looping are preserved while Enter can lock a selected audSeg into target mode with a second loop progress bar, Shift hold plus Shift+Space creates subSegs that persist with checkpoints and render on both audEp and target bars, draggable checkpoint markers/tags support micro-adjust with magnifier and 500ms live preview, Ctrl+arrows cycle target-local subSegs, startup restore waits for full audio metadata load via GET /api/session, and all audEp API calls include per-user auth headers/token",
+                    "summary": "Keyboard controls and looping are preserved while Enter can lock a selected audSeg into target mode with a second loop progress bar, Shift hold plus Shift+Space creates subSegs that persist with checkpoints and render on both audEp and target bars, draggable checkpoint markers/tags support micro-adjust with magnifier and 500ms live preview, Ctrl+arrows cycle target-local subSegs, Ctrl+Up/Down now cycles delete targets for checkpoints or target subSeg tags with an x badge and Enter opens confirm-delete (Cancel default), startup restore waits for full audio metadata load via GET /api/session, and all audEp API calls include per-user auth headers/token",
                     "flow": [
                         "e2",
                         "e3",

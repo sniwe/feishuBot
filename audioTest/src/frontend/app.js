@@ -40,6 +40,10 @@
   const subSegValueForm = document.getElementById("subseg-value-form");
   const subSegValueInput = document.getElementById("subseg-value-input");
   const subSegValueList = document.getElementById("subseg-value-list");
+  const deleteConfirmDialog = document.getElementById("delete-confirm-dialog");
+  const deleteConfirmText = document.getElementById("delete-confirm-text");
+  const deleteConfirmCancel = document.getElementById("delete-confirm-cancel");
+  const deleteConfirmDelete = document.getElementById("delete-confirm-delete");
   const guideButtonList = document.getElementById("guide-button-list");
   const guideButtonPlayer = document.getElementById("guide-button-player");
   const guideOverlay = document.getElementById("guide-overlay");
@@ -98,7 +102,10 @@
     guideRafId: null,
     guideLanguage: "en",
     guidePhase: "list-language",
-    guideTooltipLocked: false
+    guideTooltipLocked: false,
+    deleteTargetType: "",
+    deleteTargetIndex: -1,
+    deleteConfirmOpen: false
   };
 
   const DEBUG_AUDIO = (function () {
@@ -125,6 +132,17 @@
   loginForm.addEventListener("submit", handleLoginSubmit);
   if (subSegValueForm) {
     subSegValueForm.addEventListener("submit", handleSubSegValueSubmit);
+  }
+  if (deleteConfirmCancel) {
+    deleteConfirmCancel.addEventListener("click", function () {
+      closeDeleteConfirmDialog();
+      setSaveStatus("Delete cancelled");
+    });
+  }
+  if (deleteConfirmDelete) {
+    deleteConfirmDelete.addEventListener("click", function () {
+      confirmDeleteTarget();
+    });
   }
   if (logoutButton) {
     logoutButton.addEventListener("click", handleLogoutClick);
@@ -341,6 +359,10 @@
       activeElement.dataset &&
       (activeElement.dataset.subSegValueDeleteCancel === "1" || activeElement.dataset.subSegValueDeleteConfirm === "1")
     );
+    const isDeleteConfirmControlFocused = Boolean(
+      activeElement &&
+      (activeElement === deleteConfirmCancel || activeElement === deleteConfirmDelete)
+    );
     debugLog("keydown", {
       code: keyCode,
       key: keyValue,
@@ -384,6 +406,30 @@
         event.preventDefault();
         event.stopPropagation();
         moveGuideStep({ data: { delta: 1 }, deps: {} });
+        return;
+      }
+    }
+
+    if (state.deleteConfirmOpen) {
+      if (isEscapeKey || ((event.ctrlKey || event.metaKey) && isBackspaceKey)) {
+        event.preventDefault();
+        event.stopPropagation();
+        clearDeleteTarget({ silent: false });
+        updateUi();
+        return;
+      }
+      if (isEnterKey) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (isDeleteConfirmControlFocused && activeElement === deleteConfirmDelete) {
+          confirmDeleteTarget();
+        } else {
+          closeDeleteConfirmDialog();
+          setSaveStatus("Delete cancelled");
+        }
+        return;
+      }
+      if (isDeleteConfirmControlFocused) {
         return;
       }
     }
@@ -435,6 +481,11 @@
     if ((event.ctrlKey || event.metaKey) && isBackspaceKey) {
       if (isPlayerActive()) {
         event.preventDefault();
+        if (state.deleteConfirmOpen || hasDeleteTargetSelection()) {
+          clearDeleteTarget({ silent: false });
+          updateUi();
+          return;
+        }
         if (state.activeSubSegValueKey) {
           state.activeSubSegValueKey = null;
           if (subSegValueInput) {
@@ -481,6 +532,18 @@
     }
 
     if (isEnterKey && isSubSegInputFocused) {
+      return;
+    }
+
+    if ((event.ctrlKey || event.metaKey) && (isArrowUp || isArrowDown)) {
+      event.preventDefault();
+      cycleDeleteTarget(isArrowDown ? 1 : -1);
+      return;
+    }
+
+    if (isEnterKey && hasDeleteTargetSelection()) {
+      event.preventDefault();
+      openDeleteConfirmDialog();
       return;
     }
 
@@ -740,6 +803,7 @@
     playerView.classList.add("hidden");
     setPlayerLoading(false);
     state.isPlayerVisible = false;
+    clearDeleteTarget({ silent: true });
   }
 
   function showPlayerView() {
@@ -761,6 +825,7 @@
     playerView.classList.add("hidden");
     setPlayerLoading(false);
     state.isPlayerVisible = false;
+    clearDeleteTarget({ silent: true });
   }
 
   function setPlayerLoading(isLoading, message) {
@@ -2277,6 +2342,7 @@
     state.markerSignature = "";
     state.subSegSignature = "";
     state.targetMarkerSignature = "";
+    clearDeleteTarget({ silent: true });
     renderSubSegValuePanel();
   }
 
@@ -2420,6 +2486,180 @@
     });
     syncSubSegValueSelectionToCurrentTarget();
     renderSubSegValuePanel();
+  }
+
+  function hasDeleteTargetSelection() {
+    return (state.deleteTargetType === "checkpoint" || state.deleteTargetType === "subseg") &&
+      Number.isFinite(state.deleteTargetIndex) &&
+      state.deleteTargetIndex >= 0;
+  }
+
+  function clearDeleteTarget(ctx) {
+    const data = ctx || {};
+    const silent = Boolean(data.silent);
+    const hadTarget = hasDeleteTargetSelection() || state.deleteConfirmOpen;
+    state.deleteTargetType = "";
+    state.deleteTargetIndex = -1;
+    state.deleteConfirmOpen = false;
+    state.markerSignature = "";
+    state.targetMarkerSignature = "";
+    if (deleteConfirmDialog) {
+      deleteConfirmDialog.classList.add("hidden");
+    }
+    if (!silent && hadTarget) {
+      setSaveStatus("Delete target cleared");
+    }
+  }
+
+  function cycleDeleteTarget(step) {
+    if (!isPlayerActive() || !audio.src) {
+      return;
+    }
+    syncTargetSubSegsFromCurrentBounds();
+    let targetType = "";
+    let total = 0;
+    if (hasTargetSpan() && state.targetSubSegs.length > 0) {
+      targetType = "subseg";
+      total = state.targetSubSegs.length;
+    } else if (!hasTargetSpan() && state.checkpoints.length > 0) {
+      targetType = "checkpoint";
+      total = state.checkpoints.length;
+    }
+    if (!targetType || total <= 0) {
+      setSaveStatus(hasTargetSpan() ? "No subSeg tags available for delete target" : "No checkpoints available for delete target");
+      return;
+    }
+    if (state.deleteTargetType !== targetType || state.deleteTargetIndex < 0 || state.deleteTargetIndex >= total) {
+      state.deleteTargetIndex = step > 0 ? 0 : total - 1;
+    } else {
+      state.deleteTargetIndex = (state.deleteTargetIndex + step + total) % total;
+    }
+    state.deleteTargetType = targetType;
+    state.deleteConfirmOpen = false;
+    state.markerSignature = "";
+    state.targetMarkerSignature = "";
+    updateUi();
+
+    if (targetType === "checkpoint") {
+      const point = state.checkpoints[state.deleteTargetIndex];
+      setSaveStatus(
+        "Delete target checkpoint " + String(state.deleteTargetIndex + 1) + "/" + String(total) +
+        ": " + formatTime(Number.isFinite(point) ? point : 0)
+      );
+      return;
+    }
+    const seg = state.targetSubSegs[state.deleteTargetIndex];
+    setSaveStatus(
+      "Delete target subSeg " + String(state.deleteTargetIndex + 1) + "/" + String(total) +
+      ": " + formatCompactedRange(seg ? seg.start : 0, seg ? seg.end : 0)
+    );
+  }
+
+  function openDeleteConfirmDialog() {
+    const target = getActiveDeleteTarget();
+    if (!target) {
+      setSaveStatus("Select a delete target first (Ctrl+Up/Down)");
+      return;
+    }
+    state.deleteConfirmOpen = true;
+    renderDeleteConfirmDialog();
+    requestAnimationFrame(function () {
+      if (!deleteConfirmCancel) {
+        return;
+      }
+      try {
+        deleteConfirmCancel.focus({ preventScroll: true });
+      } catch {
+        deleteConfirmCancel.focus();
+      }
+    });
+    setSaveStatus("Confirm delete target");
+  }
+
+  function closeDeleteConfirmDialog() {
+    state.deleteConfirmOpen = false;
+    renderDeleteConfirmDialog();
+  }
+
+  function getActiveDeleteTarget() {
+    if (!hasDeleteTargetSelection()) {
+      return null;
+    }
+    if (state.deleteTargetType === "checkpoint") {
+      const idx = state.deleteTargetIndex;
+      const seconds = state.checkpoints[idx];
+      if (!Number.isFinite(seconds)) {
+        return null;
+      }
+      return {
+        type: "checkpoint",
+        index: idx,
+        summary: "checkpoint at " + formatTime(seconds)
+      };
+    }
+    if (state.deleteTargetType === "subseg") {
+      syncTargetSubSegsFromCurrentBounds();
+      const idx = state.deleteTargetIndex;
+      const seg = state.targetSubSegs[idx];
+      if (!seg || !Number.isFinite(seg.start) || !Number.isFinite(seg.end) || seg.end <= seg.start) {
+        return null;
+      }
+      return {
+        type: "subseg",
+        index: idx,
+        start: seg.start,
+        end: seg.end,
+        summary: "subSeg " + formatCompactedRange(seg.start, seg.end)
+      };
+    }
+    return null;
+  }
+
+  function confirmDeleteTarget() {
+    const target = getActiveDeleteTarget();
+    if (!target) {
+      clearDeleteTarget({ silent: true });
+      updateUi();
+      setSaveStatus("Delete target is no longer valid");
+      return;
+    }
+
+    if (target.type === "checkpoint") {
+      const deletedTime = state.checkpoints[target.index];
+      state.checkpoints.splice(target.index, 1);
+      state.selectedSpanIndex = -1;
+      state.markerSignature = "";
+      state.targetMarkerSignature = "";
+      clearDeleteTarget({ silent: true });
+      updateUi();
+      enqueueAutoSave();
+      setSaveStatus("Deleted checkpoint " + formatTime(Number.isFinite(deletedTime) ? deletedTime : 0));
+      return;
+    }
+
+    const subSegIndex = state.subSegs.findIndex(function (seg) {
+      return Math.abs(seg.start - target.start) <= 0.01 && Math.abs(seg.end - target.end) <= 0.01;
+    });
+    if (subSegIndex < 0) {
+      clearDeleteTarget({ silent: true });
+      updateUi();
+      setSaveStatus("Delete target is no longer valid");
+      return;
+    }
+    state.subSegs.splice(subSegIndex, 1);
+    const valueKey = getSubSegValueKey(target);
+    if (valueKey && Object.prototype.hasOwnProperty.call(state.subSegValueEntries, valueKey)) {
+      delete state.subSegValueEntries[valueKey];
+    }
+    syncTargetSubSegsFromCurrentBounds();
+    state.selectedTargetSubSegIndex = -1;
+    state.subSegSignature = "";
+    state.markerSignature = "";
+    state.targetMarkerSignature = "";
+    clearDeleteTarget({ silent: true });
+    updateUi();
+    enqueueAutoSave();
+    setSaveStatus("Deleted " + target.summary);
   }
 
   function getSubSegValueKey(seg) {
@@ -2569,6 +2809,19 @@
       subSegValueList.appendChild(card);
     });
     scheduleGuideStepRender({ deps: {} });
+  }
+
+  function renderDeleteConfirmDialog() {
+    if (!deleteConfirmDialog || !deleteConfirmText) {
+      return;
+    }
+    const target = getActiveDeleteTarget();
+    const isVisible = Boolean(state.deleteConfirmOpen && target);
+    deleteConfirmDialog.classList.toggle("hidden", !isVisible);
+    if (!isVisible) {
+      return;
+    }
+    deleteConfirmText.textContent = "Delete " + target.summary + "? This cannot be undone.";
   }
 
   function handleSubSegCardInputChange(event) {
@@ -2929,6 +3182,7 @@
     renderTargetProgress();
     syncSubSegValueSelectionToCurrentTarget();
     renderSubSegValuePanel();
+    renderDeleteConfirmDialog();
 
     if (isPlayerActive() && duration > 0 && !state.hasAutoFocusedProgress) {
       state.hasAutoFocusedProgress = true;
@@ -3052,6 +3306,12 @@
 
       const tag = document.createElement("span");
       tag.className = "checkpoint-tag";
+      const isDeleteTarget = !hasTargetSpan() &&
+        state.deleteTargetType === "checkpoint" &&
+        state.deleteTargetIndex === checkpointIndex;
+      if (isDeleteTarget) {
+        tag.classList.add("is-delete-target");
+      }
       if (boundaryRole) {
         tag.classList.add("cycle-target-tag", "cycle-target-tag-" + boundaryRole);
         if (hasLockedTarget && boundaryRole === "start") {
@@ -3218,6 +3478,9 @@
 
       const tag = document.createElement("span");
       tag.className = "checkpoint-tag target-subseg-tag";
+      if (state.deleteTargetType === "subseg" && state.deleteTargetIndex === idx) {
+        tag.classList.add("is-delete-target");
+      }
       tag.textContent = formatCompactedRange(seg.start, seg.end);
       span.appendChild(tag);
 
@@ -3446,6 +3709,9 @@
     state.activeSubSegValueKey = null;
     state.shiftHoldTss = null;
     state.targetMarkerSignature = "";
+    if (state.deleteTargetType === "subseg" || state.deleteConfirmOpen) {
+      clearDeleteTarget({ silent: true });
+    }
     if (preserveSelection && priorIndex >= 0) {
       state.selectedSpanIndex = priorIndex;
     }
