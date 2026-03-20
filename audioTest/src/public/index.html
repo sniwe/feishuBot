@@ -24,7 +24,10 @@
 
     <section id="library-view" class="library-view">
       <div class="library-head-row">
-        <button id="logout-button" class="logout-button" type="button" aria-label="Log out" title="Log out">Logout</button>
+        <div class="library-head-left">
+          <button id="guide-button-list" class="guide-button" type="button" aria-label="Start guide mode">Guide</button>
+          <button id="logout-button" class="logout-button" type="button" aria-label="Log out" title="Log out">Logout</button>
+        </div>
         <button id="upload-button" class="upload-button" type="button" aria-label="Upload audio" title="Upload audio">Upload</button>
       </div>
       <p id="save-status" class="save-status"></p>
@@ -37,7 +40,7 @@
     <section id="player-view" class="player-view hidden">
       <div class="player-head">
         <button id="back-button" class="back-button" type="button" aria-label="Back to audio list">Back</button>
-        <button id="guide-button" class="guide-button" type="button" aria-label="Start guide mode">Guide</button>
+        <button id="guide-button-player" class="guide-button" type="button" aria-label="Start guide mode">Guide</button>
       </div>
       <section class="player" aria-live="polite">
         <audio id="audio" preload="metadata"></audio>
@@ -90,6 +93,10 @@
           <button id="guide-close-button" class="guide-close-button" type="button" aria-label="Close guide mode">Close</button>
           <p id="guide-step-title" class="guide-step-title"></p>
           <p id="guide-step-text" class="guide-step-text"></p>
+          <div id="guide-language-picker" class="guide-language-picker hidden">
+            <button id="guide-lang-en" class="guide-lang-button" type="button">English</button>
+            <button id="guide-lang-zh" class="guide-lang-button" type="button">中文</button>
+          </div>
           <div class="guide-actions">
             <button id="guide-prev-button" class="guide-nav-button" type="button">Prev</button>
             <span id="guide-step-counter" class="guide-step-counter"></span>
