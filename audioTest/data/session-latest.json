@@ -1,7 +1,7 @@
 {
   "id": "i-accidentally-started-a-global-trend-mp3-mmym0bn3-21q5vx",
   "owner": "zhaoying",
-  "savedAt": "2026-03-20T08:05:05.023Z",
+  "savedAt": "2026-03-20T08:10:30.462Z",
   "file": {
     "name": "I accidentally started a global trend...mp3",
     "type": "audio/mpeg",
@@ -26,8 +26,8 @@
     ],
     "subSegValueEntries": {},
     "selectedSpanIndex": -1,
-    "currentTime": 0.422858,
-    "wasPlaying": true
+    "currentTime": 1.395627,
+    "wasPlaying": false
   },
   "audioId": "i-accidentally-started-a-global-trend-mp3-mmym0bba-p7y5vv",
   "audioUrl": ""
