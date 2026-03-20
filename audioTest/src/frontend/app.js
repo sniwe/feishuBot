@@ -874,6 +874,8 @@
         checkpointCycleText: "This highlighted range shows cycling between checkpoint spans for focused review.",
         playerFocusTitle: "Focused Range Bar",
         playerFocusText: "This lower bar appears when you lock a focused range for detailed review.",
+        subSegCreateTitle: "Create subSeg in Target audSeg",
+        subSegCreateText: "First lock target audSeg with Enter. Then hold Shift to set start, and press Shift+Space at end to create subSeg.",
         inputTitle: "Text Input",
         inputText: "Type short notes for the currently focused small range.",
         cardsTitle: "Note Cards",
@@ -904,6 +906,8 @@
         checkpointCycleText: "\u8fd9\u4e2a\u9ad8\u4eae\u8303\u56f4\u6f14\u793a\u4e86\u5728\u68c0\u67e5\u70b9\u5206\u6bb5\u95f4\u7684\u5faa\u73af\u9009\u62e9\u3002",
         playerFocusTitle: "\u805a\u7126\u8303\u56f4\u6761",
         playerFocusText: "\u9501\u5b9a\u805a\u7126\u8303\u56f4\u540e\uff0c\u4e0b\u65b9\u4f1a\u51fa\u73b0\u8fd9\u4e2a\u8303\u56f4\u6761\u7528\u4e8e\u7cbe\u7ec6\u67e5\u770b\u3002",
+        subSegCreateTitle: "\u5728\u76ee\u6807 audSeg \u5185\u521b\u5efa subSeg",
+        subSegCreateText: "\u5148\u6309 Enter \u9501\u5b9a\u76ee\u6807 audSeg\uff0c\u518d\u6309\u4f4f Shift \u8bbe\u7f6e\u8d77\u70b9\uff0c\u5728\u7ec8\u70b9\u6309 Shift+Space \u521b\u5efa subSeg\u3002",
         inputTitle: "\u6587\u672c\u8f93\u5165\u6846",
         inputText: "\u5728\u8fd9\u91cc\u53ef\u4ee5\u4e3a\u5f53\u524d\u805a\u7126\u7684\u5c0f\u8303\u56f4\u8f93\u5165\u7b80\u77ed\u8bf4\u660e\u3002",
         cardsTitle: "\u8bf4\u660e\u5361\u7247",
@@ -1121,8 +1125,39 @@
     targetProgress.style.setProperty("--progress-pct", "46%");
     targetPlayhead.style.left = "46%";
     targetPlayheadTime.textContent = "00:19";
+    if (targetSubSegActiveFill) {
+      targetSubSegActiveFill.style.display = "none";
+      targetSubSegActiveFill.style.left = "0%";
+      targetSubSegActiveFill.style.width = "0%";
+    }
+    if (targetCheckpointMarkers) {
+      targetCheckpointMarkers.innerHTML = "";
+    }
 
     if (phase === "player-focus") {
+      subSegValuePanel.classList.add("hidden");
+      subSegValueList.innerHTML = "";
+      return;
+    }
+
+    if (phase === "player-subseg-create") {
+      if (targetSubSegActiveFill) {
+        targetSubSegActiveFill.style.display = "block";
+        targetSubSegActiveFill.style.left = "34%";
+        targetSubSegActiveFill.style.width = "18%";
+      }
+      if (targetCheckpointMarkers) {
+        [34, 52].forEach(function (pct, idx) {
+          const marker = document.createElement("span");
+          marker.className = "checkpoint-marker";
+          marker.style.left = String(pct) + "%";
+          const tag = document.createElement("span");
+          tag.className = "checkpoint-tag target-subseg-tag";
+          tag.textContent = idx === 0 ? "subSeg start" : "subSeg end";
+          marker.appendChild(tag);
+          targetCheckpointMarkers.appendChild(marker);
+        });
+      }
       subSegValuePanel.classList.add("hidden");
       subSegValueList.innerHTML = "";
       return;
@@ -1490,6 +1525,13 @@
         phase: "player-focus",
         titleKey: "playerFocusTitle",
         textKey: "playerFocusText",
+        getTarget: function () { return targetProgressWrap; }
+      },
+      {
+        id: "player-subseg-create",
+        phase: "player-subseg-create",
+        titleKey: "subSegCreateTitle",
+        textKey: "subSegCreateText",
         getTarget: function () { return targetProgressWrap; }
       },
       {
