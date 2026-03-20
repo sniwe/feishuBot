@@ -84,6 +84,7 @@
     subSegValueEntries: {},
     subSegCardRecallPositions: {},
     subSegCardDeleteDialogKey: null,
+    subSegValueNodeIdCounter: 0,
     shiftHoldTss: null,
     hasAutoFocusedProgress: false,
     markerSignature: "",
@@ -2859,9 +2860,13 @@
     }
     const createdAt = new Date().toISOString();
     state.subSegValueEntries[key].push({
+      nodeId: createSubSegValueNodeId(),
       value: text,
       createdAt,
-      history: []
+      history: [],
+      children: [],
+      anchorStart: null,
+      anchorEnd: null
     });
     subSegValueInput.value = "";
     renderSubSegValuePanel();
@@ -2884,68 +2889,83 @@
     const values = Array.isArray(state.subSegValueEntries[selectedKey]) ? state.subSegValueEntries[selectedKey] : [];
     subSegValueList.innerHTML = "";
     values.forEach(function (entry, entryIndex) {
-      const card = document.createElement("div");
-      card.className = "subseg-value-card";
-      const input = document.createElement("input");
-      input.type = "text";
-      input.className = "subseg-value-card-input";
-      input.dataset.subSegValueKey = selectedKey;
-      input.dataset.subSegValueIndex = String(entryIndex);
-      const recallPosition = getCardRecallPosition(selectedKey, entryIndex, entry);
-      const isRecalling = recallPosition < getCardCurrentPosition(entry);
-      const recallMeta = getCardRecallMeta(entry, recallPosition);
-      const version = document.createElement("div");
-      version.className = "subseg-value-version";
-      if (isRecalling && recallMeta) {
-        version.textContent = "current -" + String(recallMeta.offset) + " | " + formatSavedAt(recallMeta.createdAt);
-      } else {
-        version.textContent = "current -0 | " + formatSavedAt(entry && entry.createdAt ? entry.createdAt : "");
-      }
-      card.appendChild(version);
-      input.value = isRecalling ? getCardValueAtPosition(entry, recallPosition) : String(entry.value || "");
-      input.readOnly = isRecalling;
-      if (isRecalling) {
-        input.classList.add("is-recalling");
-      }
-      input.addEventListener("change", handleSubSegCardInputChange);
-      card.appendChild(input);
-
-      const deleteDialogKey = getSubSegCardRecallStateKey(selectedKey, entryIndex);
-      if (state.subSegCardDeleteDialogKey === deleteDialogKey) {
-        const actions = document.createElement("div");
-        actions.className = "subseg-value-delete-row";
-
-        const cancelButton = document.createElement("button");
-        cancelButton.type = "button";
-        cancelButton.className = "subseg-value-delete-cancel";
-        cancelButton.dataset.subSegValueDeleteCancel = "1";
-        cancelButton.dataset.subSegValueKey = selectedKey;
-        cancelButton.dataset.subSegValueIndex = String(entryIndex);
-        cancelButton.textContent = "Cancel";
-        cancelButton.addEventListener("click", function () {
-          state.subSegCardDeleteDialogKey = null;
-          renderSubSegValuePanel();
-          focusSubSegCardInput(selectedKey, entryIndex, isRecalling);
-        });
-
-        const deleteButton = document.createElement("button");
-        deleteButton.type = "button";
-        deleteButton.className = "subseg-value-delete-confirm";
-        deleteButton.dataset.subSegValueDeleteConfirm = "1";
-        deleteButton.dataset.subSegValueKey = selectedKey;
-        deleteButton.dataset.subSegValueIndex = String(entryIndex);
-        deleteButton.textContent = "Delete";
-        deleteButton.addEventListener("click", function () {
-          deleteSubSegValueCard(selectedKey, entryIndex);
-        });
-
-        actions.appendChild(cancelButton);
-        actions.appendChild(deleteButton);
-        card.appendChild(actions);
-      }
-      subSegValueList.appendChild(card);
+      renderSubSegValueCardNode(selectedKey, entry, [entryIndex], 0);
     });
     scheduleGuideStepRender({ deps: {} });
+  }
+
+  function renderSubSegValueCardNode(key, entry, path, depth) {
+    if (!subSegValueList || !entry || typeof entry !== "object") {
+      return;
+    }
+    const pathKey = getSubSegValuePathKey(path);
+    const card = document.createElement("div");
+    card.className = "subseg-value-card";
+    card.style.setProperty("--subseg-card-depth", String(Math.max(0, depth)));
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "subseg-value-card-input";
+    input.dataset.subSegValueKey = key;
+    input.dataset.subSegValuePath = pathKey;
+    const recallPosition = getCardRecallPosition(key, pathKey, entry);
+    const isRecalling = recallPosition < getCardCurrentPosition(entry);
+    const recallMeta = getCardRecallMeta(entry, recallPosition);
+    const version = document.createElement("div");
+    version.className = "subseg-value-version";
+    if (isRecalling && recallMeta) {
+      version.textContent = "current -" + String(recallMeta.offset) + " | " + formatSavedAt(recallMeta.createdAt);
+    } else {
+      version.textContent = "current -0 | " + formatSavedAt(entry && entry.createdAt ? entry.createdAt : "");
+    }
+    card.appendChild(version);
+    input.value = isRecalling ? getCardValueAtPosition(entry, recallPosition) : String(entry.value || "");
+    input.readOnly = isRecalling;
+    if (isRecalling) {
+      input.classList.add("is-recalling");
+    }
+    input.addEventListener("change", handleSubSegCardInputChange);
+    card.appendChild(input);
+
+    const deleteDialogKey = getSubSegCardRecallStateKey(key, pathKey);
+    if (state.subSegCardDeleteDialogKey === deleteDialogKey) {
+      const actions = document.createElement("div");
+      actions.className = "subseg-value-delete-row";
+
+      const cancelButton = document.createElement("button");
+      cancelButton.type = "button";
+      cancelButton.className = "subseg-value-delete-cancel";
+      cancelButton.dataset.subSegValueDeleteCancel = "1";
+      cancelButton.dataset.subSegValueKey = key;
+      cancelButton.dataset.subSegValuePath = pathKey;
+      cancelButton.textContent = "Cancel";
+      cancelButton.addEventListener("click", function () {
+        state.subSegCardDeleteDialogKey = null;
+        renderSubSegValuePanel();
+        focusSubSegCardInput(key, pathKey, isRecalling);
+      });
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "subseg-value-delete-confirm";
+      deleteButton.dataset.subSegValueDeleteConfirm = "1";
+      deleteButton.dataset.subSegValueKey = key;
+      deleteButton.dataset.subSegValuePath = pathKey;
+      deleteButton.textContent = "Delete";
+      deleteButton.addEventListener("click", function () {
+        deleteSubSegValueCard(key, pathKey);
+      });
+
+      actions.appendChild(cancelButton);
+      actions.appendChild(deleteButton);
+      card.appendChild(actions);
+    }
+
+    subSegValueList.appendChild(card);
+    entry.children = getSortedChildEntries(entry.children);
+    const sortedChildren = entry.children;
+    sortedChildren.forEach(function (childEntry, childIndex) {
+      renderSubSegValueCardNode(key, childEntry, path.concat(childIndex), depth + 1);
+    });
   }
 
   function renderDeleteConfirmDialog() {
@@ -2964,13 +2984,13 @@
   function handleSubSegCardInputChange(event) {
     const inputEl = event.target;
     const key = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValueKey || "" : "");
-    const index = Number(inputEl && inputEl.dataset ? inputEl.dataset.subSegValueIndex : NaN);
-    const entry = getSubSegValueEntry(key, index);
+    const pathKey = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValuePath || "" : "");
+    const entry = getSubSegValueEntry(key, pathKey);
     if (!entry) {
       return;
     }
     const currentPos = getCardCurrentPosition(entry);
-    const recallPos = getCardRecallPosition(key, index, entry);
+    const recallPos = getCardRecallPosition(key, pathKey, entry);
     if (recallPos < currentPos) {
       inputEl.value = getCardValueAtPosition(entry, recallPos);
       return;
@@ -2998,18 +3018,56 @@
   }
 
   function getSubSegValueEntry(key, index) {
-    if (!key || !Number.isFinite(index)) {
+    const path = getSubSegValuePathArray(index);
+    if (!key || path.length <= 0) {
       return null;
     }
     const list = Array.isArray(state.subSegValueEntries[key]) ? state.subSegValueEntries[key] : null;
-    if (!list || index < 0 || index >= list.length) {
+    if (!list) {
       return null;
     }
-    return list[index];
+    let node = null;
+    for (let i = 0; i < path.length; i += 1) {
+      const idx = path[i];
+      const source = i === 0
+        ? list
+        : (node && Array.isArray(node.children) ? node.children : null);
+      if (!source || idx < 0 || idx >= source.length) {
+        return null;
+      }
+      node = source[idx];
+    }
+    return node;
   }
 
-  function getSubSegCardRecallStateKey(key, index) {
-    return key + "#" + String(index);
+  function getSubSegValuePathArray(pathLike) {
+    if (Array.isArray(pathLike)) {
+      return pathLike.filter(function (v) { return Number.isFinite(v) && v >= 0; }).map(function (v) { return Math.floor(v); });
+    }
+    if (typeof pathLike === "number" && Number.isFinite(pathLike)) {
+      return [Math.floor(pathLike)];
+    }
+    const raw = String(pathLike || "").trim();
+    if (!raw) {
+      return [];
+    }
+    const mapped = raw.split(".")
+      .map(function (part) {
+        const idx = Number(part);
+        return Number.isFinite(idx) && idx >= 0 ? Math.floor(idx) : NaN;
+      });
+    if (mapped.some(function (v) { return !Number.isFinite(v); })) {
+      return [];
+    }
+    return mapped;
+  }
+
+  function getSubSegValuePathKey(pathLike) {
+    return getSubSegValuePathArray(pathLike).join(".");
+  }
+
+  function getSubSegCardRecallStateKey(key, pathKey) {
+    return key + "#" + String(pathKey || "");
   }
 
   function getCardCurrentPosition(entry) {
@@ -3017,8 +3075,8 @@
     return historyLen;
   }
 
-  function getCardRecallPosition(key, index, entry) {
-    const stateKey = getSubSegCardRecallStateKey(key, index);
+  function getCardRecallPosition(key, pathKey, entry) {
+    const stateKey = getSubSegCardRecallStateKey(key, pathKey);
     const currentPos = getCardCurrentPosition(entry);
     const stored = Number(state.subSegCardRecallPositions[stateKey]);
     if (!Number.isFinite(stored) || stored < 0 || stored > currentPos) {
@@ -3027,8 +3085,8 @@
     return stored;
   }
 
-  function setCardRecallPosition(key, index, position) {
-    const stateKey = getSubSegCardRecallStateKey(key, index);
+  function setCardRecallPosition(key, pathKey, position) {
+    const stateKey = getSubSegCardRecallStateKey(key, pathKey);
     state.subSegCardRecallPositions[stateKey] = position;
   }
 
@@ -3074,21 +3132,34 @@
     const isArrowUp = keyCode === "ArrowUp" || keyValue === "ArrowUp" || keyValue === "Up";
     const isArrowDown = keyCode === "ArrowDown" || keyValue === "ArrowDown" || keyValue === "Down";
     const isSpace = keyCode === "Space" || keyValue === " " || keyValue === "Spacebar";
+    const isEnter = keyCode === "Enter" || keyValue === "Enter";
     const isBackspace = keyCode === "Backspace" || keyValue === "Backspace";
     const isCtrl = Boolean(event.ctrlKey || event.metaKey);
     const isShift = Boolean(event.shiftKey);
+    const key = String(active.dataset.subSegValueKey || "");
+    const pathKey = String(active.dataset.subSegValuePath || "");
+    const entry = getSubSegValueEntry(key, pathKey);
+    if (!entry) {
+      return false;
+    }
+    if (isEnter) {
+      const childPathKey = createChildCardFromSelection(key, pathKey, active, entry);
+      if (!childPathKey) {
+        return false;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      renderSubSegValuePanel();
+      focusSubSegCardInput(key, childPathKey, false, { selectAll: true });
+      enqueueAutoSave();
+      return true;
+    }
     if (!isCtrl) {
       return false;
     }
 
-    const key = String(active.dataset.subSegValueKey || "");
-    const index = Number(active.dataset.subSegValueIndex);
-    const entry = getSubSegValueEntry(key, index);
-    if (!entry) {
-      return false;
-    }
     const currentPos = getCardCurrentPosition(entry);
-    let recallPos = getCardRecallPosition(key, index, entry);
+    let recallPos = getCardRecallPosition(key, pathKey, entry);
 
     if (isSpace && (isCtrl || isShift)) {
       event.preventDefault();
@@ -3104,14 +3175,14 @@
     if (isBackspace && isCtrl) {
       event.preventDefault();
       event.stopPropagation();
-      toggleSubSegCardDeleteDialog(key, index);
+      toggleSubSegCardDeleteDialog(key, pathKey);
       return true;
     }
 
     if (isArrowUp || isArrowDown) {
       event.preventDefault();
       event.stopPropagation();
-      moveFocusFromSubSegCardInput(key, index, isArrowDown ? 1 : -1);
+      moveFocusFromSubSegCardInput(key, pathKey, isArrowDown ? 1 : -1);
       return true;
     }
 
@@ -3123,19 +3194,19 @@
       } else {
         recallPos = Math.min(currentPos, recallPos + 1);
       }
-      setCardRecallPosition(key, index, recallPos);
+      setCardRecallPosition(key, pathKey, recallPos);
       const isRecalling = recallPos < currentPos;
       renderSubSegValuePanel();
-      focusSubSegCardInput(key, index, isRecalling);
+      focusSubSegCardInput(key, pathKey, isRecalling);
       return true;
     }
 
     return false;
   }
 
-  function focusSubSegCardInput(key, index, isRecalling) {
+  function focusSubSegCardInput(key, pathKey, isRecalling, options) {
     requestAnimationFrame(function () {
-      const selector = ".subseg-value-card-input[data-sub-seg-value-key=\"" + cssEscapeAttr(key) + "\"][data-sub-seg-value-index=\"" + String(index) + "\"]";
+      const selector = ".subseg-value-card-input[data-sub-seg-value-key=\"" + cssEscapeAttr(key) + "\"][data-sub-seg-value-path=\"" + cssEscapeAttr(pathKey) + "\"]";
       const input = subSegValueList ? subSegValueList.querySelector(selector) : null;
       if (!input) {
         return;
@@ -3146,6 +3217,9 @@
         input.focus({ preventScroll: true });
       } catch {
         input.focus();
+      }
+      if (options && options.selectAll) {
+        input.select();
       }
     });
   }
@@ -3165,8 +3239,8 @@
 
   function moveFocusFromTopSubSegInput(delta) {
     const key = state.activeSubSegValueKey;
-    const list = key && Array.isArray(state.subSegValueEntries[key]) ? state.subSegValueEntries[key] : [];
-    const totalCards = list.length;
+    const flattened = getFlattenedSubSegCardList(key);
+    const totalCards = flattened.length;
     if (totalCards <= 0) {
       return;
     }
@@ -3177,59 +3251,63 @@
       focusTopSubSegInput();
       return;
     }
-    const nextIndex = nextSlot - 1;
-    const nextEntry = getSubSegValueEntry(key, nextIndex);
-    if (!nextEntry) {
+    const next = flattened[nextSlot - 1];
+    if (!next || !next.entry) {
       return;
     }
-    const nextCurrentPos = getCardCurrentPosition(nextEntry);
-    const nextRecallPos = getCardRecallPosition(key, nextIndex, nextEntry);
-    focusSubSegCardInput(key, nextIndex, nextRecallPos < nextCurrentPos);
+    const nextCurrentPos = getCardCurrentPosition(next.entry);
+    const nextRecallPos = getCardRecallPosition(key, next.pathKey, next.entry);
+    focusSubSegCardInput(key, next.pathKey, nextRecallPos < nextCurrentPos);
   }
 
-  function moveFocusFromSubSegCardInput(key, index, delta) {
-    const list = Array.isArray(state.subSegValueEntries[key]) ? state.subSegValueEntries[key] : [];
-    const totalCards = list.length;
+  function moveFocusFromSubSegCardInput(key, pathKey, delta) {
+    const flattened = getFlattenedSubSegCardList(key);
+    const totalCards = flattened.length;
     if (totalCards <= 0) {
       return;
     }
+    const currentIndex = flattened.findIndex(function (item) {
+      return item.pathKey === pathKey;
+    });
+    if (currentIndex < 0) {
+      return;
+    }
     const totalSlots = totalCards + 1;
-    const currentSlot = index + 1;
+    const currentSlot = currentIndex + 1;
     const nextSlot = (currentSlot + delta + totalSlots) % totalSlots;
     if (nextSlot === 0) {
       focusTopSubSegInput();
       return;
     }
-    const nextIndex = nextSlot - 1;
-    const nextEntry = getSubSegValueEntry(key, nextIndex);
-    if (!nextEntry) {
+    const next = flattened[nextSlot - 1];
+    if (!next || !next.entry) {
       return;
     }
-    const nextCurrentPos = getCardCurrentPosition(nextEntry);
-    const nextRecallPos = getCardRecallPosition(key, nextIndex, nextEntry);
-    focusSubSegCardInput(key, nextIndex, nextRecallPos < nextCurrentPos);
+    const nextCurrentPos = getCardCurrentPosition(next.entry);
+    const nextRecallPos = getCardRecallPosition(key, next.pathKey, next.entry);
+    focusSubSegCardInput(key, next.pathKey, nextRecallPos < nextCurrentPos);
   }
 
   function cssEscapeAttr(value) {
     return String(value).replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
   }
 
-  function toggleSubSegCardDeleteDialog(key, index) {
-    const dialogKey = getSubSegCardRecallStateKey(key, index);
+  function toggleSubSegCardDeleteDialog(key, pathKey) {
+    const dialogKey = getSubSegCardRecallStateKey(key, pathKey);
     if (state.subSegCardDeleteDialogKey === dialogKey) {
       state.subSegCardDeleteDialogKey = null;
       renderSubSegValuePanel();
-      focusSubSegCardInput(key, index, false);
+      focusSubSegCardInput(key, pathKey, false);
       return;
     }
     state.subSegCardDeleteDialogKey = dialogKey;
     renderSubSegValuePanel();
-    focusSubSegDeleteCancel(key, index);
+    focusSubSegDeleteCancel(key, pathKey);
   }
 
-  function focusSubSegDeleteCancel(key, index) {
+  function focusSubSegDeleteCancel(key, pathKey) {
     requestAnimationFrame(function () {
-      const selector = "button[data-sub-seg-value-delete-cancel=\"1\"][data-sub-seg-value-key=\"" + cssEscapeAttr(key) + "\"][data-sub-seg-value-index=\"" + String(index) + "\"]";
+      const selector = "button[data-sub-seg-value-delete-cancel=\"1\"][data-sub-seg-value-key=\"" + cssEscapeAttr(key) + "\"][data-sub-seg-value-path=\"" + cssEscapeAttr(pathKey) + "\"]";
       const btn = subSegValueList ? subSegValueList.querySelector(selector) : null;
       if (!btn) {
         return;
@@ -3242,25 +3320,129 @@
     });
   }
 
-  function deleteSubSegValueCard(key, index) {
+  function deleteSubSegValueCard(key, pathKey) {
+    const path = getSubSegValuePathArray(pathKey);
     const list = Array.isArray(state.subSegValueEntries[key]) ? state.subSegValueEntries[key] : null;
-    if (!list || index < 0 || index >= list.length) {
+    if (!list || path.length <= 0) {
       return;
     }
-    list.splice(index, 1);
+    const lastIndex = path[path.length - 1];
+    const parentPath = path.slice(0, -1);
+    const parentNode = parentPath.length > 0 ? getSubSegValueEntry(key, parentPath) : null;
+    const sourceList = parentNode
+      ? (Array.isArray(parentNode.children) ? parentNode.children : null)
+      : list;
+    if (!sourceList || lastIndex < 0 || lastIndex >= sourceList.length) {
+      return;
+    }
+    sourceList.splice(lastIndex, 1);
     if (!list.length) {
       delete state.subSegValueEntries[key];
     }
     state.subSegCardDeleteDialogKey = null;
     const recallKeys = Object.keys(state.subSegCardRecallPositions);
+    const targetPrefix = key + "#" + getSubSegValuePathKey(path);
     recallKeys.forEach(function (k) {
-      if (k.startsWith(key + "#")) {
+      if (k === targetPrefix || k.startsWith(targetPrefix + ".")) {
         delete state.subSegCardRecallPositions[k];
       }
     });
     renderSubSegValuePanel();
     focusTopSubSegInput();
     enqueueAutoSave();
+  }
+
+  function createSubSegValueNodeId() {
+    state.subSegValueNodeIdCounter += 1;
+    return "card-" + Date.now().toString(36) + "-" + state.subSegValueNodeIdCounter.toString(36);
+  }
+
+  function createChildCardFromSelection(key, parentPathKey, inputEl, parentEntry) {
+    if (!key || !parentEntry || !inputEl) {
+      return "";
+    }
+    const selectionStart = Number(inputEl.selectionStart);
+    const selectionEnd = Number(inputEl.selectionEnd);
+    if (!Number.isFinite(selectionStart) || !Number.isFinite(selectionEnd) || selectionEnd <= selectionStart) {
+      return "";
+    }
+    const sourceValue = String(inputEl.value || "");
+    const selectedValue = sourceValue.slice(selectionStart, selectionEnd).trim();
+    if (!selectedValue) {
+      return "";
+    }
+    if (!Array.isArray(parentEntry.children)) {
+      parentEntry.children = [];
+    }
+    const createdAt = new Date().toISOString();
+    const childNode = {
+      nodeId: createSubSegValueNodeId(),
+      value: selectedValue,
+      createdAt,
+      history: [],
+      children: [],
+      anchorStart: selectionStart,
+      anchorEnd: selectionEnd
+    };
+    parentEntry.children.push(childNode);
+    parentEntry.children = getSortedChildEntries(parentEntry.children);
+    const childIndex = parentEntry.children.findIndex(function (child) {
+      return child && child.nodeId === childNode.nodeId;
+    });
+    if (childIndex < 0) {
+      return "";
+    }
+    const childPathKey = getSubSegValuePathKey(parentPathKey + "." + String(childIndex));
+    setCardRecallPosition(key, childPathKey, 0);
+    return childPathKey;
+  }
+
+  function getSortedChildEntries(children) {
+    const list = Array.isArray(children) ? children.slice() : [];
+    list.sort(function (a, b) {
+      const aStart = Number.isFinite(Number(a && a.anchorStart)) ? Number(a.anchorStart) : Number.MAX_SAFE_INTEGER;
+      const bStart = Number.isFinite(Number(b && b.anchorStart)) ? Number(b.anchorStart) : Number.MAX_SAFE_INTEGER;
+      if (aStart !== bStart) {
+        return aStart - bStart;
+      }
+      const aEnd = Number.isFinite(Number(a && a.anchorEnd)) ? Number(a.anchorEnd) : Number.MAX_SAFE_INTEGER;
+      const bEnd = Number.isFinite(Number(b && b.anchorEnd)) ? Number(b.anchorEnd) : Number.MAX_SAFE_INTEGER;
+      if (aEnd !== bEnd) {
+        return aEnd - bEnd;
+      }
+      const aCreated = String(a && a.createdAt ? a.createdAt : "");
+      const bCreated = String(b && b.createdAt ? b.createdAt : "");
+      if (aCreated !== bCreated) {
+        return aCreated < bCreated ? -1 : 1;
+      }
+      const aId = String(a && a.nodeId ? a.nodeId : "");
+      const bId = String(b && b.nodeId ? b.nodeId : "");
+      if (aId === bId) {
+        return 0;
+      }
+      return aId < bId ? -1 : 1;
+    });
+    return list;
+  }
+
+  function getFlattenedSubSegCardList(key) {
+    const roots = key && Array.isArray(state.subSegValueEntries[key]) ? state.subSegValueEntries[key] : [];
+    const flattened = [];
+    function visit(nodes, pathPrefix) {
+      const list = Array.isArray(nodes) ? nodes : [];
+      list.forEach(function (entry, index) {
+        const path = pathPrefix.concat(index);
+        flattened.push({
+          pathKey: getSubSegValuePathKey(path),
+          entry
+        });
+        if (entry && Array.isArray(entry.children) && entry.children.length > 0) {
+          visit(entry.children, path);
+        }
+      });
+    }
+    visit(roots, []);
+    return flattened;
   }
 
   function seekBy(deltaSeconds) {
@@ -3695,43 +3877,7 @@
       const values = Array.isArray(source[key]) ? source[key] : [];
       const cleaned = values
         .map(function (entry) {
-          if (entry && typeof entry === "object") {
-            const value = String(entry.value || "").trim();
-            const createdAt = String(entry.createdAt || nowIso);
-            const historyRaw = Array.isArray(entry.history) ? entry.history : [];
-            const history = historyRaw
-              .map(function (h) {
-                if (h && typeof h === "object") {
-                  const hv = String(h.value || "").trim();
-                  if (!hv) {
-                    return null;
-                  }
-                  return {
-                    value: hv,
-                    createdAt: String(h.createdAt || nowIso)
-                  };
-                }
-                const hv = String(h || "").trim();
-                if (!hv) {
-                  return null;
-                }
-                return {
-                  value: hv,
-                  createdAt: nowIso
-                };
-              })
-              .filter(function (h) { return Boolean(h); })
-              .slice(0, 200);
-            if (!value) {
-              return null;
-            }
-            return { value, createdAt, history };
-          }
-          const value = String(entry || "").trim();
-          if (!value) {
-            return null;
-          }
-          return { value, createdAt: nowIso, history: [] };
+          return normalizeSubSegValueEntryNode(entry, nowIso);
         })
         .filter(function (v) { return Boolean(v); })
         .slice(0, 200);
@@ -3740,6 +3886,72 @@
       }
     });
     return normalized;
+  }
+
+  function normalizeSubSegValueEntryNode(entry, nowIso) {
+    if (entry && typeof entry === "object") {
+      const value = String(entry.value || "").trim();
+      if (!value) {
+        return null;
+      }
+      const createdAt = String(entry.createdAt || nowIso);
+      const historyRaw = Array.isArray(entry.history) ? entry.history : [];
+      const history = historyRaw
+        .map(function (h) {
+          if (h && typeof h === "object") {
+            const hv = String(h.value || "").trim();
+            if (!hv) {
+              return null;
+            }
+            return {
+              value: hv,
+              createdAt: String(h.createdAt || nowIso)
+            };
+          }
+          const hv = String(h || "").trim();
+          if (!hv) {
+            return null;
+          }
+          return {
+            value: hv,
+            createdAt: nowIso
+          };
+        })
+        .filter(function (h) { return Boolean(h); })
+        .slice(0, 200);
+      const childrenRaw = Array.isArray(entry.children) ? entry.children : [];
+      const children = getSortedChildEntries(
+        childrenRaw
+          .map(function (child) { return normalizeSubSegValueEntryNode(child, nowIso); })
+          .filter(function (child) { return Boolean(child); })
+      );
+      const anchorStartRaw = Number(entry.anchorStart);
+      const anchorEndRaw = Number(entry.anchorEnd);
+      const anchorStart = Number.isFinite(anchorStartRaw) && anchorStartRaw >= 0 ? Math.floor(anchorStartRaw) : null;
+      const anchorEnd = Number.isFinite(anchorEndRaw) && anchorEndRaw >= 0 ? Math.floor(anchorEndRaw) : null;
+      return {
+        nodeId: typeof entry.nodeId === "string" && entry.nodeId ? entry.nodeId : createSubSegValueNodeId(),
+        value,
+        createdAt,
+        history,
+        children,
+        anchorStart,
+        anchorEnd
+      };
+    }
+    const value = String(entry || "").trim();
+    if (!value) {
+      return null;
+    }
+    return {
+      nodeId: createSubSegValueNodeId(),
+      value,
+      createdAt: nowIso,
+      history: [],
+      children: [],
+      anchorStart: null,
+      anchorEnd: null
+    };
   }
 
   function getSubSegsForBounds(bounds) {

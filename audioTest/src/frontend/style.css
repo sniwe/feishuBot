@@ -902,6 +902,7 @@ h1, p { margin: 0; }
   border-radius: 6px;
   background: #ffffff;
   padding: 5px 7px;
+  margin-left: calc(var(--subseg-card-depth, 0) * 5px);
   color: #31425f;
   font-size: 0.78rem;
   line-height: 1.3;
