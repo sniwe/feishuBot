@@ -4070,6 +4070,8 @@
 
   function renderGuideFeatureBadge() {
     const showBadge = hasUnseenGuideFeatureForUser(state.authUser);
+    const wasVisible = Boolean(state.guideFeatureBadgeVisible);
+    state.guideFeatureBadgeVisible = showBadge;
     [guideButtonList, guideButtonPlayer].forEach(function (btn) {
       if (!btn) {
         return;
@@ -4077,6 +4079,94 @@
       btn.classList.toggle("has-new-guide-feature", showBadge);
       btn.setAttribute("aria-label", showBadge ? "Start guide mode (new feature added)" : "Start guide mode");
     });
+    if (!showBadge) {
+      hideGuideFeatureSpotlightNudge();
+      return;
+    }
+    if (!wasVisible) {
+      showGuideFeatureSpotlightNudge();
+    }
+  }
+
+  function getGuideFeatureSpotlightTargetButton() {
+    if (state.isPlayerVisible && guideButtonPlayer && !playerView.classList.contains("hidden")) {
+      return guideButtonPlayer;
+    }
+    if (guideButtonList && !libraryView.classList.contains("hidden")) {
+      return guideButtonList;
+    }
+    return guideButtonList || guideButtonPlayer || null;
+  }
+
+  function ensureGuideFeatureNudgeElement() {
+    let el = document.getElementById("guide-feature-nudge");
+    if (el) {
+      return el;
+    }
+    el = document.createElement("div");
+    el.id = "guide-feature-nudge";
+    el.className = "guide-feature-nudge";
+    el.textContent = "New guide features added";
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function positionGuideFeatureNudge(targetButton, nudgeEl) {
+    if (!targetButton || !nudgeEl) {
+      return;
+    }
+    const rect = targetButton.getBoundingClientRect();
+    const top = Math.max(8, rect.top - 2);
+    const preferredLeft = rect.right + 10;
+    nudgeEl.style.top = String(Math.round(top)) + "px";
+    nudgeEl.style.left = String(Math.round(preferredLeft)) + "px";
+    const nudgeRect = nudgeEl.getBoundingClientRect();
+    if ((nudgeRect.right + 8) > window.innerWidth) {
+      const fallbackLeft = Math.max(8, rect.left - nudgeRect.width - 10);
+      nudgeEl.style.left = String(Math.round(fallbackLeft)) + "px";
+    }
+  }
+
+  function showGuideFeatureSpotlightNudge() {
+    if (!state.guideFeatureBadgeVisible) {
+      return;
+    }
+    const targetButton = getGuideFeatureSpotlightTargetButton();
+    if (!targetButton) {
+      return;
+    }
+    [guideButtonList, guideButtonPlayer].forEach(function (btn) {
+      if (btn) {
+        btn.classList.remove("new-feature-spotlight");
+      }
+    });
+    targetButton.classList.add("new-feature-spotlight");
+    const nudgeEl = ensureGuideFeatureNudgeElement();
+    nudgeEl.classList.add("is-visible");
+    positionGuideFeatureNudge(targetButton, nudgeEl);
+    if (state.guideFeatureSpotlightTimerId) {
+      window.clearTimeout(state.guideFeatureSpotlightTimerId);
+      state.guideFeatureSpotlightTimerId = null;
+    }
+    state.guideFeatureSpotlightTimerId = window.setTimeout(function () {
+      hideGuideFeatureSpotlightNudge();
+    }, 4500);
+  }
+
+  function hideGuideFeatureSpotlightNudge() {
+    [guideButtonList, guideButtonPlayer].forEach(function (btn) {
+      if (btn) {
+        btn.classList.remove("new-feature-spotlight");
+      }
+    });
+    const nudgeEl = document.getElementById("guide-feature-nudge");
+    if (nudgeEl) {
+      nudgeEl.classList.remove("is-visible");
+    }
+    if (state.guideFeatureSpotlightTimerId) {
+      window.clearTimeout(state.guideFeatureSpotlightTimerId);
+      state.guideFeatureSpotlightTimerId = null;
+    }
   }
 
   function persistCurrentLoginActivity() {
