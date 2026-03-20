@@ -1263,6 +1263,25 @@
     targetProgress.style.setProperty("--progress-pct", "46%");
     targetPlayhead.style.left = "46%";
     targetPlayheadTime.textContent = "00:19";
+    if (phase === "player-subseg-start") {
+      progress.value = 338;
+      progress.style.setProperty("--progress-pct", "33.8%");
+      playhead.style.left = "33.8%";
+      playheadTime.textContent = "01:16";
+      targetProgress.value = 340;
+      targetProgress.style.setProperty("--progress-pct", "34%");
+      targetPlayhead.style.left = "34%";
+      targetPlayheadTime.textContent = "01:16";
+    } else if (phase === "player-subseg-end") {
+      progress.value = 364;
+      progress.style.setProperty("--progress-pct", "36.4%");
+      playhead.style.left = "36.4%";
+      playheadTime.textContent = "01:22";
+      targetProgress.value = 520;
+      targetProgress.style.setProperty("--progress-pct", "52%");
+      targetPlayhead.style.left = "52%";
+      targetPlayheadTime.textContent = "01:22";
+    }
     if (targetSubSegActiveFill) {
       targetSubSegActiveFill.style.display = "none";
       targetSubSegActiveFill.style.left = "0%";
