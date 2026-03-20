@@ -1169,8 +1169,8 @@
       renderGuideBoundaryTagMarkers({
         data: {
           container: targetCheckpointMarkers,
-          startLabel: "01:05",
-          endLabel: "01:37",
+          startLabel: "01:25",
+          endLabel: "02:12",
           tagExtraClass: "target-subseg-tag"
         },
         deps: {}
@@ -1244,6 +1244,11 @@
         progress.style.setProperty("--progress-pct", "37.8%");
         playhead.style.left = "37.8%";
         playheadTime.textContent = "01:25";
+      } else {
+        progress.value = 378;
+        progress.style.setProperty("--progress-pct", "37.8%");
+        playhead.style.left = "37.8%";
+        playheadTime.textContent = "01:25";
       }
       renderGuideCheckpointMarkers({
         data: {
@@ -1283,28 +1288,32 @@
 
     targetProgressWrap.classList.remove("hidden");
     targetProgress.disabled = true;
-    targetProgress.value = 219;
-    targetProgress.style.setProperty("--progress-pct", "21.9%");
-    targetPlayhead.style.left = "21.9%";
-    targetPlayheadTime.textContent = "01:12";
+    progress.value = 413;
+    progress.style.setProperty("--progress-pct", "41.3%");
+    playhead.style.left = "41.3%";
+    playheadTime.textContent = "01:33";
+    targetProgress.value = 170;
+    targetProgress.style.setProperty("--progress-pct", "17%");
+    targetPlayhead.style.left = "17%";
+    targetPlayheadTime.textContent = "01:33";
     if (phase === "player-subseg-start") {
-      progress.value = 338;
-      progress.style.setProperty("--progress-pct", "33.8%");
-      playhead.style.left = "33.8%";
-      playheadTime.textContent = "01:16";
+      progress.value = 449;
+      progress.style.setProperty("--progress-pct", "44.9%");
+      playhead.style.left = "44.9%";
+      playheadTime.textContent = "01:41";
       targetProgress.value = 344;
       targetProgress.style.setProperty("--progress-pct", "34.4%");
       targetPlayhead.style.left = "34.4%";
-      targetPlayheadTime.textContent = "01:16";
+      targetPlayheadTime.textContent = "01:41";
     } else if (phase === "player-subseg-end") {
-      progress.value = 364;
-      progress.style.setProperty("--progress-pct", "36.4%");
-      playhead.style.left = "36.4%";
-      playheadTime.textContent = "01:22";
+      progress.value = 486;
+      progress.style.setProperty("--progress-pct", "48.6%");
+      playhead.style.left = "48.6%";
+      playheadTime.textContent = "01:49";
       targetProgress.value = 531;
       targetProgress.style.setProperty("--progress-pct", "53.1%");
       targetPlayhead.style.left = "53.1%";
-      targetPlayheadTime.textContent = "01:22";
+      targetPlayheadTime.textContent = "01:49";
     }
     if (targetSubSegActiveFill) {
       targetSubSegActiveFill.style.display = "none";
@@ -1316,8 +1325,8 @@
       renderGuideBoundaryTagMarkers({
         data: {
           container: targetCheckpointMarkers,
-          startLabel: "01:05",
-          endLabel: "01:37",
+          startLabel: "01:25",
+          endLabel: "02:12",
           tagExtraClass: "target-subseg-tag"
         },
         deps: {}
