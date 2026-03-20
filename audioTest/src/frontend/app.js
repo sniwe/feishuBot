@@ -855,8 +855,8 @@
         complete: "Guide complete",
         languageTitle: "Language",
         languageText: "Choose guide language. You can switch later in this same step.",
-        listHeaderTitle: "Audio List",
-        listHeaderText: "This page shows saved audio items. Use Guide to learn safely with demo data only.",
+        uploadButtonTitle: "Upload Button",
+        uploadButtonText: "Use this button to add a new audio file. In guide mode, the next steps simulate processing only.",
         demoCardReadyTitle: "Demo Card",
         demoCardReadyText: "This sample card is for training only. Click Next to simulate a processing state.",
         demoCardUploadTitle: "Upload Phase",
@@ -879,8 +879,8 @@
         complete: "\u5f15\u5bfc\u5b8c\u6210",
         languageTitle: "\u8bed\u8a00",
         languageText: "\u8bf7\u9009\u62e9\u5f15\u5bfc\u8bed\u8a00\u3002\u4f60\u53ef\u4ee5\u5728\u672c\u6b65\u9aa4\u968f\u65f6\u5207\u6362\u3002",
-        listHeaderTitle: "\u97f3\u9891\u5217\u8868\u9875",
-        listHeaderText: "\u8fd9\u91cc\u663e\u793a\u5df2\u4fdd\u5b58\u7684\u97f3\u9891\u6761\u76ee\u3002\u5f15\u5bfc\u6a21\u5f0f\u53ea\u4f7f\u7528\u6f14\u793a\u6570\u636e\uff0c\u4e0d\u5f71\u54cd\u771f\u5b9e\u6570\u636e\u3002",
+        uploadButtonTitle: "\u4e0a\u4f20\u6309\u94ae",
+        uploadButtonText: "\u4f7f\u7528\u8fd9\u4e2a\u6309\u94ae\u6dfb\u52a0\u65b0\u97f3\u9891\u6587\u4ef6\u3002\u5f15\u5bfc\u6a21\u5f0f\u4e0b\uff0c\u540e\u7eed\u6b65\u9aa4\u53ea\u505a\u6d41\u7a0b\u6a21\u62df\u3002",
         demoCardReadyTitle: "\u6f14\u793a\u5361\u7247",
         demoCardReadyText: "\u8fd9\u4e2a\u5361\u7247\u4ec5\u7528\u4e8e\u6559\u5b66\u3002\u70b9\u51fb\u201c\u4e0b\u4e00\u6b65\u201d\u53ef\u6a21\u62df\u8fdb\u5165\u5904\u7406\u72b6\u6001\u3002",
         demoCardUploadTitle: "\u4e0a\u4f20\u9636\u6bb5",
@@ -1328,8 +1328,8 @@
       {
         id: "list-overview",
         phase: "list-overview",
-        titleKey: "listHeaderTitle",
-        textKey: "listHeaderText",
+        titleKey: "uploadButtonTitle",
+        textKey: "uploadButtonText",
         getTarget: function () { return uploadButton || libraryView.querySelector(".library-head-row"); }
       },
       {
