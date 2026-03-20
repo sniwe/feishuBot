@@ -882,6 +882,8 @@
         subSegStartText: "At the beginning of unclear audio, hold Shift to set subSeg start, then keep listening for the end point.",
         subSegEndTitle: "Set subSeg End",
         subSegEndText: "At the end of that unclear audio, press Shift+Space to set subSeg end and finalize the subSeg.",
+        subSegSelectTitle: "Select subSeg For Input",
+        subSegSelectText: "Press Ctrl+Left/Right to cycle subSegs inside this audSeg. Stop on your target subSeg, then press Enter to open text input mode.",
         inputTitle: "Text Input",
         inputText: "Purpose: write your best attempt of the target subSeg audio. If words are uncertain, approximate from hearing only. Do not use dictionary or outside sources.",
         firstCardInputTitle: "Enter First Card Value",
@@ -940,6 +942,8 @@
         subSegStartText: "\u5728\u542c\u4e0d\u6e05\u5185\u5bb9\u7684\u8d77\u70b9\u6309\u4f4f Shift \u8bbe\u5b9a subSeg \u5f00\u59cb\uff0c\u7136\u540e\u7ee7\u7eed\u542c\u5230\u7ed3\u675f\u70b9\u3002",
         subSegEndTitle: "\u8bbe\u7f6e subSeg \u7ec8\u70b9",
         subSegEndText: "\u5728\u8be5\u542c\u4e0d\u6e05\u7247\u6bb5\u7684\u7ed3\u675f\u70b9\u6309 Shift+Space\uff0c\u8bbe\u7f6e subSeg \u7ec8\u70b9\u5e76\u5b8c\u6210 subSeg\u3002",
+        subSegSelectTitle: "\u9009\u62e9\u8981\u8f93\u5165\u7684 subSeg",
+        subSegSelectText: "\u6309 Ctrl+\u5de6/\u53f3 \u5728\u5f53\u524d audSeg \u5185\u5faa\u73af\u9009\u62e9 subSeg\u3002\u9009\u4e2d\u76ee\u6807 subSeg \u540e\uff0c\u6309 Enter \u8fdb\u5165\u6587\u672c\u8f93\u5165\u6a21\u5f0f\u3002",
         inputTitle: "\u6587\u672c\u8f93\u5165\u6846",
         inputText: "\u76ee\u7684\uff1a\u5c06 target subSeg \u7684\u97f3\u9891\u5185\u5bb9\u5c3d\u529b\u5199\u4e0b\u6765\u3002\u4e0d\u786e\u5b9a\u7684\u8bcd\u8bf7\u6309\u542c\u611f\u8fd1\u4f3c\u62fc\u5199\uff0c\u4e0d\u8981\u67e5\u5b57\u5178\uff0c\u4e5f\u4e0d\u8981\u4f9d\u8d56\u5916\u90e8\u8d44\u6e90\u3002",
         firstCardInputTitle: "\u8f93\u5165\u7b2c\u4e00\u7248\u5361\u7247\u5185\u5bb9",
@@ -1349,6 +1353,7 @@
     if (
       phase === "player-subseg-start" ||
       phase === "player-subseg-end" ||
+      phase === "player-subseg-select" ||
       phase === "player-input" ||
       phase === "player-card-first-input" ||
       phase === "player-cards" ||
@@ -1389,7 +1394,12 @@
       selectedSpanOverlay.style.display = "none";
     }
 
-    if (phase === "player-subseg-card" || phase === "player-subseg-start" || phase === "player-subseg-end") {
+    if (
+      phase === "player-subseg-card" ||
+      phase === "player-subseg-start" ||
+      phase === "player-subseg-end" ||
+      phase === "player-subseg-select"
+    ) {
       subSegValuePanel.classList.add("hidden");
       subSegValueList.innerHTML = "";
       return;
@@ -1859,6 +1869,13 @@
         phase: "player-subseg-end",
         titleKey: "subSegEndTitle",
         textKey: "subSegEndText",
+        getTarget: function () { return targetProgressWrap; }
+      },
+      {
+        id: "player-subseg-select",
+        phase: "player-subseg-select",
+        titleKey: "subSegSelectTitle",
+        textKey: "subSegSelectText",
         getTarget: function () { return targetProgressWrap; }
       },
       {
