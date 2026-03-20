@@ -429,9 +429,12 @@
         }
         return;
       }
-      if (isDeleteConfirmControlFocused) {
+      if (keyCode === "Tab") {
         return;
       }
+      event.preventDefault();
+      event.stopPropagation();
+      return;
     }
 
     if ((event.ctrlKey || event.metaKey) && isSubSegInputFocused && (isBackspaceKey || isDeleteKey)) {

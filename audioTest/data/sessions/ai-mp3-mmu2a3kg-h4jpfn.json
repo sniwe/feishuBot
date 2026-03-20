@@ -1,7 +1,7 @@
 {
   "id": "ai-mp3-mmu2a3kg-h4jpfn",
   "owner": "rhys",
-  "savedAt": "2026-03-20T08:02:10.038Z",
+  "savedAt": "2026-03-20T10:06:19.568Z",
   "file": {
     "name": "AI的胡说八道，为什么比人类骗子“更危险”？.mp3",
     "type": "audio/mpeg",
@@ -13,8 +13,7 @@
       82.773824,
       168.603169,
       359.202853,
-      494.202853,
-      664.202853
+      494.202853
     ],
     "subSegs": [
       {
@@ -89,10 +88,17 @@
             }
           ]
         }
+      ],
+      "15.453|19.233": [
+        {
+          "value": "am i losign all control?",
+          "createdAt": "2026-03-20T10:06:19.171Z",
+          "history": []
+        }
       ]
     },
     "selectedSpanIndex": -1,
-    "currentTime": 0.02,
+    "currentTime": 15.453381,
     "wasPlaying": false
   },
   "audioId": "ai-mp3-mmu2a3b9-i7zysw",
