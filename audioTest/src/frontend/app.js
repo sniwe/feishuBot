@@ -3115,7 +3115,7 @@
       return true;
     }
 
-    if ((isArrowLeft || isArrowRight)) {
+    if ((isArrowLeft || isArrowRight) && !isShift) {
       event.preventDefault();
       event.stopPropagation();
       if (isArrowLeft) {

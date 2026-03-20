@@ -1,7 +1,7 @@
 {
   "id": "ai-mp3-mmu2a3kg-h4jpfn",
   "owner": "rhys",
-  "savedAt": "2026-03-20T11:25:19.287Z",
+  "savedAt": "2026-03-20T14:15:28.478Z",
   "file": {
     "name": "AI的胡说八道，为什么比人类骗子“更危险”？.mp3",
     "type": "audio/mpeg",
@@ -50,30 +50,6 @@
           "history": []
         }
       ],
-      "7.045|9.052": [
-        {
-          "value": "input1 is new, and you are a poo",
-          "createdAt": "2026-03-19T02:51:12.489Z",
-          "history": [
-            {
-              "value": "input1",
-              "createdAt": "2026-03-19T02:51:00.754Z"
-            },
-            {
-              "value": "input1is",
-              "createdAt": "2026-03-19T02:51:00.754Z"
-            },
-            {
-              "value": "input1isnew",
-              "createdAt": "2026-03-19T02:51:00.754Z"
-            },
-            {
-              "value": "input1 is new",
-              "createdAt": "2026-03-19T02:51:00.754Z"
-            }
-          ]
-        }
-      ],
       "10.564|12.416": [
         {
           "value": "test the second one again",
@@ -97,10 +73,26 @@
           "createdAt": "2026-03-20T10:06:40.231Z",
           "history": []
         }
+      ],
+      "7.045|9.052": [
+        {
+          "value": "this is a test",
+          "createdAt": "2026-03-20T14:15:27.980Z",
+          "history": [
+            {
+              "value": "test",
+              "createdAt": "2026-03-20T14:05:12.066Z"
+            },
+            {
+              "value": "test 2",
+              "createdAt": "2026-03-20T14:05:16.139Z"
+            }
+          ]
+        }
       ]
     },
     "selectedSpanIndex": -1,
-    "currentTime": 140,
+    "currentTime": 7.044739,
     "wasPlaying": false
   },
   "audioId": "ai-mp3-mmu2a3b9-i7zysw",
