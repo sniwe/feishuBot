@@ -940,6 +940,10 @@
         checkpointSetText: "Move playback to a logical boundary. Here the cursor is at 01:25. Press Shift+Space to add a checkpoint at this exact time.",
         checkpointAddTitle: "Checkpoint Timestamps",
         checkpointAddText: "Checkpoint tags are shown as timestamps, matching runtime view. Each pair of timestamps defines one audSeg boundary.",
+        checkpointDeleteTargetTitle: "Delete Checkpoint Target",
+        checkpointDeleteTargetText: "On the audEp bar, press Ctrl+Up/Down to cycle delete targets across checkpoint tags.",
+        checkpointDeleteConfirmTitle: "Delete Checkpoint Confirm",
+        checkpointDeleteConfirmText: "Press Enter to open delete dialog. In dialog, Enter on Delete confirms; Esc or Ctrl+Backspace cancels.",
         checkpointCycleTitle: "Cycle-Select Span",
         checkpointCycleText: "Use Ctrl+Left/Right to cycle checkpoint spans, then press Enter to lock the current span as target audSeg.",
         playerFocusTitle: "Target audSeg Bar",
@@ -952,6 +956,12 @@
         subSegEndText: "At the end of that unclear audio, press Shift+Space to set subSeg end and finalize the subSeg.",
         subSegSelectTitle: "Select subSeg For Input",
         subSegSelectText: "Press Ctrl+Left/Right to cycle subSegs inside this audSeg. Stop on your target subSeg, then press Enter to open text input mode.",
+        subSegDeleteTargetTitle: "Delete subSeg Target",
+        subSegDeleteTargetText: "Inside target audSeg, press Ctrl+Up/Down to cycle delete targets across subSeg tags.",
+        subSegDeleteConfirmTitle: "Delete subSeg Confirm",
+        subSegDeleteConfirmText: "Press Enter to open delete dialog. In dialog, Enter on Delete confirms; Esc or Ctrl+Backspace cancels.",
+        guideCheckpointDeleteSummary: "checkpoint at 02:12",
+        guideSubSegDeleteSummary: "subSeg 01:41-49",
         inputTitle: "Text Input",
         inputText: "Purpose: write your best attempt of the target subSeg audio. If words are uncertain, approximate from hearing only. Do not use dictionary or outside sources.",
         firstCardInputTitle: "Enter First Card Value",
@@ -1000,6 +1010,10 @@
         checkpointSetText: "\u5c06\u64ad\u653e\u5b9a\u4f4d\u5230\u903b\u8f91\u8fb9\u754c\u3002\u6b64\u5904\u5149\u6807\u5728 01:25\uff0c\u6309 Shift+Space \u5373\u53ef\u5728\u8be5\u65f6\u95f4\u6dfb\u52a0\u68c0\u67e5\u70b9\u3002",
         checkpointAddTitle: "\u68c0\u67e5\u70b9\u65f6\u95f4\u6233",
         checkpointAddText: "\u68c0\u67e5\u70b9\u6807\u7b7e\u4ee5\u65f6\u95f4\u6233\u663e\u793a\uff08\u4e0e\u8fd0\u884c\u754c\u9762\u4e00\u81f4\uff09\u3002\u6bcf\u4e24\u4e2a\u65f6\u95f4\u6233\u5b9a\u4e49\u4e00\u4e2a audSeg \u8fb9\u754c\u3002",
+        checkpointDeleteTargetTitle: "\u9009\u62e9\u8981\u5220\u9664\u7684 checkpoint",
+        checkpointDeleteTargetText: "\u5728 audEp \u8fdb\u5ea6\u6761\u4e0a\u6309 Ctrl+\u4e0a/\u4e0b\uff0c\u5728 checkpoint \u6807\u7b7e\u95f4\u5faa\u73af\u9009\u62e9\u5220\u9664\u76ee\u6807\u3002",
+        checkpointDeleteConfirmTitle: "\u786e\u8ba4\u5220\u9664 checkpoint",
+        checkpointDeleteConfirmText: "\u6309 Enter \u6253\u5f00\u5220\u9664\u786e\u8ba4\u6846\u3002\u5728\u786e\u8ba4\u6846\u4e2d\uff0c\u5bf9\u7740 Delete \u6309 Enter \u6267\u884c\u5220\u9664\uff1bEsc \u6216 Ctrl+Backspace \u53d6\u6d88\u3002",
         checkpointCycleTitle: "\u5faa\u73af\u9009\u62e9\u8303\u56f4",
         checkpointCycleText: "\u4f7f\u7528 Ctrl+\u5de6/\u53f3 \u5728\u68c0\u67e5\u70b9\u5206\u6bb5\u95f4\u5faa\u73af\u9009\u62e9\uff0c\u7136\u540e\u6309 Enter \u5c06\u5f53\u524d\u5206\u6bb5\u9501\u5b9a\u4e3a target audSeg\u3002",
         playerFocusTitle: "\u76ee\u6807 audSeg \u8303\u56f4\u6761",
@@ -1012,6 +1026,12 @@
         subSegEndText: "\u5728\u8be5\u542c\u4e0d\u6e05\u7247\u6bb5\u7684\u7ed3\u675f\u70b9\u6309 Shift+Space\uff0c\u8bbe\u7f6e subSeg \u7ec8\u70b9\u5e76\u5b8c\u6210 subSeg\u3002",
         subSegSelectTitle: "\u9009\u62e9\u8981\u8f93\u5165\u7684 subSeg",
         subSegSelectText: "\u6309 Ctrl+\u5de6/\u53f3 \u5728\u5f53\u524d audSeg \u5185\u5faa\u73af\u9009\u62e9 subSeg\u3002\u9009\u4e2d\u76ee\u6807 subSeg \u540e\uff0c\u6309 Enter \u8fdb\u5165\u6587\u672c\u8f93\u5165\u6a21\u5f0f\u3002",
+        subSegDeleteTargetTitle: "\u9009\u62e9\u8981\u5220\u9664\u7684 subSeg",
+        subSegDeleteTargetText: "\u5728 target audSeg \u5185\u6309 Ctrl+\u4e0a/\u4e0b\uff0c\u5728 subSeg \u6807\u7b7e\u95f4\u5faa\u73af\u9009\u62e9\u5220\u9664\u76ee\u6807\u3002",
+        subSegDeleteConfirmTitle: "\u786e\u8ba4\u5220\u9664 subSeg",
+        subSegDeleteConfirmText: "\u6309 Enter \u6253\u5f00\u5220\u9664\u786e\u8ba4\u6846\u3002\u5728\u786e\u8ba4\u6846\u4e2d\uff0c\u5bf9\u7740 Delete \u6309 Enter \u6267\u884c\u5220\u9664\uff1bEsc \u6216 Ctrl+Backspace \u53d6\u6d88\u3002",
+        guideCheckpointDeleteSummary: "checkpoint at 02:12",
+        guideSubSegDeleteSummary: "subSeg 01:41-49",
         inputTitle: "\u6587\u672c\u8f93\u5165\u6846",
         inputText: "\u76ee\u7684\uff1a\u5c06 target subSeg \u7684\u97f3\u9891\u5185\u5bb9\u5c3d\u529b\u5199\u4e0b\u6765\u3002\u4e0d\u786e\u5b9a\u7684\u8bcd\u8bf7\u6309\u542c\u611f\u8fd1\u4f3c\u62fc\u5199\uff0c\u4e0d\u8981\u67e5\u5b57\u5178\uff0c\u4e5f\u4e0d\u8981\u4f9d\u8d56\u5916\u90e8\u8d44\u6e90\u3002",
         firstCardInputTitle: "\u8f93\u5165\u7b2c\u4e00\u7248\u5361\u7247\u5185\u5bb9",
@@ -1189,6 +1209,9 @@
 
       const tag = document.createElement("span");
       tag.className = "checkpoint-tag";
+      if (markerDef.deleteTarget) {
+        tag.classList.add("is-delete-target");
+      }
       if (markerDef.boundary === "start" || markerDef.boundary === "end") {
         tag.classList.add("cycle-target-tag", "cycle-target-tag-" + markerDef.boundary);
       }
@@ -1227,6 +1250,7 @@
     const { data = {}, deps } = ctx;
     void deps;
     const mode = String(data.mode || "complete");
+    const deleteTarget = Boolean(data.deleteTarget);
     if (targetSubSegActiveFill) {
       if (mode === "complete") {
         targetSubSegActiveFill.style.display = "block";
@@ -1263,11 +1287,29 @@
         span.style.width = "18.7%";
         const tag = document.createElement("span");
         tag.className = "checkpoint-tag target-subseg-tag";
+        if (deleteTarget) {
+          tag.classList.add("is-delete-target");
+        }
         tag.textContent = "01:41-49";
         span.appendChild(tag);
         targetCheckpointMarkers.appendChild(span);
       }
     }
+  }
+
+  function hideGuideDeleteDialog() {
+    if (!deleteConfirmDialog) {
+      return;
+    }
+    deleteConfirmDialog.classList.add("hidden");
+  }
+
+  function showGuideDeleteDialog(summary) {
+    if (!deleteConfirmDialog || !deleteConfirmText) {
+      return;
+    }
+    deleteConfirmText.textContent = "Delete " + String(summary || "target") + "? This cannot be undone.";
+    deleteConfirmDialog.classList.remove("hidden");
   }
 
   function renderGuideMainSubSegOverlay(ctx) {
@@ -1288,7 +1330,9 @@
     const { data = {}, deps } = ctx;
     void deps;
     const phase = String(data.phase || "");
+    const guideCopy = getGuideCopy({ deps: {} });
     fileName.textContent = "Guide Demo - Episode 01.mp3";
+    hideGuideDeleteDialog();
     progress.disabled = true;
     progress.value = 320;
     progress.style.setProperty("--progress-pct", "32%");
@@ -1317,7 +1361,13 @@
       return;
     }
 
-    if (phase === "player-checkpoint-set" || phase === "player-checkpoint-add" || phase === "player-checkpoint-cycle") {
+    if (
+      phase === "player-checkpoint-set" ||
+      phase === "player-checkpoint-add" ||
+      phase === "player-checkpoint-delete-target" ||
+      phase === "player-checkpoint-delete-confirm" ||
+      phase === "player-checkpoint-cycle"
+    ) {
       if (phase === "player-checkpoint-set") {
         progress.value = 378;
         progress.style.setProperty("--progress-pct", "37.8%");
@@ -1340,7 +1390,7 @@
             : [
               { pct: 13.8, label: "00:31" },
               { pct: 37.8, label: "01:25", boundary: "start" },
-              { pct: 58.7, label: "02:12", boundary: "end" },
+              { pct: 58.7, label: "02:12", boundary: "end", deleteTarget: phase === "player-checkpoint-delete-target" || phase === "player-checkpoint-delete-confirm" },
               { pct: 84, label: "03:09" }
             ]
         },
@@ -1358,6 +1408,9 @@
         selectedSpanOverlay.style.display = "block";
         selectedSpanOverlay.style.left = "37.8%";
         selectedSpanOverlay.style.width = "20.9%";
+      }
+      if (phase === "player-checkpoint-delete-confirm") {
+        showGuideDeleteDialog(guideCopy.guideCheckpointDeleteSummary || "checkpoint at 02:12");
       }
       targetProgressWrap.classList.add("hidden");
       subSegValuePanel.classList.add("hidden");
@@ -1422,6 +1475,8 @@
       phase === "player-subseg-start" ||
       phase === "player-subseg-end" ||
       phase === "player-subseg-select" ||
+      phase === "player-subseg-delete-target" ||
+      phase === "player-subseg-delete-confirm" ||
       phase === "player-input" ||
       phase === "player-card-first-input" ||
       phase === "player-cards" ||
@@ -1436,7 +1491,13 @@
       phase === "player-exit-list"
     ) {
       const targetMode = phase === "player-subseg-start" ? "start-only" : "complete";
-      renderGuideTargetSubSeg({ data: { mode: targetMode }, deps: {} });
+      renderGuideTargetSubSeg({
+        data: {
+          mode: targetMode,
+          deleteTarget: phase === "player-subseg-delete-target" || phase === "player-subseg-delete-confirm"
+        },
+        deps: {}
+      });
       if (targetMode === "complete") {
         renderGuideMainSubSegOverlay({ deps: {} });
       }
@@ -1462,11 +1523,17 @@
       selectedSpanOverlay.style.display = "none";
     }
 
+    if (phase === "player-subseg-delete-confirm") {
+      showGuideDeleteDialog(guideCopy.guideSubSegDeleteSummary || "subSeg 01:41-49");
+    }
+
     if (
       phase === "player-subseg-card" ||
       phase === "player-subseg-start" ||
       phase === "player-subseg-end" ||
-      phase === "player-subseg-select"
+      phase === "player-subseg-select" ||
+      phase === "player-subseg-delete-target" ||
+      phase === "player-subseg-delete-confirm"
     ) {
       subSegValuePanel.classList.add("hidden");
       subSegValueList.innerHTML = "";
@@ -1905,6 +1972,20 @@
         getTarget: function () { return checkpointMarkers || progressTrackMain; }
       },
       {
+        id: "player-checkpoint-delete-target",
+        phase: "player-checkpoint-delete-target",
+        titleKey: "checkpointDeleteTargetTitle",
+        textKey: "checkpointDeleteTargetText",
+        getTarget: function () { return checkpointMarkers || progressTrackMain; }
+      },
+      {
+        id: "player-checkpoint-delete-confirm",
+        phase: "player-checkpoint-delete-confirm",
+        titleKey: "checkpointDeleteConfirmTitle",
+        textKey: "checkpointDeleteConfirmText",
+        getTarget: function () { return deleteConfirmDialog || checkpointMarkers || progressTrackMain; }
+      },
+      {
         id: "player-checkpoint-cycle",
         phase: "player-checkpoint-cycle",
         titleKey: "checkpointCycleTitle",
@@ -1945,6 +2026,20 @@
         titleKey: "subSegSelectTitle",
         textKey: "subSegSelectText",
         getTarget: function () { return targetProgressWrap; }
+      },
+      {
+        id: "player-subseg-delete-target",
+        phase: "player-subseg-delete-target",
+        titleKey: "subSegDeleteTargetTitle",
+        textKey: "subSegDeleteTargetText",
+        getTarget: function () { return targetProgressWrap; }
+      },
+      {
+        id: "player-subseg-delete-confirm",
+        phase: "player-subseg-delete-confirm",
+        titleKey: "subSegDeleteConfirmTitle",
+        textKey: "subSegDeleteConfirmText",
+        getTarget: function () { return deleteConfirmDialog || targetProgressWrap; }
       },
       {
         id: "player-input",
