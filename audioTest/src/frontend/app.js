@@ -1240,23 +1240,23 @@
 
     if (phase === "player-checkpoint-set" || phase === "player-checkpoint-add" || phase === "player-checkpoint-cycle") {
       if (phase === "player-checkpoint-set") {
-        progress.value = 333;
-        progress.style.setProperty("--progress-pct", "33.3%");
-        playhead.style.left = "33.3%";
+        progress.value = 378;
+        progress.style.setProperty("--progress-pct", "37.8%");
+        playhead.style.left = "37.8%";
         playheadTime.textContent = "01:25";
       }
       renderGuideCheckpointMarkers({
         data: {
           markers: phase === "player-checkpoint-set"
             ? [
-              { pct: 14, label: "00:31" },
-              { pct: 58, label: "02:12" },
+              { pct: 13.8, label: "00:31" },
+              { pct: 58.7, label: "02:12" },
               { pct: 84, label: "03:09" }
             ]
             : [
-              { pct: 14, label: "00:31" },
-              { pct: 33, label: "01:25", boundary: "start" },
-              { pct: 58, label: "02:12", boundary: "end" },
+              { pct: 13.8, label: "00:31" },
+              { pct: 37.8, label: "01:25", boundary: "start" },
+              { pct: 58.7, label: "02:12", boundary: "end" },
               { pct: 84, label: "03:09" }
             ]
         },
@@ -1272,8 +1272,8 @@
       });
       if (phase === "player-checkpoint-cycle") {
         selectedSpanOverlay.style.display = "block";
-        selectedSpanOverlay.style.left = "33%";
-        selectedSpanOverlay.style.width = "25%";
+        selectedSpanOverlay.style.left = "37.8%";
+        selectedSpanOverlay.style.width = "20.9%";
       }
       targetProgressWrap.classList.add("hidden");
       subSegValuePanel.classList.add("hidden");
@@ -1365,8 +1365,8 @@
     if (phase === "player-exit-audseg" || phase === "player-exit-list") {
       targetProgressWrap.classList.add("hidden");
       selectedSpanOverlay.style.display = "block";
-      selectedSpanOverlay.style.left = "33%";
-      selectedSpanOverlay.style.width = "25%";
+      selectedSpanOverlay.style.left = "37.8%";
+      selectedSpanOverlay.style.width = "20.9%";
     }
 
     if (phase === "player-exit-list") {
@@ -1414,7 +1414,7 @@
       const inputEl = document.createElement("input");
       inputEl.type = "text";
       inputEl.className = "subseg-value-card-input";
-      inputEl.value = recalled ? "\u524d\u540e\u4e24\u6e05" : "\u94b1\u8d27\u4e24\u6e05";
+      inputEl.value = (recalled || phase === "player-cards") ? "\u524d\u540e\u4e24\u6e05" : "\u94b1\u8d27\u4e24\u6e05";
       inputEl.readOnly = true;
       if (recalled) {
         inputEl.classList.add("is-recalling");
@@ -1435,9 +1435,11 @@
       if (!recalled) {
         const historyHint = document.createElement("div");
         historyHint.className = "subseg-value-version";
-        historyHint.textContent = editing
-          ? "history: \u524d\u540e\u4e24\u6e05 | current: \u94b1\u8d27\u4e24\u6e05"
-          : "history: \u524d\u540e\u4e24\u6e05";
+        historyHint.textContent = phase === "player-cards"
+          ? "history: (none yet)"
+          : (editing
+            ? "history: \u524d\u540e\u4e24\u6e05 | current: \u94b1\u8d27\u4e24\u6e05"
+            : "history: \u524d\u540e\u4e24\u6e05");
         card.appendChild(historyHint);
       }
 
