@@ -1,7 +1,7 @@
 {
   "id": "ai-mp3-mmu2a3kg-h4jpfn",
   "owner": "rhys",
-  "savedAt": "2026-03-20T14:15:28.478Z",
+  "savedAt": "2026-03-20T15:04:34.456Z",
   "file": {
     "name": "AI的胡说八道，为什么比人类骗子“更危险”？.mp3",
     "type": "audio/mpeg",
@@ -45,13 +45,18 @@
     "subSegValueEntries": {
       "74.306|77.401": [
         {
+          "nodeId": "card-mmz14vgy-1",
           "value": "以一种一项不到的方式boji到你",
           "createdAt": "2026-03-19T02:51:00.754Z",
-          "history": []
+          "history": [],
+          "children": [],
+          "anchorStart": null,
+          "anchorEnd": null
         }
       ],
       "10.564|12.416": [
         {
+          "nodeId": "card-mmz14vgy-2",
           "value": "test the second one again",
           "createdAt": "2026-03-19T03:20:06.529Z",
           "history": [
@@ -59,23 +64,35 @@
               "value": "test the second one",
               "createdAt": "2026-03-19T03:20:02.407Z"
             }
-          ]
+          ],
+          "children": [],
+          "anchorStart": null,
+          "anchorEnd": null
         }
       ],
       "15.453|19.233": [
         {
+          "nodeId": "card-mmz14vgy-3",
           "value": "am i losign all control?",
           "createdAt": "2026-03-20T10:06:19.171Z",
-          "history": []
+          "history": [],
+          "children": [],
+          "anchorStart": null,
+          "anchorEnd": null
         },
         {
+          "nodeId": "card-mmz14vgy-4",
           "value": "test 2",
           "createdAt": "2026-03-20T10:06:40.231Z",
-          "history": []
+          "history": [],
+          "children": [],
+          "anchorStart": null,
+          "anchorEnd": null
         }
       ],
       "7.045|9.052": [
         {
+          "nodeId": "card-mmz14vgy-5",
           "value": "this is a test",
           "createdAt": "2026-03-20T14:15:27.980Z",
           "history": [
@@ -87,7 +104,29 @@
               "value": "test 2",
               "createdAt": "2026-03-20T14:05:16.139Z"
             }
-          ]
+          ],
+          "children": [
+            {
+              "nodeId": "card-mmz15cwn-7",
+              "value": "this",
+              "createdAt": "2026-03-20T15:04:27.287Z",
+              "history": [],
+              "children": [],
+              "anchorStart": 0,
+              "anchorEnd": 4
+            },
+            {
+              "nodeId": "card-mmz152im-6",
+              "value": "test",
+              "createdAt": "2026-03-20T15:04:13.822Z",
+              "history": [],
+              "children": [],
+              "anchorStart": 10,
+              "anchorEnd": 14
+            }
+          ],
+          "anchorStart": null,
+          "anchorEnd": null
         }
       ]
     },
