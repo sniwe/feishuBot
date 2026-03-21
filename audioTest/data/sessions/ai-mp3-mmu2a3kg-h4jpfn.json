@@ -1,9 +1,9 @@
 {
   "id": "ai-mp3-mmu2a3kg-h4jpfn",
   "owner": "rhys",
-  "savedAt": "2026-03-21T04:58:07.830Z",
-  "updatedAt": "2026-03-21T04:58:07.830Z",
-  "revision": 5,
+  "savedAt": "2026-03-21T05:03:27.641Z",
+  "updatedAt": "2026-03-21T05:03:27.641Z",
+  "revision": 8,
   "file": {
     "name": "AI的胡说八道，为什么比人类骗子更危险？.mp3",
     "type": "audio/mpeg",
@@ -116,15 +116,6 @@
               "children": [],
               "anchorStart": 0,
               "anchorEnd": 4
-            },
-            {
-              "nodeId": "card-mmz152im-6",
-              "value": "test",
-              "createdAt": "2026-03-20T15:04:13.822Z",
-              "history": [],
-              "children": [],
-              "anchorStart": 10,
-              "anchorEnd": 14
             }
           ],
           "anchorStart": 0,
@@ -146,35 +137,6 @@
               "anchorEnd": 17
             },
             {
-              "nodeId": "card-mmzr38mf-a",
-              "value": "under the puddle",
-              "createdAt": "2026-03-21T03:10:38.439Z",
-              "history": [],
-              "children": [
-                {
-                  "nodeId": "card-mmzr3e01-b",
-                  "value": "the puddle",
-                  "createdAt": "2026-03-21T03:10:45.409Z",
-                  "history": [],
-                  "children": [
-                    {
-                      "nodeId": "card-mmzr3gn2-c",
-                      "value": "puddle",
-                      "createdAt": "2026-03-21T03:10:48.830Z",
-                      "history": [],
-                      "children": [],
-                      "anchorStart": 4,
-                      "anchorEnd": 10
-                    }
-                  ],
-                  "anchorStart": 6,
-                  "anchorEnd": 16
-                }
-              ],
-              "anchorStart": 18,
-              "anchorEnd": 34
-            },
-            {
               "nodeId": "card-mmzs7va8-1",
               "value": "puddle",
               "createdAt": "2026-03-21T03:42:14.048Z",
@@ -190,7 +152,7 @@
       ]
     },
     "selectedSpanIndex": -1,
-    "currentTime": 140.02,
+    "currentTime": 7.044739,
     "wasPlaying": false
   },
   "audioId": "ai-mp3-mmu2a3b9-i7zysw",
