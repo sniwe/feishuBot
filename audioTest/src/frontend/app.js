@@ -510,7 +510,7 @@
           renderSubSegValuePanel();
           setSaveStatus("audSeg subSeg value selection exited");
         }
-      } else if ((event.ctrlKey || event.metaKey) && (isArrowUp || isArrowDown)) {
+      } else if ((event.ctrlKey || event.metaKey) && !event.shiftKey && (isArrowUp || isArrowDown)) {
         event.preventDefault();
         event.stopPropagation();
         moveFocusFromTopSubSegInput(isArrowDown ? 1 : -1);
@@ -3652,6 +3652,7 @@
     }
     entry.value = nextValue;
     entry.createdAt = new Date().toISOString();
+    setCardRecallPosition(key, pathKey, getCardCurrentPosition(entry));
     recordSubSegTimelineEvent(key, "card-version", entry.createdAt);
     if (Object.prototype.hasOwnProperty.call(state.subSegCardLiveValueOverrides, stateKey)) {
       delete state.subSegCardLiveValueOverrides[stateKey];
@@ -3871,7 +3872,7 @@
       return true;
     }
 
-    if (isArrowUp || isArrowDown) {
+    if ((isArrowUp || isArrowDown) && !isShift) {
       event.preventDefault();
       event.stopPropagation();
       moveFocusFromSubSegCardInput(key, pathKey, isArrowDown ? 1 : -1);
