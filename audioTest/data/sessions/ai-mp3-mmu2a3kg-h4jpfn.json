@@ -1,9 +1,9 @@
 {
   "id": "ai-mp3-mmu2a3kg-h4jpfn",
   "owner": "rhys",
-  "savedAt": "2026-03-21T06:31:27.515Z",
-  "updatedAt": "2026-03-21T06:31:27.515Z",
-  "revision": 58,
+  "savedAt": "2026-03-21T06:37:07.805Z",
+  "updatedAt": "2026-03-21T06:37:07.805Z",
+  "revision": 60,
   "file": {
     "name": "AI的胡说八道，为什么比人类骗子更危险？.mp3",
     "type": "audio/mpeg",
@@ -227,8 +227,8 @@
         },
         {
           "nodeId": "card-mmzr2a0b-8",
-          "value": "there is a munkey besides the bag full of poodles",
-          "createdAt": "2026-03-21T06:31:14.524Z",
+          "value": "there is a munkey besides the bag full of poodles have seven legs",
+          "createdAt": "2026-03-21T06:37:06.597Z",
           "history": [
             {
               "value": "there is a monkey under the puddle",
@@ -345,6 +345,14 @@
             {
               "value": "there is a munkey besides the ag full of poodles",
               "createdAt": "2026-03-21T06:31:13.866Z"
+            },
+            {
+              "value": "there is a munkey besides the bag full of poodles",
+              "createdAt": "2026-03-21T06:31:14.524Z"
+            },
+            {
+              "value": "there is a munkey besides the bag full of poodles have seven logs",
+              "createdAt": "2026-03-21T06:36:50.018Z"
             }
           ],
           "children": [
@@ -6332,6 +6340,608 @@
                   {
                     "value": "there is a munkey besides the ag full of poodles",
                     "createdAt": "2026-03-21T06:31:13.866Z"
+                  }
+                ],
+                "children": [
+                  {
+                    "nodeId": "card-mmzr35fz-9",
+                    "value": "monkey",
+                    "createdAt": "2026-03-21T03:10:34.319Z",
+                    "history": [],
+                    "children": [],
+                    "anchorStart": 11,
+                    "anchorEnd": 17
+                  },
+                  {
+                    "nodeId": "card-mmzx9jns-1",
+                    "value": "above",
+                    "createdAt": "2026-03-21T06:03:30.376Z",
+                    "history": [],
+                    "children": [],
+                    "anchorStart": 18,
+                    "anchorEnd": 23
+                  },
+                  {
+                    "nodeId": "card-mmzs7va8-1",
+                    "value": "puddle",
+                    "createdAt": "2026-03-21T03:42:14.048Z",
+                    "history": [],
+                    "children": [],
+                    "anchorStart": 28,
+                    "anchorEnd": 34
+                  },
+                  {
+                    "nodeId": "card-mmzx6dez-1",
+                    "value": "paddle",
+                    "createdAt": "2026-03-21T06:01:02.315Z",
+                    "history": [],
+                    "children": [],
+                    "anchorStart": 28,
+                    "anchorEnd": 34
+                  }
+                ],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              }
+            ]
+          },
+          {
+            "id": "timeline-mmzygele-1",
+            "label": "card-version",
+            "createdAt": "2026-03-21T06:36:50.018Z",
+            "snapshot": [
+              {
+                "nodeId": "card-mmz14vgy-5",
+                "value": "these are tests 2",
+                "createdAt": "2026-03-21T06:23:37.028Z",
+                "history": [
+                  {
+                    "value": "test",
+                    "createdAt": "2026-03-20T14:05:12.066Z"
+                  },
+                  {
+                    "value": "test 2",
+                    "createdAt": "2026-03-20T14:05:16.139Z"
+                  },
+                  {
+                    "value": "this is a test",
+                    "createdAt": "2026-03-20T14:15:27.980Z"
+                  },
+                  {
+                    "value": "this is a testtes",
+                    "createdAt": "2026-03-21T05:18:58.770Z"
+                  },
+                  {
+                    "value": "this is a test",
+                    "createdAt": "2026-03-21T05:19:04.310Z"
+                  },
+                  {
+                    "value": "this is a test 2",
+                    "createdAt": "2026-03-21T05:19:32.353Z"
+                  },
+                  {
+                    "value": "t 2",
+                    "createdAt": "2026-03-21T06:23:33.006Z"
+                  },
+                  {
+                    "value": "th 2",
+                    "createdAt": "2026-03-21T06:23:33.086Z"
+                  },
+                  {
+                    "value": "the 2",
+                    "createdAt": "2026-03-21T06:23:33.202Z"
+                  },
+                  {
+                    "value": "thes 2",
+                    "createdAt": "2026-03-21T06:23:33.975Z"
+                  },
+                  {
+                    "value": "these 2",
+                    "createdAt": "2026-03-21T06:23:34.078Z"
+                  },
+                  {
+                    "value": "these  2",
+                    "createdAt": "2026-03-21T06:23:34.267Z"
+                  },
+                  {
+                    "value": "these a 2",
+                    "createdAt": "2026-03-21T06:23:34.761Z"
+                  },
+                  {
+                    "value": "these ae 2",
+                    "createdAt": "2026-03-21T06:23:34.969Z"
+                  },
+                  {
+                    "value": "these ae  2",
+                    "createdAt": "2026-03-21T06:23:35.107Z"
+                  },
+                  {
+                    "value": "these ae 2",
+                    "createdAt": "2026-03-21T06:23:35.586Z"
+                  },
+                  {
+                    "value": "these a 2",
+                    "createdAt": "2026-03-21T06:23:35.749Z"
+                  },
+                  {
+                    "value": "these ar 2",
+                    "createdAt": "2026-03-21T06:23:35.845Z"
+                  },
+                  {
+                    "value": "these are 2",
+                    "createdAt": "2026-03-21T06:23:35.956Z"
+                  },
+                  {
+                    "value": "these are  2",
+                    "createdAt": "2026-03-21T06:23:36.011Z"
+                  },
+                  {
+                    "value": "these are t 2",
+                    "createdAt": "2026-03-21T06:23:36.388Z"
+                  },
+                  {
+                    "value": "these are te 2",
+                    "createdAt": "2026-03-21T06:23:36.526Z"
+                  },
+                  {
+                    "value": "these are tes 2",
+                    "createdAt": "2026-03-21T06:23:36.620Z"
+                  },
+                  {
+                    "value": "these are test 2",
+                    "createdAt": "2026-03-21T06:23:36.814Z"
+                  }
+                ],
+                "children": [
+                  {
+                    "nodeId": "card-mmz15cwn-7",
+                    "value": "this",
+                    "createdAt": "2026-03-20T15:04:27.287Z",
+                    "history": [],
+                    "children": [],
+                    "anchorStart": 0,
+                    "anchorEnd": 4
+                  },
+                  {
+                    "nodeId": "card-mmzy0zpc-1",
+                    "value": "test",
+                    "createdAt": "2026-03-21T06:24:50.880Z",
+                    "history": [],
+                    "children": [],
+                    "anchorStart": 10,
+                    "anchorEnd": 14
+                  }
+                ],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              },
+              {
+                "nodeId": "card-mmzr2a0b-8",
+                "value": "there is a munkey besides the bag full of poodles have seven logs",
+                "createdAt": "2026-03-21T06:36:50.018Z",
+                "history": [
+                  {
+                    "value": "there is a monkey under the puddle",
+                    "createdAt": "2026-03-21T03:09:53.579Z"
+                  },
+                  {
+                    "value": "there is a monkey under the paddle",
+                    "createdAt": "2026-03-21T05:56:17.308Z"
+                  },
+                  {
+                    "value": "there is a monkey under the paddles",
+                    "createdAt": "2026-03-21T06:02:00.785Z"
+                  },
+                  {
+                    "value": "there is a monkey under the poodles",
+                    "createdAt": "2026-03-21T06:02:31.281Z"
+                  },
+                  {
+                    "value": "there is a monkey above the poodles",
+                    "createdAt": "2026-03-21T06:03:26.399Z"
+                  },
+                  {
+                    "value": "there is a monkey beside the poodles",
+                    "createdAt": "2026-03-21T06:03:43.602Z"
+                  },
+                  {
+                    "value": "there is a mnkey beside the poodles",
+                    "createdAt": "2026-03-21T06:07:50.675Z"
+                  },
+                  {
+                    "value": "there is a munkey beside the poodles",
+                    "createdAt": "2026-03-21T06:07:51.126Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the poodles",
+                    "createdAt": "2026-03-21T06:25:26.660Z"
+                  },
+                  {
+                    "value": "there is a munkey beside the poodles",
+                    "createdAt": "2026-03-21T06:25:33.486Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the poodles",
+                    "createdAt": "2026-03-21T06:25:44.633Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the poodle",
+                    "createdAt": "2026-03-21T06:25:49.394Z"
+                  },
+                  {
+                    "value": "there is a munkey besides thepoodles",
+                    "createdAt": "2026-03-21T06:26:01.589Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the poodles",
+                    "createdAt": "2026-03-21T06:30:23.096Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the poodles;",
+                    "createdAt": "2026-03-21T06:30:26.837Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the poodles",
+                    "createdAt": "2026-03-21T06:30:57.678Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the  poodles",
+                    "createdAt": "2026-03-21T06:31:09.441Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the n poodles",
+                    "createdAt": "2026-03-21T06:31:09.839Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the na poodles",
+                    "createdAt": "2026-03-21T06:31:09.942Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag poodles",
+                    "createdAt": "2026-03-21T06:31:10.137Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag  poodles",
+                    "createdAt": "2026-03-21T06:31:10.221Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag f poodles",
+                    "createdAt": "2026-03-21T06:31:10.524Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag fu poodles",
+                    "createdAt": "2026-03-21T06:31:10.647Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag ful poodles",
+                    "createdAt": "2026-03-21T06:31:10.823Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag full poodles",
+                    "createdAt": "2026-03-21T06:31:10.960Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag full  poodles",
+                    "createdAt": "2026-03-21T06:31:11.114Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag full o poodles",
+                    "createdAt": "2026-03-21T06:31:11.261Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag full of poodles",
+                    "createdAt": "2026-03-21T06:31:11.403Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the ag full of poodles",
+                    "createdAt": "2026-03-21T06:31:13.866Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the bag full of poodles",
+                    "createdAt": "2026-03-21T06:31:14.524Z"
+                  }
+                ],
+                "children": [
+                  {
+                    "nodeId": "card-mmzr35fz-9",
+                    "value": "monkey",
+                    "createdAt": "2026-03-21T03:10:34.319Z",
+                    "history": [],
+                    "children": [],
+                    "anchorStart": 11,
+                    "anchorEnd": 17
+                  },
+                  {
+                    "nodeId": "card-mmzx9jns-1",
+                    "value": "above",
+                    "createdAt": "2026-03-21T06:03:30.376Z",
+                    "history": [],
+                    "children": [],
+                    "anchorStart": 18,
+                    "anchorEnd": 23
+                  },
+                  {
+                    "nodeId": "card-mmzs7va8-1",
+                    "value": "puddle",
+                    "createdAt": "2026-03-21T03:42:14.048Z",
+                    "history": [],
+                    "children": [],
+                    "anchorStart": 28,
+                    "anchorEnd": 34
+                  },
+                  {
+                    "nodeId": "card-mmzx6dez-1",
+                    "value": "paddle",
+                    "createdAt": "2026-03-21T06:01:02.315Z",
+                    "history": [],
+                    "children": [],
+                    "anchorStart": 28,
+                    "anchorEnd": 34
+                  }
+                ],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              }
+            ]
+          },
+          {
+            "id": "timeline-mmzygrdx-2",
+            "label": "card-version",
+            "createdAt": "2026-03-21T06:37:06.597Z",
+            "snapshot": [
+              {
+                "nodeId": "card-mmz14vgy-5",
+                "value": "these are tests 2",
+                "createdAt": "2026-03-21T06:23:37.028Z",
+                "history": [
+                  {
+                    "value": "test",
+                    "createdAt": "2026-03-20T14:05:12.066Z"
+                  },
+                  {
+                    "value": "test 2",
+                    "createdAt": "2026-03-20T14:05:16.139Z"
+                  },
+                  {
+                    "value": "this is a test",
+                    "createdAt": "2026-03-20T14:15:27.980Z"
+                  },
+                  {
+                    "value": "this is a testtes",
+                    "createdAt": "2026-03-21T05:18:58.770Z"
+                  },
+                  {
+                    "value": "this is a test",
+                    "createdAt": "2026-03-21T05:19:04.310Z"
+                  },
+                  {
+                    "value": "this is a test 2",
+                    "createdAt": "2026-03-21T05:19:32.353Z"
+                  },
+                  {
+                    "value": "t 2",
+                    "createdAt": "2026-03-21T06:23:33.006Z"
+                  },
+                  {
+                    "value": "th 2",
+                    "createdAt": "2026-03-21T06:23:33.086Z"
+                  },
+                  {
+                    "value": "the 2",
+                    "createdAt": "2026-03-21T06:23:33.202Z"
+                  },
+                  {
+                    "value": "thes 2",
+                    "createdAt": "2026-03-21T06:23:33.975Z"
+                  },
+                  {
+                    "value": "these 2",
+                    "createdAt": "2026-03-21T06:23:34.078Z"
+                  },
+                  {
+                    "value": "these  2",
+                    "createdAt": "2026-03-21T06:23:34.267Z"
+                  },
+                  {
+                    "value": "these a 2",
+                    "createdAt": "2026-03-21T06:23:34.761Z"
+                  },
+                  {
+                    "value": "these ae 2",
+                    "createdAt": "2026-03-21T06:23:34.969Z"
+                  },
+                  {
+                    "value": "these ae  2",
+                    "createdAt": "2026-03-21T06:23:35.107Z"
+                  },
+                  {
+                    "value": "these ae 2",
+                    "createdAt": "2026-03-21T06:23:35.586Z"
+                  },
+                  {
+                    "value": "these a 2",
+                    "createdAt": "2026-03-21T06:23:35.749Z"
+                  },
+                  {
+                    "value": "these ar 2",
+                    "createdAt": "2026-03-21T06:23:35.845Z"
+                  },
+                  {
+                    "value": "these are 2",
+                    "createdAt": "2026-03-21T06:23:35.956Z"
+                  },
+                  {
+                    "value": "these are  2",
+                    "createdAt": "2026-03-21T06:23:36.011Z"
+                  },
+                  {
+                    "value": "these are t 2",
+                    "createdAt": "2026-03-21T06:23:36.388Z"
+                  },
+                  {
+                    "value": "these are te 2",
+                    "createdAt": "2026-03-21T06:23:36.526Z"
+                  },
+                  {
+                    "value": "these are tes 2",
+                    "createdAt": "2026-03-21T06:23:36.620Z"
+                  },
+                  {
+                    "value": "these are test 2",
+                    "createdAt": "2026-03-21T06:23:36.814Z"
+                  }
+                ],
+                "children": [
+                  {
+                    "nodeId": "card-mmz15cwn-7",
+                    "value": "this",
+                    "createdAt": "2026-03-20T15:04:27.287Z",
+                    "history": [],
+                    "children": [],
+                    "anchorStart": 0,
+                    "anchorEnd": 4
+                  },
+                  {
+                    "nodeId": "card-mmzy0zpc-1",
+                    "value": "test",
+                    "createdAt": "2026-03-21T06:24:50.880Z",
+                    "history": [],
+                    "children": [],
+                    "anchorStart": 10,
+                    "anchorEnd": 14
+                  }
+                ],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              },
+              {
+                "nodeId": "card-mmzr2a0b-8",
+                "value": "there is a munkey besides the bag full of poodles have seven legs",
+                "createdAt": "2026-03-21T06:37:06.597Z",
+                "history": [
+                  {
+                    "value": "there is a monkey under the puddle",
+                    "createdAt": "2026-03-21T03:09:53.579Z"
+                  },
+                  {
+                    "value": "there is a monkey under the paddle",
+                    "createdAt": "2026-03-21T05:56:17.308Z"
+                  },
+                  {
+                    "value": "there is a monkey under the paddles",
+                    "createdAt": "2026-03-21T06:02:00.785Z"
+                  },
+                  {
+                    "value": "there is a monkey under the poodles",
+                    "createdAt": "2026-03-21T06:02:31.281Z"
+                  },
+                  {
+                    "value": "there is a monkey above the poodles",
+                    "createdAt": "2026-03-21T06:03:26.399Z"
+                  },
+                  {
+                    "value": "there is a monkey beside the poodles",
+                    "createdAt": "2026-03-21T06:03:43.602Z"
+                  },
+                  {
+                    "value": "there is a mnkey beside the poodles",
+                    "createdAt": "2026-03-21T06:07:50.675Z"
+                  },
+                  {
+                    "value": "there is a munkey beside the poodles",
+                    "createdAt": "2026-03-21T06:07:51.126Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the poodles",
+                    "createdAt": "2026-03-21T06:25:26.660Z"
+                  },
+                  {
+                    "value": "there is a munkey beside the poodles",
+                    "createdAt": "2026-03-21T06:25:33.486Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the poodles",
+                    "createdAt": "2026-03-21T06:25:44.633Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the poodle",
+                    "createdAt": "2026-03-21T06:25:49.394Z"
+                  },
+                  {
+                    "value": "there is a munkey besides thepoodles",
+                    "createdAt": "2026-03-21T06:26:01.589Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the poodles",
+                    "createdAt": "2026-03-21T06:30:23.096Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the poodles;",
+                    "createdAt": "2026-03-21T06:30:26.837Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the poodles",
+                    "createdAt": "2026-03-21T06:30:57.678Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the  poodles",
+                    "createdAt": "2026-03-21T06:31:09.441Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the n poodles",
+                    "createdAt": "2026-03-21T06:31:09.839Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the na poodles",
+                    "createdAt": "2026-03-21T06:31:09.942Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag poodles",
+                    "createdAt": "2026-03-21T06:31:10.137Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag  poodles",
+                    "createdAt": "2026-03-21T06:31:10.221Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag f poodles",
+                    "createdAt": "2026-03-21T06:31:10.524Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag fu poodles",
+                    "createdAt": "2026-03-21T06:31:10.647Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag ful poodles",
+                    "createdAt": "2026-03-21T06:31:10.823Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag full poodles",
+                    "createdAt": "2026-03-21T06:31:10.960Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag full  poodles",
+                    "createdAt": "2026-03-21T06:31:11.114Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag full o poodles",
+                    "createdAt": "2026-03-21T06:31:11.261Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the nag full of poodles",
+                    "createdAt": "2026-03-21T06:31:11.403Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the ag full of poodles",
+                    "createdAt": "2026-03-21T06:31:13.866Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the bag full of poodles",
+                    "createdAt": "2026-03-21T06:31:14.524Z"
+                  },
+                  {
+                    "value": "there is a munkey besides the bag full of poodles have seven logs",
+                    "createdAt": "2026-03-21T06:36:50.018Z"
                   }
                 ],
                 "children": [
