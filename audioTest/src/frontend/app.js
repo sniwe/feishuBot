@@ -3230,6 +3230,7 @@
     if (depth > 0 && !isLastSibling) {
       nextAncestorGuideDepths.push(depth);
     }
+    const visibleChildren = [];
     sortedChildren.forEach(function (childEntry, childIndex) {
       const childPath = path.concat(childIndex);
       const childPathKey = getSubSegValuePathKey(childPath);
@@ -3241,12 +3242,18 @@
       if (String(displayedValue || "").indexOf(childDisplayedValue) < 0) {
         return;
       }
+      visibleChildren.push({
+        childEntry,
+        childPath
+      });
+    });
+    visibleChildren.forEach(function (item, visibleIndex) {
       renderSubSegValueCardNode(
         key,
-        childEntry,
-        childPath,
+        item.childEntry,
+        item.childPath,
         depth + 1,
-        childIndex === (sortedChildren.length - 1),
+        visibleIndex === (visibleChildren.length - 1),
         nextAncestorGuideDepths
       );
     });
@@ -3266,24 +3273,31 @@
   }
 
   function handleSubSegCardInputChange(event) {
-    const inputEl = event.target;
+    commitSubSegCardInputValue(event ? event.target : null, { rerender: false });
+  }
+
+  function commitSubSegCardInputValue(inputEl, options) {
     const key = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValueKey || "" : "");
     const pathKey = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValuePath || "" : "");
     const entry = getSubSegValueEntry(key, pathKey);
     if (!entry) {
-      return;
+      return { changed: false, key, pathKey };
     }
     const currentPos = getCardCurrentPosition(entry);
     const recallPos = getCardRecallPosition(key, pathKey, entry);
     if (recallPos < currentPos) {
-      inputEl.value = getCardValueAtPosition(entry, recallPos);
-      return;
+      if (inputEl) {
+        inputEl.value = getCardValueAtPosition(entry, recallPos);
+      }
+      return { changed: false, key, pathKey };
     }
-    const nextValue = String(inputEl.value || "").trim();
+    const nextValue = String(inputEl && inputEl.value ? inputEl.value : "").trim();
     const prevValue = String(entry.value || "");
     if (!nextValue || nextValue === prevValue) {
-      inputEl.value = prevValue;
-      return;
+      if (inputEl) {
+        inputEl.value = prevValue;
+      }
+      return { changed: false, key, pathKey };
     }
     if (!Array.isArray(entry.history)) {
       entry.history = [];
@@ -3297,8 +3311,15 @@
     }
     entry.value = nextValue;
     entry.createdAt = new Date().toISOString();
-    inputEl.value = nextValue;
+    if (inputEl) {
+      inputEl.value = nextValue;
+    }
+    if (options && options.rerender) {
+      renderSubSegValuePanel();
+      focusSubSegCardInput(key, pathKey, false);
+    }
     enqueueAutoSave();
+    return { changed: true, key, pathKey };
   }
 
   function getSubSegValueEntry(key, index) {
@@ -3428,15 +3449,21 @@
     }
     if (isEnter) {
       const childPathKey = createChildCardFromSelection(key, pathKey, active, entry);
-      if (!childPathKey) {
-        return false;
+      if (childPathKey) {
+        event.preventDefault();
+        event.stopPropagation();
+        renderSubSegValuePanel();
+        focusSubSegCardInput(key, childPathKey, false, { selectAll: true });
+        enqueueAutoSave();
+        return true;
       }
-      event.preventDefault();
-      event.stopPropagation();
-      renderSubSegValuePanel();
-      focusSubSegCardInput(key, childPathKey, false, { selectAll: true });
-      enqueueAutoSave();
-      return true;
+      const committed = commitSubSegCardInputValue(active, { rerender: true });
+      if (committed.changed) {
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+      }
+      return false;
     }
     if (!isCtrl) {
       return false;
