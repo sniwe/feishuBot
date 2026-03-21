@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   const LOGIN_STORAGE_KEY = "audioTest.auth";
   const GUIDE_SEEN_STORAGE_KEY = "audioTest.guideSeenByUser";
   const GUIDE_FEATURE_VERSION = "cards-feature-pack-2026-03-21d";
@@ -89,6 +89,7 @@
     subSegCardRecallPositions: {},
     subSegCardLiveValueOverrides: {},
     subSegCardCommitTimerIds: {},
+    subSegCardInternalChangeGuards: {},
     subSegCardDeleteDialogKey: null,
     subSegValueNodeIdCounter: 0,
     subSegTimelines: {},
@@ -1025,13 +1026,13 @@
         inputTitle: "Text Input",
         inputText: "Purpose: write your best attempt of the target subSeg audio. If words are uncertain, approximate from hearing only. Do not use dictionary or outside sources.",
         firstCardInputTitle: "Enter First Card Value",
-        firstCardInputText: "Type your first best-attempt text (example: '前后两清') in the top input and press Enter to create the first card version.",
+        firstCardInputText: "Type your first best-attempt text (example: 'å‰åŽä¸¤æ¸…') in the top input and press Enter to create the first card version.",
         cardsTitle: "First Version Saved",
         cardsText: "After Enter, the first input becomes the first version on this card.",
         cardEditTitle: "Edit To New Version",
-        cardEditText: "Focus this card, update your text after re-listening (example now: '钱货两清'), then save. The prior text remains as version history on the same card.",
+        cardEditText: "Focus this card, update your text after re-listening (example now: 'é’±è´§ä¸¤æ¸…'), then save. The prior text remains as version history on the same card.",
         cardChildSelectTitle: "Create Child Cards",
-        cardChildSelectText: "Goal: split a long parent phrase into a smaller focused idea you want to track as its own child card. On parent text '钱货两清', focus the parent input, highlight '钱货', then press Enter.",
+        cardChildSelectText: "Goal: split a long parent phrase into a smaller focused idea you want to track as its own child card. On parent text 'é’±è´§ä¸¤æ¸…', focus the parent input, highlight 'é’±è´§', then press Enter.",
         cardChildCreatedTitle: "Child Card Created",
         cardChildCreatedText: "After Enter, a child card appears directly under the parent using the selected substring. Repeat on any child to nest deeper. Siblings are ordered by earliest highlighted index in parent text, and each child indents +5px per level.",
         cardNavVerticalTitle: "Move Between Cards",
@@ -1624,7 +1625,7 @@
       return;
     }
     if (phase === "player-card-first-input") {
-      subSegValueInput.value = "前后两清";
+      subSegValueInput.value = "å‰åŽä¸¤æ¸…";
       subSegValueList.innerHTML = "";
       return;
     }
@@ -1656,7 +1657,7 @@
         const rootInput = document.createElement("input");
         rootInput.type = "text";
         rootInput.className = "subseg-value-card-input";
-        rootInput.value = "钱货两清";
+        rootInput.value = "é’±è´§ä¸¤æ¸…";
         rootInput.readOnly = true;
         rootInput.style.outline = "2px solid #6e92c9";
         rootInput.style.borderRadius = "4px";
@@ -1680,7 +1681,7 @@
           const childInput = document.createElement("input");
           childInput.type = "text";
           childInput.className = "subseg-value-card-input";
-          childInput.value = "钱货";
+          childInput.value = "é’±è´§";
           childInput.readOnly = true;
           childCard.appendChild(childVersion);
           childCard.appendChild(childInput);
@@ -1717,7 +1718,7 @@
         rootInput.type = "text";
         rootInput.className = "subseg-value-card-input";
         rootInput.id = "guide-nav-parent-input";
-        rootInput.value = "钱货两清";
+        rootInput.value = "é’±è´§ä¸¤æ¸…";
         rootInput.readOnly = false;
         rootInput.classList.add("guide-nav-caret-demo");
         rootInput.addEventListener("beforeinput", function (event) {
@@ -1743,7 +1744,7 @@
         childInput.type = "text";
         childInput.className = "subseg-value-card-input";
         childInput.id = "guide-nav-child-input";
-        childInput.value = "钱货";
+        childInput.value = "é’±è´§";
         childInput.readOnly = false;
         childInput.classList.add("guide-nav-caret-demo");
         childInput.addEventListener("beforeinput", function (event) {
@@ -2721,6 +2722,7 @@
     state.subSegTimelines = {};
     state.subSegTimelineEventIdCounter = 0;
     state.subSegCardRecallPositions = {};
+    state.subSegCardInternalChangeGuards = {};
     state.subSegCardDeleteDialogKey = null;
     state.activeSubSegValueKey = null;
     resetSubSegTimelineUiState();
@@ -3375,6 +3377,7 @@
       }
       subSegValueList.innerHTML = "";
       state.subSegCardLiveValueOverrides = {};
+      state.subSegCardInternalChangeGuards = {};
       clearAllSubSegCardCommitTimers();
       scheduleGuideStepRender({ deps: {} });
       return;
@@ -3565,7 +3568,13 @@
   }
 
   function handleSubSegCardInputChange(event) {
-    commitSubSegCardInputValue(event ? event.target : null, { rerender: false });
+    const inputEl = event ? event.target : null;
+    const key = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValueKey || "" : "");
+    const pathKey = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValuePath || "" : "");
+    if (key && pathKey && consumeSubSegCardInternalChangeGuard(key, pathKey)) {
+      return;
+    }
+    commitSubSegCardInputValue(inputEl, { rerender: false });
   }
 
   function handleSubSegCardInputLive(event) {
@@ -3581,6 +3590,7 @@
     const stateKey = getSubSegCardRecallStateKey(key, pathKey);
     const value = String(inputEl && inputEl.value ? inputEl.value : "");
     state.subSegCardLiveValueOverrides[stateKey] = value;
+    setSubSegCardInternalChangeGuard(key, pathKey);
     scheduleSubSegCardCommitDebounced(key, pathKey);
     const selectionStart = Number(inputEl && inputEl.selectionStart);
     const selectionEnd = Number(inputEl && inputEl.selectionEnd);
@@ -3588,6 +3598,9 @@
     focusSubSegCardInput(key, pathKey, false, {
       selectionStart: Number.isFinite(selectionStart) ? selectionStart : value.length,
       selectionEnd: Number.isFinite(selectionEnd) ? selectionEnd : value.length
+    });
+    requestAnimationFrame(function () {
+      clearSubSegCardInternalChangeGuard(key, pathKey);
     });
   }
 
@@ -3673,6 +3686,25 @@
       window.clearTimeout(timerId);
     }
     delete state.subSegCardCommitTimerIds[stateKey];
+  }
+
+  function setSubSegCardInternalChangeGuard(key, pathKey) {
+    const stateKey = getSubSegCardRecallStateKey(key, pathKey);
+    state.subSegCardInternalChangeGuards[stateKey] = true;
+  }
+
+  function clearSubSegCardInternalChangeGuard(key, pathKey) {
+    const stateKey = getSubSegCardRecallStateKey(key, pathKey);
+    delete state.subSegCardInternalChangeGuards[stateKey];
+  }
+
+  function consumeSubSegCardInternalChangeGuard(key, pathKey) {
+    const stateKey = getSubSegCardRecallStateKey(key, pathKey);
+    if (!state.subSegCardInternalChangeGuards[stateKey]) {
+      return false;
+    }
+    delete state.subSegCardInternalChangeGuards[stateKey];
+    return true;
   }
 
   function clearAllSubSegCardCommitTimers() {
@@ -4076,6 +4108,12 @@
     liveKeys.forEach(function (k) {
       if (k === targetPrefix || k.startsWith(targetPrefix + ".")) {
         delete state.subSegCardLiveValueOverrides[k];
+      }
+    });
+    const guardKeys = Object.keys(state.subSegCardInternalChangeGuards);
+    guardKeys.forEach(function (k) {
+      if (k === targetPrefix || k.startsWith(targetPrefix + ".")) {
+        delete state.subSegCardInternalChangeGuards[k];
       }
     });
     const timerKeys = Object.keys(state.subSegCardCommitTimerIds);
@@ -4844,6 +4882,7 @@
     state.targetSubSegs = [];
     state.selectedTargetSubSegIndex = -1;
     state.subSegCardRecallPositions = {};
+    state.subSegCardInternalChangeGuards = {};
     state.subSegCardDeleteDialogKey = null;
     state.activeSubSegValueKey = null;
     resetSubSegTimelineUiState();
@@ -5864,4 +5903,5 @@
 
   window.addEventListener("beforeunload", revokeObjectUrl);
 })();
+
 
