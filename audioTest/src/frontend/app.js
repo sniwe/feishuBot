@@ -2665,11 +2665,11 @@
         throw new Error("session_payload_invalid");
       }
 
-      await applySavedSession(saved);
       state.activeSessionId = saved.id || sessionId;
       state.activeRevision = normalizeRevision(saved.revision);
       state.activeAudioId = typeof saved.audioId === "string" ? saved.audioId : null;
       state.activeAudioUrl = typeof saved.audioUrl === "string" ? saved.audioUrl : null;
+      await applySavedSession(saved);
       startRealtimeForSession(state.activeSessionId);
       debugLog("openPersistedSession:loaded", {
         sessionId: state.activeSessionId,
@@ -4895,11 +4895,11 @@
       if (!saved || typeof saved !== "object") {
         return false;
       }
-      await applySavedSession(saved);
       state.activeSessionId = saved.id || sessionId;
       state.activeRevision = normalizeRevision(saved.revision);
       state.activeAudioId = typeof saved.audioId === "string" ? saved.audioId : null;
       state.activeAudioUrl = typeof saved.audioUrl === "string" ? saved.audioUrl : null;
+      await applySavedSession(saved);
       startRealtimeForSession(state.activeSessionId);
       if (data.statusText) {
         setSaveStatus(String(data.statusText));
@@ -4998,7 +4998,8 @@
         currentTime: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
         wasPlaying: !audio.paused
       },
-      audioId: uploadedAudio.id
+      audioId: uploadedAudio.id || "",
+      audioUrl: uploadedAudio.url || ""
     };
 
     const response = await fetch("/api/session", {
@@ -5209,8 +5210,14 @@
     if (state.activeAudioId) {
       return { id: state.activeAudioId, url: state.activeAudioUrl || buildAuthenticatedAudioUrl(state.activeAudioId) };
     }
+    if (state.activeAudioUrl) {
+      return { id: "", url: state.activeAudioUrl };
+    }
     if (!state.currentFile) {
       throw new Error("missing_current_file");
+    }
+    if (!(state.currentFile instanceof Blob)) {
+      throw new Error("missing_uploadable_audio_blob");
     }
 
     setSaveStatus("Uploading audio...");
