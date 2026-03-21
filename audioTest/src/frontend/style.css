@@ -924,6 +924,10 @@ h1, p { margin: 0; }
   height: calc(100% + 14px);
 }
 
+.subseg-value-card.is-nested.is-last-sibling::before {
+  height: calc(50% + 7px);
+}
+
 .subseg-value-card.is-nested::after {
   left: var(--subseg-card-bridge-left, -4px);
   top: 50%;

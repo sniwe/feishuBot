@@ -2889,12 +2889,12 @@
     const values = Array.isArray(state.subSegValueEntries[selectedKey]) ? state.subSegValueEntries[selectedKey] : [];
     subSegValueList.innerHTML = "";
     values.forEach(function (entry, entryIndex) {
-      renderSubSegValueCardNode(selectedKey, entry, [entryIndex], 0);
+      renderSubSegValueCardNode(selectedKey, entry, [entryIndex], 0, entryIndex === (values.length - 1));
     });
     scheduleGuideStepRender({ deps: {} });
   }
 
-  function renderSubSegValueCardNode(key, entry, path, depth) {
+  function renderSubSegValueCardNode(key, entry, path, depth, isLastSibling) {
     if (!subSegValueList || !entry || typeof entry !== "object") {
       return;
     }
@@ -2903,8 +2903,9 @@
     card.className = "subseg-value-card";
     card.style.setProperty("--subseg-card-depth", String(Math.max(0, depth)));
     card.classList.toggle("is-nested", depth > 0);
+    card.classList.toggle("is-last-sibling", Boolean(isLastSibling) && depth > 0);
     const bridgeLeft = depth > 1 ? -9 : -4;
-    const bridgeWidth = depth > 1 ? 9 : 4;
+    const bridgeWidth = depth > 1 ? 5 : 4;
     card.style.setProperty("--subseg-card-bridge-left", String(bridgeLeft) + "px");
     card.style.setProperty("--subseg-card-bridge-width", String(bridgeWidth) + "px");
     const input = document.createElement("input");
@@ -2969,7 +2970,13 @@
     entry.children = getSortedChildEntries(entry.children);
     const sortedChildren = entry.children;
     sortedChildren.forEach(function (childEntry, childIndex) {
-      renderSubSegValueCardNode(key, childEntry, path.concat(childIndex), depth + 1);
+      renderSubSegValueCardNode(
+        key,
+        childEntry,
+        path.concat(childIndex),
+        depth + 1,
+        childIndex === (sortedChildren.length - 1)
+      );
     });
   }
 
