@@ -1,7 +1,7 @@
 {
   "id": "ai-mp3-mmu2a3kg-h4jpfn",
   "owner": "rhys",
-  "savedAt": "2026-03-21T03:09:53.870Z",
+  "savedAt": "2026-03-21T03:10:45.694Z",
   "file": {
     "name": "AI的胡说八道，为什么比人类骗子“更危险”？.mp3",
     "type": "audio/mpeg",
@@ -133,7 +133,36 @@
           "value": "there is a monkey under the puddle",
           "createdAt": "2026-03-21T03:09:53.579Z",
           "history": [],
-          "children": [],
+          "children": [
+            {
+              "nodeId": "card-mmzr35fz-9",
+              "value": "monkey",
+              "createdAt": "2026-03-21T03:10:34.319Z",
+              "history": [],
+              "children": [],
+              "anchorStart": 11,
+              "anchorEnd": 17
+            },
+            {
+              "nodeId": "card-mmzr38mf-a",
+              "value": "under the puddle",
+              "createdAt": "2026-03-21T03:10:38.439Z",
+              "history": [],
+              "children": [
+                {
+                  "nodeId": "card-mmzr3e01-b",
+                  "value": "the puddle",
+                  "createdAt": "2026-03-21T03:10:45.409Z",
+                  "history": [],
+                  "children": [],
+                  "anchorStart": 6,
+                  "anchorEnd": 16
+                }
+              ],
+              "anchorStart": 18,
+              "anchorEnd": 34
+            }
+          ],
           "anchorStart": null,
           "anchorEnd": null
         }

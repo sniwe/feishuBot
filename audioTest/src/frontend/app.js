@@ -2902,6 +2902,7 @@
     const card = document.createElement("div");
     card.className = "subseg-value-card";
     card.style.setProperty("--subseg-card-depth", String(Math.max(0, depth)));
+    card.classList.toggle("is-nested", depth > 0);
     const input = document.createElement("input");
     input.type = "text";
     input.className = "subseg-value-card-input";
