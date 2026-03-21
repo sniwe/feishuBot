@@ -2905,7 +2905,7 @@
     card.classList.toggle("is-nested", depth > 0);
     card.classList.toggle("is-last-sibling", Boolean(isLastSibling) && depth > 0);
     const bridgeLeft = depth > 1 ? -9 : -4;
-    const bridgeWidth = depth > 1 ? 5 : 4;
+    const bridgeWidth = depth > 1 ? 9 : 4;
     card.style.setProperty("--subseg-card-bridge-left", String(bridgeLeft) + "px");
     card.style.setProperty("--subseg-card-bridge-width", String(bridgeWidth) + "px");
     const input = document.createElement("input");
