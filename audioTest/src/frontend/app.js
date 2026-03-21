@@ -1665,6 +1665,45 @@
         }
         return;
       }
+      if (phase === "player-card-nav-list") {
+        const cluster = document.createElement("div");
+        cluster.id = "guide-card-nav-list-cluster";
+
+        const rootCard = document.createElement("div");
+        rootCard.className = "subseg-value-card";
+        const rootVersion = document.createElement("div");
+        rootVersion.className = "subseg-value-version";
+        rootVersion.textContent = "current -0 | current version";
+        const rootInput = document.createElement("input");
+        rootInput.type = "text";
+        rootInput.className = "subseg-value-card-input";
+        rootInput.value = "钱货两清";
+        rootInput.readOnly = true;
+        rootCard.appendChild(rootVersion);
+        rootCard.appendChild(rootInput);
+        cluster.appendChild(rootCard);
+
+        const childCard = document.createElement("div");
+        childCard.className = "subseg-value-card is-nested is-last-sibling";
+        childCard.style.setProperty("--subseg-card-depth", "1");
+        childCard.style.setProperty("--subseg-card-line-left", "-4px");
+        childCard.style.setProperty("--subseg-card-bridge-left", "-4px");
+        childCard.style.setProperty("--subseg-card-bridge-width", "4px");
+        const childVersion = document.createElement("div");
+        childVersion.className = "subseg-value-version";
+        childVersion.textContent = "current -0 | child card";
+        const childInput = document.createElement("input");
+        childInput.type = "text";
+        childInput.className = "subseg-value-card-input";
+        childInput.value = "钱货";
+        childInput.readOnly = true;
+        childCard.appendChild(childVersion);
+        childCard.appendChild(childInput);
+        cluster.appendChild(childCard);
+
+        subSegValueList.appendChild(cluster);
+        return;
+      }
       const card = document.createElement("div");
       card.className = "subseg-value-card";
       const recalled = phase === "player-card-nav-history";
@@ -2211,7 +2250,7 @@
         textKey: "cardNavVerticalText",
         spotlightPadding: { top: 18, right: 18, bottom: 18, left: 18 },
         spotlightMinWidth: 360,
-        getTarget: function () { return subSegValueList || subSegValuePanel; }
+        getTarget: function () { return document.getElementById("guide-card-nav-list-cluster") || subSegValueList || subSegValuePanel; }
       },
       {
         id: "player-card-delete",
