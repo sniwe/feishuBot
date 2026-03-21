@@ -84,6 +84,7 @@
     subSegValueEntries: {},
     subSegCardRecallPositions: {},
     subSegCardLiveValueOverrides: {},
+    subSegCardCommitTimerIds: {},
     subSegCardDeleteDialogKey: null,
     subSegValueNodeIdCounter: 0,
     shiftHoldTss: null,
@@ -3105,6 +3106,7 @@
     if (!isVisible) {
       subSegValueList.innerHTML = "";
       state.subSegCardLiveValueOverrides = {};
+      clearAllSubSegCardCommitTimers();
       scheduleGuideStepRender({ deps: {} });
       return;
     }
@@ -3292,6 +3294,7 @@
     const stateKey = getSubSegCardRecallStateKey(key, pathKey);
     const value = String(inputEl && inputEl.value ? inputEl.value : "");
     state.subSegCardLiveValueOverrides[stateKey] = value;
+    scheduleSubSegCardCommitDebounced(key, pathKey);
     const selectionStart = Number(inputEl && inputEl.selectionStart);
     const selectionEnd = Number(inputEl && inputEl.selectionEnd);
     renderSubSegValuePanel();
@@ -3308,6 +3311,7 @@
     if (!entry) {
       return { changed: false, key, pathKey };
     }
+    clearSubSegCardCommitTimerByStateKey(getSubSegCardRecallStateKey(key, pathKey));
     const currentPos = getCardCurrentPosition(entry);
     const recallPos = getCardRecallPosition(key, pathKey, entry);
     if (recallPos < currentPos) {
@@ -3317,12 +3321,30 @@
       return { changed: false, key, pathKey };
     }
     const nextValue = String(inputEl && inputEl.value ? inputEl.value : "").trim();
-    const prevValue = String(entry.value || "");
+    const result = applySubSegCardValueCommit(key, pathKey, nextValue, {
+      rerender: Boolean(options && options.rerender),
+      restoreFocus: Boolean(options && options.rerender)
+    });
+    if (inputEl && !result.changed) {
+      inputEl.value = String(entry.value || "");
+    }
+    return result;
+  }
+
+  function applySubSegCardValueCommit(key, pathKey, nextValueRaw, options) {
+    const entry = getSubSegValueEntry(key, pathKey);
+    if (!entry) {
+      return { changed: false, key, pathKey };
+    }
+    const currentPos = getCardCurrentPosition(entry);
+    const recallPos = getCardRecallPosition(key, pathKey, entry);
     const stateKey = getSubSegCardRecallStateKey(key, pathKey);
+    if (recallPos < currentPos) {
+      return { changed: false, key, pathKey };
+    }
+    const nextValue = String(nextValueRaw || "").trim();
+    const prevValue = String(entry.value || "");
     if (!nextValue || nextValue === prevValue) {
-      if (inputEl) {
-        inputEl.value = prevValue;
-      }
       if (Object.prototype.hasOwnProperty.call(state.subSegCardLiveValueOverrides, stateKey)) {
         delete state.subSegCardLiveValueOverrides[stateKey];
       }
@@ -3340,18 +3362,50 @@
     }
     entry.value = nextValue;
     entry.createdAt = new Date().toISOString();
-    if (inputEl) {
-      inputEl.value = nextValue;
-    }
     if (Object.prototype.hasOwnProperty.call(state.subSegCardLiveValueOverrides, stateKey)) {
       delete state.subSegCardLiveValueOverrides[stateKey];
     }
     if (options && options.rerender) {
       renderSubSegValuePanel();
-      focusSubSegCardInput(key, pathKey, false);
+      if (options.restoreFocus) {
+        focusSubSegCardInput(key, pathKey, false);
+      }
     }
     enqueueAutoSave();
     return { changed: true, key, pathKey };
+  }
+
+  function clearSubSegCardCommitTimerByStateKey(stateKey) {
+    const timerId = Number(state.subSegCardCommitTimerIds[stateKey]);
+    if (Number.isFinite(timerId) && timerId > 0) {
+      window.clearTimeout(timerId);
+    }
+    delete state.subSegCardCommitTimerIds[stateKey];
+  }
+
+  function clearAllSubSegCardCommitTimers() {
+    const keys = Object.keys(state.subSegCardCommitTimerIds || {});
+    keys.forEach(function (stateKey) {
+      clearSubSegCardCommitTimerByStateKey(stateKey);
+    });
+  }
+
+  function scheduleSubSegCardCommitDebounced(key, pathKey) {
+    if (!key || !pathKey) {
+      return;
+    }
+    const stateKey = getSubSegCardRecallStateKey(key, pathKey);
+    clearSubSegCardCommitTimerByStateKey(stateKey);
+    state.subSegCardCommitTimerIds[stateKey] = window.setTimeout(function () {
+      clearSubSegCardCommitTimerByStateKey(stateKey);
+      const nextValue = Object.prototype.hasOwnProperty.call(state.subSegCardLiveValueOverrides, stateKey)
+        ? String(state.subSegCardLiveValueOverrides[stateKey] || "")
+        : "";
+      if (!nextValue) {
+        return;
+      }
+      applySubSegCardValueCommit(key, pathKey, nextValue, { rerender: false, restoreFocus: false });
+    }, 2500);
   }
 
   function getSubSegValueEntry(key, index) {
@@ -3707,6 +3761,18 @@
     recallKeys.forEach(function (k) {
       if (k === targetPrefix || k.startsWith(targetPrefix + ".")) {
         delete state.subSegCardRecallPositions[k];
+      }
+    });
+    const liveKeys = Object.keys(state.subSegCardLiveValueOverrides);
+    liveKeys.forEach(function (k) {
+      if (k === targetPrefix || k.startsWith(targetPrefix + ".")) {
+        delete state.subSegCardLiveValueOverrides[k];
+      }
+    });
+    const timerKeys = Object.keys(state.subSegCardCommitTimerIds);
+    timerKeys.forEach(function (k) {
+      if (k === targetPrefix || k.startsWith(targetPrefix + ".")) {
+        clearSubSegCardCommitTimerByStateKey(k);
       }
     });
     renderSubSegValuePanel();
