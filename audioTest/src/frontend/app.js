@@ -42,6 +42,10 @@
   const subSegValuePanel = document.getElementById("subseg-value-panel");
   const subSegValueForm = document.getElementById("subseg-value-form");
   const subSegValueInput = document.getElementById("subseg-value-input");
+  const subSegTimeline = document.getElementById("subseg-timeline");
+  const subSegTimelineStart = document.getElementById("subseg-timeline-start");
+  const subSegTimelineEnd = document.getElementById("subseg-timeline-end");
+  const subSegTimelineTrack = document.getElementById("subseg-timeline-track");
   const subSegValueList = document.getElementById("subseg-value-list");
   const deleteConfirmDialog = document.getElementById("delete-confirm-dialog");
   const deleteConfirmText = document.getElementById("delete-confirm-text");
@@ -87,6 +91,12 @@
     subSegCardCommitTimerIds: {},
     subSegCardDeleteDialogKey: null,
     subSegValueNodeIdCounter: 0,
+    subSegTimelines: {},
+    subSegTimelineEventIdCounter: 0,
+    subSegTimelineVisible: false,
+    subSegTimelineTraversal: false,
+    subSegTimelineKey: "",
+    subSegTimelineNodeIndex: -1,
     shiftHoldTss: null,
     hasAutoFocusedProgress: false,
     markerSignature: "",
@@ -471,16 +481,6 @@
       return;
     }
 
-    if ((event.ctrlKey || event.metaKey) && isSubSegInputFocused && (isBackspaceKey || isDeleteKey)) {
-      event.preventDefault();
-      event.stopPropagation();
-      state.activeSubSegValueKey = null;
-      state.subSegCardDeleteDialogKey = null;
-      renderSubSegValuePanel();
-      setSaveStatus("audSeg subSeg value selection exited");
-      return;
-    }
-
     if (isSubSegCardInputFocused) {
       if (handleFocusedSubSegCardKeyDown(event)) {
         return;
@@ -493,7 +493,23 @@
     }
 
     if (isSubSegInputFocused) {
-      if ((event.ctrlKey || event.metaKey) && (isArrowUp || isArrowDown)) {
+      if ((event.ctrlKey || event.metaKey) && (isArrowLeft || isArrowRight)) {
+        event.preventDefault();
+        event.stopPropagation();
+        traverseSubSegTimeline(isArrowRight ? 1 : -1);
+      } else if ((event.ctrlKey || event.metaKey) && isBackspaceKey) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (state.subSegTimelineVisible) {
+          hideSubSegTimeline();
+          setSaveStatus("audSeg subSeg timeline hidden");
+        } else {
+          state.activeSubSegValueKey = null;
+          state.subSegCardDeleteDialogKey = null;
+          renderSubSegValuePanel();
+          setSaveStatus("audSeg subSeg value selection exited");
+        }
+      } else if ((event.ctrlKey || event.metaKey) && (isArrowUp || isArrowDown)) {
         event.preventDefault();
         event.stopPropagation();
         moveFocusFromTopSubSegInput(isArrowDown ? 1 : -1);
@@ -524,12 +540,17 @@
           return;
         }
         if (state.activeSubSegValueKey) {
-          state.activeSubSegValueKey = null;
-          if (subSegValueInput) {
-            subSegValueInput.value = "";
+          if (state.subSegTimelineVisible) {
+            hideSubSegTimeline();
+            setSaveStatus("audSeg subSeg timeline hidden");
+          } else {
+            state.activeSubSegValueKey = null;
+            if (subSegValueInput) {
+              subSegValueInput.value = "";
+            }
+            renderSubSegValuePanel();
+            setSaveStatus("audSeg subSeg value selection cleared");
           }
-          renderSubSegValuePanel();
-          setSaveStatus("audSeg subSeg value selection cleared");
           return;
         }
         if (state.selectedTargetSubSegIndex >= 0) {
@@ -2694,9 +2715,11 @@
     state.checkpoints = [];
     state.subSegs = [];
     state.subSegValueEntries = {};
+    state.subSegTimelines = {};
     state.subSegCardRecallPositions = {};
     state.subSegCardDeleteDialogKey = null;
     state.activeSubSegValueKey = null;
+    resetSubSegTimelineUiState();
     state.selectedSpanIndex = -1;
     clearTargetSpanLock({ preserveSelection: false });
     state.shiftHoldTss = null;
@@ -2795,7 +2818,11 @@
       return;
     }
 
-    const created = { start, end };
+    const created = {
+      start,
+      end,
+      createdAt: new Date().toISOString()
+    };
     state.subSegs.push(created);
     state.subSegs = normalizeSubSegs(state.subSegs);
     syncTargetSubSegsFromCurrentBounds();
@@ -3035,6 +3062,207 @@
     return getSubSegValueKey(seg);
   }
 
+  function hideSubSegTimeline() {
+    state.subSegTimelineVisible = false;
+    state.subSegTimelineTraversal = false;
+    state.subSegTimelineNodeIndex = -1;
+    state.subSegTimelineKey = "";
+    renderSubSegValuePanel();
+  }
+
+  function resetSubSegTimelineUiState() {
+    state.subSegTimelineVisible = false;
+    state.subSegTimelineTraversal = false;
+    state.subSegTimelineKey = "";
+    state.subSegTimelineNodeIndex = -1;
+  }
+
+  function isSubSegTimelineTraversalActiveForKey(key) {
+    return Boolean(
+      state.subSegTimelineVisible &&
+      state.subSegTimelineTraversal &&
+      key &&
+      state.subSegTimelineKey === key
+    );
+  }
+
+  function cloneSubSegValueEntryList(entries) {
+    const list = Array.isArray(entries) ? entries : [];
+    return JSON.parse(JSON.stringify(list));
+  }
+
+  function parseSubSegValueKey(key) {
+    const raw = String(key || "");
+    const parts = raw.split("|");
+    if (parts.length !== 2) {
+      return null;
+    }
+    const start = Number(parts[0]);
+    const end = Number(parts[1]);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+      return null;
+    }
+    return { start, end };
+  }
+
+  function getSubSegCreatedAtByKey(key) {
+    const parsed = parseSubSegValueKey(key);
+    if (!parsed) {
+      return "";
+    }
+    const match = state.subSegs.find(function (seg) {
+      return Math.abs(seg.start - parsed.start) <= 0.01 && Math.abs(seg.end - parsed.end) <= 0.01;
+    });
+    if (!match) {
+      return "";
+    }
+    const createdAt = String(match.createdAt || "");
+    const stamp = new Date(createdAt);
+    if (Number.isNaN(stamp.getTime())) {
+      return "";
+    }
+    return createdAt;
+  }
+
+  function createTimelineEventId() {
+    state.subSegTimelineEventIdCounter += 1;
+    return "timeline-" + Date.now().toString(36) + "-" + state.subSegTimelineEventIdCounter.toString(36);
+  }
+
+  function ensureSubSegTimeline(key) {
+    if (!key) {
+      return null;
+    }
+    const timeline = state.subSegTimelines[key];
+    if (timeline && typeof timeline === "object" && Array.isArray(timeline.events)) {
+      return timeline;
+    }
+    const createdAt = getSubSegCreatedAtByKey(key) || new Date().toISOString();
+    const seeded = {
+      createdAt,
+      events: []
+    };
+    state.subSegTimelines[key] = seeded;
+    return seeded;
+  }
+
+  function recordSubSegTimelineEvent(key, label, createdAt) {
+    if (!key) {
+      return;
+    }
+    const timeline = ensureSubSegTimeline(key);
+    if (!timeline) {
+      return;
+    }
+    if (!Array.isArray(timeline.events)) {
+      timeline.events = [];
+    }
+    const when = String(createdAt || new Date().toISOString());
+    timeline.events.push({
+      id: createTimelineEventId(),
+      label: String(label || "version"),
+      createdAt: when,
+      snapshot: cloneSubSegValueEntryList(state.subSegValueEntries[key])
+    });
+    if (timeline.events.length > 400) {
+      timeline.events = timeline.events.slice(timeline.events.length - 400);
+    }
+  }
+
+  function getSelectedSubSegTimeline() {
+    const key = state.activeSubSegValueKey || getSelectedTargetSubSegValueKey();
+    if (!key) {
+      return null;
+    }
+    return ensureSubSegTimeline(key);
+  }
+
+  function getTimelineNodeSnapshot(key) {
+    if (!isSubSegTimelineTraversalActiveForKey(key)) {
+      return null;
+    }
+    const timeline = ensureSubSegTimeline(key);
+    if (!timeline || !Array.isArray(timeline.events) || timeline.events.length <= 0) {
+      return null;
+    }
+    const idx = Math.max(0, Math.min(timeline.events.length - 1, Number(state.subSegTimelineNodeIndex)));
+    const event = timeline.events[idx];
+    return Array.isArray(event && event.snapshot) ? event.snapshot : null;
+  }
+
+  function traverseSubSegTimeline(step) {
+    const key = state.activeSubSegValueKey;
+    if (!key) {
+      return;
+    }
+    const timeline = ensureSubSegTimeline(key);
+    const events = Array.isArray(timeline && timeline.events) ? timeline.events : [];
+    if (events.length <= 0) {
+      setSaveStatus("No timeline checkpoints yet");
+      return;
+    }
+    const delta = step > 0 ? 1 : -1;
+    if (!state.subSegTimelineVisible || state.subSegTimelineKey !== key) {
+      state.subSegTimelineVisible = true;
+      state.subSegTimelineTraversal = true;
+      state.subSegTimelineKey = key;
+      state.subSegTimelineNodeIndex = events.length - 1;
+    }
+    const nextIndex = Math.max(0, Math.min(events.length - 1, state.subSegTimelineNodeIndex + delta));
+    state.subSegTimelineNodeIndex = nextIndex;
+    const targetEvent = events[nextIndex];
+    renderSubSegValuePanel();
+    focusTopSubSegInput();
+    setSaveStatus(
+      "Timeline " + String(nextIndex + 1) + "/" + String(events.length) +
+      " | " + formatSavedAt(targetEvent && targetEvent.createdAt ? targetEvent.createdAt : "")
+    );
+  }
+
+  function renderSubSegTimeline(key) {
+    if (!subSegTimeline || !subSegTimelineTrack || !subSegTimelineStart || !subSegTimelineEnd) {
+      return;
+    }
+    const canShow = Boolean(state.subSegTimelineVisible && key);
+    subSegTimeline.classList.toggle("hidden", !canShow);
+    subSegTimelineTrack.innerHTML = "";
+    if (!canShow) {
+      return;
+    }
+    const timeline = ensureSubSegTimeline(key);
+    const events = Array.isArray(timeline && timeline.events) ? timeline.events : [];
+    if (events.length <= 0) {
+      subSegTimeline.classList.add("hidden");
+      return;
+    }
+    const createdAt = String((timeline && timeline.createdAt) || events[0].createdAt || new Date().toISOString());
+    const startStamp = new Date(createdAt).getTime();
+    const nowStamp = Date.now();
+    const span = Math.max(1, nowStamp - startStamp);
+    subSegTimelineStart.textContent = formatSavedAt(createdAt);
+    subSegTimelineEnd.textContent = "now";
+    const selectedIdx = Math.max(0, Math.min(events.length - 1, Number(state.subSegTimelineNodeIndex)));
+    events.forEach(function (eventItem, idx) {
+      const eventStamp = new Date(eventItem && eventItem.createdAt ? eventItem.createdAt : createdAt).getTime();
+      const safeStamp = Number.isFinite(eventStamp) ? eventStamp : startStamp;
+      const leftPct = Math.max(0, Math.min(100, ((safeStamp - startStamp) / span) * 100));
+      const node = document.createElement("button");
+      node.type = "button";
+      node.className = "subseg-timeline-node" + (idx === selectedIdx ? " is-selected" : "");
+      node.style.left = String(leftPct) + "%";
+      node.title = String(eventItem && eventItem.label ? eventItem.label : "version") + " | " + formatSavedAt(eventItem && eventItem.createdAt ? eventItem.createdAt : "");
+      node.addEventListener("click", function () {
+        state.subSegTimelineVisible = true;
+        state.subSegTimelineTraversal = true;
+        state.subSegTimelineKey = key;
+        state.subSegTimelineNodeIndex = idx;
+        renderSubSegValuePanel();
+        focusTopSubSegInput();
+      });
+      subSegTimelineTrack.appendChild(node);
+    });
+  }
+
   function activateSubSegValueSelection() {
     const key = getSelectedTargetSubSegValueKey();
     if (!key) {
@@ -3042,6 +3270,8 @@
       return;
     }
     state.activeSubSegValueKey = key;
+    ensureSubSegTimeline(key);
+    resetSubSegTimelineUiState();
     renderSubSegValuePanel();
     requestAnimationFrame(function () {
       if (!subSegValueInput) {
@@ -3062,6 +3292,7 @@
     const currentKey = getSelectedTargetSubSegValueKey();
     if (!currentKey || currentKey !== state.activeSubSegValueKey) {
       state.activeSubSegValueKey = null;
+      resetSubSegTimelineUiState();
       if (subSegValueInput) {
         subSegValueInput.value = "";
       }
@@ -3072,6 +3303,9 @@
     event.preventDefault();
     const key = state.activeSubSegValueKey;
     if (!key || !subSegValueInput) {
+      return;
+    }
+    if (isSubSegTimelineTraversalActiveForKey(key)) {
       return;
     }
     const text = String(subSegValueInput.value || "").trim();
@@ -3091,6 +3325,7 @@
       anchorStart: null,
       anchorEnd: null
     });
+    recordSubSegTimelineEvent(key, "card-created", createdAt);
     subSegValueInput.value = "";
     renderSubSegValuePanel();
     enqueueAutoSave();
@@ -3104,6 +3339,12 @@
     const isVisible = Boolean(hasTargetSpan() && selectedKey && state.activeSubSegValueKey && selectedKey === state.activeSubSegValueKey);
     subSegValuePanel.classList.toggle("hidden", !isVisible);
     if (!isVisible) {
+      if (subSegTimelineTrack) {
+        subSegTimelineTrack.innerHTML = "";
+      }
+      if (subSegTimeline) {
+        subSegTimeline.classList.add("hidden");
+      }
       subSegValueList.innerHTML = "";
       state.subSegCardLiveValueOverrides = {};
       clearAllSubSegCardCommitTimers();
@@ -3111,7 +3352,14 @@
       return;
     }
 
-    const values = Array.isArray(state.subSegValueEntries[selectedKey]) ? state.subSegValueEntries[selectedKey] : [];
+    const timelineSnapshot = getTimelineNodeSnapshot(selectedKey);
+    const values = Array.isArray(timelineSnapshot)
+      ? timelineSnapshot
+      : (Array.isArray(state.subSegValueEntries[selectedKey]) ? state.subSegValueEntries[selectedKey] : []);
+    renderSubSegTimeline(selectedKey);
+    if (subSegValueInput) {
+      subSegValueInput.readOnly = isSubSegTimelineTraversalActiveForKey(selectedKey);
+    }
     subSegValueList.innerHTML = "";
     values.forEach(function (entry, entryIndex) {
       renderSubSegValueCardNode(
@@ -3169,10 +3417,13 @@
     input.className = "subseg-value-card-input";
     input.dataset.subSegValueKey = key;
     input.dataset.subSegValuePath = pathKey;
+    const isTimelineTraversal = isSubSegTimelineTraversalActiveForKey(key);
     const recallPosition = getCardRecallPosition(key, pathKey, entry);
     const isRecalling = recallPosition < getCardCurrentPosition(entry);
     const liveOverrideKey = getSubSegCardRecallStateKey(key, pathKey);
-    const displayedValue = isRecalling
+    const displayedValue = isTimelineTraversal
+      ? String(entry.value || "")
+      : isRecalling
       ? getCardValueAtPosition(entry, recallPosition)
       : Object.prototype.hasOwnProperty.call(state.subSegCardLiveValueOverrides, liveOverrideKey)
         ? String(state.subSegCardLiveValueOverrides[liveOverrideKey] || "")
@@ -3181,19 +3432,23 @@
     const version = document.createElement("div");
     version.className = "subseg-value-version";
     const totalVersions = getCardTotalVersions(entry);
-    if (isRecalling && recallMeta) {
+    if (isTimelineTraversal) {
+      version.textContent = "timeline | " + formatSavedAt(entry && entry.createdAt ? entry.createdAt : "");
+    } else if (isRecalling && recallMeta) {
       version.textContent = "current -" + String(recallMeta.offset) + " (" + String(totalVersions) + " total) | " + formatSavedAt(recallMeta.createdAt);
     } else {
       version.textContent = "current -0 (" + String(totalVersions) + " total) | " + formatSavedAt(entry && entry.createdAt ? entry.createdAt : "");
     }
     card.appendChild(version);
     input.value = displayedValue;
-    input.readOnly = isRecalling;
+    input.readOnly = Boolean(isRecalling || isTimelineTraversal);
     if (isRecalling) {
       input.classList.add("is-recalling");
     }
-    input.addEventListener("input", handleSubSegCardInputLive);
-    input.addEventListener("change", handleSubSegCardInputChange);
+    if (!isTimelineTraversal) {
+      input.addEventListener("input", handleSubSegCardInputLive);
+      input.addEventListener("change", handleSubSegCardInputChange);
+    }
     card.appendChild(input);
 
     const deleteDialogKey = getSubSegCardRecallStateKey(key, pathKey);
@@ -3292,6 +3547,9 @@
     if (!key || !pathKey) {
       return;
     }
+    if (isSubSegTimelineTraversalActiveForKey(key)) {
+      return;
+    }
     const stateKey = getSubSegCardRecallStateKey(key, pathKey);
     const value = String(inputEl && inputEl.value ? inputEl.value : "");
     state.subSegCardLiveValueOverrides[stateKey] = value;
@@ -3308,6 +3566,9 @@
   function commitSubSegCardInputValue(inputEl, options) {
     const key = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValueKey || "" : "");
     const pathKey = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValuePath || "" : "");
+    if (isSubSegTimelineTraversalActiveForKey(key)) {
+      return { changed: false, key, pathKey };
+    }
     const entry = getSubSegValueEntry(key, pathKey);
     if (!entry) {
       return { changed: false, key, pathKey };
@@ -3363,6 +3624,7 @@
     }
     entry.value = nextValue;
     entry.createdAt = new Date().toISOString();
+    recordSubSegTimelineEvent(key, "card-version", entry.createdAt);
     if (Object.prototype.hasOwnProperty.call(state.subSegCardLiveValueOverrides, stateKey)) {
       delete state.subSegCardLiveValueOverrides[stateKey];
     }
@@ -3534,6 +3796,12 @@
     const isShift = Boolean(event.shiftKey);
     const key = String(active.dataset.subSegValueKey || "");
     const pathKey = String(active.dataset.subSegValuePath || "");
+    if (isSubSegTimelineTraversalActiveForKey(key)) {
+      event.preventDefault();
+      event.stopPropagation();
+      focusTopSubSegInput();
+      return true;
+    }
     const entry = getSubSegValueEntry(key, pathKey);
     if (!entry) {
       return false;
@@ -3757,8 +4025,15 @@
       return;
     }
     sourceList.splice(lastIndex, 1);
+    const deletedAt = new Date().toISOString();
     if (!list.length) {
       delete state.subSegValueEntries[key];
+      delete state.subSegTimelines[key];
+      if (state.subSegTimelineKey === key) {
+        resetSubSegTimelineUiState();
+      }
+    } else {
+      recordSubSegTimelineEvent(key, "card-delete", deletedAt);
     }
     state.subSegCardDeleteDialogKey = null;
     const recallKeys = Object.keys(state.subSegCardRecallPositions);
@@ -3825,6 +4100,7 @@
     if (childIndex < 0) {
       return "";
     }
+    recordSubSegTimelineEvent(key, "card-child-created", createdAt);
     const childPathKey = getSubSegValuePathKey(parentPathKey + "." + String(childIndex));
     setCardRecallPosition(key, childPathKey, 0);
     return childPathKey;
@@ -4291,7 +4567,13 @@
       if ((clampedEnd - clampedStart) <= 0.03) {
         return;
       }
-      normalized.push({ start: clampedStart, end: clampedEnd });
+      const rawCreatedAt = String(seg && seg.createdAt ? seg.createdAt : "");
+      const createdStamp = new Date(rawCreatedAt);
+      normalized.push({
+        start: clampedStart,
+        end: clampedEnd,
+        createdAt: Number.isNaN(createdStamp.getTime()) ? new Date().toISOString() : rawCreatedAt
+      });
     });
     normalized.sort(function (a, b) {
       if (Math.abs(a.start - b.start) > 0.01) {
@@ -4316,6 +4598,52 @@
         .slice(0, 200);
       if (cleaned.length > 0) {
         normalized[key] = cleaned;
+      }
+    });
+    return normalized;
+  }
+
+  function normalizeSubSegTimelines(rawTimelines, subSegValueEntries) {
+    const source = rawTimelines && typeof rawTimelines === "object" ? rawTimelines : {};
+    const normalized = {};
+    const nowIso = new Date().toISOString();
+    Object.keys(source).forEach(function (key) {
+      const timeline = source[key];
+      if (!timeline || typeof timeline !== "object") {
+        return;
+      }
+      const rawCreatedAt = String(timeline.createdAt || getSubSegCreatedAtByKey(key) || nowIso);
+      const createdAtStamp = new Date(rawCreatedAt);
+      const createdAt = Number.isNaN(createdAtStamp.getTime()) ? nowIso : rawCreatedAt;
+      const eventsRaw = Array.isArray(timeline.events) ? timeline.events : [];
+      const events = eventsRaw
+        .map(function (eventItem) {
+          if (!eventItem || typeof eventItem !== "object") {
+            return null;
+          }
+          const rawEventCreatedAt = String(eventItem.createdAt || nowIso);
+          const eventStamp = new Date(rawEventCreatedAt);
+          return {
+            id: String(eventItem.id || createTimelineEventId()),
+            label: String(eventItem.label || "version"),
+            createdAt: Number.isNaN(eventStamp.getTime()) ? nowIso : rawEventCreatedAt,
+            snapshot: normalizeSubSegValueEntries({ tmp: eventItem.snapshot }).tmp || []
+          };
+        })
+        .filter(function (item) { return Boolean(item); })
+        .slice(-400);
+      normalized[key] = {
+        createdAt,
+        events
+      };
+    });
+
+    Object.keys(subSegValueEntries || {}).forEach(function (key) {
+      if (!normalized[key]) {
+        normalized[key] = {
+          createdAt: getSubSegCreatedAtByKey(key) || nowIso,
+          events: []
+        };
       }
     });
     return normalized;
@@ -4489,6 +4817,7 @@
     state.subSegCardRecallPositions = {};
     state.subSegCardDeleteDialogKey = null;
     state.activeSubSegValueKey = null;
+    resetSubSegTimelineUiState();
     state.shiftHoldTss = null;
     state.targetMarkerSignature = "";
     if (state.deleteTargetType === "subseg" || state.deleteConfirmOpen) {
@@ -5153,9 +5482,10 @@
       playback: {
         checkpoints: state.checkpoints.slice(),
         subSegs: state.subSegs.map(function (seg) {
-          return { start: seg.start, end: seg.end };
+          return { start: seg.start, end: seg.end, createdAt: seg.createdAt || new Date().toISOString() };
         }),
         subSegValueEntries: state.subSegValueEntries,
+        subSegTimelines: state.subSegTimelines,
         selectedSpanIndex: -1,
         currentTime: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
         wasPlaying: !audio.paused
@@ -5265,7 +5595,9 @@
       : [];
     state.subSegs = normalizeSubSegs(savedPlayback.subSegs);
     state.subSegValueEntries = normalizeSubSegValueEntries(savedPlayback.subSegValueEntries);
+    state.subSegTimelines = normalizeSubSegTimelines(savedPlayback.subSegTimelines, state.subSegValueEntries);
     state.activeSubSegValueKey = null;
+    resetSubSegTimelineUiState();
 
     state.selectedSpanIndex = -1;
     clearTargetSpanLock({ preserveSelection: false });
