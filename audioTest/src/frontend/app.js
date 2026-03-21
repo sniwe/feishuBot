@@ -3167,6 +3167,9 @@
     input.dataset.subSegValuePath = pathKey;
     const recallPosition = getCardRecallPosition(key, pathKey, entry);
     const isRecalling = recallPosition < getCardCurrentPosition(entry);
+    const displayedValue = isRecalling
+      ? getCardValueAtPosition(entry, recallPosition)
+      : String(entry.value || "");
     const recallMeta = getCardRecallMeta(entry, recallPosition);
     const version = document.createElement("div");
     version.className = "subseg-value-version";
@@ -3176,7 +3179,7 @@
       version.textContent = "current -0 | " + formatSavedAt(entry && entry.createdAt ? entry.createdAt : "");
     }
     card.appendChild(version);
-    input.value = isRecalling ? getCardValueAtPosition(entry, recallPosition) : String(entry.value || "");
+    input.value = displayedValue;
     input.readOnly = isRecalling;
     if (isRecalling) {
       input.classList.add("is-recalling");
@@ -3228,10 +3231,20 @@
       nextAncestorGuideDepths.push(depth);
     }
     sortedChildren.forEach(function (childEntry, childIndex) {
+      const childPath = path.concat(childIndex);
+      const childPathKey = getSubSegValuePathKey(childPath);
+      const childRecallPosition = getCardRecallPosition(key, childPathKey, childEntry);
+      const childDisplayedValue = String(getCardValueAtPosition(childEntry, childRecallPosition) || "").trim();
+      if (!childDisplayedValue) {
+        return;
+      }
+      if (String(displayedValue || "").indexOf(childDisplayedValue) < 0) {
+        return;
+      }
       renderSubSegValueCardNode(
         key,
         childEntry,
-        path.concat(childIndex),
+        childPath,
         depth + 1,
         childIndex === (sortedChildren.length - 1),
         nextAncestorGuideDepths
