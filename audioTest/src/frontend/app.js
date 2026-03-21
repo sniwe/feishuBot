@@ -1679,7 +1679,8 @@
         rootVersion.textContent = "current -0 | current version";
         const rootInput = document.createElement("input");
         rootInput.type = "text";
-        rootInput.className = "subseg-value-card-input";`r`n        rootInput.id = "guide-nav-parent-input";
+        rootInput.className = "subseg-value-card-input";
+        rootInput.id = "guide-nav-parent-input";
         rootInput.value = "钱货两清";
         rootInput.readOnly = true;
         rootCard.appendChild(rootVersion);
@@ -1697,14 +1698,17 @@
         childVersion.textContent = "current -0 | child card";
         const childInput = document.createElement("input");
         childInput.type = "text";
-        childInput.className = "subseg-value-card-input";`r`n        childInput.id = "guide-nav-child-input";
+        childInput.className = "subseg-value-card-input";
+        childInput.id = "guide-nav-child-input";
         childInput.value = "钱货";
         childInput.readOnly = true;
         childCard.appendChild(childVersion);
         childCard.appendChild(childInput);
         cluster.appendChild(childCard);
 
-        subSegValueList.appendChild(cluster);`r`n        startGuideNavInputBlink([rootInput, childInput]);`r`n        return;
+        subSegValueList.appendChild(cluster);
+        startGuideNavInputBlink([rootInput, childInput]);
+        return;
       }
       const card = document.createElement("div");
       card.className = "subseg-value-card";
