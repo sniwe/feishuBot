@@ -104,6 +104,8 @@
     guideStepIndex: -1,
     guideSteps: [],
     guideRafId: null,
+    guideNavBlinkTimerId: null,
+    guideNavBlinkIndex: 0,
     guideLanguage: "en",
     guidePhase: "list-language",
     guideTooltipLocked: false,
@@ -1365,6 +1367,7 @@
     void deps;
     const phase = String(data.phase || "");
     const guideCopy = getGuideCopy({ deps: {} });
+    stopGuideNavInputBlink();
     fileName.textContent = "Guide Demo - Episode 01.mp3";
     hideGuideDeleteDialog();
     progress.disabled = true;
@@ -1676,7 +1679,7 @@
         rootVersion.textContent = "current -0 | current version";
         const rootInput = document.createElement("input");
         rootInput.type = "text";
-        rootInput.className = "subseg-value-card-input";
+        rootInput.className = "subseg-value-card-input";`r`n        rootInput.id = "guide-nav-parent-input";
         rootInput.value = "钱货两清";
         rootInput.readOnly = true;
         rootCard.appendChild(rootVersion);
@@ -1694,15 +1697,14 @@
         childVersion.textContent = "current -0 | child card";
         const childInput = document.createElement("input");
         childInput.type = "text";
-        childInput.className = "subseg-value-card-input";
+        childInput.className = "subseg-value-card-input";`r`n        childInput.id = "guide-nav-child-input";
         childInput.value = "钱货";
         childInput.readOnly = true;
         childCard.appendChild(childVersion);
         childCard.appendChild(childInput);
         cluster.appendChild(childCard);
 
-        subSegValueList.appendChild(cluster);
-        return;
+        subSegValueList.appendChild(cluster);`r`n        startGuideNavInputBlink([rootInput, childInput]);`r`n        return;
       }
       const card = document.createElement("div");
       card.className = "subseg-value-card";
@@ -1768,6 +1770,47 @@
     }
   }
 
+  function stopGuideNavInputBlink() {
+    if (state.guideNavBlinkTimerId) {
+      window.clearInterval(state.guideNavBlinkTimerId);
+      state.guideNavBlinkTimerId = null;
+    }
+    state.guideNavBlinkIndex = 0;
+  }
+
+  function startGuideNavInputBlink(inputs) {
+    const list = Array.isArray(inputs)
+      ? inputs.filter(function (el) { return Boolean(el); })
+      : [];
+    if (list.length < 2) {
+      return;
+    }
+    stopGuideNavInputBlink();
+    function focusIndex(index) {
+      const target = list[index % list.length];
+      if (!target) {
+        return;
+      }
+      try {
+        target.focus({ preventScroll: true });
+      } catch {
+        target.focus();
+      }
+      const len = String(target.value || "").length;
+      try {
+        target.setSelectionRange(len, len);
+      } catch {
+        // Ignore selection failures.
+      }
+    }
+    focusIndex(0);
+    state.guideNavBlinkIndex = 0;
+    state.guideNavBlinkTimerId = window.setInterval(function () {
+      state.guideNavBlinkIndex = (state.guideNavBlinkIndex + 1) % list.length;
+      focusIndex(state.guideNavBlinkIndex);
+    }, 650);
+  }
+
   function startGuideMode(ctx) {
     const { deps } = ctx;
     void deps;
@@ -1807,6 +1850,7 @@
     state.guideStepIndex = -1;
     state.guideSteps = [];
     state.guideTooltipLocked = false;
+    stopGuideNavInputBlink();
     if (state.guideRafId) {
       cancelAnimationFrame(state.guideRafId);
       state.guideRafId = null;
@@ -5017,3 +5061,4 @@
 
   window.addEventListener("beforeunload", revokeObjectUrl);
 })();
+
