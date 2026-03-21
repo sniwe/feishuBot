@@ -2903,6 +2903,10 @@
     card.className = "subseg-value-card";
     card.style.setProperty("--subseg-card-depth", String(Math.max(0, depth)));
     card.classList.toggle("is-nested", depth > 0);
+    const bridgeLeft = depth > 1 ? -9 : -4;
+    const bridgeWidth = depth > 1 ? 9 : 4;
+    card.style.setProperty("--subseg-card-bridge-left", String(bridgeLeft) + "px");
+    card.style.setProperty("--subseg-card-bridge-width", String(bridgeWidth) + "px");
     const input = document.createElement("input");
     input.type = "text";
     input.className = "subseg-value-card-input";
