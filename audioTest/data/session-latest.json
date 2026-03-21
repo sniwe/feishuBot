@@ -1,198 +1,23 @@
 {
-  "id": "ai-mp3-mmu2a3kg-h4jpfn",
+  "id": "ep-ai-mp3-mmym2vf9-1im9hc",
   "owner": "rhys",
-  "savedAt": "2026-03-21T04:58:07.830Z",
-  "updatedAt": "2026-03-21T04:58:07.830Z",
-  "revision": 5,
+  "savedAt": "2026-03-21T05:00:02.783Z",
+  "updatedAt": "2026-03-21T05:00:02.783Z",
+  "revision": 9,
   "file": {
-    "name": "AIçš„èƒ¡è¯´å…«é“ï¼Œä¸ºä»€ä¹ˆæ¯”äººç±»éª—å­â€œæ›´å±é™©â€ï¼Ÿ.mp3",
+    "name": "ep：AI危机如何看待.mp3",
     "type": "audio/mpeg",
-    "size": 11253803,
-    "lastModified": 1749090197714
+    "size": 13401278,
+    "lastModified": 1722994654242
   },
   "playback": {
-    "checkpoints": [
-      140
-    ],
-    "subSegs": [
-      {
-        "start": 7.044739,
-        "end": 9.05202
-      },
-      {
-        "start": 10.563998,
-        "end": 12.415793
-      },
-      {
-        "start": 15.453381,
-        "end": 19.233435
-      },
-      {
-        "start": 33.296642,
-        "end": 34.142893
-      },
-      {
-        "start": 40.938971,
-        "end": 48.26449
-      },
-      {
-        "start": 56.330202,
-        "end": 60.297027
-      },
-      {
-        "start": 74.305848,
-        "end": 77.401328
-      }
-    ],
-    "subSegValueEntries": {
-      "74.306|77.401": [
-        {
-          "nodeId": "card-mmz14vgy-1",
-          "value": "ä»¥ä¸€ç§ä¸€é¡¹ä¸åˆ°çš„æ–¹å¼bojiåˆ°ä½",
-          "createdAt": "2026-03-19T02:51:00.754Z",
-          "history": [],
-          "children": [],
-          "anchorStart": 0,
-          "anchorEnd": 0
-        }
-      ],
-      "10.564|12.416": [
-        {
-          "nodeId": "card-mmz14vgy-2",
-          "value": "test the second one again",
-          "createdAt": "2026-03-19T03:20:06.529Z",
-          "history": [
-            {
-              "value": "test the second one",
-              "createdAt": "2026-03-19T03:20:02.407Z"
-            }
-          ],
-          "children": [],
-          "anchorStart": 0,
-          "anchorEnd": 0
-        }
-      ],
-      "15.453|19.233": [
-        {
-          "nodeId": "card-mmz14vgy-3",
-          "value": "am i losign all control?",
-          "createdAt": "2026-03-20T10:06:19.171Z",
-          "history": [],
-          "children": [],
-          "anchorStart": 0,
-          "anchorEnd": 0
-        },
-        {
-          "nodeId": "card-mmz14vgy-4",
-          "value": "test 2",
-          "createdAt": "2026-03-20T10:06:40.231Z",
-          "history": [],
-          "children": [],
-          "anchorStart": 0,
-          "anchorEnd": 0
-        }
-      ],
-      "7.045|9.052": [
-        {
-          "nodeId": "card-mmz14vgy-5",
-          "value": "this is a test",
-          "createdAt": "2026-03-20T14:15:27.980Z",
-          "history": [
-            {
-              "value": "test",
-              "createdAt": "2026-03-20T14:05:12.066Z"
-            },
-            {
-              "value": "test 2",
-              "createdAt": "2026-03-20T14:05:16.139Z"
-            }
-          ],
-          "children": [
-            {
-              "nodeId": "card-mmz15cwn-7",
-              "value": "this",
-              "createdAt": "2026-03-20T15:04:27.287Z",
-              "history": [],
-              "children": [],
-              "anchorStart": 0,
-              "anchorEnd": 4
-            },
-            {
-              "nodeId": "card-mmz152im-6",
-              "value": "test",
-              "createdAt": "2026-03-20T15:04:13.822Z",
-              "history": [],
-              "children": [],
-              "anchorStart": 10,
-              "anchorEnd": 14
-            }
-          ],
-          "anchorStart": 0,
-          "anchorEnd": 0
-        },
-        {
-          "nodeId": "card-mmzr2a0b-8",
-          "value": "there is a monkey under the puddle",
-          "createdAt": "2026-03-21T03:09:53.579Z",
-          "history": [],
-          "children": [
-            {
-              "nodeId": "card-mmzr35fz-9",
-              "value": "monkey",
-              "createdAt": "2026-03-21T03:10:34.319Z",
-              "history": [],
-              "children": [],
-              "anchorStart": 11,
-              "anchorEnd": 17
-            },
-            {
-              "nodeId": "card-mmzr38mf-a",
-              "value": "under the puddle",
-              "createdAt": "2026-03-21T03:10:38.439Z",
-              "history": [],
-              "children": [
-                {
-                  "nodeId": "card-mmzr3e01-b",
-                  "value": "the puddle",
-                  "createdAt": "2026-03-21T03:10:45.409Z",
-                  "history": [],
-                  "children": [
-                    {
-                      "nodeId": "card-mmzr3gn2-c",
-                      "value": "puddle",
-                      "createdAt": "2026-03-21T03:10:48.830Z",
-                      "history": [],
-                      "children": [],
-                      "anchorStart": 4,
-                      "anchorEnd": 10
-                    }
-                  ],
-                  "anchorStart": 6,
-                  "anchorEnd": 16
-                }
-              ],
-              "anchorStart": 18,
-              "anchorEnd": 34
-            },
-            {
-              "nodeId": "card-mmzs7va8-1",
-              "value": "puddle",
-              "createdAt": "2026-03-21T03:42:14.048Z",
-              "history": [],
-              "children": [],
-              "anchorStart": 28,
-              "anchorEnd": 34
-            }
-          ],
-          "anchorStart": 0,
-          "anchorEnd": 0
-        }
-      ]
-    },
+    "checkpoints": [],
+    "subSegs": [],
+    "subSegValueEntries": {},
     "selectedSpanIndex": -1,
-    "currentTime": 140.02,
+    "currentTime": 0,
     "wasPlaying": false
   },
-  "audioId": "ai-mp3-mmu2a3b9-i7zysw",
-  "audioUrl": "/api/audio?id=ai-mp3-mmu2a3b9-i7zysw&username=rhys&authToken=tok_mmzulyv3_ts370t5ml6"
+  "audioId": "ep-ai-mp3-mmym2ury-vz23m9",
+  "audioUrl": "/api/audio?id=ep-ai-mp3-mmym2ury-vz23m9&username=rhys&authToken=tok_mmzulyv3_ts370t5ml6"
 }
