@@ -1,7 +1,7 @@
 (function () {
   const LOGIN_STORAGE_KEY = "audioTest.auth";
   const GUIDE_SEEN_STORAGE_KEY = "audioTest.guideSeenByUser";
-  const GUIDE_FEATURE_VERSION = "cards-feature-pack-2026-03-21c";
+  const GUIDE_FEATURE_VERSION = "cards-feature-pack-2026-03-21d";
   const LOGIN_TTL_MS = 5 * 60 * 1000;
   const AUTH_PING_MIN_INTERVAL_MS = 30 * 1000;
   const ALLOWED_USERS = ["zhaoying", "rhys"];
@@ -994,7 +994,7 @@
         cardsText: "After Enter, the first input becomes the first version on this card.",
         cardEditTitle: "Edit To New Version",
         cardEditText: "Focus this card, update your text after re-listening (example now: '钱货两清'), then save. The prior text remains as version history on the same card.",
-        cardChildSelectTitle: "Select Parent Substring",
+        cardChildSelectTitle: "Create Child Cards",
         cardChildSelectText: "Goal: split a long parent phrase into a smaller focused idea you want to track as its own child card. On parent text '钱货两清', focus the parent input, highlight '钱货', then press Enter.",
         cardChildCreatedTitle: "Child Card Created",
         cardChildCreatedText: "After Enter, a child card appears directly under the parent using the selected substring. Repeat on any child to nest deeper. Siblings are ordered by earliest highlighted index in parent text, and each child indents +5px per level.",
@@ -1070,7 +1070,7 @@
         cardsText: "\u6309 Enter \u540e\uff0c\u8f93\u5165\u5185\u5bb9\u4f1a\u4f5c\u4e3a\u8fd9\u5f20\u5361\u7684\u7b2c\u4e00\u4e2a\u7248\u672c\u3002",
         cardEditTitle: "\u4fee\u6539\u4e3a\u65b0\u7248\u672c",
         cardEditText: "\u805a\u7126\u8be5\u5361\u540e\uff0c\u91cd\u542c\u97f3\u9891\u5e76\u4fee\u6539\u6587\u5b57\uff08\u793a\u4f8b\u66f4\u65b0\u4e3a\u201c\u94b1\u8d27\u4e24\u6e05\u201d\uff09\uff0c\u518d\u4fdd\u5b58\u3002\u65e7\u7248\u672c\u4f1a\u7559\u5728\u540c\u4e00\u5f20\u5361\u7684\u5386\u53f2\u4e2d\u3002",
-        cardChildSelectTitle: "\u9009\u62e9\u7236\u5361\u5b50\u4e32",
+        cardChildSelectTitle: "\u521b\u5efa\u5b50\u5361\u7247",
         cardChildSelectText: "\u76ee\u7684\uff1a\u628a\u8f83\u957f\u7684\u7236\u5361\u77ed\u8bed\u62c6\u6210\u4e00\u4e2a\u66f4\u805a\u7126\u7684\u5b50\u610f\u601d\uff0c\u4f5c\u4e3a\u72ec\u7acb\u5b50\u5361\u8ddf\u8e2a\u3002\u4ee5\u201c\u94b1\u8d27\u4e24\u6e05\u201d\u4e3a\u7236\u5361\uff0c\u805a\u7126\u7236\u5361\u8f93\u5165\u6846\uff0c\u9ad8\u4eae\u9009\u4e2d\u201c\u94b1\u8d27\u201d\uff0c\u7136\u540e\u6309 Enter\u3002",
         cardChildCreatedTitle: "\u5b50\u5361\u5df2\u521b\u5efa",
         cardChildCreatedText: "\u6309 Enter \u540e\uff0c\u4f1a\u5728\u7236\u5361\u4e0b\u65b9\u521b\u5efa\u4e00\u5f20\u5b50\u5361\uff08\u5185\u5bb9\u4e3a\u9009\u4e2d\u5b50\u4e32\uff09\u3002\u53ef\u5728\u5b50\u5361\u4e0a\u7ee7\u7eed\u6267\u884c\u76f8\u540c\u64cd\u4f5c\u4ee5\u5d4c\u5957\u3002\u540c\u7ea7\u5b50\u5361\u4f1a\u6309\u7236\u6587\u672c\u4e2d\u9ad8\u4eae\u8d77\u59cb\u4f4d\u7f6e\u6392\u5e8f\uff0c\u6bcf\u5c42\u76f8\u5bf9\u7236\u5361\u5411\u53f3\u7f29\u8fdb +5px\u3002",
@@ -1682,7 +1682,14 @@
         rootInput.className = "subseg-value-card-input";
         rootInput.id = "guide-nav-parent-input";
         rootInput.value = "钱货两清";
-        rootInput.readOnly = true;
+        rootInput.readOnly = false;
+        rootInput.classList.add("guide-nav-caret-demo");
+        rootInput.addEventListener("beforeinput", function (event) {
+          event.preventDefault();
+        });
+        rootInput.addEventListener("keydown", function (event) {
+          event.preventDefault();
+        });
         rootCard.appendChild(rootVersion);
         rootCard.appendChild(rootInput);
         cluster.appendChild(rootCard);
@@ -1701,7 +1708,14 @@
         childInput.className = "subseg-value-card-input";
         childInput.id = "guide-nav-child-input";
         childInput.value = "钱货";
-        childInput.readOnly = true;
+        childInput.readOnly = false;
+        childInput.classList.add("guide-nav-caret-demo");
+        childInput.addEventListener("beforeinput", function (event) {
+          event.preventDefault();
+        });
+        childInput.addEventListener("keydown", function (event) {
+          event.preventDefault();
+        });
         childCard.appendChild(childVersion);
         childCard.appendChild(childInput);
         cluster.appendChild(childCard);
