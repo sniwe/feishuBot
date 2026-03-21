@@ -918,7 +918,7 @@ h1, p { margin: 0; }
 }
 
 .subseg-value-card.is-nested::before {
-  left: -4px;
+  left: var(--subseg-card-line-left, -4px);
   top: -7px;
   width: 1px;
   height: calc(100% + 14px);
