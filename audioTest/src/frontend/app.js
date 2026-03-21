@@ -3550,8 +3550,8 @@
 
   function moveFocusFromTopSubSegInput(delta) {
     const key = state.activeSubSegValueKey;
-    const flattened = getFlattenedSubSegCardList(key);
-    const totalCards = flattened.length;
+    const visiblePaths = getVisibleSubSegCardPathList(key);
+    const totalCards = visiblePaths.length;
     if (totalCards <= 0) {
       return;
     }
@@ -3562,24 +3562,26 @@
       focusTopSubSegInput();
       return;
     }
-    const next = flattened[nextSlot - 1];
-    if (!next || !next.entry) {
+    const nextPathKey = visiblePaths[nextSlot - 1];
+    if (!nextPathKey) {
       return;
     }
-    const nextCurrentPos = getCardCurrentPosition(next.entry);
-    const nextRecallPos = getCardRecallPosition(key, next.pathKey, next.entry);
-    focusSubSegCardInput(key, next.pathKey, nextRecallPos < nextCurrentPos);
+    const nextEntry = getSubSegValueEntry(key, nextPathKey);
+    if (!nextEntry) {
+      return;
+    }
+    const nextCurrentPos = getCardCurrentPosition(nextEntry);
+    const nextRecallPos = getCardRecallPosition(key, nextPathKey, nextEntry);
+    focusSubSegCardInput(key, nextPathKey, nextRecallPos < nextCurrentPos);
   }
 
   function moveFocusFromSubSegCardInput(key, pathKey, delta) {
-    const flattened = getFlattenedSubSegCardList(key);
-    const totalCards = flattened.length;
+    const visiblePaths = getVisibleSubSegCardPathList(key);
+    const totalCards = visiblePaths.length;
     if (totalCards <= 0) {
       return;
     }
-    const currentIndex = flattened.findIndex(function (item) {
-      return item.pathKey === pathKey;
-    });
+    const currentIndex = visiblePaths.indexOf(pathKey);
     if (currentIndex < 0) {
       return;
     }
@@ -3590,13 +3592,30 @@
       focusTopSubSegInput();
       return;
     }
-    const next = flattened[nextSlot - 1];
-    if (!next || !next.entry) {
+    const nextPathKey = visiblePaths[nextSlot - 1];
+    if (!nextPathKey) {
       return;
     }
-    const nextCurrentPos = getCardCurrentPosition(next.entry);
-    const nextRecallPos = getCardRecallPosition(key, next.pathKey, next.entry);
-    focusSubSegCardInput(key, next.pathKey, nextRecallPos < nextCurrentPos);
+    const nextEntry = getSubSegValueEntry(key, nextPathKey);
+    if (!nextEntry) {
+      return;
+    }
+    const nextCurrentPos = getCardCurrentPosition(nextEntry);
+    const nextRecallPos = getCardRecallPosition(key, nextPathKey, nextEntry);
+    focusSubSegCardInput(key, nextPathKey, nextRecallPos < nextCurrentPos);
+  }
+
+  function getVisibleSubSegCardPathList(key) {
+    if (!key || !subSegValueList) {
+      return [];
+    }
+    const selector = ".subseg-value-card-input[data-sub-seg-value-key=\"" + cssEscapeAttr(key) + "\"][data-sub-seg-value-path]";
+    const nodes = Array.from(subSegValueList.querySelectorAll(selector));
+    return nodes
+      .map(function (node) {
+        return String(node.dataset && node.dataset.subSegValuePath ? node.dataset.subSegValuePath : "").trim();
+      })
+      .filter(function (path) { return Boolean(path); });
   }
 
   function cssEscapeAttr(value) {
