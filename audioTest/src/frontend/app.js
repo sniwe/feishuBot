@@ -338,8 +338,10 @@
     }
 
     state.activeSessionId = null;
+    state.activeRevision = 0;
     state.activeAudioId = null;
     state.activeAudioUrl = null;
+    stopRealtime();
     state.pendingUpload = {
       id: "pending-" + Date.now().toString(36),
       file: {
@@ -5036,7 +5038,9 @@
     const saved = await response.json();
     if (saved && saved.id) {
       state.activeSessionId = saved.id;
-      startRealtimeForSession(state.activeSessionId);
+      if (isPlayerActive()) {
+        startRealtimeForSession(state.activeSessionId);
+      }
     }
     if (saved && saved.revision != null) {
       state.activeRevision = normalizeRevision(saved.revision);
@@ -5053,8 +5057,10 @@
   async function applySavedSession(saved) {
     const savedFile = saved.file || {};
     const savedPlayback = saved.playback || {};
+    state.activeRevision = normalizeRevision(saved && saved.revision);
     debugLog("applySavedSession:start", {
       id: saved && saved.id,
+      revision: state.activeRevision,
       audioId: saved && saved.audioId,
       hasAudioUrl: Boolean(saved && saved.audioUrl),
       hasAudioBase64: Boolean(saved && saved.audioBase64),

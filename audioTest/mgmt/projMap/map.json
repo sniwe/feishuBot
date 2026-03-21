@@ -4,7 +4,7 @@
     "name":  "audioTest",
     "summary":  "Toy browser audio checkpoint player with keyboard controls",
     "root":  "C:\\Users\\Qub\\audioTest",
-    "updated":  "2026-03-21T04:28:32.7433683Z",
+    "updated":  "2026-03-21T04:47:00.0000000Z",
     "nodes":  [
                   {
                       "id":  "control:ui",
@@ -35,10 +35,10 @@
                       "id":  "module:audio-control",
                       "type":  "module",
                       "name":  "src/frontend/app.js",
-                      "summary":  "Refactored audio controller with centralized state/UI updates, session save/restore via backend API, audSeg target-lock playback mode, and auth-scoped requests",
+                      "summary":  "Refactored audio controller with centralized state/UI updates, session save/restore via backend API, SSE realtime sync/reconnect, revision conflict handling, audSeg target-lock playback mode, and auth-scoped requests",
                       "features":  [
                                        {
-                                           "summary":  "Keyboard controls and looping are preserved while Enter can lock a selected audSeg into target mode with a second loop progress bar, Shift hold plus Shift+Space creates subSegs that persist with checkpoints and render on both audEp and target bars, draggable checkpoint markers/tags support micro-adjust with magnifier and 500ms live preview, Ctrl+arrows cycle target-local subSegs, Ctrl+Up/Down now cycles delete targets for checkpoints or target subSeg tags with an x badge and Enter opens confirm-delete (Cancel default), startup restore waits for full audio metadata load via GET /api/session, and all audEp API calls include per-user auth headers/token",
+                                           "summary":  "Keyboard controls and looping are preserved while Enter can lock a selected audSeg into target mode with a second loop progress bar, Shift hold plus Shift+Space creates subSegs that persist with checkpoints and render on both audEp and target bars, draggable checkpoint markers/tags support micro-adjust with magnifier and 500ms live preview, Ctrl+arrows cycle target-local subSegs, Ctrl+Up/Down now cycles delete targets for checkpoints or target subSeg tags with an x badge and Enter opens confirm-delete (Cancel default), startup restore waits for full audio metadata load via GET /api/session, audEp now opens authenticated /api/realtime SSE for live sync, and save payloads include baseRevision for conflict-safe writes",
                                            "flow":  [
                                                         "e2",
                                                         "e3",
@@ -84,10 +84,10 @@
                       "id":  "module:session-backend",
                       "type":  "module",
                       "name":  "src/backend/server.js",
-                      "summary":  "Node HTTP server with persisted-audio list/detail APIs, payload validation, hardened static path resolution, and owner-scoped auth for session/audio operations",
+                      "summary":  "Node HTTP server with persisted-audio list/detail APIs, authenticated SSE realtime channel broadcasts, revision-aware conflict responses, hardened static path resolution, and owner-scoped auth for session/audio operations",
                       "features":  [
                                        {
-                                           "summary":  "GET /api/sessions and GET/POST/DELETE /api/session plus GET/POST /api/audio now require authenticated user context and enforce owner-only visibility and interaction",
+                                           "summary":  "GET /api/sessions and GET/POST/DELETE /api/session plus GET/POST /api/audio and GET /api/realtime require authenticated user context; session writes now emit session_updated/session_deleted events and enforce baseRevision conflict checks",
                                            "flow":  [
                                                         "e5",
                                                         "e6"
@@ -161,7 +161,7 @@
                       "kind":  "control",
                       "from":  "module:audio-control",
                       "to":  "module:session-backend",
-                      "note":  "Frontend persists and restores session via /api/session"
+                      "note":  "Frontend persists/restores session via /api/session and subscribes to /api/realtime for live updates"
                   },
                   {
                       "id":  "e6",
