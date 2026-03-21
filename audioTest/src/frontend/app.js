@@ -98,6 +98,12 @@
     authUser: null,
     authToken: null,
     activeSessionId: null,
+    activeRevision: 0,
+    realtimeSource: null,
+    realtimeChannelId: "",
+    realtimeRetryTimerId: null,
+    realtimeRetryCount: 0,
+    isApplyingRemoteUpdate: false,
     saveQueue: Promise.resolve(),
     isPersisting: false,
     isGuideMode: false,
@@ -830,6 +836,7 @@
     playerView.classList.add("hidden");
     setPlayerLoading(false);
     state.isPlayerVisible = false;
+    stopRealtime();
     clearDeleteTarget({ silent: true });
   }
 
@@ -852,6 +859,7 @@
     playerView.classList.add("hidden");
     setPlayerLoading(false);
     state.isPlayerVisible = false;
+    stopRealtime();
     clearDeleteTarget({ silent: true });
   }
 
@@ -2657,10 +2665,13 @@
 
       await applySavedSession(saved);
       state.activeSessionId = saved.id || sessionId;
+      state.activeRevision = normalizeRevision(saved.revision);
       state.activeAudioId = typeof saved.audioId === "string" ? saved.audioId : null;
       state.activeAudioUrl = typeof saved.audioUrl === "string" ? saved.audioUrl : null;
+      startRealtimeForSession(state.activeSessionId);
       debugLog("openPersistedSession:loaded", {
         sessionId: state.activeSessionId,
+        revision: state.activeRevision,
         audioId: state.activeAudioId,
         audioUrl: state.activeAudioUrl,
         checkpoints: Array.isArray(saved.playback && saved.playback.checkpoints) ? saved.playback.checkpoints.length : 0
@@ -4416,8 +4427,10 @@
 
       if (state.activeSessionId === sessionId) {
         state.activeSessionId = null;
+        state.activeRevision = 0;
         state.activeAudioId = null;
         state.activeAudioUrl = null;
+        stopRealtime();
       }
 
       setSaveStatus("Deleted");
@@ -4717,10 +4730,225 @@
     return "/api/audio?" + query.toString();
   }
 
+  function normalizeRevision(value) {
+    const numeric = Number(value);
+    if (!Number.isInteger(numeric) || numeric < 0) {
+      return 0;
+    }
+    return numeric;
+  }
+
+  function buildRealtimeUrl(sessionId) {
+    const query = new URLSearchParams();
+    query.set("channel", String(sessionId || ""));
+    if (state.authUser) {
+      query.set("username", state.authUser);
+    }
+    if (state.authToken) {
+      query.set("authToken", state.authToken);
+    }
+    return "/api/realtime?" + query.toString();
+  }
+
+  function stopRealtime() {
+    if (state.realtimeRetryTimerId) {
+      window.clearTimeout(state.realtimeRetryTimerId);
+      state.realtimeRetryTimerId = null;
+    }
+    if (state.realtimeSource) {
+      try {
+        state.realtimeSource.close();
+      } catch {
+        // Ignore close failures.
+      }
+    }
+    state.realtimeSource = null;
+    state.realtimeChannelId = "";
+    state.realtimeRetryCount = 0;
+  }
+
+  function scheduleRealtimeReconnect(sessionId) {
+    if (!state.authUser || !state.authToken || !sessionId || state.activeSessionId !== sessionId) {
+      return;
+    }
+    if (state.realtimeRetryTimerId) {
+      return;
+    }
+    const attempt = state.realtimeRetryCount + 1;
+    state.realtimeRetryCount = attempt;
+    const delayMs = Math.min(10000, 500 * Math.pow(2, Math.max(0, attempt - 1)));
+    state.realtimeRetryTimerId = window.setTimeout(function () {
+      state.realtimeRetryTimerId = null;
+      if (!state.authUser || !state.authToken || state.activeSessionId !== sessionId) {
+        return;
+      }
+      startRealtimeForSession(sessionId);
+    }, delayMs);
+  }
+
+  function startRealtimeForSession(sessionId) {
+    if (!window.EventSource) {
+      return;
+    }
+    const resolvedSessionId = String(sessionId || "").trim();
+    if (!resolvedSessionId || !state.authUser || !state.authToken) {
+      stopRealtime();
+      return;
+    }
+    if (state.realtimeSource && state.realtimeChannelId === resolvedSessionId) {
+      return;
+    }
+    stopRealtime();
+    const source = new EventSource(buildRealtimeUrl(resolvedSessionId));
+    state.realtimeSource = source;
+    state.realtimeChannelId = resolvedSessionId;
+
+    source.addEventListener("connected", function () {
+      state.realtimeRetryCount = 0;
+    });
+
+    source.addEventListener("session_updated", function (event) {
+      if (!event || !event.data) {
+        return;
+      }
+      let payload = null;
+      try {
+        payload = JSON.parse(event.data);
+      } catch {
+        payload = null;
+      }
+      if (!payload || typeof payload !== "object") {
+        return;
+      }
+      handleRealtimeSessionUpdated(payload).catch(function () {});
+    });
+
+    source.addEventListener("session_deleted", function (event) {
+      if (!event || !event.data) {
+        return;
+      }
+      let payload = null;
+      try {
+        payload = JSON.parse(event.data);
+      } catch {
+        payload = null;
+      }
+      if (!payload || typeof payload !== "object") {
+        return;
+      }
+      handleRealtimeSessionDeleted(payload).catch(function () {});
+    });
+
+    source.onerror = function () {
+      if (!state.realtimeSource || state.realtimeSource !== source) {
+        return;
+      }
+      try {
+        source.close();
+      } catch {
+        // Ignore close failures.
+      }
+      state.realtimeSource = null;
+      if (!state.realtimeChannelId) {
+        return;
+      }
+      scheduleRealtimeReconnect(state.realtimeChannelId);
+    };
+  }
+
+  async function reloadActiveSessionFromServer(ctx) {
+    const data = ctx || {};
+    const sessionId = String(data.sessionId || state.activeSessionId || "").trim();
+    if (!sessionId || state.isApplyingRemoteUpdate) {
+      return false;
+    }
+    state.isApplyingRemoteUpdate = true;
+    try {
+      const response = await fetch("/api/session?id=" + encodeURIComponent(sessionId), {
+        method: "GET",
+        cache: "no-store",
+        headers: buildAuthHeaders()
+      });
+      if (response.status === 401) {
+        clearLoginState("Login expired. Please sign in again.");
+        return false;
+      }
+      if (response.status === 404) {
+        if (state.activeSessionId === sessionId) {
+          state.activeSessionId = null;
+          state.activeRevision = 0;
+          state.activeAudioId = null;
+          state.activeAudioUrl = null;
+          stopRealtime();
+          showLibraryView();
+          await loadPersistedAudioCards();
+          setSaveStatus("Session removed remotely", true);
+        }
+        return false;
+      }
+      if (!response.ok) {
+        return false;
+      }
+      const saved = await response.json();
+      if (!saved || typeof saved !== "object") {
+        return false;
+      }
+      await applySavedSession(saved);
+      state.activeSessionId = saved.id || sessionId;
+      state.activeRevision = normalizeRevision(saved.revision);
+      state.activeAudioId = typeof saved.audioId === "string" ? saved.audioId : null;
+      state.activeAudioUrl = typeof saved.audioUrl === "string" ? saved.audioUrl : null;
+      startRealtimeForSession(state.activeSessionId);
+      if (data.statusText) {
+        setSaveStatus(String(data.statusText));
+      }
+      return true;
+    } finally {
+      state.isApplyingRemoteUpdate = false;
+    }
+  }
+
+  async function handleRealtimeSessionUpdated(payload) {
+    const incomingSessionId = String(payload.sessionId || "").trim();
+    if (!incomingSessionId || !state.activeSessionId || incomingSessionId !== state.activeSessionId) {
+      return;
+    }
+    const incomingRevision = normalizeRevision(payload.revision);
+    const actor = String(payload.actor || "").trim().toLowerCase();
+    const selfUser = String(state.authUser || "").trim().toLowerCase();
+    if (actor && selfUser && actor === selfUser && incomingRevision <= state.activeRevision) {
+      return;
+    }
+    if (incomingRevision > 0 && incomingRevision <= state.activeRevision) {
+      return;
+    }
+    await reloadActiveSessionFromServer({
+      sessionId: incomingSessionId,
+      statusText: "Remote update received"
+    });
+  }
+
+  async function handleRealtimeSessionDeleted(payload) {
+    const incomingSessionId = String(payload.sessionId || "").trim();
+    if (!incomingSessionId || !state.activeSessionId || incomingSessionId !== state.activeSessionId) {
+      return;
+    }
+    state.activeSessionId = null;
+    state.activeRevision = 0;
+    state.activeAudioId = null;
+    state.activeAudioUrl = null;
+    stopRealtime();
+    showLibraryView();
+    await loadPersistedAudioCards();
+    setSaveStatus("Session deleted remotely", true);
+  }
+
   function clearLoginState(message) {
+    stopRealtime();
     state.authUser = null;
     state.authToken = null;
     state.activeSessionId = null;
+    state.activeRevision = 0;
     state.activeAudioId = null;
     state.activeAudioUrl = null;
     state.sessionsCache = [];
@@ -4751,6 +4979,7 @@
 
     const payload = {
       sessionId: state.activeSessionId,
+      baseRevision: normalizeRevision(state.activeRevision),
       file: {
         name: state.currentFile.name,
         type: state.currentFile.type,
@@ -4782,6 +5011,22 @@
       clearLoginState("Login expired. Please sign in again.");
       throw new Error("auth_required");
     }
+    if (response.status === 409) {
+      const conflict = await response.json().catch(function () { return {}; });
+      const conflictSessionId = String(
+        (conflict && conflict.sessionId) ||
+        state.activeSessionId ||
+        ""
+      ).trim();
+      if (conflictSessionId) {
+        await reloadActiveSessionFromServer({
+          sessionId: conflictSessionId,
+          statusText: "Remote changes loaded (conflict)"
+        });
+      }
+      await loadPersistedAudioCards();
+      return;
+    }
 
     if (!response.ok) {
       const detail = await response.text().catch(function () { return ""; });
@@ -4791,6 +5036,10 @@
     const saved = await response.json();
     if (saved && saved.id) {
       state.activeSessionId = saved.id;
+      startRealtimeForSession(state.activeSessionId);
+    }
+    if (saved && saved.revision != null) {
+      state.activeRevision = normalizeRevision(saved.revision);
     }
     if (uploadedAudio && uploadedAudio.id) {
       state.activeAudioId = uploadedAudio.id;
