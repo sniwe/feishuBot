@@ -83,6 +83,7 @@
     activeSubSegValueKey: null,
     subSegValueEntries: {},
     subSegCardRecallPositions: {},
+    subSegCardLiveValueOverrides: {},
     subSegCardDeleteDialogKey: null,
     subSegValueNodeIdCounter: 0,
     shiftHoldTss: null,
@@ -3103,6 +3104,7 @@
     subSegValuePanel.classList.toggle("hidden", !isVisible);
     if (!isVisible) {
       subSegValueList.innerHTML = "";
+      state.subSegCardLiveValueOverrides = {};
       scheduleGuideStepRender({ deps: {} });
       return;
     }
@@ -3167,9 +3169,12 @@
     input.dataset.subSegValuePath = pathKey;
     const recallPosition = getCardRecallPosition(key, pathKey, entry);
     const isRecalling = recallPosition < getCardCurrentPosition(entry);
+    const liveOverrideKey = getSubSegCardRecallStateKey(key, pathKey);
     const displayedValue = isRecalling
       ? getCardValueAtPosition(entry, recallPosition)
-      : String(entry.value || "");
+      : Object.prototype.hasOwnProperty.call(state.subSegCardLiveValueOverrides, liveOverrideKey)
+        ? String(state.subSegCardLiveValueOverrides[liveOverrideKey] || "")
+        : String(entry.value || "");
     const recallMeta = getCardRecallMeta(entry, recallPosition);
     const version = document.createElement("div");
     version.className = "subseg-value-version";
@@ -3184,6 +3189,7 @@
     if (isRecalling) {
       input.classList.add("is-recalling");
     }
+    input.addEventListener("input", handleSubSegCardInputLive);
     input.addEventListener("change", handleSubSegCardInputChange);
     card.appendChild(input);
 
@@ -3276,6 +3282,25 @@
     commitSubSegCardInputValue(event ? event.target : null, { rerender: false });
   }
 
+  function handleSubSegCardInputLive(event) {
+    const inputEl = event ? event.target : null;
+    const key = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValueKey || "" : "");
+    const pathKey = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValuePath || "" : "");
+    if (!key || !pathKey) {
+      return;
+    }
+    const stateKey = getSubSegCardRecallStateKey(key, pathKey);
+    const value = String(inputEl && inputEl.value ? inputEl.value : "");
+    state.subSegCardLiveValueOverrides[stateKey] = value;
+    const selectionStart = Number(inputEl && inputEl.selectionStart);
+    const selectionEnd = Number(inputEl && inputEl.selectionEnd);
+    renderSubSegValuePanel();
+    focusSubSegCardInput(key, pathKey, false, {
+      selectionStart: Number.isFinite(selectionStart) ? selectionStart : value.length,
+      selectionEnd: Number.isFinite(selectionEnd) ? selectionEnd : value.length
+    });
+  }
+
   function commitSubSegCardInputValue(inputEl, options) {
     const key = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValueKey || "" : "");
     const pathKey = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValuePath || "" : "");
@@ -3293,9 +3318,13 @@
     }
     const nextValue = String(inputEl && inputEl.value ? inputEl.value : "").trim();
     const prevValue = String(entry.value || "");
+    const stateKey = getSubSegCardRecallStateKey(key, pathKey);
     if (!nextValue || nextValue === prevValue) {
       if (inputEl) {
         inputEl.value = prevValue;
+      }
+      if (Object.prototype.hasOwnProperty.call(state.subSegCardLiveValueOverrides, stateKey)) {
+        delete state.subSegCardLiveValueOverrides[stateKey];
       }
       return { changed: false, key, pathKey };
     }
@@ -3313,6 +3342,9 @@
     entry.createdAt = new Date().toISOString();
     if (inputEl) {
       inputEl.value = nextValue;
+    }
+    if (Object.prototype.hasOwnProperty.call(state.subSegCardLiveValueOverrides, stateKey)) {
+      delete state.subSegCardLiveValueOverrides[stateKey];
     }
     if (options && options.rerender) {
       renderSubSegValuePanel();
@@ -3457,12 +3489,6 @@
         enqueueAutoSave();
         return true;
       }
-      const committed = commitSubSegCardInputValue(active, { rerender: true });
-      if (committed.changed) {
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-      }
       return false;
     }
     if (!isCtrl) {
@@ -3531,6 +3557,12 @@
       }
       if (options && options.selectAll) {
         input.select();
+      } else if (options && Number.isFinite(options.selectionStart) && Number.isFinite(options.selectionEnd)) {
+        try {
+          input.setSelectionRange(options.selectionStart, options.selectionEnd);
+        } catch {
+          // Ignore selection failures.
+        }
       }
     });
   }
