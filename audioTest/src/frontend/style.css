@@ -921,7 +921,7 @@ h1, p { margin: 0; }
   left: -4px;
   top: -7px;
   width: 1px;
-  height: calc(50% + 7px);
+  height: calc(100% + 14px);
 }
 
 .subseg-value-card.is-nested::after {
