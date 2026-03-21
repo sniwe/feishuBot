@@ -2889,12 +2889,19 @@
     const values = Array.isArray(state.subSegValueEntries[selectedKey]) ? state.subSegValueEntries[selectedKey] : [];
     subSegValueList.innerHTML = "";
     values.forEach(function (entry, entryIndex) {
-      renderSubSegValueCardNode(selectedKey, entry, [entryIndex], 0, entryIndex === (values.length - 1));
+      renderSubSegValueCardNode(
+        selectedKey,
+        entry,
+        [entryIndex],
+        0,
+        entryIndex === (values.length - 1),
+        []
+      );
     });
     scheduleGuideStepRender({ deps: {} });
   }
 
-  function renderSubSegValueCardNode(key, entry, path, depth, isLastSibling) {
+  function renderSubSegValueCardNode(key, entry, path, depth, isLastSibling, ancestorGuideDepths) {
     if (!subSegValueList || !entry || typeof entry !== "object") {
       return;
     }
@@ -2909,6 +2916,29 @@
     card.style.setProperty("--subseg-card-line-left", String(bridgeLeft) + "px");
     card.style.setProperty("--subseg-card-bridge-left", String(bridgeLeft) + "px");
     card.style.setProperty("--subseg-card-bridge-width", String(bridgeWidth) + "px");
+    if (depth > 0 && Array.isArray(ancestorGuideDepths) && ancestorGuideDepths.length > 0) {
+      const uniqueGuideDepths = ancestorGuideDepths.filter(function (guideDepth, idx, arr) {
+        return Number.isFinite(guideDepth) && guideDepth > 0 && arr.indexOf(guideDepth) === idx;
+      });
+      if (uniqueGuideDepths.length > 0) {
+        const guides = document.createElement("div");
+        guides.className = "subseg-value-ancestor-guides";
+        uniqueGuideDepths.forEach(function (guideDepth) {
+          const depthDelta = depth - guideDepth;
+          if (depthDelta <= 0) {
+            return;
+          }
+          const guide = document.createElement("span");
+          guide.className = "subseg-value-ancestor-guide";
+          const guideLeft = -4 - (5 * depthDelta);
+          guide.style.left = String(guideLeft) + "px";
+          guides.appendChild(guide);
+        });
+        if (guides.childNodes.length > 0) {
+          card.appendChild(guides);
+        }
+      }
+    }
     const input = document.createElement("input");
     input.type = "text";
     input.className = "subseg-value-card-input";
@@ -2970,13 +3000,20 @@
     subSegValueList.appendChild(card);
     entry.children = getSortedChildEntries(entry.children);
     const sortedChildren = entry.children;
+    const nextAncestorGuideDepths = Array.isArray(ancestorGuideDepths)
+      ? ancestorGuideDepths.slice()
+      : [];
+    if (depth > 0 && !isLastSibling) {
+      nextAncestorGuideDepths.push(depth);
+    }
     sortedChildren.forEach(function (childEntry, childIndex) {
       renderSubSegValueCardNode(
         key,
         childEntry,
         path.concat(childIndex),
         depth + 1,
-        childIndex === (sortedChildren.length - 1)
+        childIndex === (sortedChildren.length - 1),
+        nextAncestorGuideDepths
       );
     });
   }

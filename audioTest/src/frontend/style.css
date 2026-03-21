@@ -935,6 +935,23 @@ h1, p { margin: 0; }
   height: 1px;
 }
 
+.subseg-value-ancestor-guides {
+  position: absolute;
+  top: -7px;
+  bottom: -7px;
+  left: 0;
+  width: 0;
+  pointer-events: none;
+}
+
+.subseg-value-ancestor-guide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #b9c9df;
+}
+
 .subseg-value-version {
   color: #5d6980;
   font-size: 0.68rem;
