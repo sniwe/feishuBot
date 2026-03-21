@@ -1,7 +1,7 @@
 (function () {
   const LOGIN_STORAGE_KEY = "audioTest.auth";
   const GUIDE_SEEN_STORAGE_KEY = "audioTest.guideSeenByUser";
-  const GUIDE_FEATURE_VERSION = "cards-feature-pack-2026-03-20";
+  const GUIDE_FEATURE_VERSION = "cards-feature-pack-2026-03-21a";
   const LOGIN_TTL_MS = 5 * 60 * 1000;
   const AUTH_PING_MIN_INTERVAL_MS = 30 * 1000;
   const ALLOWED_USERS = ["zhaoying", "rhys"];
@@ -992,6 +992,8 @@
         cardsText: "After Enter, the first input becomes the first version on this card.",
         cardEditTitle: "Edit To New Version",
         cardEditText: "Focus this card, update your text after re-listening (example now: '钱货两清'), then save. The prior text remains as version history on the same card.",
+        cardChildTitle: "Create Nested Sub-Card",
+        cardChildText: "Focus a card input, highlight a substring, then press Enter to create a child card under that parent. Repeat on any child to nest deeper. Siblings are auto-ordered by earliest highlighted character index in parent text (earlier = higher), and each child indents +5px per level.",
         cardNavTitle: "Navigate Between Cards",
         cardNavText: "Focus the top input, press Ctrl+Down to enter first card. Then use Ctrl+Up/Down across cards, and Ctrl+Left/Right to recall older/newer versions on that same focused card.",
         cardDeleteTitle: "Card Delete Dialog",
@@ -1062,6 +1064,8 @@
         cardsText: "\u6309 Enter \u540e\uff0c\u8f93\u5165\u5185\u5bb9\u4f1a\u4f5c\u4e3a\u8fd9\u5f20\u5361\u7684\u7b2c\u4e00\u4e2a\u7248\u672c\u3002",
         cardEditTitle: "\u4fee\u6539\u4e3a\u65b0\u7248\u672c",
         cardEditText: "\u805a\u7126\u8be5\u5361\u540e\uff0c\u91cd\u542c\u97f3\u9891\u5e76\u4fee\u6539\u6587\u5b57\uff08\u793a\u4f8b\u66f4\u65b0\u4e3a\u201c\u94b1\u8d27\u4e24\u6e05\u201d\uff09\uff0c\u518d\u4fdd\u5b58\u3002\u65e7\u7248\u672c\u4f1a\u7559\u5728\u540c\u4e00\u5f20\u5361\u7684\u5386\u53f2\u4e2d\u3002",
+        cardChildTitle: "\u521b\u5efa\u5d4c\u5957\u5b50\u5361\u7247",
+        cardChildText: "\u805a\u7126\u67d0\u5f20\u5361\u7684\u8f93\u5165\u6846\uff0c\u9ad8\u4eae\u9009\u4e2d\u7236\u6587\u672c\u4e2d\u7684\u5b50\u4e32\uff0c\u6309 Enter \u5373\u53ef\u5728\u5176\u4e0b\u521b\u5efa\u5b50\u5361\u7247\u3002\u5728\u4efb\u610f\u5b50\u5361\u4e0a\u91cd\u590d\u6b64\u64cd\u4f5c\u53ef\u7ee7\u7eed\u5d4c\u5957\u3002\u540c\u7ea7\u5b50\u5361\u4f1a\u6309\u7236\u6587\u672c\u4e2d\u9ad8\u4eae\u8d77\u59cb\u5b57\u7b26\u4f4d\u7f6e\u7531\u5c0f\u5230\u5927\u6392\u5e8f\uff08\u8d8a\u9760\u524d\u8d8a\u9760\u4e0a\uff09\uff0c\u6bcf\u4e00\u5c42\u5b50\u5361\u76f8\u5bf9\u7236\u5361\u5411\u53f3\u7f29\u8fdb +5px\u3002",
         cardNavTitle: "\u5361\u7247\u5bfc\u822a",
         cardNavText: "\u5148\u805a\u7126\u9876\u90e8\u8f93\u5165\u6846\uff0c\u6309 Ctrl+\u4e0b \u8fdb\u5165\u7b2c\u4e00\u5f20\u5361\u7247\u3002\u7136\u540e\u7528 Ctrl+\u4e0a/\u4e0b \u5728\u5361\u7247\u95f4\u79fb\u52a8\uff0c\u7528 Ctrl+\u5de6/\u53f3 \u5728\u5f53\u524d\u5361\u7247\u4e0a\u67e5\u770b\u66f4\u65e9/\u66f4\u65b0\u7248\u672c\u3002",
         cardDeleteTitle: "\u6253\u5f00\u5361\u7247\u5220\u9664\u5bf9\u8bdd",
@@ -1503,6 +1507,7 @@
       phase === "player-card-first-input" ||
       phase === "player-cards" ||
       phase === "player-card-edit" ||
+      phase === "player-card-child-create" ||
       phase === "player-card-nav" ||
       phase === "player-card-delete" ||
       phase === "player-card-delete-confirm" ||
@@ -1578,6 +1583,7 @@
     if (
       phase === "player-card-edit" ||
       phase === "player-cards" ||
+      phase === "player-card-child-create" ||
       phase === "player-card-nav" ||
       phase === "player-card-delete" ||
       phase === "player-card-delete-confirm" ||
@@ -1585,6 +1591,50 @@
       phase === "player-exit-subseg"
     ) {
       subSegValueList.innerHTML = "";
+      if (phase === "player-card-child-create") {
+        const rootCard = document.createElement("div");
+        rootCard.className = "subseg-value-card";
+        const rootVersion = document.createElement("div");
+        rootVersion.className = "subseg-value-version";
+        rootVersion.textContent = "current -0 | current version";
+        const rootInput = document.createElement("input");
+        rootInput.type = "text";
+        rootInput.className = "subseg-value-card-input";
+        rootInput.value = "there is a monkey under the puddle";
+        rootInput.readOnly = true;
+        rootInput.id = "guide-card-child-target";
+        rootInput.style.outline = "2px solid #6e92c9";
+        rootInput.style.borderRadius = "4px";
+        rootCard.appendChild(rootVersion);
+        rootCard.appendChild(rootInput);
+        subSegValueList.appendChild(rootCard);
+
+        function appendGuideNestedCard(label, depth, isLastSibling) {
+          const childCard = document.createElement("div");
+          childCard.className = "subseg-value-card is-nested" + (isLastSibling ? " is-last-sibling" : "");
+          childCard.style.setProperty("--subseg-card-depth", String(depth));
+          childCard.style.setProperty("--subseg-card-line-left", "-4px");
+          childCard.style.setProperty("--subseg-card-bridge-left", "-4px");
+          childCard.style.setProperty("--subseg-card-bridge-width", "4px");
+          const childVersion = document.createElement("div");
+          childVersion.className = "subseg-value-version";
+          childVersion.textContent = "current -0 | child card";
+          const childInput = document.createElement("input");
+          childInput.type = "text";
+          childInput.className = "subseg-value-card-input";
+          childInput.value = label;
+          childInput.readOnly = true;
+          childCard.appendChild(childVersion);
+          childCard.appendChild(childInput);
+          subSegValueList.appendChild(childCard);
+        }
+
+        appendGuideNestedCard("monkey", 1, false);
+        appendGuideNestedCard("under the puddle", 1, true);
+        appendGuideNestedCard("the puddle", 2, true);
+        appendGuideNestedCard("puddle", 3, true);
+        return;
+      }
       const card = document.createElement("div");
       card.className = "subseg-value-card";
       const recalled = phase === "player-card-nav";
@@ -2096,6 +2146,15 @@
         spotlightPadding: { top: 20, right: 20, bottom: 20, left: 20 },
         spotlightMinWidth: 380,
         getTarget: function () { return subSegValueList.querySelector(".subseg-value-card-input") || subSegValuePanel; }
+      },
+      {
+        id: "player-card-child-create",
+        phase: "player-card-child-create",
+        titleKey: "cardChildTitle",
+        textKey: "cardChildText",
+        spotlightPadding: { top: 20, right: 20, bottom: 20, left: 20 },
+        spotlightMinWidth: 380,
+        getTarget: function () { return document.getElementById("guide-card-child-target") || subSegValueList || subSegValuePanel; }
       },
       {
         id: "player-card-nav",
