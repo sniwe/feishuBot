@@ -2904,9 +2904,8 @@
     card.style.setProperty("--subseg-card-depth", String(Math.max(0, depth)));
     card.classList.toggle("is-nested", depth > 0);
     card.classList.toggle("is-last-sibling", Boolean(isLastSibling) && depth > 0);
-    const bridgeOffset = Math.max(0, (depth * 5) - 1);
-    const bridgeLeft = depth > 0 ? (0 - bridgeOffset) : 0;
-    const bridgeWidth = depth > 0 ? bridgeOffset : 0;
+    const bridgeLeft = depth > 0 ? -4 : 0;
+    const bridgeWidth = depth > 0 ? 4 : 0;
     card.style.setProperty("--subseg-card-line-left", String(bridgeLeft) + "px");
     card.style.setProperty("--subseg-card-bridge-left", String(bridgeLeft) + "px");
     card.style.setProperty("--subseg-card-bridge-width", String(bridgeWidth) + "px");
