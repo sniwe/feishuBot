@@ -3180,10 +3180,11 @@
     const recallMeta = getCardRecallMeta(entry, recallPosition);
     const version = document.createElement("div");
     version.className = "subseg-value-version";
+    const totalVersions = getCardTotalVersions(entry);
     if (isRecalling && recallMeta) {
-      version.textContent = "current -" + String(recallMeta.offset) + " | " + formatSavedAt(recallMeta.createdAt);
+      version.textContent = "current -" + String(recallMeta.offset) + " (" + String(totalVersions) + " total) | " + formatSavedAt(recallMeta.createdAt);
     } else {
-      version.textContent = "current -0 | " + formatSavedAt(entry && entry.createdAt ? entry.createdAt : "");
+      version.textContent = "current -0 (" + String(totalVersions) + " total) | " + formatSavedAt(entry && entry.createdAt ? entry.createdAt : "");
     }
     card.appendChild(version);
     input.value = displayedValue;
@@ -3464,6 +3465,10 @@
   function getCardCurrentPosition(entry) {
     const historyLen = Array.isArray(entry && entry.history) ? entry.history.length : 0;
     return historyLen;
+  }
+
+  function getCardTotalVersions(entry) {
+    return getCardCurrentPosition(entry) + 1;
   }
 
   function getCardRecallPosition(key, pathKey, entry) {
