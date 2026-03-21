@@ -1,7 +1,7 @@
 (function () {
   const LOGIN_STORAGE_KEY = "audioTest.auth";
   const GUIDE_SEEN_STORAGE_KEY = "audioTest.guideSeenByUser";
-  const GUIDE_FEATURE_VERSION = "cards-feature-pack-2026-03-21b";
+  const GUIDE_FEATURE_VERSION = "cards-feature-pack-2026-03-21c";
   const LOGIN_TTL_MS = 5 * 60 * 1000;
   const AUTH_PING_MIN_INTERVAL_MS = 30 * 1000;
   const ALLOWED_USERS = ["zhaoying", "rhys"];
@@ -996,8 +996,10 @@
         cardChildSelectText: "Use card text '钱货两清' as parent. Focus the parent card input, highlight substring '钱货', then press Enter.",
         cardChildCreatedTitle: "Child Card Created",
         cardChildCreatedText: "After Enter, a child card appears directly under the parent using the selected substring. Repeat on any child to nest deeper. Siblings are ordered by earliest highlighted index in parent text, and each child indents +5px per level.",
-        cardNavTitle: "Navigate Between Cards",
-        cardNavText: "Focus the top input, press Ctrl+Down to enter first card. Then use Ctrl+Up/Down across cards, and Ctrl+Left/Right to recall older/newer versions on that same focused card.",
+        cardNavVerticalTitle: "Move Between Cards",
+        cardNavVerticalText: "Press Ctrl+Up or Ctrl+Down to move focus to another card.",
+        cardNavHistoryTitle: "Review Earlier Wording",
+        cardNavHistoryText: "On the focused card, press Ctrl+Left or Ctrl+Right to switch between older and newer versions.",
         cardDeleteTitle: "Card Delete Dialog",
         cardDeleteText: "On a focused card input, press Ctrl+Backspace to open card delete actions.",
         cardDeleteConfirmTitle: "Card Delete Actions",
@@ -1070,8 +1072,10 @@
         cardChildSelectText: "\u4ee5\u201c\u94b1\u8d27\u4e24\u6e05\u201d\u4f5c\u4e3a\u7236\u5361\u5185\u5bb9\u3002\u805a\u7126\u7236\u5361\u8f93\u5165\u6846\uff0c\u9ad8\u4eae\u9009\u4e2d\u201c\u94b1\u8d27\u201d\uff0c\u7136\u540e\u6309 Enter\u3002",
         cardChildCreatedTitle: "\u5b50\u5361\u5df2\u521b\u5efa",
         cardChildCreatedText: "\u6309 Enter \u540e\uff0c\u4f1a\u5728\u7236\u5361\u4e0b\u65b9\u521b\u5efa\u4e00\u5f20\u5b50\u5361\uff08\u5185\u5bb9\u4e3a\u9009\u4e2d\u5b50\u4e32\uff09\u3002\u53ef\u5728\u5b50\u5361\u4e0a\u7ee7\u7eed\u6267\u884c\u76f8\u540c\u64cd\u4f5c\u4ee5\u5d4c\u5957\u3002\u540c\u7ea7\u5b50\u5361\u4f1a\u6309\u7236\u6587\u672c\u4e2d\u9ad8\u4eae\u8d77\u59cb\u4f4d\u7f6e\u6392\u5e8f\uff0c\u6bcf\u5c42\u76f8\u5bf9\u7236\u5361\u5411\u53f3\u7f29\u8fdb +5px\u3002",
-        cardNavTitle: "\u5361\u7247\u5bfc\u822a",
-        cardNavText: "\u5148\u805a\u7126\u9876\u90e8\u8f93\u5165\u6846\uff0c\u6309 Ctrl+\u4e0b \u8fdb\u5165\u7b2c\u4e00\u5f20\u5361\u7247\u3002\u7136\u540e\u7528 Ctrl+\u4e0a/\u4e0b \u5728\u5361\u7247\u95f4\u79fb\u52a8\uff0c\u7528 Ctrl+\u5de6/\u53f3 \u5728\u5f53\u524d\u5361\u7247\u4e0a\u67e5\u770b\u66f4\u65e9/\u66f4\u65b0\u7248\u672c\u3002",
+        cardNavVerticalTitle: "\u5728\u5361\u7247\u95f4\u79fb\u52a8",
+        cardNavVerticalText: "\u6309 Ctrl+\u4e0a \u6216 Ctrl+\u4e0b\uff0c\u628a\u7126\u70b9\u79fb\u5230\u5176\u4ed6\u5361\u7247\u3002",
+        cardNavHistoryTitle: "\u67e5\u770b\u524d\u540e\u7248\u672c",
+        cardNavHistoryText: "\u5728\u5f53\u524d\u5df2\u805a\u7126\u5361\u7247\u4e0a\uff0c\u6309 Ctrl+\u5de6 \u6216 Ctrl+\u53f3\uff0c\u5207\u6362\u66f4\u65e9/\u66f4\u65b0\u6587\u672c\u7248\u672c\u3002",
         cardDeleteTitle: "\u6253\u5f00\u5361\u7247\u5220\u9664\u5bf9\u8bdd",
         cardDeleteText: "\u5728\u5df2\u805a\u7126\u7684\u5361\u7247\u8f93\u5165\u6846\u4e0a\u6309 Ctrl+Backspace\uff0c\u6253\u5f00\u8be5\u5361\u7247\u7684\u5220\u9664\u64cd\u4f5c\u3002",
         cardDeleteConfirmTitle: "\u5361\u7247\u5220\u9664\u64cd\u4f5c",
@@ -1511,9 +1515,10 @@
       phase === "player-card-first-input" ||
       phase === "player-cards" ||
       phase === "player-card-edit" ||
+      phase === "player-card-nav-history" ||
       phase === "player-card-child-select" ||
       phase === "player-card-child-created" ||
-      phase === "player-card-nav" ||
+      phase === "player-card-nav-list" ||
       phase === "player-card-delete" ||
       phase === "player-card-delete-confirm" ||
       phase === "player-exit-value-mode" ||
@@ -1588,9 +1593,10 @@
     if (
       phase === "player-card-edit" ||
       phase === "player-cards" ||
+      phase === "player-card-nav-history" ||
       phase === "player-card-child-select" ||
       phase === "player-card-child-created" ||
-      phase === "player-card-nav" ||
+      phase === "player-card-nav-list" ||
       phase === "player-card-delete" ||
       phase === "player-card-delete-confirm" ||
       phase === "player-exit-value-mode" ||
@@ -1661,7 +1667,7 @@
       }
       const card = document.createElement("div");
       card.className = "subseg-value-card";
-      const recalled = phase === "player-card-nav";
+      const recalled = phase === "player-card-nav-history";
       const editing = phase === "player-card-edit";
 
       const version = document.createElement("div");
@@ -2172,6 +2178,15 @@
         getTarget: function () { return subSegValueList.querySelector(".subseg-value-card-input") || subSegValuePanel; }
       },
       {
+        id: "player-card-nav-history",
+        phase: "player-card-nav-history",
+        titleKey: "cardNavHistoryTitle",
+        textKey: "cardNavHistoryText",
+        spotlightPadding: { top: 18, right: 18, bottom: 18, left: 18 },
+        spotlightMinWidth: 360,
+        getTarget: function () { return subSegValueList || subSegValuePanel; }
+      },
+      {
         id: "player-card-child-select",
         phase: "player-card-child-select",
         titleKey: "cardChildSelectTitle",
@@ -2190,10 +2205,10 @@
         getTarget: function () { return document.getElementById("guide-card-child-cluster") || subSegValueList || subSegValuePanel; }
       },
       {
-        id: "player-card-nav",
-        phase: "player-card-nav",
-        titleKey: "cardNavTitle",
-        textKey: "cardNavText",
+        id: "player-card-nav-list",
+        phase: "player-card-nav-list",
+        titleKey: "cardNavVerticalTitle",
+        textKey: "cardNavVerticalText",
         spotlightPadding: { top: 18, right: 18, bottom: 18, left: 18 },
         spotlightMinWidth: 360,
         getTarget: function () { return subSegValueList || subSegValuePanel; }
