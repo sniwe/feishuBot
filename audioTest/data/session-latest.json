@@ -1,9 +1,9 @@
 {
   "id": "ai-mp3-mmu2a3kg-h4jpfn",
   "owner": "rhys",
-  "savedAt": "2026-03-22T05:41:48.531Z",
-  "updatedAt": "2026-03-22T05:41:48.531Z",
-  "revision": 61,
+  "savedAt": "2026-03-22T11:58:32.415Z",
+  "updatedAt": "2026-03-22T11:58:32.415Z",
+  "revision": 64,
   "file": {
     "name": "AI的胡说八道，为什么比人类骗子更危险？.mp3",
     "type": "audio/mpeg",
@@ -97,6 +97,24 @@
           "children": [],
           "anchorStart": 0,
           "anchorEnd": 0
+        },
+        {
+          "nodeId": "card-mn1pdooi-1",
+          "value": "i understand, but... you know..",
+          "createdAt": "2026-03-22T11:58:31.612Z",
+          "history": [
+            {
+              "value": "i understand",
+              "createdAt": "2026-03-22T11:58:18.930Z"
+            },
+            {
+              "value": "i understand, but...",
+              "createdAt": "2026-03-22T11:58:26.912Z"
+            }
+          ],
+          "children": [],
+          "anchorStart": null,
+          "anchorEnd": null
         }
       ],
       "7.045|9.052": [
@@ -402,8 +420,8 @@
           "createdAt": "2026-03-22T05:41:45.042Z",
           "history": [],
           "children": [],
-          "anchorStart": null,
-          "anchorEnd": null
+          "anchorStart": 0,
+          "anchorEnd": 0
         }
       ]
     },
@@ -418,7 +436,149 @@
       },
       "15.453|19.233": {
         "createdAt": "2026-03-21T06:24:18.506Z",
-        "events": []
+        "events": [
+          {
+            "id": "timeline-mn1p58hl-1",
+            "label": "timeline-seed",
+            "createdAt": "2026-03-20T10:06:19.171Z",
+            "snapshot": [
+              {
+                "nodeId": "card-mmz14vgy-3",
+                "value": "am i losign all control?",
+                "createdAt": "2026-03-20T10:06:19.171Z",
+                "history": [],
+                "children": [],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              },
+              {
+                "nodeId": "card-mmz14vgy-4",
+                "value": "test 2",
+                "createdAt": "2026-03-20T10:06:40.231Z",
+                "history": [],
+                "children": [],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              }
+            ]
+          },
+          {
+            "id": "timeline-mn1pdooi-2",
+            "label": "card-created",
+            "createdAt": "2026-03-22T11:58:18.930Z",
+            "snapshot": [
+              {
+                "nodeId": "card-mmz14vgy-3",
+                "value": "am i losign all control?",
+                "createdAt": "2026-03-20T10:06:19.171Z",
+                "history": [],
+                "children": [],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              },
+              {
+                "nodeId": "card-mmz14vgy-4",
+                "value": "test 2",
+                "createdAt": "2026-03-20T10:06:40.231Z",
+                "history": [],
+                "children": [],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              },
+              {
+                "nodeId": "card-mn1pdooi-1",
+                "value": "i understand",
+                "createdAt": "2026-03-22T11:58:18.930Z",
+                "history": [],
+                "children": [],
+                "anchorStart": null,
+                "anchorEnd": null
+              }
+            ]
+          },
+          {
+            "id": "timeline-mn1pduu8-3",
+            "label": "card-version",
+            "createdAt": "2026-03-22T11:58:26.912Z",
+            "snapshot": [
+              {
+                "nodeId": "card-mmz14vgy-3",
+                "value": "am i losign all control?",
+                "createdAt": "2026-03-20T10:06:19.171Z",
+                "history": [],
+                "children": [],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              },
+              {
+                "nodeId": "card-mmz14vgy-4",
+                "value": "test 2",
+                "createdAt": "2026-03-20T10:06:40.231Z",
+                "history": [],
+                "children": [],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              },
+              {
+                "nodeId": "card-mn1pdooi-1",
+                "value": "i understand, but...",
+                "createdAt": "2026-03-22T11:58:26.912Z",
+                "history": [
+                  {
+                    "value": "i understand",
+                    "createdAt": "2026-03-22T11:58:18.930Z"
+                  }
+                ],
+                "children": [],
+                "anchorStart": null,
+                "anchorEnd": null
+              }
+            ]
+          },
+          {
+            "id": "timeline-mn1pdygs-4",
+            "label": "card-version",
+            "createdAt": "2026-03-22T11:58:31.612Z",
+            "snapshot": [
+              {
+                "nodeId": "card-mmz14vgy-3",
+                "value": "am i losign all control?",
+                "createdAt": "2026-03-20T10:06:19.171Z",
+                "history": [],
+                "children": [],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              },
+              {
+                "nodeId": "card-mmz14vgy-4",
+                "value": "test 2",
+                "createdAt": "2026-03-20T10:06:40.231Z",
+                "history": [],
+                "children": [],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              },
+              {
+                "nodeId": "card-mn1pdooi-1",
+                "value": "i understand, but... you know..",
+                "createdAt": "2026-03-22T11:58:31.612Z",
+                "history": [
+                  {
+                    "value": "i understand",
+                    "createdAt": "2026-03-22T11:58:18.930Z"
+                  },
+                  {
+                    "value": "i understand, but...",
+                    "createdAt": "2026-03-22T11:58:26.912Z"
+                  }
+                ],
+                "children": [],
+                "anchorStart": null,
+                "anchorEnd": null
+              }
+            ]
+          }
+        ]
       },
       "7.045|9.052": {
         "createdAt": "2026-03-21T06:24:18.506Z",
@@ -7303,8 +7463,8 @@
                 "createdAt": "2026-03-22T05:41:45.042Z",
                 "history": [],
                 "children": [],
-                "anchorStart": null,
-                "anchorEnd": null
+                "anchorStart": 0,
+                "anchorEnd": 0
               }
             ]
           }
@@ -7312,7 +7472,7 @@
       }
     },
     "selectedSpanIndex": -1,
-    "currentTime": 7.044739,
+    "currentTime": 15.453381,
     "wasPlaying": false
   },
   "audioId": "ai-mp3-mmu2a3b9-i7zysw",
