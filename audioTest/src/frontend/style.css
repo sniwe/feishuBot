@@ -672,6 +672,11 @@ h1, p { margin: 0; }
   background: #111111;
   transform: translate(-50%, -50%);
   pointer-events: none;
+  z-index: 1;
+}
+
+.checkpoint-marker.is-tag-target {
+  z-index: 10;
 }
 
 .checkpoint-marker.selected {
@@ -707,6 +712,8 @@ h1, p { margin: 0; }
   border-radius: 4px;
   letter-spacing: 0.01em;
   pointer-events: none;
+  opacity: 0.5;
+  z-index: 1;
 }
 
 .checkpoint-tag.is-delete-target {
@@ -714,6 +721,8 @@ h1, p { margin: 0; }
   background: rgba(255, 240, 240, 0.98);
   color: #7d2222;
   box-shadow: 0 0 0 1px rgba(196, 84, 84, 0.22);
+  opacity: 1;
+  z-index: 12;
 }
 
 .checkpoint-tag.is-delete-target::after {
@@ -737,6 +746,8 @@ h1, p { margin: 0; }
   border-color: #9eb6da;
   background: rgba(236, 244, 255, 0.98);
   color: #234166;
+  opacity: 1;
+  z-index: 12;
 }
 
 .checkpoint-tag.cycle-target-tag-start {
@@ -846,6 +857,10 @@ h1, p { margin: 0; }
   z-index: 5;
 }
 
+.target-subseg-span.is-tag-target {
+  z-index: 10;
+}
+
 .target-subseg-span.selected {
   background: rgba(7, 74, 71, 0.62);
   border-color: rgba(7, 74, 71, 0.9);
@@ -863,6 +878,7 @@ h1, p { margin: 0; }
   background: rgba(229, 239, 255, 0.98);
   color: #1f3a5f;
   font-weight: 700;
+  opacity: 1;
 }
 
 .subseg-value-panel {
@@ -916,9 +932,19 @@ h1, p { margin: 0; }
   line-height: 1.2;
 }
 
+.subseg-timeline-start,
+.subseg-timeline-end {
+  border: 1px solid #cfd9ea;
+  border-radius: 999px;
+  background: #f4f8ff;
+  color: #3d5678;
+  padding: 1px 6px;
+  font-weight: 600;
+}
+
 .subseg-timeline-track {
   position: relative;
-  min-height: 20px;
+  min-height: 36px;
 }
 
 .subseg-timeline-track::before {
@@ -943,11 +969,38 @@ h1, p { margin: 0; }
   background: #f8fbff;
   padding: 0;
   cursor: pointer;
+  opacity: 0.5;
+  z-index: 2;
 }
 
 .subseg-timeline-node.is-selected {
   border-color: #1f5ea8;
   background: #d9e8fb;
+  opacity: 1;
+  z-index: 3;
+}
+
+.subseg-timeline-tick {
+  position: absolute;
+  top: 8px;
+  width: 1px;
+  height: 6px;
+  margin-left: -0.5px;
+  background: rgba(95, 128, 173, 0.5);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.subseg-timeline-tick-label {
+  position: absolute;
+  top: 18px;
+  transform: translateX(-50%);
+  color: #73809a;
+  font-size: 0.6rem;
+  line-height: 1;
+  white-space: nowrap;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .subseg-value-card {

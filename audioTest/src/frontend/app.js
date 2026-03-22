@@ -1277,6 +1277,7 @@
       marker.className = "checkpoint-marker";
       if (markerDef.boundary === "start" || markerDef.boundary === "end") {
         marker.classList.add("is-cycle-target-" + markerDef.boundary);
+        marker.classList.add("is-tag-target");
       }
       marker.style.left = String(markerDef.pct || 0) + "%";
 
@@ -1284,6 +1285,7 @@
       tag.className = "checkpoint-tag";
       if (markerDef.deleteTarget) {
         tag.classList.add("is-delete-target");
+        marker.classList.add("is-tag-target");
       }
       if (markerDef.boundary === "start" || markerDef.boundary === "end") {
         tag.classList.add("cycle-target-tag", "cycle-target-tag-" + markerDef.boundary);
@@ -2660,6 +2662,56 @@
     return date.toLocaleString();
   }
 
+  function getTimestampOrFallback(value, fallback) {
+    const stamp = new Date(value).getTime();
+    if (Number.isFinite(stamp)) {
+      return stamp;
+    }
+    return fallback;
+  }
+
+  function getEarliestEntryCreatedAt(entries) {
+    const queue = Array.isArray(entries) ? entries.slice() : [];
+    let bestIso = "";
+    let bestStamp = Number.POSITIVE_INFINITY;
+    while (queue.length > 0) {
+      const entry = queue.shift();
+      if (!entry || typeof entry !== "object") {
+        continue;
+      }
+      const createdAt = String(entry.createdAt || "");
+      const stamp = new Date(createdAt).getTime();
+      if (Number.isFinite(stamp) && stamp < bestStamp) {
+        bestStamp = stamp;
+        bestIso = createdAt;
+      }
+      if (Array.isArray(entry.children) && entry.children.length > 0) {
+        queue.push.apply(queue, entry.children);
+      }
+    }
+    return bestIso;
+  }
+
+  function formatTimelineElapsed(ms) {
+    const safeMs = Math.max(0, Number.isFinite(ms) ? ms : 0);
+    const totalSeconds = Math.round(safeMs / 1000);
+    if (totalSeconds < 60) {
+      return String(totalSeconds) + "s";
+    }
+    const totalMinutes = Math.round(totalSeconds / 60);
+    if (totalMinutes < 60) {
+      return String(totalMinutes) + "m";
+    }
+    const totalHours = totalMinutes / 60;
+    if (totalHours < 24) {
+      const rounded = totalHours >= 10 ? Math.round(totalHours) : Math.round(totalHours * 10) / 10;
+      return String(rounded) + "h";
+    }
+    const totalDays = totalHours / 24;
+    const roundedDays = totalDays >= 10 ? Math.round(totalDays) : Math.round(totalDays * 10) / 10;
+    return String(roundedDays) + "d";
+  }
+
   async function openPersistedSession(sessionId) {
     if (state.isPersisting || state.loadingSessionId) {
       return;
@@ -3148,7 +3200,7 @@
     const timeline = state.subSegTimelines[key];
     if (timeline && typeof timeline === "object" && Array.isArray(timeline.events)) {
       if (timeline.events.length <= 0 && Array.isArray(state.subSegValueEntries[key]) && state.subSegValueEntries[key].length > 0) {
-        const seededAt = new Date().toISOString();
+        const seededAt = getEarliestEntryCreatedAt(state.subSegValueEntries[key]) || new Date().toISOString();
         timeline.events.push({
           id: createTimelineEventId(),
           label: "timeline-seed",
@@ -3165,7 +3217,7 @@
     };
     state.subSegTimelines[key] = seeded;
     if (Array.isArray(state.subSegValueEntries[key]) && state.subSegValueEntries[key].length > 0) {
-      const seededAt = new Date().toISOString();
+      const seededAt = getEarliestEntryCreatedAt(state.subSegValueEntries[key]) || new Date().toISOString();
       seeded.events.push({
         id: createTimelineEventId(),
         label: "timeline-seed",
@@ -3265,15 +3317,36 @@
       subSegTimeline.classList.add("hidden");
       return;
     }
-    const createdAt = String((timeline && timeline.createdAt) || events[0].createdAt || new Date().toISOString());
-    const startStamp = new Date(createdAt).getTime();
-    const nowStamp = Date.now();
-    const span = Math.max(1, nowStamp - startStamp);
-    subSegTimelineStart.textContent = formatSavedAt(createdAt);
-    subSegTimelineEnd.textContent = "now";
+    const fallbackIso = String((timeline && timeline.createdAt) || events[0].createdAt || new Date().toISOString());
+    const fallbackStamp = getTimestampOrFallback(fallbackIso, Date.now());
+    const stamps = events
+      .map(function (eventItem) {
+        return getTimestampOrFallback(eventItem && eventItem.createdAt ? eventItem.createdAt : fallbackIso, fallbackStamp);
+      })
+      .filter(function (stamp) { return Number.isFinite(stamp); });
+    const startStamp = stamps.length > 0 ? Math.min.apply(null, stamps) : fallbackStamp;
+    const endStamp = stamps.length > 0 ? Math.max.apply(null, stamps) : fallbackStamp;
+    const span = Math.max(1, endStamp - startStamp);
+    subSegTimelineStart.textContent = "start " + formatSavedAt(new Date(startStamp).toISOString());
+    subSegTimelineEnd.textContent = "end " + formatSavedAt(new Date(endStamp).toISOString());
+    const tickCount = 5;
+    for (let idx = 0; idx < tickCount; idx += 1) {
+      const ratio = tickCount <= 1 ? 0 : idx / (tickCount - 1);
+      const tickLeftPct = ratio * 100;
+      const tickStamp = startStamp + (span * ratio);
+      const tick = document.createElement("span");
+      tick.className = "subseg-timeline-tick";
+      tick.style.left = String(tickLeftPct) + "%";
+      const tickLabel = document.createElement("span");
+      tickLabel.className = "subseg-timeline-tick-label";
+      tickLabel.style.left = String(tickLeftPct) + "%";
+      tickLabel.textContent = formatTimelineElapsed(tickStamp - startStamp);
+      subSegTimelineTrack.appendChild(tick);
+      subSegTimelineTrack.appendChild(tickLabel);
+    }
     const selectedIdx = Math.max(0, Math.min(events.length - 1, Number(state.subSegTimelineNodeIndex)));
     events.forEach(function (eventItem, idx) {
-      const eventStamp = new Date(eventItem && eventItem.createdAt ? eventItem.createdAt : createdAt).getTime();
+      const eventStamp = new Date(eventItem && eventItem.createdAt ? eventItem.createdAt : fallbackIso).getTime();
       const safeStamp = Number.isFinite(eventStamp) ? eventStamp : startStamp;
       const leftPct = Math.max(0, Math.min(100, ((safeStamp - startStamp) / span) * 100));
       const node = document.createElement("button");
@@ -4363,6 +4436,7 @@
       const boundaryRole = classifyBoundary(seconds);
       if (boundaryRole) {
         marker.classList.add("is-cycle-target-" + boundaryRole);
+        marker.classList.add("is-tag-target");
       }
 
       const tag = document.createElement("span");
@@ -4389,6 +4463,7 @@
       const boundaryRole = classifyBoundary(seconds);
       if (boundaryRole) {
         marker.classList.add("is-cycle-target-" + boundaryRole);
+        marker.classList.add("is-tag-target");
       }
       const percent = Math.max(0, Math.min(100, (seconds / duration) * 100));
       marker.style.left = String(percent) + "%";
@@ -4406,6 +4481,7 @@
         state.deleteTargetIndex === checkpointIndex;
       if (isDeleteTarget) {
         tag.classList.add("is-delete-target");
+        marker.classList.add("is-tag-target");
       }
       if (boundaryRole) {
         tag.classList.add("cycle-target-tag", "cycle-target-tag-" + boundaryRole);
@@ -4568,6 +4644,9 @@
 
       const span = document.createElement("span");
       span.className = "target-subseg-span" + (idx === state.selectedTargetSubSegIndex ? " selected" : "");
+      if (idx === state.selectedTargetSubSegIndex || (state.deleteTargetType === "subseg" && state.deleteTargetIndex === idx)) {
+        span.classList.add("is-tag-target");
+      }
       span.style.left = String(startPct) + "%";
       span.style.width = String(widthPct) + "%";
 
