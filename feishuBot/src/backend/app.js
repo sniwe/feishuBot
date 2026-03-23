@@ -76,27 +76,38 @@ const fileTransfer = createFileTransferService({
   },
 });
 
-async function sendTextMessage(chatId, text, meta = {}) {
-  const state = stateStore.getChatState(chatId);
-  const persistedEntry = stateStore.getPersistedChatEntry(chatId);
+async function sendMessage(receiveIdType, receiveId, text, meta = {}) {
+  const isChatMessage = receiveIdType === "chat_id";
+  const state = isChatMessage ? stateStore.getChatState(receiveId) : null;
+  const persistedEntry = isChatMessage ? stateStore.getPersistedChatEntry(receiveId) : { sessionId: "", chatName: "" };
   stateStore.appendMessageLog({
     direction: "outgoing",
-    chat_id: chatId,
+    chat_id: isChatMessage ? receiveId : "",
     message_type: "text",
     text,
     codex_session_id: state?.codexResponseId || persistedEntry.sessionId || "",
     chat_name: persistedEntry.chatName || "",
+    destination_type: receiveIdType,
+    destination_id: receiveId,
     ...meta,
   });
 
   await client.im.v1.message.create({
-    params: { receive_id_type: "chat_id" },
+    params: { receive_id_type: receiveIdType },
     data: {
-      receive_id: chatId,
+      receive_id: receiveId,
       msg_type: "text",
       content: JSON.stringify({ text }),
     },
   });
+}
+
+async function sendTextMessage(chatId, text, meta = {}) {
+  return sendMessage("chat_id", chatId, text, meta);
+}
+
+async function sendDirectMessage(openId, text, meta = {}) {
+  return sendMessage("open_id", openId, text, meta);
 }
 
 const codexRunner = createCodexRunner({
@@ -137,6 +148,7 @@ const relay = createRelayController({
     fileTransfer,
     codexRunner,
     sendTextMessage,
+    sendDirectMessage,
   },
 });
 

@@ -4,7 +4,7 @@
   "name": "audioTest",
   "summary": "Browser audio checkpoint player with authenticated session persistence and remote storage support",
   "root": "C:\\Users\\Qub\\audioTest",
-  "updated": "2026-03-23T14:31:08.7783512+08:00",
+  "updated": "2026-03-23T14:35:00.0000000+08:00",
   "nodes": [
     {
       "id": "control:ui",
@@ -29,7 +29,7 @@
       "summary": "Frontend orchestrator for login, audio playback, session persistence, restore flow, guide interactions, and shared helpers",
       "features": [
         {
-          "summary": "Coordinates audio upload, session save and restore, player controls, guide state, and shared formatting helpers while delegating browser auth and session lifecycle work to dedicated helpers",
+          "summary": "Coordinates audio upload, session save and restore, player controls, guide state, and shared formatting helpers while delegating browser auth and session lifecycle work to dedicated helpers, including flattened-order sub-segment card gap normalization as comment bubbles resize",
           "flow": ["e2", "e3"]
         }
       ],

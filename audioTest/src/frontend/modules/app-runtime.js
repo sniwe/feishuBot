@@ -3412,13 +3412,13 @@
         entryIndex === (values.length - 1),
         [],
         entryIndex + 1,
-        0
+        entryIndex < (values.length - 1)
       );
     });
     scheduleGuideStepRender({ deps: {} });
   }
 
-  function renderSubSegValueCardNode(key, entry, path, depth, isLastSibling, ancestorGuideDepths, siblingOrder) {
+  function renderSubSegValueCardNode(key, entry, path, depth, isLastSibling, ancestorGuideDepths, siblingOrder, hasFollowingBranch) {
     if (!subSegValueList || !entry || typeof entry !== "object") {
       return;
     }
@@ -3599,7 +3599,7 @@
         order: visibleChildren.length + 1
       });
     });
-    const hasFollowingContent = Boolean(!isLastSibling || visibleChildren.length > 0);
+    const hasFollowingContent = Boolean(Boolean(hasFollowingBranch) || visibleChildren.length > 0);
     card.dataset.subsegHasFollowingContent = hasFollowingContent ? "1" : "0";
     card.classList.toggle("has-following-content", hasFollowingContent);
     if (hasFollowingContent) {
@@ -3624,6 +3624,7 @@
       });
     }
     visibleChildren.forEach(function (item, visibleIndex) {
+      const childHasFollowingBranch = Boolean((visibleIndex < (visibleChildren.length - 1)) || hasFollowingBranch);
       renderSubSegValueCardNode(
         key,
         item.childEntry,
@@ -3631,7 +3632,8 @@
         depth + 1,
         visibleIndex === (visibleChildren.length - 1),
         nextAncestorGuideDepths,
-        visibleIndex + 1
+        visibleIndex + 1,
+        childHasFollowingBranch
       );
     });
   }
