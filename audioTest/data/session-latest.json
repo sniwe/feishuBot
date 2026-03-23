@@ -1,9 +1,9 @@
 {
   "id": "ai-mp3-mmu2a3kg-h4jpfn",
   "owner": "rhys",
-  "savedAt": "2026-03-23T05:18:00.411Z",
-  "updatedAt": "2026-03-23T05:18:00.411Z",
-  "revision": 141,
+  "savedAt": "2026-03-23T05:21:17.436Z",
+  "updatedAt": "2026-03-23T05:21:17.436Z",
+  "revision": 148,
   "file": {
     "name": "AI的胡说八道，为什么比人类骗子更危险？.mp3",
     "type": "audio/mpeg",
@@ -197,6 +197,15 @@
               "anchorEnd": 22
             }
           ],
+          "anchorStart": 0,
+          "anchorEnd": 0
+        },
+        {
+          "nodeId": "card-mn2qmb07-1",
+          "value": "a new beast",
+          "createdAt": "2026-03-23T05:20:46.903Z",
+          "history": [],
+          "children": [],
           "anchorStart": null,
           "anchorEnd": null
         }
@@ -756,8 +765,8 @@
                 "createdAt": "2026-03-23T05:17:31.088Z",
                 "history": [],
                 "children": [],
-                "anchorStart": null,
-                "anchorEnd": null
+                "anchorStart": 0,
+                "anchorEnd": 0
               }
             ]
           },
@@ -772,8 +781,8 @@
                 "createdAt": "2026-03-23T05:17:31.088Z",
                 "history": [],
                 "children": [],
-                "anchorStart": null,
-                "anchorEnd": null
+                "anchorStart": 0,
+                "anchorEnd": 0
               }
             ]
           },
@@ -798,6 +807,41 @@
                     "anchorEnd": 22
                   }
                 ],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              }
+            ]
+          },
+          {
+            "id": "timeline-mn2qmb08-1",
+            "label": "card-created",
+            "createdAt": "2026-03-23T05:20:46.903Z",
+            "snapshot": [
+              {
+                "nodeId": "card-mn2qi3ww-1",
+                "value": "TEST for the last time",
+                "createdAt": "2026-03-23T05:17:31.088Z",
+                "history": [],
+                "children": [
+                  {
+                    "nodeId": "card-mn2qi7uv-2",
+                    "value": "last time",
+                    "createdAt": "2026-03-23T05:17:36.199Z",
+                    "history": [],
+                    "children": [],
+                    "anchorStart": 13,
+                    "anchorEnd": 22
+                  }
+                ],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              },
+              {
+                "nodeId": "card-mn2qmb07-1",
+                "value": "a new beast",
+                "createdAt": "2026-03-23T05:20:46.903Z",
+                "history": [],
+                "children": [],
                 "anchorStart": null,
                 "anchorEnd": null
               }
@@ -808,7 +852,7 @@
     },
     "subSegCardBubbleValues": {
       "10.564|12.416#0": "where are you little guy\ni can't find the boo",
-      "7.045|9.052#0": "that is very possible, so why do it"
+      "7.045|9.052#0": "that is very possible so why do it"
     },
     "selectedSpanIndex": -1,
     "currentTime": 7.044739,

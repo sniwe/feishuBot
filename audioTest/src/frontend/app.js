@@ -3479,13 +3479,14 @@
         0,
         entryIndex === (values.length - 1),
         [],
-        entryIndex + 1
+        entryIndex + 1,
+        0
       );
     });
     scheduleGuideStepRender({ deps: {} });
   }
 
-  function renderSubSegValueCardNode(key, entry, path, depth, isLastSibling, ancestorGuideDepths, siblingOrder) {
+  function renderSubSegValueCardNode(key, entry, path, depth, isLastSibling, ancestorGuideDepths, siblingOrder, parentGapPx) {
     if (!subSegValueList || !entry || typeof entry !== "object") {
       return;
     }
@@ -3501,6 +3502,7 @@
     card.style.setProperty("--subseg-card-bridge-left", String(bridgeLeft) + "px");
     card.style.setProperty("--subseg-card-bridge-width", String(bridgeWidth) + "px");
     card.style.setProperty("--subseg-card-indent-step", "10px");
+    card.style.setProperty("--subseg-card-parent-gap", String(Math.max(0, Number(parentGapPx) || 0)) + "px");
     card.classList.toggle("has-following-content", false);
     if (depth > 0 && Array.isArray(ancestorGuideDepths) && ancestorGuideDepths.length > 0) {
       const uniqueGuideDepths = ancestorGuideDepths.filter(function (guideDepth, idx, arr) {
@@ -3669,7 +3671,7 @@
     card.dataset.subsegHasFollowingContent = hasFollowingContent ? "1" : "0";
     card.classList.toggle("has-following-content", hasFollowingContent);
     subSegValueList.appendChild(card);
-    syncSubSegCardBubbleWidth(cardBubbleInput);
+    const reservedGapPx = syncSubSegCardBubbleWidth(cardBubbleInput);
     requestAnimationFrame(function () {
       syncSubSegCardBubbleWidth(cardBubbleInput);
     });
@@ -3695,7 +3697,8 @@
         depth + 1,
         visibleIndex === (visibleChildren.length - 1),
         nextAncestorGuideDepths,
-        visibleIndex + 1
+        visibleIndex + 1,
+        reservedGapPx
       );
     });
   }
@@ -3954,7 +3957,7 @@
 
   function syncSubSegCardBubbleWidth(inputEl) {
     if (!inputEl) {
-      return;
+      return 0;
     }
     const bubble = inputEl.closest(".subseg-value-card-bubble");
     const card = inputEl.closest(".subseg-value-card");
@@ -4003,6 +4006,7 @@
     card.style.marginBottom = String(marginBottom) + "px";
     card.style.setProperty("--subseg-card-spine-extension", String(spineExtension) + "px");
     bubble.classList.toggle("has-content", hasContent);
+    return marginBottom;
   }
 
   function commitSubSegCardInputValue(inputEl, options) {

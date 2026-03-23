@@ -1171,13 +1171,13 @@ h1, p { margin: 0; }
 
 .subseg-value-card.is-nested::before {
   left: var(--subseg-card-line-left, -4px);
-  top: -7px;
+  top: calc(-7px - var(--subseg-card-parent-gap, 0px));
   width: 1px;
-  height: calc(100% + 14px + var(--subseg-card-spine-extension, 0px));
+  height: calc(100% + 14px + var(--subseg-card-spine-extension, 0px) + var(--subseg-card-parent-gap, 0px));
 }
 
 .subseg-value-card.is-nested.is-last-sibling::before {
-  height: calc(50% + 7px + var(--subseg-card-spine-extension, 0px));
+  height: calc(50% + 7px + var(--subseg-card-spine-extension, 0px) + var(--subseg-card-parent-gap, 0px));
 }
 
 .subseg-value-card.is-nested::after {
@@ -1189,8 +1189,8 @@ h1, p { margin: 0; }
 
 .subseg-value-ancestor-guides {
   position: absolute;
-  top: -7px;
-  bottom: calc(-7px - var(--subseg-card-spine-extension, 0px));
+  top: calc(-7px - var(--subseg-card-parent-gap, 0px));
+  bottom: calc(-7px - var(--subseg-card-spine-extension, 0px) - var(--subseg-card-parent-gap, 0px));
   left: 0;
   width: 0;
   pointer-events: none;
