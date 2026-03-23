@@ -3463,7 +3463,6 @@
       const connectorBadge = document.createElement("span");
       connectorBadge.className = "subseg-value-connector-badge";
       connectorBadge.textContent = String(Math.floor(siblingOrder));
-      connectorBadge.style.left = "calc(var(--subseg-card-line-left, -9px) + (var(--subseg-card-bridge-width, 4px) / 2) + 1px)";
       card.appendChild(connectorBadge);
     }
     const inputShell = document.createElement("div");

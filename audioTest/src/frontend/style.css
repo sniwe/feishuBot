@@ -1009,7 +1009,7 @@ h1, p { margin: 0; }
   border-radius: 6px;
   background: #ffffff;
   padding: 5px 7px;
-  margin-left: calc(var(--subseg-card-depth, 0) * 10px);
+  margin-left: calc(var(--subseg-card-depth, 0) * 5px);
   color: #31425f;
   font-size: 0.78rem;
   line-height: 1.3;
@@ -1143,8 +1143,8 @@ h1, p { margin: 0; }
 
 .subseg-value-connector-badge {
   position: absolute;
-  left: calc(var(--subseg-card-line-left, -9px) + 3px);
-  top: 50%;
+  left: 0;
+  top: 0;
   transform: translate(-50%, -50%);
   width: 9px;
   height: 9px;
@@ -1163,7 +1163,7 @@ h1, p { margin: 0; }
 
 .subseg-value-card.is-nested::before,
 .subseg-value-card.is-nested::after {
-  content: "";
+  content: none;
   position: absolute;
   background: #b9c9df;
   pointer-events: none;
@@ -1178,6 +1178,7 @@ h1, p { margin: 0; }
   background: #b9c9df;
   pointer-events: none;
   z-index: 0;
+  display: none;
 }
 
 .subseg-value-card.is-nested::before {
@@ -1205,6 +1206,7 @@ h1, p { margin: 0; }
   left: 0;
   width: 0;
   pointer-events: none;
+  display: none;
 }
 
 .subseg-value-ancestor-guide {
