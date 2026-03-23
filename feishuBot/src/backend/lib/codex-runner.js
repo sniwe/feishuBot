@@ -113,7 +113,13 @@ function createCodexRunner(ctx) {
           continue;
         }
 
-        recipientToken = match[1].trim().replace(/^["'`]+|["'`]+$/g, "").replace(/^@+/, "");
+        recipientToken = match[1]
+          .trim()
+          .replace(/^["'`]+|["'`]+$/g, "")
+          .replace(/^@+/, "")
+          .replace(/^user\s+/i, "")
+          .replace(/^member\s+/i, "")
+          .replace(/^to\s+/i, "");
         message = match[2].trim();
         break;
       }
@@ -125,6 +131,10 @@ function createCodexRunner(ctx) {
       let openId = recipientToken;
       if (/^(me|last_sender|last|sender)$/i.test(recipientToken)) {
         openId = state.lastSenderOpenId || "";
+      }
+
+      if (!/^ou_[a-z0-9]+$/i.test(openId)) {
+        openId = "";
       }
 
       return {

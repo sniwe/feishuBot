@@ -70,7 +70,13 @@ function createRelayController(ctx) {
         }
 
         return {
-          recipient: match[1].trim().replace(/^["'`]+|["'`]+$/g, "").replace(/^@+/, ""),
+          recipient: match[1]
+            .trim()
+            .replace(/^["'`]+|["'`]+$/g, "")
+            .replace(/^@+/, "")
+            .replace(/^user\s+/i, "")
+            .replace(/^member\s+/i, "")
+            .replace(/^to\s+/i, ""),
           message: match[2].trim(),
         };
       }
@@ -93,8 +99,12 @@ function createRelayController(ctx) {
       openId = state.lastSenderOpenId || "";
     }
 
+    if (!/^ou_[a-z0-9]+$/i.test(openId)) {
+      openId = "";
+    }
+
     if (!openId) {
-      await sendTextMessage(chatId, "No direct-message recipient is available yet.");
+      await sendTextMessage(chatId, `I could not resolve "${recipientToken}" to a valid open_id yet. Use an open_id, or add a lookup cache.`);
       return;
     }
 
