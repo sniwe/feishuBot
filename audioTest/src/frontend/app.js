@@ -3781,9 +3781,9 @@
 
       const bubble = document.createElement("span");
       bubble.className = "subseg-value-selection-bubble";
-      bubble.style.left = String(left - 2) + "px";
+      bubble.style.left = String(left - 1) + "px";
       bubble.style.top = String(top - 1) + "px";
-      bubble.style.width = String(width + 4) + "px";
+      bubble.style.width = String(width + 2) + "px";
       bubble.style.height = String(height + 2) + "px";
       bubble.style.setProperty("--subseg-bubble-order", String(item.order || 1));
       bubble.setAttribute("aria-hidden", "true");

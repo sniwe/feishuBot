@@ -1,9 +1,9 @@
 {
   "id": "ai-mp3-mmu2a3kg-h4jpfn",
   "owner": "rhys",
-  "savedAt": "2026-03-23T03:11:24.020Z",
-  "updatedAt": "2026-03-23T03:11:24.020Z",
-  "revision": 76,
+  "savedAt": "2026-03-23T03:16:03.020Z",
+  "updatedAt": "2026-03-23T03:16:03.020Z",
+  "revision": 78,
   "file": {
     "name": "AI的胡说八道，为什么比人类骗子更危险？.mp3",
     "type": "audio/mpeg",
@@ -92,7 +92,27 @@
               "createdAt": "2026-03-19T03:20:02.407Z"
             }
           ],
-          "children": [],
+          "children": [
+            {
+              "nodeId": "card-mn2m31g4-1",
+              "value": "second",
+              "createdAt": "2026-03-23T03:13:49.588Z",
+              "history": [],
+              "children": [
+                {
+                  "nodeId": "card-mn2m5vxv-2",
+                  "value": "on",
+                  "createdAt": "2026-03-23T03:16:02.419Z",
+                  "history": [],
+                  "children": [],
+                  "anchorStart": 3,
+                  "anchorEnd": 5
+                }
+              ],
+              "anchorStart": 9,
+              "anchorEnd": 15
+            }
+          ],
           "anchorStart": 0,
           "anchorEnd": 0
         }
@@ -611,6 +631,78 @@
                   }
                 ],
                 "children": [],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              }
+            ]
+          },
+          {
+            "id": "timeline-mn2m31g4-1",
+            "label": "card-child-created",
+            "createdAt": "2026-03-23T03:13:49.588Z",
+            "snapshot": [
+              {
+                "nodeId": "card-mmz14vgy-2",
+                "value": "test the second one again",
+                "createdAt": "2026-03-19T03:20:06.529Z",
+                "history": [
+                  {
+                    "value": "test the second one",
+                    "createdAt": "2026-03-19T03:20:02.407Z"
+                  }
+                ],
+                "children": [
+                  {
+                    "nodeId": "card-mn2m31g4-1",
+                    "value": "second",
+                    "createdAt": "2026-03-23T03:13:49.588Z",
+                    "history": [],
+                    "children": [],
+                    "anchorStart": 9,
+                    "anchorEnd": 15
+                  }
+                ],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              }
+            ]
+          },
+          {
+            "id": "timeline-mn2m5vxv-2",
+            "label": "card-child-created",
+            "createdAt": "2026-03-23T03:16:02.419Z",
+            "snapshot": [
+              {
+                "nodeId": "card-mmz14vgy-2",
+                "value": "test the second one again",
+                "createdAt": "2026-03-19T03:20:06.529Z",
+                "history": [
+                  {
+                    "value": "test the second one",
+                    "createdAt": "2026-03-19T03:20:02.407Z"
+                  }
+                ],
+                "children": [
+                  {
+                    "nodeId": "card-mn2m31g4-1",
+                    "value": "second",
+                    "createdAt": "2026-03-23T03:13:49.588Z",
+                    "history": [],
+                    "children": [
+                      {
+                        "nodeId": "card-mn2m5vxv-2",
+                        "value": "on",
+                        "createdAt": "2026-03-23T03:16:02.419Z",
+                        "history": [],
+                        "children": [],
+                        "anchorStart": 3,
+                        "anchorEnd": 5
+                      }
+                    ],
+                    "anchorStart": 9,
+                    "anchorEnd": 15
+                  }
+                ],
                 "anchorStart": 0,
                 "anchorEnd": 0
               }
@@ -10257,7 +10349,7 @@
       }
     },
     "selectedSpanIndex": -1,
-    "currentTime": 7.044739,
+    "currentTime": 10.563998,
     "wasPlaying": false
   },
   "audioId": "ai-mp3-mmu2a3b9-i7zysw",
