@@ -3520,6 +3520,8 @@
     }
     const inputShell = document.createElement("div");
     inputShell.className = "subseg-value-card-input-shell";
+    const displayText = document.createElement("div");
+    displayText.className = "subseg-value-card-display";
     const selectionLayer = document.createElement("div");
     selectionLayer.className = "subseg-value-selection-layer";
     const input = document.createElement("input");
@@ -3558,6 +3560,8 @@
       input.addEventListener("input", handleSubSegCardInputLive);
       input.addEventListener("change", handleSubSegCardInputChange);
     }
+    displayText.textContent = displayedValue;
+    inputShell.appendChild(displayText);
     inputShell.appendChild(selectionLayer);
     inputShell.appendChild(input);
     card.appendChild(version);
@@ -3636,8 +3640,8 @@
       renderSubSegCardSelectionBubbles({
         ui: {
           selectionLayer,
-          inputShell,
-          input
+          displayText,
+          inputShell
         },
         data: {
           displayedValue,
@@ -3679,11 +3683,11 @@
   function renderSubSegCardSelectionBubbles(ctx) {
     const { ui, data } = ctx;
     const selectionLayer = ui && ui.selectionLayer ? ui.selectionLayer : null;
-    const input = ui && ui.input ? ui.input : null;
+    const displayText = ui && ui.displayText ? ui.displayText : null;
     const inputShell = ui && ui.inputShell ? ui.inputShell : null;
     const displayedValue = String(data && data.displayedValue ? data.displayedValue : "");
     const visibleChildren = Array.isArray(data && data.visibleChildren) ? data.visibleChildren : [];
-    if (!selectionLayer || !input || !inputShell) {
+    if (!selectionLayer || !displayText || !inputShell) {
       return;
     }
     selectionLayer.innerHTML = "";
@@ -3691,54 +3695,33 @@
       return;
     }
 
-    const style = window.getComputedStyle(input);
-    const paddingLeft = Number.parseFloat(style.paddingLeft) || 0;
-    const paddingTop = Number.parseFloat(style.paddingTop) || 0;
-    const paddingRight = Number.parseFloat(style.paddingRight) || 0;
-    const paddingBottom = Number.parseFloat(style.paddingBottom) || 0;
-    const font = [
-      style ? style.fontStyle : "",
-      style ? style.fontVariant : "",
-      style ? style.fontWeight : "",
-      style ? style.fontStretch : "",
-      style ? style.fontSize : "",
-      style ? style.fontFamily : ""
-    ].filter(function (value) { return Boolean(String(value || "").trim()); }).join(" ");
+    const textNode = displayText.firstChild && displayText.firstChild.nodeType === Node.TEXT_NODE
+      ? displayText.firstChild
+      : null;
+    if (!textNode) {
+      return;
+    }
+    const textRect = displayText.getBoundingClientRect();
+    const style = window.getComputedStyle(displayText);
 
     visibleChildren.forEach(function (item) {
       const range = item && item.resolvedSelection ? item.resolvedSelection : null;
       if (!range) {
         return;
       }
-      const mirror = document.createElement("div");
-      mirror.className = "subseg-value-selection-mirror";
-      mirror.style.font = font || "normal 0.78rem Segoe UI, Tahoma, sans-serif";
-      mirror.style.paddingLeft = String(paddingLeft) + "px";
-      mirror.style.paddingTop = String(paddingTop) + "px";
-      mirror.style.paddingRight = String(paddingRight) + "px";
-      mirror.style.paddingBottom = String(paddingBottom) + "px";
-
-      const before = document.createElement("span");
-      before.className = "subseg-value-selection-mirror-text";
-      before.textContent = displayedValue.slice(0, range.start);
-
-      const selected = document.createElement("span");
-      selected.className = "subseg-value-selection-mirror-selected";
-      selected.textContent = displayedValue.slice(range.start, range.end);
-
-      const after = document.createElement("span");
-      after.className = "subseg-value-selection-mirror-text";
-      after.textContent = displayedValue.slice(range.end);
-
-      mirror.appendChild(before);
-      mirror.appendChild(selected);
-      mirror.appendChild(after);
-      selectionLayer.appendChild(mirror);
-
-      const mirrorRect = mirror.getBoundingClientRect();
-      const selectedRect = selected.getBoundingClientRect();
-      const left = Math.max(0, selectedRect.left - mirrorRect.left);
-      const top = Math.max(0, selectedRect.top - mirrorRect.top);
+      const domRange = document.createRange();
+      try {
+        domRange.setStart(textNode, Math.max(0, Math.min(range.start, textNode.length)));
+        domRange.setEnd(textNode, Math.max(0, Math.min(range.end, textNode.length)));
+      } catch {
+        return;
+      }
+      const selectedRect = domRange.getBoundingClientRect();
+      if (!selectedRect || !Number.isFinite(selectedRect.width) || !Number.isFinite(selectedRect.height)) {
+        return;
+      }
+      const left = Math.max(0, selectedRect.left - textRect.left);
+      const top = Math.max(0, selectedRect.top - textRect.top);
       const width = Math.max(12, selectedRect.width);
       const height = Math.max(16, selectedRect.height);
 
@@ -3755,7 +3738,6 @@
       badge.textContent = String(item.order || 1);
       bubble.appendChild(badge);
       selectionLayer.appendChild(bubble);
-      selectionLayer.removeChild(mirror);
     });
   }
 
