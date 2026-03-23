@@ -13,6 +13,7 @@ function createCodexRunner(ctx) {
     quoteForCmd,
     splitForFeishu,
     uploadFileToChat,
+    sendDirectMessage,
     sendTextMessage,
     setChatSessionId,
     extractThreadStartedId,
@@ -20,8 +21,10 @@ function createCodexRunner(ctx) {
     extractUploadDirective,
   } = deps;
 
-  function buildCodexPrompt(userText) {
-    return `${codexRelayPrompt}\n\nUSER_MESSAGE: ${userText}\nASSISTANT_REPLY:`;
+  function buildCodexPrompt(userText, state = {}) {
+    const chatId = state.chatId || "";
+    const senderOpenId = state.lastSenderOpenId || "";
+    return `${codexRelayPrompt}\n\nCHAT_CONTEXT:\n- CHAT_ID: ${chatId}\n- LAST_SENDER_OPEN_ID: ${senderOpenId || "(unknown)"}\n\nUSER_MESSAGE: ${userText}\nASSISTANT_REPLY:`;
   }
 
   function buildCodexArgs(outputPath) {
@@ -87,6 +90,55 @@ function createCodexRunner(ctx) {
     return useful.join("\n").trim();
   }
 
+  function extractDirectMessageDirective(text, state = {}) {
+    const lines = (text || "").split(/\r?\n/);
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        continue;
+      }
+
+      const match = trimmed.match(/^DM_USER:\s*(.+?)\s*\|\s*([\s\S]+)$/i);
+      if (!match || !match[1] || !match[2]) {
+        continue;
+      }
+
+      const recipientToken = match[1].trim();
+      const message = match[2].trim();
+      if (!recipientToken || !message) {
+        continue;
+      }
+
+      let openId = recipientToken;
+      if (/^(me|last_sender|last|sender)$/i.test(recipientToken)) {
+        openId = state.lastSenderOpenId || "";
+      }
+
+      return {
+        recipientToken,
+        openId,
+        message,
+      };
+    }
+
+    return null;
+  }
+
+  function stripDirectiveLines(text) {
+    return (text || "")
+      .split(/\r?\n/)
+      .filter((line) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return true;
+        }
+
+        return !/^DM_USER:\s*/i.test(trimmed) && !/^(!upload\s+|UPLOAD_FILE:\s*)/i.test(trimmed);
+      })
+      .join("\n")
+      .trim();
+  }
+
   async function runCodexTurn(chatId, state, userText) {
     if (state.isTurnInFlight) {
       return;
@@ -95,7 +147,7 @@ function createCodexRunner(ctx) {
     state.isTurnInFlight = true;
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "feishuBot-codex-"));
     const outputPath = path.join(tempDir, "last-message.txt");
-    const prompt = buildCodexPrompt(userText);
+    const prompt = buildCodexPrompt(userText, state);
     const codexSessionId = typeof state.codexResponseId === "string" ? state.codexResponseId.trim() : "";
     const codexArgs = codexSessionId ? buildCodexResumeArgs(codexSessionId, outputPath) : buildCodexArgs(outputPath);
     const child = spawn("cmd.exe", ["/d", "/s", "/c", [codexCommand, ...codexArgs].map(quoteForCmd).join(" ")], {
@@ -144,14 +196,28 @@ function createCodexRunner(ctx) {
       state.hasActiveSession = true;
 
       let messageText = finalMessage;
+      const directMessageDirective = extractDirectMessageDirective ? extractDirectMessageDirective(finalMessage, state) : null;
+      if (directMessageDirective) {
+        if (!directMessageDirective.openId) {
+          throw new Error(`Codex requested a DM to "${directMessageDirective.recipientToken}" but no recipient open_id was available.`);
+        }
+
+        await sendDirectMessage(directMessageDirective.openId, directMessageDirective.message, {
+          source_chat_id: chatId,
+          source_codex_session_id: state.codexResponseId || codexSessionId || "",
+          direct_message: true,
+          codex_directive: "DM_USER",
+        });
+      }
+
       const uploadDirective = extractUploadDirective ? extractUploadDirective(finalMessage) : "";
       if (uploadDirective) {
         await uploadFileToChat(chatId, uploadDirective);
-        messageText = finalMessage
-          .split(/\r?\n/)
-          .filter((line) => !/^(!upload\s+|UPLOAD_FILE:)/i.test(line.trim()))
-          .join("\n")
-          .trim();
+      }
+
+      messageText = stripDirectiveLines(finalMessage);
+      if (directMessageDirective && !messageText) {
+        messageText = `Sent a direct message to ${directMessageDirective.recipientToken}.`;
       }
 
       for (const chunk of splitForFeishu(messageText)) {
@@ -226,6 +292,7 @@ function createCodexRunner(ctx) {
     buildCodexArgs,
     buildCodexResumeArgs,
     extractLastUsefulText,
+    extractDirectMessageDirective,
     runCodexTurn,
     startNewCodexSession,
     cancelTurn,

@@ -25,6 +25,7 @@ Return only the final user-facing answer text.
 Do not include tool logs, status lines, internal reasoning, or metadata.
 Never output exactly the same text as USER_MESSAGE.
 If the user asks you to upload a local file, you must output a single line exactly in the form "UPLOAD_FILE: <absolute_path>" and nothing else on that line.
+If you need to send a direct message to a Feishu user, output a single line exactly in the form "DM_USER: <open_id|last_sender|me> | <message>" and nothing else on that line.
 If USER_MESSAGE is vague, ask one concise clarifying question instead of echoing.`).trim();
 const CODEX_SESSION_INDEX_PATH = path.join(os.homedir(), ".codex", "session_index.jsonl");
 
@@ -131,6 +132,7 @@ const codexRunner = createCodexRunner({
     quoteForCmd,
     splitForFeishu: stateStore.splitForFeishu,
     uploadFileToChat: fileTransfer.uploadFileToChat,
+    sendDirectMessage,
     sendTextMessage,
     setChatSessionId: stateStore.setChatSessionId,
     extractThreadStartedId: stateStore.extractThreadStartedId,

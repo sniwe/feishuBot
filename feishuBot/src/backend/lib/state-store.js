@@ -412,6 +412,7 @@ function createStateStore(ctx) {
       const latestThread = stored.threadId ? getPersistedThreadEntry(stored.threadId) : getLatestThreadEntryForChat(chatId);
       const storedResponseId = stored.sessionId || latestThread?.sessionId || null;
       chatStates.set(chatId, {
+        chatId,
         isArmed: false,
         waitingForModeChoice: false,
         waitingForResumeChatSelection: false,
