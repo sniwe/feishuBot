@@ -1169,15 +1169,26 @@ h1, p { margin: 0; }
   pointer-events: none;
 }
 
+.subseg-value-card-tail {
+  position: absolute;
+  left: var(--subseg-card-line-left, -4px);
+  top: 100%;
+  width: 1px;
+  height: var(--subseg-card-tail-length, 0px);
+  background: #b9c9df;
+  pointer-events: none;
+  z-index: 0;
+}
+
 .subseg-value-card.is-nested::before {
   left: var(--subseg-card-line-left, -4px);
-  top: calc(-7px - var(--subseg-card-parent-gap, 0px));
+  top: 0;
   width: 1px;
-  height: calc(100% + 14px + var(--subseg-card-spine-extension, 0px) + var(--subseg-card-parent-gap, 0px));
+  height: calc(100% + var(--subseg-card-spine-extension, 0px));
 }
 
 .subseg-value-card.is-nested.is-last-sibling::before {
-  height: calc(50% + 7px + var(--subseg-card-spine-extension, 0px) + var(--subseg-card-parent-gap, 0px));
+  height: calc(50% + var(--subseg-card-spine-extension, 0px));
 }
 
 .subseg-value-card.is-nested::after {
@@ -1189,8 +1200,8 @@ h1, p { margin: 0; }
 
 .subseg-value-ancestor-guides {
   position: absolute;
-  top: calc(-7px - var(--subseg-card-parent-gap, 0px));
-  bottom: calc(-7px - var(--subseg-card-spine-extension, 0px) - var(--subseg-card-parent-gap, 0px));
+  top: 0;
+  bottom: calc(-1 * var(--subseg-card-spine-extension, 0px));
   left: 0;
   width: 0;
   pointer-events: none;

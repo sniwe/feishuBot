@@ -3486,7 +3486,7 @@
     scheduleGuideStepRender({ deps: {} });
   }
 
-  function renderSubSegValueCardNode(key, entry, path, depth, isLastSibling, ancestorGuideDepths, siblingOrder, parentGapPx) {
+  function renderSubSegValueCardNode(key, entry, path, depth, isLastSibling, ancestorGuideDepths, siblingOrder) {
     if (!subSegValueList || !entry || typeof entry !== "object") {
       return;
     }
@@ -3502,8 +3502,7 @@
     card.style.setProperty("--subseg-card-bridge-left", String(bridgeLeft) + "px");
     card.style.setProperty("--subseg-card-bridge-width", String(bridgeWidth) + "px");
     card.style.setProperty("--subseg-card-indent-step", "10px");
-    card.style.setProperty("--subseg-card-parent-gap", String(Math.max(0, Number(parentGapPx) || 0)) + "px");
-    card.classList.toggle("has-following-content", false);
+    card.style.setProperty("--subseg-card-tail-length", "0px");
     if (depth > 0 && Array.isArray(ancestorGuideDepths) && ancestorGuideDepths.length > 0) {
       const uniqueGuideDepths = ancestorGuideDepths.filter(function (guideDepth, idx, arr) {
         return Number.isFinite(guideDepth) && guideDepth > 0 && arr.indexOf(guideDepth) === idx;
@@ -3670,8 +3669,13 @@
     const hasFollowingContent = Boolean(!isLastSibling || visibleChildren.length > 0);
     card.dataset.subsegHasFollowingContent = hasFollowingContent ? "1" : "0";
     card.classList.toggle("has-following-content", hasFollowingContent);
+    if (hasFollowingContent) {
+      const tail = document.createElement("span");
+      tail.className = "subseg-value-card-tail";
+      card.appendChild(tail);
+    }
     subSegValueList.appendChild(card);
-    const reservedGapPx = syncSubSegCardBubbleWidth(cardBubbleInput);
+    syncSubSegCardBubbleWidth(cardBubbleInput);
     requestAnimationFrame(function () {
       syncSubSegCardBubbleWidth(cardBubbleInput);
     });
@@ -3697,8 +3701,7 @@
         depth + 1,
         visibleIndex === (visibleChildren.length - 1),
         nextAncestorGuideDepths,
-        visibleIndex + 1,
-        reservedGapPx
+        visibleIndex + 1
       );
     });
   }
@@ -4002,9 +4005,10 @@
     bubble.style.width = String(nextWidth) + "px";
     const reserveBelow = card.dataset.subsegHasFollowingContent === "1";
     const marginBottom = reserveBelow ? Math.max(0, nextHeight - 2) : 0;
-    const spineExtension = reserveBelow ? Math.max(0, marginBottom - 7) : 0;
+    const spineExtension = 0;
     card.style.marginBottom = String(marginBottom) + "px";
     card.style.setProperty("--subseg-card-spine-extension", String(spineExtension) + "px");
+    card.style.setProperty("--subseg-card-tail-length", String(marginBottom) + "px");
     bubble.classList.toggle("has-content", hasContent);
     return marginBottom;
   }
