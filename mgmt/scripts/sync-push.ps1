@@ -31,51 +31,9 @@ try {
         & (Join-Path $GLOBAL_MGMT_DIR "scripts\bootstrap-machine.ps1") | Out-Null
     }
 
-    function Get-ManagedPathspecs {
-        $specs = @("AGENTS.md", ".gitignore", "mgmt")
-        $indexPath = Join-Path $GLOBAL_MGMT_DIR "projects-index.json"
-        if (Test-Path -LiteralPath $indexPath) {
-            try {
-                $idx = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json
-                foreach ($p in @($idx.projects | Where-Object { $_.status -eq "active" })) {
-                    $projectRoot = [string]$p.projectRoot
-                    if ([string]::IsNullOrWhiteSpace($projectRoot)) { continue }
-                    $fullProjectRoot = [IO.Path]::GetFullPath($projectRoot)
-                    $fullRepoRoot = [IO.Path]::GetFullPath($REPO_ROOT)
-                    if (-not $fullProjectRoot.StartsWith($fullRepoRoot, [System.StringComparison]::OrdinalIgnoreCase)) { continue }
-                    $relative = $fullProjectRoot.Substring($fullRepoRoot.Length).TrimStart('\', '/')
-                    if (-not [string]::IsNullOrWhiteSpace($relative)) {
-                        $specs += $relative
-                    }
-                }
-            } catch {}
-        }
-        return @($specs | Select-Object -Unique)
-    }
-
-    $pathspecs = Get-ManagedPathspecs
-    $status = git status --porcelain -- @pathspecs
-    if ([string]::IsNullOrWhiteSpace(($status | Out-String))) {
-        Write-Output "No changes to commit."
-        exit 0
-    }
-
-    git add -A -- @pathspecs
-    git diff --cached --quiet -- @pathspecs
-    if ($LASTEXITCODE -eq 0) {
-        Write-Output "No staged managed changes to commit."
-        exit 0
-    }
-
-    $commitMsg = if ([string]::IsNullOrWhiteSpace($Message)) {
-        "sync: update workspace state $(Get-Date -Format s)"
-    } else {
-        $Message
-    }
-
-    git commit -m $commitMsg
-    git push
-    Write-Output "Sync push complete."
+    # This machine is configured as receive-only. Never publish local changes.
+    Write-Output "Push disabled on this machine. Pull completed; no commit/push performed."
+    exit 0
 }
 finally {
     Pop-Location

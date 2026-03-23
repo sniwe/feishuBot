@@ -12,4 +12,5 @@ mgmt/config/oms.cookies.storage.json
 node_modules/
 dist/
 build/
+src/backend/oms/data/orders/
 # codex-governed:end
