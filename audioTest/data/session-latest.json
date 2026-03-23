@@ -1,9 +1,9 @@
 {
   "id": "ai-mp3-mmu2a3kg-h4jpfn",
   "owner": "rhys",
-  "savedAt": "2026-03-23T06:20:12.195Z",
-  "updatedAt": "2026-03-23T06:20:12.195Z",
-  "revision": 163,
+  "savedAt": "2026-03-23T06:27:56.683Z",
+  "updatedAt": "2026-03-23T06:27:56.683Z",
+  "revision": 167,
   "file": {
     "name": "AI的胡说八道，为什么比人类骗子更危险？.mp3",
     "type": "audio/mpeg",
@@ -907,10 +907,11 @@
     },
     "subSegCardBubbleValues": {
       "10.564|12.416#0": "where are you little guy\ni can't find the boo",
-      "15.453|19.233#0": "if there was two balls under the fridge... incin"
+      "15.453|19.233#0": "if there was two balls under the fridge... incin",
+      "7.045|9.052#0": "the problem persists\nwhich, of course, is not good"
     },
     "selectedSpanIndex": -1,
-    "currentTime": 15.453381,
+    "currentTime": 7.044739,
     "wasPlaying": false
   },
   "audioId": "ai-mp3-mmu2a3b9-i7zysw",
