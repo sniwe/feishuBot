@@ -1018,7 +1018,7 @@ h1, p { margin: 0; }
 .subseg-value-card-bubble {
   position: absolute;
   right: 5px;
-  bottom: -7px;
+  top: calc(100% - 7px);
   width: 32px;
   height: 12px;
   display: flex;
