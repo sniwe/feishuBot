@@ -98,13 +98,26 @@ function createCodexRunner(ctx) {
         continue;
       }
 
-      const match = trimmed.match(/^DM_USER:\s*(.+?)\s*\|\s*([\s\S]+)$/i);
-      if (!match || !match[1] || !match[2]) {
-        continue;
+      const patterns = [
+        /^DM_USER:\s*(.+?)\s*\|\s*([\s\S]+)$/i,
+        /^@(.+?)\s*:\s*([\s\S]+)$/i,
+        /^send\s+a\s+message\s+to\s+(.+?)\s*:\s*([\s\S]+)$/i,
+        /^send\s+message\s+to\s+(.+?)\s*:\s*([\s\S]+)$/i,
+      ];
+
+      let recipientToken = "";
+      let message = "";
+      for (const pattern of patterns) {
+        const match = trimmed.match(pattern);
+        if (!match || !match[1] || !match[2]) {
+          continue;
+        }
+
+        recipientToken = match[1].trim().replace(/^["'`]+|["'`]+$/g, "").replace(/^@+/, "");
+        message = match[2].trim();
+        break;
       }
 
-      const recipientToken = match[1].trim();
-      const message = match[2].trim();
       if (!recipientToken || !message) {
         continue;
       }
@@ -133,7 +146,13 @@ function createCodexRunner(ctx) {
           return true;
         }
 
-        return !/^DM_USER:\s*/i.test(trimmed) && !/^(!upload\s+|UPLOAD_FILE:\s*)/i.test(trimmed);
+        return (
+          !/^DM_USER:\s*/i.test(trimmed) &&
+          !/^@.+?:/i.test(trimmed) &&
+          !/^send\s+a\s+message\s+to\s+/i.test(trimmed) &&
+          !/^send\s+message\s+to\s+/i.test(trimmed) &&
+          !/^(!upload\s+|UPLOAD_FILE:\s*)/i.test(trimmed)
+        );
       })
       .join("\n")
       .trim();

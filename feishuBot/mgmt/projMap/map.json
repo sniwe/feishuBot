@@ -4,7 +4,7 @@
   "name": "feishuBot",
   "summary": "Project map for the Feishu Codex relay",
   "root": "C:\\Users\\Qub\\feishuBot",
-  "updated": "2026-03-23T14:44:31.8295809+08:00",
+  "updated": "2026-03-23T15:06:41.5523976+08:00",
   "nodes": [
     {
       "id": "node-root",
@@ -160,7 +160,7 @@
       "summary": "CLI execution, session resume, and turn output handling",
       "features": [
         {
-          "summary": "Runs new and resumed Codex turns, captures thread ids, and applies Codex directives",
+          "summary": "Runs new and resumed Codex turns, captures thread ids, and applies Codex DM/file directives",
           "flow": [
             "edge-codex-relay"
           ]

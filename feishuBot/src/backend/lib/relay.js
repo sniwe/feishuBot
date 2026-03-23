@@ -56,15 +56,24 @@ function createRelayController(ctx) {
         continue;
       }
 
-      const match = trimmed.match(/^!?(?:\/)?dm\s+(\S+)\s+([\s\S]+)$/i);
-      if (!match || !match[1] || !match[2]) {
-        continue;
-      }
+      const patterns = [
+        /^!?(?:\/)?dm\s+(\S+)\s+([\s\S]+)$/i,
+        /^@(.+?)\s*:\s*([\s\S]+)$/i,
+        /^send\s+a\s+message\s+to\s+(.+?)\s*:\s*([\s\S]+)$/i,
+        /^send\s+message\s+to\s+(.+?)\s*:\s*([\s\S]+)$/i,
+      ];
 
-      return {
-        recipient: match[1].trim(),
-        message: match[2].trim(),
-      };
+      for (const pattern of patterns) {
+        const match = trimmed.match(pattern);
+        if (!match || !match[1] || !match[2]) {
+          continue;
+        }
+
+        return {
+          recipient: match[1].trim().replace(/^["'`]+|["'`]+$/g, "").replace(/^@+/, ""),
+          message: match[2].trim(),
+        };
+      }
     }
 
     return null;
