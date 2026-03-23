@@ -1018,6 +1018,7 @@ h1, p { margin: 0; }
 .subseg-value-card-input-shell {
   position: relative;
   display: block;
+  min-height: 1.35em;
 }
 
 .subseg-value-selection-layer {
@@ -1030,8 +1031,9 @@ h1, p { margin: 0; }
 
 .subseg-value-selection-bubble {
   position: absolute;
-  top: 0;
-  height: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 1.25em;
   min-height: 18px;
   border: 1px solid rgba(67, 129, 212, 0.48);
   border-radius: 999px;
