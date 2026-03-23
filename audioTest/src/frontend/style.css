@@ -910,7 +910,7 @@ h1, p { margin: 0; }
 
 .subseg-value-list {
   display: grid;
-  gap: 0;
+  gap: 5px;
 }
 
 .subseg-timeline {
@@ -1018,7 +1018,7 @@ h1, p { margin: 0; }
 .subseg-value-card-bubble {
   position: absolute;
   right: 5px;
-  top: calc(100% - 7px);
+  bottom: -7px;
   width: 32px;
   height: 12px;
   display: flex;
@@ -1068,12 +1068,6 @@ h1, p { margin: 0; }
 
 .subseg-value-card-bubble-input::placeholder {
   color: rgba(49, 66, 95, 0.6);
-}
-
-.subseg-value-card-spacing {
-  width: 100%;
-  height: 0;
-  pointer-events: none;
 }
 
 .subseg-value-card-input-shell {
@@ -1179,11 +1173,11 @@ h1, p { margin: 0; }
   left: var(--subseg-card-line-left, -4px);
   top: -7px;
   width: 1px;
-  height: calc(100% + 14px + var(--subseg-card-spine-extension, 0px));
+  height: calc(100% + 14px);
 }
 
 .subseg-value-card.is-nested.is-last-sibling::before {
-  height: calc(50% + 7px + var(--subseg-card-spine-extension, 0px));
+  height: calc(50% + 7px);
 }
 
 .subseg-value-card.is-nested::after {

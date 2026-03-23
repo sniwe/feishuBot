@@ -3595,9 +3595,6 @@
     cardBubbleInput.addEventListener("change", handleSubSegCardBubbleInputChange);
     cardBubble.appendChild(cardBubbleInput);
     card.appendChild(cardBubble);
-    const cardSpacer = document.createElement("div");
-    cardSpacer.className = "subseg-value-card-spacing";
-    cardSpacer.setAttribute("aria-hidden", "true");
 
     const deleteDialogKey = getSubSegCardRecallStateKey(key, pathKey);
     if (state.subSegCardDeleteDialogKey === deleteDialogKey) {
@@ -3635,8 +3632,6 @@
 
     entry.children = getSortedChildEntries(entry.children);
     const sortedChildren = entry.children;
-    const hasFollowingContent = Boolean(!isLastSibling || (Array.isArray(sortedChildren) && sortedChildren.length > 0));
-    card.dataset.subsegHasFollowingContent = hasFollowingContent ? "1" : "0";
     const nextAncestorGuideDepths = Array.isArray(ancestorGuideDepths)
       ? ancestorGuideDepths.slice()
       : [];
@@ -3670,7 +3665,6 @@
       });
     });
     subSegValueList.appendChild(card);
-    subSegValueList.appendChild(cardSpacer);
     syncSubSegCardBubbleWidth(cardBubbleInput);
     requestAnimationFrame(function () {
       syncSubSegCardBubbleWidth(cardBubbleInput);
@@ -3963,9 +3957,6 @@
     if (!bubble || !card) {
       return;
     }
-    const spacer = card.nextElementSibling && card.nextElementSibling.classList && card.nextElementSibling.classList.contains("subseg-value-card-spacing")
-      ? card.nextElementSibling
-      : null;
     const value = String(inputEl.value || "");
     const hasContent = Boolean(value.trim());
     const minWidth = 32;
@@ -4005,11 +3996,6 @@
     }
     bubble.style.height = String(nextHeight) + "px";
     inputEl.style.height = String(nextHeight) + "px";
-    const spacerHeight = hasFollowingContent ? Math.max(0, nextHeight - 2) : 0;
-    if (spacer) {
-      spacer.style.height = String(spacerHeight) + "px";
-    }
-    card.style.setProperty("--subseg-card-spine-extension", card.dataset.subsegHasFollowingContent === "1" ? String(spacerHeight) + "px" : "0px");
     bubble.style.width = String(nextWidth) + "px";
     bubble.classList.toggle("has-content", hasContent);
   }

@@ -1,122 +1,141 @@
-{
-  "id": "map:feishuBot",
-  "type": "project-map",
-  "name": "feishuBot",
-  "summary": "Project map for the Feishu Codex relay",
-  "root": "C:\\Users\\Qub\\feishuBot",
-  "updated": "2026-03-23T12:36:00.0000000+08:00",
-  "nodes": [
-    {
-      "id": "node-root",
-      "type": "module",
-      "name": "Project Root",
-      "summary": "Workspace entrypoint and governance files",
-      "features": [
-        {
-          "summary": "Project entrypoint forwards to backend implementation",
-          "flow": [
-            "edge-root-backend"
-          ]
-        }
-      ],
-      "edges": [
-        {
-          "id": "edge-root-backend",
-          "kind": "depends",
-          "from": "node-root",
-          "to": "node-backend"
-        }
-      ],
-      "critical": true,
-      "files": [
-        "package.json",
-        "AGENTS.md",
-        ".gitignore"
-      ],
-      "children": [
-        "node-backend"
-      ]
-    },
-    {
-      "id": "node-backend",
-      "type": "module",
-      "name": "Backend Relay",
-      "summary": "Feishu event loop, session persistence, and Codex session management",
-      "features": [
-        {
-          "summary": "Runs Codex turns and resumes persisted thread sessions",
-          "flow": [
-            "edge-backend-codex",
-            "edge-backend-feishu"
-          ]
-        }
-      ],
-      "edges": [
-        {
-          "id": "edge-backend-codex",
-          "kind": "io",
-          "from": "node-backend",
-          "to": "node-codex"
-        },
-        {
-          "id": "edge-backend-feishu",
-          "kind": "io",
-          "from": "node-backend",
-          "to": "node-feishu"
-        }
-      ],
-      "critical": true,
-      "files": [
-        "src/backend/index.js",
-        "codex-chat-sessions.json"
-      ],
-      "children": []
-    },
-    {
-      "id": "node-codex",
-      "type": "module",
-      "name": "Codex CLI Integration",
-      "summary": "Resumable Codex command-line execution and session lookup",
-      "features": [],
-      "edges": [],
-      "critical": true,
-      "files": [],
-      "children": []
-    },
-    {
-      "id": "node-feishu",
-      "type": "module",
-      "name": "Feishu Messaging",
-      "summary": "Lark client, send/upload, and incoming event handling",
-      "features": [],
-      "edges": [],
-      "critical": true,
-      "files": [],
-      "children": []
-    }
-  ],
-  "edges": [
-    {
-      "id": "edge-root-backend",
-      "kind": "depends",
-      "from": "node-root",
-      "to": "node-backend"
-    },
-    {
-      "id": "edge-backend-codex",
-      "kind": "io",
-      "from": "node-backend",
-      "to": "node-codex"
-    },
-    {
-      "id": "edge-backend-feishu",
-      "kind": "io",
-      "from": "node-backend",
-      "to": "node-feishu"
-    }
-  ],
-  "children": [
-    "node-root",
-    "node-backend"
-  ]
+﻿{
+    "id":  "map:feishuBot",
+    "type":  "project-map",
+    "name":  "feishuBot",
+    "summary":  "Project map for the Feishu Codex relay",
+    "root":  "C:\\Users\\Qub\\feishuBot",
+    "updated":  "2026-03-23T12:33:09.4476454+08:00",
+    "nodes":  [
+                  {
+                      "id":  "node-root",
+                      "type":  "module",
+                      "name":  "Project Root",
+                      "summary":  "Workspace launcher and governance files",
+                      "features":  [
+                                       {
+                                           "summary":  "Launcher forwards to backend implementation",
+                                           "flow":  [
+                                                        "edge-root-backend"
+                                                    ]
+                                       }
+                                   ],
+                      "edges":  [
+                                    {
+                                        "id":  "edge-root-backend",
+                                        "kind":  "depends",
+                                        "from":  "node-root",
+                                        "to":  "node-backend"
+                                    }
+                                ],
+                      "critical":  true,
+                      "files":  [
+                                    "package.json",
+                                    "AGENTS.md",
+                                    ".gitignore",
+                                    "src/backend/index.js"
+                                ],
+                      "children":  [
+                                       "node-backend"
+                                   ]
+                  },
+                  {
+                      "id":  "node-backend",
+                      "type":  "module",
+                      "name":  "Backend Relay",
+                      "summary":  "Feishu event loop, session persistence, and Codex session management",
+                      "features":  [
+                                       {
+                                           "summary":  "Runs Codex turns and resumes persisted thread sessions",
+                                           "flow":  [
+                                                        "edge-backend-codex",
+                                                        "edge-backend-feishu"
+                                                    ]
+                                       }
+                                   ],
+                      "edges":  [
+                                    {
+                                        "id":  "edge-backend-codex",
+                                        "kind":  "io",
+                                        "from":  "node-backend",
+                                        "to":  "node-codex"
+                                    },
+                                    {
+                                        "id":  "edge-backend-feishu",
+                                        "kind":  "io",
+                                        "from":  "node-backend",
+                                        "to":  "node-feishu"
+                                    }
+                                ],
+                      "critical":  true,
+                      "files":  [
+                                    "src/backend/app.js",
+                                    "codex-chat-sessions.json"
+                                ],
+                      "children":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "node-codex",
+                      "type":  "module",
+                      "name":  "Codex CLI Integration",
+                      "summary":  "Resumable Codex command-line execution and session lookup",
+                      "features":  [
+
+                                   ],
+                      "edges":  [
+
+                                ],
+                      "critical":  true,
+                      "files":  [
+
+                                ],
+                      "children":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "node-feishu",
+                      "type":  "module",
+                      "name":  "Feishu Messaging",
+                      "summary":  "Lark client, send/upload, and incoming event handling",
+                      "features":  [
+
+                                   ],
+                      "edges":  [
+
+                                ],
+                      "critical":  true,
+                      "files":  [
+
+                                ],
+                      "children":  [
+
+                                   ]
+                  }
+              ],
+    "edges":  [
+                  {
+                      "id":  "edge-root-backend",
+                      "kind":  "depends",
+                      "from":  "node-root",
+                      "to":  "node-backend"
+                  },
+                  {
+                      "id":  "edge-backend-codex",
+                      "kind":  "io",
+                      "from":  "node-backend",
+                      "to":  "node-codex"
+                  },
+                  {
+                      "id":  "edge-backend-feishu",
+                      "kind":  "io",
+                      "from":  "node-backend",
+                      "to":  "node-feishu"
+                  }
+              ],
+    "children":  [
+                     "node-root",
+                     "node-backend"
+                 ]
 }
