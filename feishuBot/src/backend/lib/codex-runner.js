@@ -184,7 +184,9 @@ function createCodexRunner(ctx) {
     state.resumeChatCandidates = [];
     state.isTurnInFlight = false;
     state.activeCodexProcess = null;
-    setChatSessionId(chatId, state, null, state.chatName);
+    state.currentThreadId = "";
+    state.pendingNewThread = true;
+    state.codexResponseId = null;
 
     await sendTextMessage(chatId, "Started new Codex session. Send your message.");
   }
@@ -211,7 +213,10 @@ function createCodexRunner(ctx) {
     state.resumeChatCandidates = [];
     state.isTurnInFlight = false;
     state.activeCodexProcess = null;
-    setChatSessionId(chatId, state, state.codexResponseId, state.chatName);
+    state.pendingNewThread = false;
+    if (state.codexResponseId || state.currentThreadId) {
+      setChatSessionId(chatId, state, state.codexResponseId, state.chatName);
+    }
 
     await sendTextMessage(chatId, "Codex disarmed.");
   }

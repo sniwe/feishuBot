@@ -8,34 +8,117 @@ function createStateStore(ctx) {
 
   const chatStates = new Map();
   const recentEventKeys = new Map();
-  let persistedSessions = { chats: {} };
+  let persistedSessions = { chats: {}, threads: [] };
+
+  function makeThreadRecordId(chatId, chatName, sessionId) {
+    const cleanedChatId = (chatId || "").trim() || "chat";
+    const cleanedName = (chatName || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    const cleanedSessionId = (sessionId || "").trim().slice(0, 8);
+    const timestamp = Date.now().toString(36);
+    return [cleanedChatId, cleanedName, cleanedSessionId, timestamp].filter(Boolean).join("-");
+  }
+
+  function normalizeThreadEntry(entry, fallback = {}) {
+    if (!entry || typeof entry !== "object") {
+      return null;
+    }
+
+    const threadId = typeof entry.threadId === "string" ? entry.threadId.trim() : typeof entry.thread_id === "string" ? entry.thread_id.trim() : "";
+    const chatId = typeof entry.chatId === "string" ? entry.chatId.trim() : typeof fallback.chatId === "string" ? fallback.chatId.trim() : "";
+    const sessionId = typeof entry.sessionId === "string" ? entry.sessionId.trim() : typeof fallback.sessionId === "string" ? fallback.sessionId.trim() : "";
+    const chatName = typeof entry.chatName === "string" ? entry.chatName.trim() : typeof fallback.chatName === "string" ? fallback.chatName.trim() : "";
+    const createdAt = typeof entry.createdAt === "string" && entry.createdAt.trim() ? entry.createdAt.trim() : new Date().toISOString();
+    const updatedAt = typeof entry.updatedAt === "string" && entry.updatedAt.trim() ? entry.updatedAt.trim() : createdAt;
+
+    if (!threadId && !chatId && !sessionId && !chatName) {
+      return null;
+    }
+
+    return {
+      threadId: threadId || makeThreadRecordId(chatId, chatName, sessionId),
+      chatId,
+      sessionId,
+      chatName,
+      createdAt,
+      updatedAt,
+    };
+  }
 
   function normalizePersistedSessions(raw) {
     if (!raw || typeof raw !== "object") {
-      return { chats: {} };
-    }
-
-    if (raw.chats && typeof raw.chats === "object") {
-      return { chats: raw.chats };
+      return { chats: {}, threads: [] };
     }
 
     const chats = {};
-    for (const [chatId, value] of Object.entries(raw)) {
-      if (typeof value === "string" && value.trim()) {
-        chats[chatId] = { sessionId: value.trim(), chatName: "" };
-        continue;
-      }
+    const threads = [];
+    const rawThreads = Array.isArray(raw.threads) ? raw.threads : [];
+    const rawChats = raw.chats && typeof raw.chats === "object" ? raw.chats : null;
 
-      if (value && typeof value === "object") {
-        const sessionId = typeof value.sessionId === "string" ? value.sessionId.trim() : "";
-        const chatName = typeof value.chatName === "string" ? value.chatName.trim() : "";
-        if (sessionId || chatName) {
-          chats[chatId] = { sessionId, chatName };
+    if (rawChats) {
+      for (const [chatId, value] of Object.entries(rawChats)) {
+        if (typeof value === "string" && value.trim()) {
+          chats[chatId] = { sessionId: value.trim(), chatName: "", threadId: "" };
+          continue;
+        }
+
+        if (value && typeof value === "object") {
+          const sessionId = typeof value.sessionId === "string" ? value.sessionId.trim() : "";
+          const chatName = typeof value.chatName === "string" ? value.chatName.trim() : "";
+          const threadId = typeof value.threadId === "string" ? value.threadId.trim() : "";
+          if (sessionId || chatName || threadId) {
+            chats[chatId] = { sessionId, chatName, threadId };
+          }
         }
       }
     }
 
-    return { chats };
+    if (rawThreads.length > 0) {
+      for (const entry of rawThreads) {
+        const normalized = normalizeThreadEntry(entry);
+        if (normalized) {
+          threads.push(normalized);
+        }
+      }
+    } else {
+      for (const [chatId, value] of Object.entries(raw)) {
+        if (chatId === "chats" || chatId === "threads") {
+          continue;
+        }
+
+        if (typeof value === "string" && value.trim()) {
+          const sessionId = value.trim();
+          const thread = normalizeThreadEntry({
+            threadId: makeThreadRecordId(chatId, "", sessionId),
+            chatId,
+            sessionId,
+            chatName: "",
+          });
+          chats[chatId] = { sessionId, chatName: "", threadId: thread.threadId };
+          threads.push(thread);
+          continue;
+        }
+
+        if (value && typeof value === "object") {
+          const sessionId = typeof value.sessionId === "string" ? value.sessionId.trim() : "";
+          const chatName = typeof value.chatName === "string" ? value.chatName.trim() : "";
+          const threadId = typeof value.threadId === "string" ? value.threadId.trim() : "";
+          if (sessionId || chatName || threadId) {
+            const thread = normalizeThreadEntry({
+              threadId: threadId || makeThreadRecordId(chatId, chatName, sessionId),
+              chatId,
+              sessionId,
+              chatName,
+              createdAt: value.createdAt,
+              updatedAt: value.updatedAt,
+            });
+            chats[chatId] = { sessionId, chatName, threadId: thread.threadId };
+            threads.push(thread);
+          }
+        }
+      }
+    }
+
+    return { chats, threads };
   }
 
   function getPersistedChatEntry(chatId) {
@@ -45,19 +128,66 @@ function createStateStore(ctx) {
 
     const existing = persistedSessions.chats[chatId];
     if (!existing || typeof existing !== "object") {
-      return { sessionId: "", chatName: "" };
+      return { sessionId: "", chatName: "", threadId: "" };
     }
 
     return {
       sessionId: typeof existing.sessionId === "string" ? existing.sessionId.trim() : "",
       chatName: typeof existing.chatName === "string" ? existing.chatName.trim() : "",
+      threadId: typeof existing.threadId === "string" ? existing.threadId.trim() : "",
     };
+  }
+
+  function getPersistedThreadEntry(threadId) {
+    const cleanedThreadId = (threadId || "").trim();
+    if (!cleanedThreadId || !Array.isArray(persistedSessions.threads)) {
+      return null;
+    }
+
+    for (let index = persistedSessions.threads.length - 1; index >= 0; index -= 1) {
+      const entry = persistedSessions.threads[index];
+      if (entry && typeof entry === "object" && entry.threadId === cleanedThreadId) {
+        return {
+          threadId: entry.threadId,
+          chatId: typeof entry.chatId === "string" ? entry.chatId.trim() : "",
+          sessionId: typeof entry.sessionId === "string" ? entry.sessionId.trim() : "",
+          chatName: typeof entry.chatName === "string" ? entry.chatName.trim() : "",
+          createdAt: typeof entry.createdAt === "string" ? entry.createdAt : "",
+          updatedAt: typeof entry.updatedAt === "string" ? entry.updatedAt : "",
+        };
+      }
+    }
+
+    return null;
+  }
+
+  function getLatestThreadEntryForChat(chatId) {
+    const cleanedChatId = (chatId || "").trim();
+    if (!cleanedChatId || !Array.isArray(persistedSessions.threads)) {
+      return null;
+    }
+
+    for (let index = persistedSessions.threads.length - 1; index >= 0; index -= 1) {
+      const entry = persistedSessions.threads[index];
+      if (entry && typeof entry === "object" && entry.chatId === cleanedChatId) {
+        return {
+          threadId: typeof entry.threadId === "string" ? entry.threadId.trim() : "",
+          chatId: typeof entry.chatId === "string" ? entry.chatId.trim() : "",
+          sessionId: typeof entry.sessionId === "string" ? entry.sessionId.trim() : "",
+          chatName: typeof entry.chatName === "string" ? entry.chatName.trim() : "",
+          createdAt: typeof entry.createdAt === "string" ? entry.createdAt : "",
+          updatedAt: typeof entry.updatedAt === "string" ? entry.updatedAt : "",
+        };
+      }
+    }
+
+    return null;
   }
 
   function loadPersistedSessions() {
     try {
       if (!fs.existsSync(sessionStorePath)) {
-        persistedSessions = { chats: {} };
+        persistedSessions = { chats: {}, threads: [] };
         return;
       }
 
@@ -66,7 +196,7 @@ function createStateStore(ctx) {
       persistedSessions = normalizePersistedSessions(parsed);
     } catch (err) {
       console.error("Failed to load persisted sessions:", err.message);
-      persistedSessions = { chats: {} };
+      persistedSessions = { chats: {}, threads: [] };
     }
   }
 
@@ -279,7 +409,8 @@ function createStateStore(ctx) {
   function getChatState(chatId) {
     if (!chatStates.has(chatId)) {
       const stored = getPersistedChatEntry(chatId);
-      const storedResponseId = stored.sessionId || null;
+      const latestThread = stored.threadId ? getPersistedThreadEntry(stored.threadId) : getLatestThreadEntryForChat(chatId);
+      const storedResponseId = stored.sessionId || latestThread?.sessionId || null;
       chatStates.set(chatId, {
         isArmed: false,
         waitingForModeChoice: false,
@@ -287,7 +418,9 @@ function createStateStore(ctx) {
         resumeChatCandidates: [],
         hasActiveSession: Boolean(storedResponseId),
         codexResponseId: storedResponseId,
-        chatName: stored.chatName || "",
+        chatName: stored.chatName || latestThread?.chatName || "",
+        currentThreadId: stored.threadId || latestThread?.threadId || "",
+        pendingNewThread: false,
         isTurnInFlight: false,
         activeCodexProcess: null,
         pendingUserTexts: [],
@@ -299,21 +432,86 @@ function createStateStore(ctx) {
   }
 
   function setChatSessionId(chatId, state, responseId, chatName = state.chatName || "") {
-    state.codexResponseId = responseId || null;
-    state.chatName = (chatName || "").trim();
+    const cleanedChatName = (chatName || "").trim();
+    const cleanedResponseId = (responseId || "").trim();
+    state.chatName = cleanedChatName;
+    state.codexResponseId = cleanedResponseId || null;
 
     if (!persistedSessions.chats || typeof persistedSessions.chats !== "object") {
       persistedSessions.chats = {};
     }
 
-    if (state.codexResponseId || state.chatName) {
-      persistedSessions.chats[chatId] = {
-        sessionId: state.codexResponseId || "",
-        chatName: state.chatName,
-      };
-    } else if (persistedSessions.chats[chatId]) {
-      delete persistedSessions.chats[chatId];
+    if (!Array.isArray(persistedSessions.threads)) {
+      persistedSessions.threads = [];
     }
+
+    if (!cleanedResponseId) {
+      const currentPointer = getPersistedChatEntry(chatId);
+      if (state.currentThreadId) {
+        const threadEntry = getPersistedThreadEntry(state.currentThreadId);
+        if (threadEntry) {
+          threadEntry.chatName = cleanedChatName || threadEntry.chatName;
+          threadEntry.updatedAt = new Date().toISOString();
+          const index = persistedSessions.threads.findIndex((entry) => entry && entry.threadId === threadEntry.threadId);
+          if (index >= 0) {
+            persistedSessions.threads[index] = threadEntry;
+          }
+          persistedSessions.chats[chatId] = {
+            sessionId: threadEntry.sessionId,
+            chatName: threadEntry.chatName,
+            threadId: threadEntry.threadId,
+          };
+          savePersistedSessions();
+        }
+      } else if (currentPointer.chatName !== cleanedChatName) {
+        persistedSessions.chats[chatId] = {
+          sessionId: currentPointer.sessionId || "",
+          chatName: cleanedChatName,
+          threadId: currentPointer.threadId || "",
+        };
+        savePersistedSessions();
+      }
+      return;
+    }
+
+    const nowIso = new Date().toISOString();
+    let threadId = state.currentThreadId || "";
+    let threadEntry = threadId ? getPersistedThreadEntry(threadId) : null;
+
+    if (state.pendingNewThread || !threadEntry) {
+      threadId = makeThreadRecordId(chatId, cleanedChatName, cleanedResponseId);
+      threadEntry = {
+        threadId,
+        chatId,
+        sessionId: cleanedResponseId,
+        chatName: cleanedChatName,
+        createdAt: nowIso,
+        updatedAt: nowIso,
+      };
+      persistedSessions.threads.push(threadEntry);
+      state.pendingNewThread = false;
+    } else {
+      threadEntry = {
+        ...threadEntry,
+        chatId,
+        sessionId: cleanedResponseId,
+        chatName: cleanedChatName || threadEntry.chatName,
+        updatedAt: nowIso,
+      };
+      const index = persistedSessions.threads.findIndex((entry) => entry && entry.threadId === threadEntry.threadId);
+      if (index >= 0) {
+        persistedSessions.threads[index] = threadEntry;
+      } else {
+        persistedSessions.threads.push(threadEntry);
+      }
+    }
+
+    state.currentThreadId = threadId;
+    persistedSessions.chats[chatId] = {
+      sessionId: cleanedResponseId,
+      chatName: cleanedChatName,
+      threadId,
+    };
 
     savePersistedSessions();
   }
@@ -325,6 +523,10 @@ function createStateStore(ctx) {
     }
 
     state.chatName = cleanedName;
+    if (state.pendingNewThread && !state.codexResponseId) {
+      return;
+    }
+
     if (state.codexResponseId || persistedSessions?.chats?.[chatId]) {
       setChatSessionId(chatId, state, state.codexResponseId, cleanedName);
     }
@@ -332,32 +534,66 @@ function createStateStore(ctx) {
 
   function buildNamedResumeChatCandidates() {
     const candidates = [];
-    const chats = persistedSessions.chats && typeof persistedSessions.chats === "object" ? persistedSessions.chats : {};
+    const threads = Array.isArray(persistedSessions.threads) && persistedSessions.threads.length > 0
+      ? persistedSessions.threads
+      : Object.entries(persistedSessions.chats && typeof persistedSessions.chats === "object" ? persistedSessions.chats : {}).map(([chatId, entry]) => ({
+          threadId: typeof entry?.threadId === "string" ? entry.threadId.trim() : chatId,
+          chatId,
+          sessionId: typeof entry?.sessionId === "string" ? entry.sessionId.trim() : "",
+          chatName: typeof entry?.chatName === "string" ? entry.chatName.trim() : "",
+          createdAt: "",
+          updatedAt: "",
+        }));
 
-    for (const [chatId, entry] of Object.entries(chats)) {
-      if (!entry || typeof entry !== "object") {
+    const nameCounts = new Map();
+    for (const thread of threads) {
+      const chatName = typeof thread.chatName === "string" ? thread.chatName.trim() : "";
+      if (!chatName) {
+        continue;
+      }
+      nameCounts.set(chatName.toLowerCase(), (nameCounts.get(chatName.toLowerCase()) || 0) + 1);
+    }
+
+    for (const thread of threads) {
+      if (!thread || typeof thread !== "object") {
         continue;
       }
 
-      const sessionId = typeof entry.sessionId === "string" ? entry.sessionId.trim() : "";
-      const chatName = typeof entry.chatName === "string" ? entry.chatName.trim() : "";
+      const chatId = typeof thread.chatId === "string" ? thread.chatId.trim() : "";
+      const threadId = typeof thread.threadId === "string" ? thread.threadId.trim() : "";
+      const sessionId = typeof thread.sessionId === "string" ? thread.sessionId.trim() : "";
+      const chatName = typeof thread.chatName === "string" ? thread.chatName.trim() : "";
       if (!chatName) {
         continue;
       }
 
       const resolvedSessionId = resolveCodexSessionIdForChat(chatName, sessionId);
-      if (resolvedSessionId && resolvedSessionId !== sessionId) {
-        persistedSessions.chats[chatId] = {
-          sessionId: resolvedSessionId,
-          chatName,
-        };
-        savePersistedSessions();
+      if (!resolvedSessionId) {
+        continue;
       }
 
-      candidates.push({ chatId, chatName, sessionId: resolvedSessionId });
+      const duplicateCount = nameCounts.get(chatName.toLowerCase()) || 0;
+      const updatedAt = typeof thread.updatedAt === "string" ? thread.updatedAt : "";
+      const displaySuffix = duplicateCount > 1 ? ` (${resolvedSessionId.slice(0, 8)})` : "";
+      candidates.push({
+        chatId,
+        threadId,
+        chatName,
+        displayName: `${chatName}${displaySuffix}`,
+        sessionId: resolvedSessionId,
+        updatedAt,
+      });
     }
 
-    candidates.sort((a, b) => a.chatName.localeCompare(b.chatName));
+    candidates.sort((a, b) => {
+      const aTime = Date.parse(a.updatedAt || "") || 0;
+      const bTime = Date.parse(b.updatedAt || "") || 0;
+      if (aTime !== bTime) {
+        return bTime - aTime;
+      }
+
+      return a.displayName.localeCompare(b.displayName);
+    });
     return candidates;
   }
 

@@ -55,9 +55,14 @@ function createRelayController(ctx) {
     }
 
     const storedEntry = stateStore.getPersistedChatEntry(chatId);
-    const sessionId = state.codexResponseId || storedEntry.sessionId || "";
+    const sessionId = state.codexResponseId || (state.currentThreadId ? storedEntry.sessionId : "");
     if (!sessionId) {
-      await sendTextMessage(chatId, "Start or resume a session before renaming this chat.");
+      state.chatName = cleanedName;
+      if (state.pendingNewThread) {
+        await sendTextMessage(chatId, `Saved chat name "${cleanedName}" for the next new session.`);
+      } else {
+        await sendTextMessage(chatId, "Start or resume a session before renaming this chat.");
+      }
       return;
     }
 
@@ -81,7 +86,7 @@ function createRelayController(ctx) {
 
     state.waitingForResumeChatSelection = true;
     state.resumeChatCandidates = candidates;
-    const options = candidates.map((candidate, index) => `${index + 1}) ${candidate.chatName}`);
+    const options = candidates.map((candidate, index) => `${index + 1}) ${candidate.displayName || candidate.chatName}`);
     await sendTextMessage(chatId, `Select a chat to resume:\n${options.join("\n")}`);
   }
 
@@ -144,6 +149,8 @@ function createRelayController(ctx) {
       state.resumeChatCandidates = [];
       state.waitingForModeChoice = false;
       state.hasActiveSession = true;
+      state.pendingNewThread = false;
+      state.currentThreadId = selected.threadId || "";
       stateStore.setChatSessionId(chatId, state, selected.sessionId, selected.chatName);
       await sendTextMessage(chatId, `Resumed Codex session from "${selected.chatName}". Send your message.`);
       return;
