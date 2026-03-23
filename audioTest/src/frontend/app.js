@@ -3501,6 +3501,7 @@
     card.style.setProperty("--subseg-card-bridge-left", String(bridgeLeft) + "px");
     card.style.setProperty("--subseg-card-bridge-width", String(bridgeWidth) + "px");
     card.style.setProperty("--subseg-card-indent-step", "10px");
+    card.classList.toggle("has-following-content", false);
     if (depth > 0 && Array.isArray(ancestorGuideDepths) && ancestorGuideDepths.length > 0) {
       const uniqueGuideDepths = ancestorGuideDepths.filter(function (guideDepth, idx, arr) {
         return Number.isFinite(guideDepth) && guideDepth > 0 && arr.indexOf(guideDepth) === idx;
@@ -3666,6 +3667,12 @@
     });
     const hasFollowingContent = Boolean(!isLastSibling || visibleChildren.length > 0);
     card.dataset.subsegHasFollowingContent = hasFollowingContent ? "1" : "0";
+    card.classList.toggle("has-following-content", hasFollowingContent);
+    if (hasFollowingContent) {
+      const followingSpine = document.createElement("span");
+      followingSpine.className = "subseg-value-following-spine";
+      card.appendChild(followingSpine);
+    }
     subSegValueList.appendChild(card);
     syncSubSegCardBubbleWidth(cardBubbleInput);
     requestAnimationFrame(function () {
@@ -3985,7 +3992,7 @@
           return Math.max(maxLineWidth, lineWidth);
         }, 0);
         nextWidth = Math.min(maxWidth, Math.max(minWidth, Math.ceil(widestLine + 18)));
-        inputEl.style.height = "auto";
+        inputEl.style.height = "0px";
         nextHeight = Math.max(minHeight, Math.ceil(inputEl.scrollHeight + 4));
         nextWidth = Math.min(maxWidth, Math.max(minWidth, Math.ceil(widestLine + 18)));
       } else {
