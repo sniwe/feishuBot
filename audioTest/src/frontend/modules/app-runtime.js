@@ -3890,6 +3890,30 @@
     return state.subSegTextMeasureCanvasContext;
   }
 
+  function ensureSubSegCardBubbleMeasureInput() {
+    if (state.subSegCardBubbleMeasureInput && state.subSegCardBubbleMeasureInput.isConnected) {
+      return state.subSegCardBubbleMeasureInput;
+    }
+    const measureInput = document.createElement("textarea");
+    measureInput.className = "subseg-value-card-bubble-input";
+    measureInput.autocomplete = "off";
+    measureInput.spellcheck = false;
+    measureInput.rows = 1;
+    measureInput.setAttribute("aria-hidden", "true");
+    measureInput.tabIndex = -1;
+    measureInput.style.position = "absolute";
+    measureInput.style.left = "-99999px";
+    measureInput.style.top = "0";
+    measureInput.style.visibility = "hidden";
+    measureInput.style.pointerEvents = "none";
+    measureInput.style.height = "auto";
+    measureInput.style.overflow = "hidden";
+    measureInput.style.width = "0px";
+    document.body.appendChild(measureInput);
+    state.subSegCardBubbleMeasureInput = measureInput;
+    return measureInput;
+  }
+
   function syncSubSegCardBubbleWidth(inputEl) {
     if (!inputEl) {
       return 0;
@@ -3930,9 +3954,13 @@
       }
     }
     bubble.style.width = String(nextWidth) + "px";
-    inputEl.style.height = "0px";
     if (hasContent) {
-      nextHeight = Math.max(minHeight, Math.ceil(inputEl.scrollHeight + 4));
+      const measureInput = ensureSubSegCardBubbleMeasureInput();
+      const contentWidth = Math.max(0, nextWidth - 12);
+      measureInput.value = value;
+      measureInput.style.width = String(contentWidth) + "px";
+      measureInput.style.height = "auto";
+      nextHeight = Math.max(minHeight, Math.ceil(measureInput.scrollHeight + 4));
     } else {
       nextHeight = minHeight;
     }
