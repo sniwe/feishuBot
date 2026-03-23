@@ -3434,6 +3434,7 @@
     card.style.setProperty("--subseg-card-bridge-left", String(bridgeLeft) + "px");
     card.style.setProperty("--subseg-card-bridge-width", String(bridgeWidth) + "px");
     card.style.setProperty("--subseg-card-indent-step", "10px");
+    card.style.setProperty("--subseg-card-top-extension", "0px");
     card.style.setProperty("--subseg-card-tail-length", "0px");
     if (depth > 0 && Array.isArray(ancestorGuideDepths) && ancestorGuideDepths.length > 0) {
       const uniqueGuideDepths = ancestorGuideDepths.filter(function (guideDepth, idx, arr) {
@@ -3966,7 +3967,17 @@
     const reserveBelow = card.dataset.subsegHasFollowingContent === "1";
     const marginBottom = reserveBelow ? Math.max(0, nextHeight - 2) : 0;
     const spineExtension = marginBottom;
+    let topExtension = 0;
+    if (card.classList.contains("is-nested")) {
+      const prevCard = card.previousElementSibling;
+      if (prevCard && prevCard.classList && prevCard.classList.contains("subseg-value-card")) {
+        const prevBottom = prevCard.offsetTop + prevCard.offsetHeight;
+        const currentTop = card.offsetTop;
+        topExtension = Math.max(0, Math.floor(currentTop - prevBottom));
+      }
+    }
     card.style.marginBottom = String(marginBottom) + "px";
+    card.style.setProperty("--subseg-card-top-extension", String(topExtension) + "px");
     card.style.setProperty("--subseg-card-spine-extension", String(spineExtension) + "px");
     card.style.setProperty("--subseg-card-tail-length", String(marginBottom) + "px");
     bubble.classList.toggle("has-content", hasContent);

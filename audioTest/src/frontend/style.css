@@ -1182,13 +1182,13 @@ h1, p { margin: 0; }
 
 .subseg-value-card.is-nested::before {
   left: var(--subseg-card-line-left, -4px);
-  top: 0;
+  top: calc(-1 * var(--subseg-card-top-extension, 0px));
   width: 1px;
-  height: calc(100% + var(--subseg-card-spine-extension, 0px));
+  height: calc(100% + var(--subseg-card-spine-extension, 0px) + var(--subseg-card-top-extension, 0px));
 }
 
 .subseg-value-card.is-nested.is-last-sibling::before {
-  height: calc(50% + var(--subseg-card-spine-extension, 0px));
+  height: calc(50% + var(--subseg-card-spine-extension, 0px) + var(--subseg-card-top-extension, 0px));
 }
 
 .subseg-value-card.is-nested::after {
@@ -1200,7 +1200,7 @@ h1, p { margin: 0; }
 
 .subseg-value-ancestor-guides {
   position: absolute;
-  top: 0;
+  top: calc(-1 * var(--subseg-card-top-extension, 0px));
   bottom: calc(-1 * var(--subseg-card-spine-extension, 0px));
   left: 0;
   width: 0;
