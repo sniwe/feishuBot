@@ -3595,10 +3595,9 @@
     cardBubbleInput.addEventListener("change", handleSubSegCardBubbleInputChange);
     cardBubble.appendChild(cardBubbleInput);
     card.appendChild(cardBubble);
-    syncSubSegCardBubbleWidth(cardBubbleInput);
-    requestAnimationFrame(function () {
-      syncSubSegCardBubbleWidth(cardBubbleInput);
-    });
+    const cardSpacer = document.createElement("div");
+    cardSpacer.className = "subseg-value-card-spacing";
+    cardSpacer.setAttribute("aria-hidden", "true");
 
     const deleteDialogKey = getSubSegCardRecallStateKey(key, pathKey);
     if (state.subSegCardDeleteDialogKey === deleteDialogKey) {
@@ -3636,6 +3635,8 @@
 
     entry.children = getSortedChildEntries(entry.children);
     const sortedChildren = entry.children;
+    const hasFollowingContent = Boolean(!isLastSibling || (Array.isArray(sortedChildren) && sortedChildren.length > 0));
+    card.dataset.subsegHasFollowingContent = hasFollowingContent ? "1" : "0";
     const nextAncestorGuideDepths = Array.isArray(ancestorGuideDepths)
       ? ancestorGuideDepths.slice()
       : [];
@@ -3669,6 +3670,11 @@
       });
     });
     subSegValueList.appendChild(card);
+    subSegValueList.appendChild(cardSpacer);
+    syncSubSegCardBubbleWidth(cardBubbleInput);
+    requestAnimationFrame(function () {
+      syncSubSegCardBubbleWidth(cardBubbleInput);
+    });
     if (visibleChildren.length > 0) {
       renderSubSegCardSelectionBubbles({
         ui: {
@@ -3957,6 +3963,9 @@
     if (!bubble || !card) {
       return;
     }
+    const spacer = card.nextElementSibling && card.nextElementSibling.classList && card.nextElementSibling.classList.contains("subseg-value-card-spacing")
+      ? card.nextElementSibling
+      : null;
     const value = String(inputEl.value || "");
     const hasContent = Boolean(value.trim());
     const minWidth = 32;
@@ -3964,8 +3973,7 @@
     const cardWidth = card.getBoundingClientRect ? card.getBoundingClientRect().width : 0;
     const maxWidth = cardWidth > 0 ? Math.max(minWidth, Math.floor(cardWidth * 0.6)) : 240;
     let nextWidth = minWidth;
-    bubble.style.height = String(minHeight) + "px";
-    inputEl.style.height = String(minHeight) + "px";
+    let nextHeight = minHeight;
     if (hasContent) {
       const ctx = ensureSubSegTextMeasureContext();
       const computed = window.getComputedStyle(inputEl);
@@ -3985,9 +3993,7 @@
         }, 0);
         nextWidth = Math.min(maxWidth, Math.max(minWidth, Math.ceil(widestLine + 18)));
         inputEl.style.height = "auto";
-        const nextHeight = Math.max(minHeight, Math.ceil(inputEl.scrollHeight + 4));
-        bubble.style.height = String(nextHeight) + "px";
-        inputEl.style.height = String(nextHeight) + "px";
+        nextHeight = Math.max(minHeight, Math.ceil(inputEl.scrollHeight + 4));
         bubble.style.borderRadius = lines.length > 1 ? "12px" : "999px";
         nextWidth = Math.min(maxWidth, Math.max(minWidth, Math.ceil(widestLine + 18)));
       } else {
@@ -3997,6 +4003,13 @@
     if (!hasContent) {
       bubble.style.borderRadius = "999px";
     }
+    bubble.style.height = String(nextHeight) + "px";
+    inputEl.style.height = String(nextHeight) + "px";
+    const spacerHeight = hasFollowingContent ? Math.max(0, nextHeight - 2) : 0;
+    if (spacer) {
+      spacer.style.height = String(spacerHeight) + "px";
+    }
+    card.style.setProperty("--subseg-card-spine-extension", card.dataset.subsegHasFollowingContent === "1" ? String(spacerHeight) + "px" : "0px");
     bubble.style.width = String(nextWidth) + "px";
     bubble.classList.toggle("has-content", hasContent);
   }

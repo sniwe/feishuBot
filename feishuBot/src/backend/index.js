@@ -1,10 +1,11 @@
-require("dotenv").config({ path: __dirname + "/.env" });
-
 const Lark = require("@larksuiteoapi/node-sdk");
 const { spawn } = require("child_process");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const PROJECT_ROOT = path.resolve(__dirname, "..", "..");
+
+require("dotenv").config({ path: path.join(PROJECT_ROOT, ".env") });
 
 const APP_ID = process.env.FEISHU_APP_ID;
 const APP_SECRET = process.env.FEISHU_APP_SECRET;
@@ -34,8 +35,8 @@ const wsClient = new Lark.WSClient({
   loggerLevel: Lark.LoggerLevel.info,
 });
 
-const SESSION_STORE_PATH = path.join(__dirname, "codex-chat-sessions.json");
-const DATA_DIR_PATH = path.join(__dirname, "data");
+const SESSION_STORE_PATH = path.join(PROJECT_ROOT, "codex-chat-sessions.json");
+const DATA_DIR_PATH = path.join(PROJECT_ROOT, "data");
 const chatStates = new Map();
 const recentEventKeys = new Map();
 let persistedSessions = { chats: {} };
@@ -500,7 +501,7 @@ function buildCodexPrompt(userText) {
 }
 
 function buildCodexArgs(outputPath) {
-  const args = ["exec", "--json", "--sandbox", "danger-full-access", "--cd", __dirname, "--output-last-message", outputPath];
+  const args = ["exec", "--json", "--sandbox", "danger-full-access", "--cd", PROJECT_ROOT, "--output-last-message", outputPath];
 
   if (CODEX_MODEL) {
     args.push("--model", CODEX_MODEL);
@@ -571,7 +572,7 @@ function inferImFileType(filePath) {
 }
 
 function resolveUploadPath(inputPath) {
-  return path.isAbsolute(inputPath) ? inputPath : path.resolve(__dirname, inputPath);
+  return path.isAbsolute(inputPath) ? inputPath : path.resolve(PROJECT_ROOT, inputPath);
 }
 
 function sanitizeFileName(fileName, fallback = "downloaded_file") {
@@ -929,7 +930,7 @@ async function runCodexTurn(chatId, state, userText) {
   const codexSessionId = typeof state.codexResponseId === "string" ? state.codexResponseId.trim() : "";
   const codexArgs = codexSessionId ? buildCodexResumeArgs(codexSessionId, outputPath) : buildCodexArgs(outputPath);
   const child = spawn("cmd.exe", ["/d", "/s", "/c", [CODEX_COMMAND, ...codexArgs].map(quoteForCmd).join(" ")], {
-    cwd: __dirname,
+    cwd: PROJECT_ROOT,
     windowsHide: true,
     stdio: ["pipe", "pipe", "pipe"],
   });
