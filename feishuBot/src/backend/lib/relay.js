@@ -322,6 +322,9 @@ function createRelayController(ctx) {
 
   function createEventDispatcher() {
     return new Lark.EventDispatcher({}).register({
+      "im.message.message_read_v1": async () => {
+        return;
+      },
       "im.message.receive_v1": async (dataEvent) => {
         try {
           console.log("Received event:", JSON.stringify(dataEvent, null, 2));
