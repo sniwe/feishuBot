@@ -74,68 +74,73 @@ function createContactResolver(ctx) {
       return null;
     }
 
-    const cached = cache.recipients[cleanedToken.toLowerCase()];
-    if (cached && typeof cached.openId === "string" && isOpenId(cached.openId)) {
-      return {
-        openId: cached.openId,
-        source: "cache",
-        token: cleanedToken,
-      };
-    }
-
-    if (isOpenId(cleanedToken)) {
-      rememberRecipient(cleanedToken, cleanedToken, { source: "open_id" });
-      return {
-        openId: cleanedToken,
-        source: "open_id",
-        token: cleanedToken,
-      };
-    }
-
-    let userId = "";
-    if (isEmail(cleanedToken)) {
-      const result = await client.contact.v3.user.batchGetId({
-        data: { emails: [cleanedToken], include_resigned: false },
-        params: { user_id_type: "user_id" },
-      });
-      userId = result?.data?.user_list?.[0]?.user_id?.trim() || "";
-      if (userId) {
-        rememberRecipient(cleanedToken, userId, { source: "email", userId });
+    try {
+      const cached = cache.recipients[cleanedToken.toLowerCase()];
+      if (cached && typeof cached.openId === "string" && isOpenId(cached.openId)) {
+        return {
+          openId: cached.openId,
+          source: "cache",
+          token: cleanedToken,
+        };
       }
-    } else if (isMobile(cleanedToken)) {
-      const result = await client.contact.v3.user.batchGetId({
-        data: { mobiles: [cleanedToken], include_resigned: false },
-        params: { user_id_type: "user_id" },
-      });
-      userId = result?.data?.user_list?.[0]?.user_id?.trim() || "";
-      if (userId) {
-        rememberRecipient(cleanedToken, userId, { source: "mobile", userId });
-      }
-    }
 
-    if (!userId) {
+      if (isOpenId(cleanedToken)) {
+        rememberRecipient(cleanedToken, cleanedToken, { source: "open_id" });
+        return {
+          openId: cleanedToken,
+          source: "open_id",
+          token: cleanedToken,
+        };
+      }
+
+      let userId = "";
+      if (isEmail(cleanedToken)) {
+        const result = await client.contact.v3.user.batchGetId({
+          data: { emails: [cleanedToken], include_resigned: false },
+          params: { user_id_type: "user_id" },
+        });
+        userId = result?.data?.user_list?.[0]?.user_id?.trim() || "";
+        if (userId) {
+          rememberRecipient(cleanedToken, userId, { source: "email", userId });
+        }
+      } else if (isMobile(cleanedToken)) {
+        const result = await client.contact.v3.user.batchGetId({
+          data: { mobiles: [cleanedToken], include_resigned: false },
+          params: { user_id_type: "user_id" },
+        });
+        userId = result?.data?.user_list?.[0]?.user_id?.trim() || "";
+        if (userId) {
+          rememberRecipient(cleanedToken, userId, { source: "mobile", userId });
+        }
+      }
+
+      if (!userId) {
+        return null;
+      }
+
+      const profile = await client.contact.v3.user.get({
+        params: { user_id_type: "user_id" },
+        path: { user_id: userId },
+      });
+      const openId = profile?.data?.user?.open_id?.trim() || "";
+      if (!openId) {
+        return null;
+      }
+
+      rememberRecipient(cleanedToken, openId, { source: "contact", userId });
+      rememberRecipient(userId, openId, { source: "contact", userId });
+
+      return {
+        openId,
+        source: "contact",
+        token: cleanedToken,
+        userId,
+        profile: profile?.data?.user || null,
+      };
+    } catch (err) {
+      console.error(`Failed to resolve contact token "${cleanedToken}":`, err.message);
       return null;
     }
-
-    const profile = await client.contact.v3.user.get({
-      params: { user_id_type: "user_id" },
-      path: { user_id: userId },
-    });
-    const openId = profile?.data?.user?.open_id?.trim() || "";
-    if (!openId) {
-      return null;
-    }
-
-    rememberRecipient(cleanedToken, openId, { source: "contact", userId });
-    rememberRecipient(userId, openId, { source: "contact", userId });
-
-    return {
-      openId,
-      source: "contact",
-      token: cleanedToken,
-      userId,
-      profile: profile?.data?.user || null,
-    };
   }
 
   async function resolveRecipientOpenId(token) {

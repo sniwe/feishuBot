@@ -4,7 +4,7 @@
   "name": "feishuBot",
   "summary": "Project map for the Feishu Codex relay",
   "root": "C:\\Users\\Qub\\feishuBot",
-  "updated": "2026-03-23T15:19:56.5793446+08:00",
+  "updated": "2026-03-23T15:21:00.9076477+08:00",
   "nodes": [
     {
       "id": "node-root",
@@ -239,6 +239,12 @@
           "to": "node-state-store"
         },
         {
+          "id": "edge-relay-contact",
+          "kind": "depends",
+          "from": "node-relay",
+          "to": "node-contact-resolver"
+        },
+        {
           "id": "edge-relay-transfer",
           "kind": "depends",
           "from": "node-relay",
@@ -278,6 +284,12 @@
       "to": "node-file-transfer"
     },
     {
+      "id": "edge-app-contact",
+      "kind": "depends",
+      "from": "node-app",
+      "to": "node-contact-resolver"
+    },
+    {
       "id": "edge-app-codex",
       "kind": "depends",
       "from": "node-app",
@@ -302,6 +314,18 @@
       "to": "node-file-transfer"
     },
     {
+      "id": "edge-contact-relay",
+      "kind": "depends",
+      "from": "node-contact-resolver",
+      "to": "node-relay"
+    },
+    {
+      "id": "edge-contact-codex",
+      "kind": "depends",
+      "from": "node-contact-resolver",
+      "to": "node-codex-runner"
+    },
+    {
       "id": "edge-transfer-feishu",
       "kind": "io",
       "from": "node-file-transfer",
@@ -318,6 +342,12 @@
       "kind": "depends",
       "from": "node-relay",
       "to": "node-state-store"
+    },
+    {
+      "id": "edge-relay-contact",
+      "kind": "depends",
+      "from": "node-relay",
+      "to": "node-contact-resolver"
     },
     {
       "id": "edge-relay-transfer",
