@@ -3608,9 +3608,6 @@
     }
     subSegValueList.appendChild(card);
     syncSubSegCardBubbleWidth(cardBubbleInput);
-    requestAnimationFrame(function () {
-      syncSubSegCardBubbleWidth(cardBubbleInput);
-    });
     if (visibleChildren.length > 0) {
       renderSubSegCardSelectionBubbles({
         ui: {
