@@ -1169,17 +1169,6 @@ h1, p { margin: 0; }
   pointer-events: none;
 }
 
-.subseg-value-following-spine {
-  position: absolute;
-  left: var(--subseg-card-line-left, -4px);
-  top: -7px;
-  bottom: calc(-7px - var(--subseg-card-spine-extension, 0px));
-  width: 1px;
-  background: #b9c9df;
-  pointer-events: none;
-  z-index: 0;
-}
-
 .subseg-value-card.is-nested::before {
   left: var(--subseg-card-line-left, -4px);
   top: -7px;

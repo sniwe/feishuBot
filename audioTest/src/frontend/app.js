@@ -3668,11 +3668,6 @@
     const hasFollowingContent = Boolean(!isLastSibling || visibleChildren.length > 0);
     card.dataset.subsegHasFollowingContent = hasFollowingContent ? "1" : "0";
     card.classList.toggle("has-following-content", hasFollowingContent);
-    if (hasFollowingContent) {
-      const followingSpine = document.createElement("span");
-      followingSpine.className = "subseg-value-following-spine";
-      card.appendChild(followingSpine);
-    }
     subSegValueList.appendChild(card);
     syncSubSegCardBubbleWidth(cardBubbleInput);
     requestAnimationFrame(function () {
