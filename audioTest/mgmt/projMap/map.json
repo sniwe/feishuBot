@@ -4,16 +4,16 @@
     "name":  "audioTest",
     "summary":  "Toy browser audio checkpoint player with keyboard controls",
     "root":  "C:\\Users\\Qub\\audioTest",
-    "updated":  "2026-03-23T11:17:34.2281773+08:00",
+    "updated":  "2026-03-23T12:10:00.0000000+08:00",
     "nodes":  [
                   {
                       "id":  "control:ui",
                       "type":  "control",
                       "name":  "src/public/index.html",
-                      "summary":  "Two-phase UI with persisted-audio card library, upload trigger, and player with checkpoint/subSeg overlays, load-state indicator, custom playhead, and child-source substring annotations rendered with mirror-measured compact numbered bubbles, elbow badges, and whitespace-trimmed selection spans with tighter horizontal fit",
+                      "summary":  "Two-phase UI with persisted-audio card library, upload trigger, and player with checkpoint/subSeg overlays, load-state indicator, custom playhead, child-source substring annotations rendered with mirror-measured compact numbered bubbles, elbow badges, whitespace-trimmed selection spans with tighter horizontal fit, and a bottom-right decorative green bubble attached to each input card",
                       "features":  [
                                        {
-                                           "summary":  "Render persisted-audio card list with queued auto-save on upload/checkpoint/subSeg updates, keep uploads in phase one until persistence completes, disable card selection during save, show a player loading bar while audEp restore completes, bubble child-source substrings with mirror-measured compact ordered badges in the parent input card list, trim surrounding whitespace from each selection span at render time, tighten the horizontal fit around each bubble, and mirror the same child order on nested connector elbows with 10px child indentation",
+                                           "summary":  "Render persisted-audio card list with queued auto-save on upload/checkpoint/subSeg updates, keep uploads in phase one until persistence completes, disable card selection during save, show a player loading bar while audEp restore completes, bubble child-source substrings with mirror-measured compact ordered badges in the parent input card list, add a bottom-right attached green bubble to each input card with a 5px right inset and 7px top overlap, trim surrounding whitespace from each selection span at render time, tighten the horizontal fit around each bubble, and mirror the same child order on nested connector elbows with 10px child indentation",
                                            "flow":  [
                                                         "e1"
                                                     ]
@@ -35,10 +35,10 @@
                       "id":  "module:audio-control",
                       "type":  "module",
                       "name":  "src/frontend/app.js",
-                      "summary":  "Refactored audio controller with centralized state/UI updates, session save/restore via backend API, SSE realtime sync/reconnect, revision conflict handling, audSeg target-lock playback mode, and auth-scoped requests",
+                      "summary":  "Refactored audio controller with centralized state/UI updates, session save/restore via backend API, revision conflict handling, audSeg target-lock playback mode, and auth-scoped requests",
                       "features":  [
                                        {
-                                           "summary":  "Keyboard controls and looping are preserved while Enter can lock a selected audSeg into target mode with a second loop progress bar, Shift hold plus Shift+Space creates subSegs that persist with checkpoints and render on both audEp and target bars, draggable checkpoint markers/tags support micro-adjust with magnifier and 500ms live preview, Ctrl+arrows cycle target-local subSegs, Ctrl+Up/Down now cycles delete targets for checkpoints or target subSeg tags with an x badge and Enter opens confirm-delete (Cancel default), startup restore waits for full audio metadata load via GET /api/session, audEp now opens authenticated /api/realtime SSE for live sync, save payloads include baseRevision for conflict-safe writes, and upload now rejects non-blob pseudo files to prevent corrupted audio blobs",
+                                           "summary":  "Keyboard controls and looping are preserved while Enter can lock a selected audSeg into target mode with a second loop progress bar, Shift hold plus Shift+Space creates subSegs that persist with checkpoints and render on both audEp and target bars, draggable checkpoint markers/tags support micro-adjust with magnifier and 500ms live preview, Ctrl+arrows cycle target-local subSegs, Ctrl+Up/Down now cycles delete targets for checkpoints or target subSeg tags with an x badge and Enter opens confirm-delete (Cancel default), startup restore waits for full audio metadata load via GET /api/session, save payloads include baseRevision for conflict-safe writes, and upload now rejects non-blob pseudo files to prevent corrupted audio blobs",
                                            "flow":  [
                                                         "e2",
                                                         "e3",
@@ -84,10 +84,10 @@
                       "id":  "module:session-backend",
                       "type":  "module",
                       "name":  "src/backend/server.js",
-                      "summary":  "Node HTTP server with persisted-audio list/detail APIs, authenticated SSE realtime channel broadcasts, revision-aware conflict responses, hardened static path resolution, and owner-scoped auth for session/audio operations",
+                      "summary":  "Node HTTP server with persisted-audio list/detail APIs, revision-aware conflict responses, hardened static path resolution, and owner-scoped auth for session/audio operations",
                       "features":  [
                                        {
-                                           "summary":  "GET /api/sessions and GET/POST/DELETE /api/session plus GET/POST /api/audio and GET /api/realtime require authenticated user context; session writes now emit session_updated/session_deleted events and enforce baseRevision conflict checks",
+                                           "summary":  "GET /api/sessions and GET/POST/DELETE /api/session plus GET/POST /api/audio require authenticated user context; session writes enforce baseRevision conflict checks",
                                            "flow":  [
                                                         "e5",
                                                         "e6"
@@ -161,7 +161,7 @@
                       "kind":  "control",
                       "from":  "module:audio-control",
                       "to":  "module:session-backend",
-                      "note":  "Frontend persists/restores session via /api/session and subscribes to /api/realtime for live updates"
+                      "note":  "Frontend persists/restores session via /api/session"
                   },
                   {
                       "id":  "e6",

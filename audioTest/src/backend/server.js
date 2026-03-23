@@ -20,16 +20,11 @@ const REMOTE_SESSIONS_PATH = String(process.env.REMOTE_SESSIONS_PATH || "/api/se
 const REMOTE_SESSION_PATH = String(process.env.REMOTE_SESSION_PATH || "/api/session").trim() || "/api/session";
 const REMOTE_AUDIO_PATH = String(process.env.REMOTE_AUDIO_PATH || "/api/audio").trim() || "/api/audio";
 const IS_REMOTE_STORAGE = STORAGE_PROVIDER === "remote" || STORAGE_PROVIDER === "ngrok";
-const REALTIME_ENABLED = String(process.env.REALTIME_ENABLED || "1").trim().toLowerCase() !== "0";
-const REALTIME_HEARTBEAT_MS = Number(process.env.REALTIME_HEARTBEAT_MS || 25000);
-const REALTIME_MAX_CLIENTS_PER_CHANNEL = Number(process.env.REALTIME_MAX_CLIENTS_PER_CHANNEL || 2);
 const USER_CREDENTIALS = {
   zhaoying: String(process.env.USER_PASSWORD_ZHAOYING || "zhaoying123"),
   rhys: String(process.env.USER_PASSWORD_RHYS || "rhys123")
 };
 const AUTH_SESSIONS = new Map();
-const REALTIME_CHANNELS = new Map();
-let REALTIME_CLIENT_COUNTER = 0;
 
 startServer({ data: {}, deps: { http, fs, fsp, path } }).catch(function (error) {
   console.error(error);
@@ -54,7 +49,6 @@ async function startServer(ctx) {
     server.listen(PORT, resolve);
   });
 
-  ensureRealtimeHeartbeat({ deps: {} });
   console.log("audioTest server listening on http://localhost:" + PORT);
 }
 
@@ -76,11 +70,6 @@ async function routeRequest(ctx) {
 
   if (req.method === "GET" && requestPath === "/api/audio") {
     await handleGetAudio({ data: { req, res, audioId: requestUrl.searchParams.get("id") }, deps: { fs: deps.fs, fsp: deps.fsp, path: deps.path } });
-    return;
-  }
-
-  if (req.method === "GET" && requestPath === "/api/realtime") {
-    await handleGetRealtime({ data: { req, res, channelId: requestUrl.searchParams.get("channel") }, deps: {} });
     return;
   }
 
@@ -195,53 +184,6 @@ async function handleGetSession(ctx) {
   }
 }
 
-async function handleGetRealtime(ctx) {
-  const { data } = ctx;
-  const { req, res, channelId } = data;
-  if (!REALTIME_ENABLED) {
-    sendJson({ data: { res, status: 404, payload: { error: "realtime_disabled" } }, deps: {} });
-    return;
-  }
-  const authUser = requireAuthUser({ data: { req, res }, deps: {} });
-  if (!authUser) {
-    return;
-  }
-  const normalizedChannelId = normalizeSessionId({ data: { sessionId: channelId }, deps: {} });
-  if (!normalizedChannelId) {
-    sendJson({ data: { res, status: 400, payload: { error: "invalid_channel" } }, deps: {} });
-    return;
-  }
-  const channelClients = getRealtimeChannelClients({ data: { channelId: normalizedChannelId }, deps: {} });
-  if (channelClients.size >= REALTIME_MAX_CLIENTS_PER_CHANNEL) {
-    sendJson({ data: { res, status: 429, payload: { error: "channel_full", maxClients: REALTIME_MAX_CLIENTS_PER_CHANNEL } }, deps: {} });
-    return;
-  }
-
-  const client = {
-    id: "rt_" + Date.now().toString(36) + "_" + (REALTIME_CLIENT_COUNTER += 1).toString(36),
-    channelId: normalizedChannelId,
-    username: authUser,
-    req,
-    res,
-    connectedAt: new Date().toISOString()
-  };
-
-  writeSseHeaders({ data: { res }, deps: {} });
-  writeSseEvent({
-    data: {
-      client,
-      event: "connected",
-      payload: {
-        channel: normalizedChannelId,
-        clientId: client.id,
-        serverNow: Date.now()
-      }
-    },
-    deps: {}
-  });
-  subscribeRealtimeClient({ data: { client }, deps: {} });
-}
-
 async function handlePostSession(ctx) {
   const { data, deps } = ctx;
   const { req, res } = data;
@@ -265,20 +207,6 @@ async function handlePostSession(ctx) {
 
   if (IS_REMOTE_STORAGE) {
     const saved = await saveRemoteSession({ data: { payload, username: authUser }, deps: {} });
-    const remoteSessionId = normalizeSessionId({ data: { sessionId: saved && saved.id ? saved.id : payload.sessionId }, deps: {} });
-    broadcastRealtimeEvent({
-      data: {
-        channelId: remoteSessionId,
-        event: "session_updated",
-        payload: {
-          sessionId: remoteSessionId,
-          updatedAt: new Date().toISOString(),
-          revision: parseRevision({ data: { value: saved && saved.revision, fallback: 0 }, deps: {} }),
-          actor: authUser
-        }
-      },
-      deps: {}
-    });
     sendJson({
       data: {
         res,
@@ -374,19 +302,6 @@ async function handlePostSession(ctx) {
   await deps.fsp.writeFile(sessionPath, JSON.stringify(record, null, 2), "utf8");
   await deps.fsp.writeFile(SESSION_PATH, JSON.stringify(record, null, 2), "utf8");
 
-  broadcastRealtimeEvent({
-    data: {
-      channelId: sessionId,
-      event: "session_updated",
-      payload: {
-        sessionId,
-        updatedAt: record.updatedAt,
-        revision: record.revision,
-        actor: authUser
-      }
-    },
-    deps: {}
-  });
   sendJson({
     data: {
       res,
@@ -454,18 +369,6 @@ async function handleDeleteSession(ctx) {
 
   if (IS_REMOTE_STORAGE) {
     const deleted = await deleteRemoteSession({ data: { sessionId: resolvedSessionId, username: authUser }, deps: {} });
-    broadcastRealtimeEvent({
-      data: {
-        channelId: resolvedSessionId,
-        event: "session_deleted",
-        payload: {
-          sessionId: resolvedSessionId,
-          deletedAt: new Date().toISOString(),
-          actor: authUser
-        }
-      },
-      deps: {}
-    });
     sendJson({ data: { res, status: 200, payload: deleted }, deps: {} });
     return;
   }
@@ -501,18 +404,6 @@ async function handleDeleteSession(ctx) {
     }
   }
 
-  broadcastRealtimeEvent({
-    data: {
-      channelId: resolvedSessionId,
-      event: "session_deleted",
-      payload: {
-        sessionId: resolvedSessionId,
-        deletedAt: new Date().toISOString(),
-        actor: authUser
-      }
-    },
-    deps: {}
-  });
   sendJson({ data: { res, status: 200, payload: { ok: true, id: resolvedSessionId } }, deps: {} });
 }
 
@@ -1260,121 +1151,6 @@ function sendJson(ctx) {
     "Cache-Control": "no-store"
   });
   res.end(JSON.stringify(payload));
-}
-
-function writeSseHeaders(ctx) {
-  const { data } = ctx;
-  const { res } = data;
-  res.writeHead(200, {
-    "Content-Type": "text/event-stream; charset=utf-8",
-    "Cache-Control": "no-cache, no-transform",
-    Connection: "keep-alive"
-  });
-}
-
-function getRealtimeChannelClients(ctx) {
-  const { data } = ctx;
-  const { channelId } = data;
-  if (!REALTIME_CHANNELS.has(channelId)) {
-    REALTIME_CHANNELS.set(channelId, new Set());
-  }
-  return REALTIME_CHANNELS.get(channelId);
-}
-
-function subscribeRealtimeClient(ctx) {
-  const { data } = ctx;
-  const { client } = data;
-  const channelClients = getRealtimeChannelClients({ data: { channelId: client.channelId }, deps: {} });
-  channelClients.add(client);
-
-  function cleanup() {
-    unsubscribeRealtimeClient({ data: { client }, deps: {} });
-  }
-
-  client.req.on("close", cleanup);
-  client.req.on("error", cleanup);
-  client.res.on("close", cleanup);
-  client.res.on("error", cleanup);
-}
-
-function unsubscribeRealtimeClient(ctx) {
-  const { data } = ctx;
-  const { client } = data;
-  if (!client || !client.channelId) {
-    return;
-  }
-  const channelClients = REALTIME_CHANNELS.get(client.channelId);
-  if (!channelClients) {
-    return;
-  }
-  channelClients.delete(client);
-  if (channelClients.size < 1) {
-    REALTIME_CHANNELS.delete(client.channelId);
-  }
-}
-
-function writeSseEvent(ctx) {
-  const { data } = ctx;
-  const { client, event, payload } = data;
-  if (!client || !client.res || client.res.writableEnded || client.res.destroyed) {
-    return false;
-  }
-  try {
-    if (event) {
-      client.res.write("event: " + event + "\n");
-    }
-    client.res.write("data: " + JSON.stringify(payload || {}) + "\n\n");
-    return true;
-  } catch {
-    unsubscribeRealtimeClient({ data: { client }, deps: {} });
-    return false;
-  }
-}
-
-function broadcastRealtimeEvent(ctx) {
-  const { data } = ctx;
-  const { channelId, event, payload } = data;
-  if (!REALTIME_ENABLED) {
-    return;
-  }
-  const normalizedChannelId = normalizeSessionId({ data: { sessionId: channelId }, deps: {} });
-  if (!normalizedChannelId) {
-    return;
-  }
-  const channelClients = REALTIME_CHANNELS.get(normalizedChannelId);
-  if (!channelClients || !channelClients.size) {
-    return;
-  }
-  for (const client of channelClients) {
-    writeSseEvent({ data: { client, event, payload }, deps: {} });
-  }
-}
-
-function ensureRealtimeHeartbeat() {
-  if (!REALTIME_ENABLED) {
-    return;
-  }
-  const heartbeatMs = Number.isFinite(REALTIME_HEARTBEAT_MS) && REALTIME_HEARTBEAT_MS > 0
-    ? REALTIME_HEARTBEAT_MS
-    : 25000;
-  const timer = setInterval(function () {
-    for (const channelClients of REALTIME_CHANNELS.values()) {
-      for (const client of channelClients) {
-        if (!client || !client.res || client.res.writableEnded || client.res.destroyed) {
-          unsubscribeRealtimeClient({ data: { client }, deps: {} });
-          continue;
-        }
-        try {
-          client.res.write(": ping\n\n");
-        } catch {
-          unsubscribeRealtimeClient({ data: { client }, deps: {} });
-        }
-      }
-    }
-  }, heartbeatMs);
-  if (timer && typeof timer.unref === "function") {
-    timer.unref();
-  }
 }
 
 function parseRevision(ctx) {
