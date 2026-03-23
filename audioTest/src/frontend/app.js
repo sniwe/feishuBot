@@ -3529,8 +3529,6 @@
     }
     const inputShell = document.createElement("div");
     inputShell.className = "subseg-value-card-input-shell";
-    const displayText = document.createElement("div");
-    displayText.className = "subseg-value-card-display";
     const selectionLayer = document.createElement("div");
     selectionLayer.className = "subseg-value-selection-layer";
     const input = document.createElement("input");
@@ -3541,7 +3539,6 @@
     const isTimelineTraversal = isSubSegTimelineTraversalActiveForKey(key);
     const recallPosition = getCardRecallPosition(key, pathKey, entry);
     const isRecalling = recallPosition < getCardCurrentPosition(entry);
-    const isHistoryView = Boolean(isTimelineTraversal || isRecalling);
     const liveOverrideKey = getSubSegCardRecallStateKey(key, pathKey);
     const displayedValue = isTimelineTraversal
       ? String(entry.value || "")
@@ -3570,8 +3567,6 @@
       input.addEventListener("input", handleSubSegCardInputLive);
       input.addEventListener("change", handleSubSegCardInputChange);
     }
-    displayText.textContent = displayedValue;
-    inputShell.appendChild(displayText);
     inputShell.appendChild(selectionLayer);
     inputShell.appendChild(input);
     card.appendChild(version);
@@ -3645,14 +3640,12 @@
         order: visibleChildren.length + 1
       });
     });
-    const useOverlayView = Boolean(!isHistoryView || visibleChildren.length > 0);
-    inputShell.classList.toggle("is-history-view", !useOverlayView);
     subSegValueList.appendChild(card);
-    if (visibleChildren.length > 0 && useOverlayView) {
+    if (visibleChildren.length > 0) {
       renderSubSegCardSelectionBubbles({
         ui: {
           selectionLayer,
-          displayText,
+          input,
           inputShell
         },
         data: {
@@ -3696,11 +3689,11 @@
   function renderSubSegCardSelectionBubbles(ctx) {
     const { ui, data } = ctx;
     const selectionLayer = ui && ui.selectionLayer ? ui.selectionLayer : null;
-    const displayText = ui && ui.displayText ? ui.displayText : null;
+    const input = ui && ui.input ? ui.input : null;
     const inputShell = ui && ui.inputShell ? ui.inputShell : null;
     const displayedValue = String(data && data.displayedValue ? data.displayedValue : "");
     const visibleChildren = Array.isArray(data && data.visibleChildren) ? data.visibleChildren : [];
-    if (!selectionLayer || !displayText || !inputShell) {
+    if (!selectionLayer || !input || !inputShell) {
       return;
     }
     selectionLayer.innerHTML = "";
@@ -3708,35 +3701,60 @@
       return;
     }
 
-    const textNode = displayText.firstChild && displayText.firstChild.nodeType === Node.TEXT_NODE
-      ? displayText.firstChild
-      : null;
-    if (!textNode) {
-      return;
-    }
-    const textRect = displayText.getBoundingClientRect();
-    const style = window.getComputedStyle(displayText);
+    const style = window.getComputedStyle(input);
 
     visibleChildren.forEach(function (item) {
       const range = item && item.resolvedSelection ? item.resolvedSelection : null;
       if (!range) {
         return;
       }
-      const domRange = document.createRange();
-      try {
-        domRange.setStart(textNode, Math.max(0, Math.min(range.start, textNode.length)));
-        domRange.setEnd(textNode, Math.max(0, Math.min(range.end, textNode.length)));
-      } catch {
-        return;
-      }
-      const selectedRect = domRange.getBoundingClientRect();
-      if (!selectedRect || !Number.isFinite(selectedRect.width) || !Number.isFinite(selectedRect.height)) {
-        return;
-      }
-      const left = Math.max(0, selectedRect.left - textRect.left);
-      const top = Math.max(0, selectedRect.top - textRect.top);
+      const mirror = document.createElement("div");
+      mirror.className = "subseg-value-selection-mirror";
+      mirror.style.font = [
+        style ? style.fontStyle : "",
+        style ? style.fontVariant : "",
+        style ? style.fontWeight : "",
+        style ? style.fontStretch : "",
+        style ? style.fontSize : "",
+        style ? style.fontFamily : ""
+      ].filter(function (value) { return Boolean(String(value || "").trim()); }).join(" ") || "normal 0.78rem Segoe UI, Tahoma, sans-serif";
+      mirror.style.paddingLeft = String(Number.parseFloat(style.paddingLeft) || 0) + "px";
+      mirror.style.paddingTop = String(Number.parseFloat(style.paddingTop) || 0) + "px";
+      mirror.style.paddingRight = String(Number.parseFloat(style.paddingRight) || 0) + "px";
+      mirror.style.paddingBottom = String(Number.parseFloat(style.paddingBottom) || 0) + "px";
+
+      const before = document.createElement("span");
+      before.className = "subseg-value-selection-mirror-text";
+      before.textContent = displayedValue.slice(0, range.start);
+
+      const selected = document.createElement("span");
+      selected.className = "subseg-value-selection-mirror-selected";
+      selected.textContent = displayedValue.slice(range.start, range.end);
+
+      const after = document.createElement("span");
+      after.className = "subseg-value-selection-mirror-text";
+      after.textContent = displayedValue.slice(range.end);
+
+      mirror.appendChild(before);
+      mirror.appendChild(selected);
+      mirror.appendChild(after);
+      selectionLayer.appendChild(mirror);
+
+      const mirrorRect = mirror.getBoundingClientRect();
+      const selectedRect = selected.getBoundingClientRect();
+      const left = Math.max(0, selectedRect.left - mirrorRect.left);
+      const top = Math.max(0, selectedRect.top - mirrorRect.top);
       const width = Math.max(12, selectedRect.width);
       const height = Math.max(16, selectedRect.height);
+
+      const domRange = document.createRange();
+      try {
+        domRange.setStart(selected.firstChild || selected, 0);
+        domRange.setEnd(selected.firstChild || selected, String(selected.textContent || "").length);
+      } catch {
+        selectionLayer.removeChild(mirror);
+        return;
+      }
 
       const bubble = document.createElement("span");
       bubble.className = "subseg-value-selection-bubble";
@@ -3751,6 +3769,7 @@
       badge.textContent = String(item.order || 1);
       bubble.appendChild(badge);
       selectionLayer.appendChild(bubble);
+      selectionLayer.removeChild(mirror);
     });
   }
 

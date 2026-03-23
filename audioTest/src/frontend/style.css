@@ -1021,19 +1021,6 @@ h1, p { margin: 0; }
   min-height: 1.35em;
 }
 
-.subseg-value-card-display {
-  position: relative;
-  z-index: 1;
-  min-height: 1.3em;
-  white-space: pre;
-  overflow: hidden;
-  text-overflow: clip;
-  color: inherit;
-  font-size: 0.78rem;
-  line-height: 1.3;
-  pointer-events: none;
-}
-
 .subseg-value-selection-layer {
   position: absolute;
   left: 0;
@@ -1043,6 +1030,25 @@ h1, p { margin: 0; }
   overflow: visible;
   pointer-events: none;
   z-index: 2;
+}
+
+.subseg-value-selection-mirror {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  white-space: pre;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.subseg-value-selection-mirror-text,
+.subseg-value-selection-mirror-selected {
+  white-space: pre;
+}
+
+.subseg-value-selection-mirror-selected {
+  display: inline-block;
 }
 
 .subseg-value-selection-bubble {
@@ -1151,36 +1157,16 @@ h1, p { margin: 0; }
 }
 
 .subseg-value-card-input {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
+  position: relative;
+  z-index: 1;
   width: 100%;
   border: 0;
   background: transparent;
-  color: transparent;
+  color: inherit;
   font-size: 0.78rem;
   line-height: 1.3;
   outline: none;
   padding: 0;
-  caret-color: #1f5ea8;
-  overflow: hidden;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.subseg-value-card-input-shell.is-history-view .subseg-value-card-display {
-  display: none;
-}
-
-.subseg-value-card-input-shell.is-history-view .subseg-value-selection-layer {
-  display: none;
-}
-
-.subseg-value-card-input-shell.is-history-view .subseg-value-card-input {
-  position: relative;
-  inset: auto;
-  z-index: 1;
-  color: inherit;
 }
 
 .subseg-value-card-input.is-recalling {
