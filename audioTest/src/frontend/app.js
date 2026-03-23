@@ -3965,6 +3965,7 @@
     const maxWidth = cardWidth > 0 ? Math.max(minWidth, Math.floor(cardWidth * 0.6)) : 240;
     let nextWidth = minWidth;
     bubble.style.height = String(minHeight) + "px";
+    inputEl.style.height = String(minHeight) + "px";
     if (hasContent) {
       const ctx = ensureSubSegTextMeasureContext();
       const computed = window.getComputedStyle(inputEl);
@@ -3986,18 +3987,16 @@
         inputEl.style.height = "auto";
         const nextHeight = Math.max(minHeight, Math.ceil(inputEl.scrollHeight + 4));
         bubble.style.height = String(nextHeight) + "px";
+        inputEl.style.height = String(nextHeight) + "px";
         bubble.style.borderRadius = lines.length > 1 ? "12px" : "999px";
-        bubble.style.alignItems = lines.length > 1 ? "flex-start" : "center";
         nextWidth = Math.min(maxWidth, Math.max(minWidth, Math.ceil(widestLine + 18)));
       } else {
-        inputEl.style.height = "100%";
+        inputEl.style.height = String(minHeight) + "px";
       }
     }
     if (!hasContent) {
       bubble.style.borderRadius = "999px";
-      bubble.style.alignItems = "center";
     }
-    inputEl.style.height = "100%";
     bubble.style.width = String(nextWidth) + "px";
     bubble.classList.toggle("has-content", hasContent);
   }
