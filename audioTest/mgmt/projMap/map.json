@@ -1,180 +1,329 @@
 {
-    "id":  "map:audioTest",
-    "type":  "project-map",
-    "name":  "audioTest",
-    "summary":  "Toy browser audio checkpoint player with keyboard controls",
-    "root":  "C:\\Users\\Qub\\audioTest",
-    "updated":  "2026-03-23T13:34:00.0000000+08:00",
-    "nodes":  [
-                  {
-                      "id":  "control:ui",
-                      "type":  "control",
-                      "name":  "src/public/index.html",
-                      "summary":  "Two-phase UI with persisted-audio card library, upload trigger, and player with checkpoint/subSeg overlays, load-state indicator, custom playhead, child-source substring annotations rendered with mirror-measured compact numbered bubbles, elbow badges, whitespace-trimmed selection spans with tighter horizontal fit, and a bottom-right decorative multiline comment bubble attached to each input card",
-                      "features":  [
-                                       {
-                                           "summary":  "Render persisted-audio card list with queued auto-save on upload/checkpoint/subSeg updates, keep uploads in phase one until persistence completes, disable card selection during save, show a player loading bar while audEp restore completes, bubble child-source substrings with mirror-measured compact ordered badges in the parent input card list, add a bottom-right attached multiline comment bubble textarea to each card with the same no-fill audSeg progress-bar color, a 5px right inset, a 7px top overlap, 6px corner rounding, downward vertical growth, reserved bottom margin, and a parent-tail connector that grows with the bubble height without extending above the parent card edge, trim surrounding whitespace from each selection span at render time, tighten the horizontal fit around each bubble, and mirror the same child order on nested connector elbows with 10px child indentation",
-                                           "flow":  [
-                                                        "e1"
-                                                    ]
-                                       }
-                                   ],
-                      "edges":  [
-                                    "e1"
-                                ],
-                      "critical":  true,
-                      "files":  [
-                                    "src/public/index.html",
-                                    "src/frontend/style.css"
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "module:audio-control",
-                      "type":  "module",
-                      "name":  "src/frontend/app.js",
-                      "summary":  "Refactored audio controller with centralized state/UI updates, session save/restore via backend API, revision conflict handling, audSeg target-lock playback mode, and auth-scoped requests",
-                      "features":  [
-                                       {
-                                           "summary":  "Keyboard controls and looping are preserved while Enter can lock a selected audSeg into target mode with a second loop progress bar, Shift hold plus Shift+Space creates subSegs that persist with checkpoints and render on both audEp and target bars, draggable checkpoint markers/tags support micro-adjust with magnifier and 500ms live preview, Ctrl+arrows cycle target-local subSegs, Ctrl+Up/Down now cycles delete targets for checkpoints or target subSeg tags with an x badge and Enter opens confirm-delete (Cancel default), startup restore waits for full audio metadata load via GET /api/session, save payloads include baseRevision for conflict-safe writes, the subSeg comment bubble now resizes as rich multiline text with downward growth and a parent-tail connector that grows with the bubble height while staying below the parent edge, and upload now rejects non-blob pseudo files to prevent corrupted audio blobs",
-                                           "flow":  [
-                                                        "e2",
-                                                        "e3",
-                                                        "e4",
-                                                        "e5"
-                                                    ]
-                                       }
-                                   ],
-                      "edges":  [
-                                    "e2",
-                                    "e3",
-                                    "e4",
-                                    "e5"
-                                ],
-                      "critical":  true,
-                      "files":  [
-                                    "src/frontend/app.js"
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "io:file-url",
-                      "type":  "io",
-                      "name":  "URL.createObjectURL",
-                      "summary":  "In-memory object URL used for selected local audio file",
-                      "features":  [
-
-                                   ],
-                      "edges":  [
-
-                                ],
-                      "critical":  false,
-                      "files":  [
-
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "module:session-backend",
-                      "type":  "module",
-                      "name":  "src/backend/server.js",
-                      "summary":  "Node HTTP server with persisted-audio list/detail APIs, revision-aware conflict responses, hardened static path resolution, and owner-scoped auth for session/audio operations",
-                      "features":  [
-                                       {
-                                           "summary":  "GET /api/sessions and GET/POST/DELETE /api/session plus GET/POST /api/audio require authenticated user context; session writes enforce baseRevision conflict checks",
-                                           "flow":  [
-                                                        "e5",
-                                                        "e6"
-                                                    ]
-                                       }
-                                   ],
-                      "edges":  [
-                                    "e5",
-                                    "e6"
-                                ],
-                      "critical":  true,
-                      "files":  [
-                                    "src/backend/server.js",
-                                    "package.json"
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "io:session-file",
-                      "type":  "io",
-                      "name":  "data/session-latest.json",
-                      "summary":  "Project-local persisted session record including audio payload and playback state",
-                      "features":  [
-
-                                   ],
-                      "edges":  [
-
-                                ],
-                      "critical":  false,
-                      "files":  [
-                                    "data/session-latest.json"
-                                ],
-                      "children":  [
-
-                                   ]
-                  }
-              ],
-    "edges":  [
-                  {
-                      "id":  "e1",
-                      "kind":  "control",
-                      "from":  "control:ui",
-                      "to":  "module:audio-control",
-                      "note":  "UI loads audio behavior module"
-                  },
-                  {
-                      "id":  "e2",
-                      "kind":  "io",
-                      "from":  "module:audio-control",
-                      "to":  "io:file-url",
-                      "via":  "handleFileChange"
-                  },
-                  {
-                      "id":  "e3",
-                      "kind":  "control",
-                      "from":  "module:audio-control",
-                      "to":  "module:audio-control",
-                      "note":  "Space toggles playback and arrows perform relative seeking"
-                  },
-                  {
-                      "id":  "e4",
-                      "kind":  "control",
-                      "from":  "module:audio-control",
-                      "to":  "module:audio-control",
-                      "note":  "Shift+Space creates checkpoints in normal mode; in target mode Shift hold arms tss and Shift+Space commits subSegs while Ctrl+arrows cycle only target subSegs; checkpoint drag updates audSeg/subSeg membership immediately"
-                  },
-                  {
-                      "id":  "e5",
-                      "kind":  "control",
-                      "from":  "module:audio-control",
-                      "to":  "module:session-backend",
-                      "note":  "Frontend persists/restores session via /api/session"
-                  },
-                  {
-                      "id":  "e6",
-                      "kind":  "io",
-                      "from":  "module:session-backend",
-                      "to":  "io:session-file",
-                      "via":  "SESSION_PATH"
-                  }
-              ],
-    "children":  [
-
-                 ]
+  "id": "map:audioTest",
+  "type": "project-map",
+  "name": "audioTest",
+  "summary": "Browser audio checkpoint player with authenticated session persistence and remote storage support",
+  "root": "C:\\Users\\Qub\\audioTest",
+  "updated": "2026-03-23T14:16:22.6621358+08:00",
+  "nodes": [
+    {
+      "id": "control:ui",
+      "type": "control",
+      "name": "src/public/index.html",
+      "summary": "Static application shell that loads the frontend runtime and helper scripts",
+      "features": [
+        {
+          "summary": "Declares the login, library, player, and guide panes and loads the auth storage, shared formatting helpers, session runtime, full app runtime, and compatibility bootstrap in a single startup path",
+          "flow": ["e1", "e2", "e3", "e4", "e11"]
+        }
+      ],
+      "edges": ["e1", "e2", "e3", "e4", "e11"],
+      "critical": true,
+      "files": ["src/public/index.html"],
+      "children": []
+    },
+    {
+      "id": "module:frontend-runtime",
+      "type": "module",
+      "name": "src/frontend/modules/app-runtime.js",
+      "summary": "Frontend orchestrator for login, audio playback, session persistence, restore flow, guide interactions, and shared helpers",
+      "features": [
+        {
+          "summary": "Coordinates audio upload, session save and restore, player controls, guide state, and shared formatting helpers while delegating browser auth and session lifecycle work to dedicated helpers",
+          "flow": ["e2", "e3"]
+        }
+      ],
+      "edges": ["e2", "e3"],
+      "critical": true,
+      "files": ["src/frontend/modules/app-runtime.js"],
+      "children": []
+    },
+    {
+      "id": "module:format-utils",
+      "type": "module",
+      "name": "src/frontend/modules/format-utils.js",
+      "summary": "Shared browser formatting and lightweight sub-segment normalization helpers",
+      "features": [
+        {
+          "summary": "Formats timestamps and durations and normalizes basic sub-segment structures used throughout the frontend",
+          "flow": ["e2"]
+        }
+      ],
+      "edges": ["e2"],
+      "critical": false,
+      "files": ["src/frontend/modules/format-utils.js"],
+      "children": []
+    },
+    {
+      "id": "module:auth-storage",
+      "type": "module",
+      "name": "src/frontend/modules/auth-storage.js",
+      "summary": "Shared browser helper for login persistence and auth header construction",
+      "features": [
+        {
+          "summary": "Persists login state in localStorage, restores active sessions, and builds request headers for authenticated API calls",
+          "flow": ["e2"]
+        }
+      ],
+      "edges": ["e2"],
+      "critical": false,
+      "files": ["src/frontend/modules/auth-storage.js"],
+      "children": []
+    },
+    {
+      "id": "module:session-runtime",
+      "type": "module",
+      "name": "src/frontend/modules/session-runtime.js",
+      "summary": "Session lifecycle helper for list/load/save/delete and audio blob conversion",
+      "features": [
+        {
+          "summary": "Loads persisted sessions, handles save/delete/reload conflicts, uploads audio blobs, and converts stored audio payloads for restore",
+          "flow": ["e3"]
+        }
+      ],
+      "edges": ["e3"],
+      "critical": false,
+      "files": ["src/frontend/modules/session-runtime.js"],
+      "children": []
+    },
+    {
+      "id": "control:frontend-bootstrap",
+      "type": "control",
+      "name": "src/frontend/app.js",
+      "summary": "Minimal bootstrap shim that loads the frontend dependency chain if needed",
+      "features": [
+        {
+          "summary": "Provides a compatibility entrypoint that only falls back to loading auth storage, shared helpers, session runtime, and the full frontend runtime if they were not already loaded",
+          "flow": []
+        }
+      ],
+      "edges": [],
+      "critical": false,
+      "files": ["src/frontend/app.js"],
+      "children": []
+    },
+    {
+      "id": "module:session-backend",
+      "type": "module",
+      "name": "src/backend/server.js",
+      "summary": "HTTP server facade that wires together config, auth, storage, and remote session modules",
+      "features": [
+        {
+          "summary": "Routes authenticated session and audio requests, enforces conflict checks, and delegates data access to focused backend modules",
+          "flow": ["e4", "e5", "e6", "e7", "e8", "e9", "e10"]
+        }
+      ],
+      "edges": ["e4", "e5", "e6", "e7", "e8", "e9", "e10"],
+      "critical": true,
+      "files": ["src/backend/server.js"],
+      "children": []
+    },
+    {
+      "id": "module:backend-config",
+      "type": "module",
+      "name": "src/backend/config.js",
+      "summary": "Shared backend paths, ports, and environment-derived flags",
+      "features": [
+        {
+          "summary": "Centralizes filesystem roots, login TTL, and remote storage configuration for the backend runtime",
+          "flow": ["e4"]
+        }
+      ],
+      "edges": ["e4"],
+      "critical": false,
+      "files": ["src/backend/config.js"],
+      "children": []
+    },
+    {
+      "id": "module:backend-utils",
+      "type": "module",
+      "name": "src/backend/utils.js",
+      "summary": "HTTP request, body, and streaming helpers for the backend",
+      "features": [
+        {
+          "summary": "Parses URLs and request bodies, emits JSON responses, and streams files and ranged audio content",
+          "flow": ["e5"]
+        }
+      ],
+      "edges": ["e5"],
+      "critical": false,
+      "files": ["src/backend/utils.js"],
+      "children": []
+    },
+    {
+      "id": "module:backend-auth",
+      "type": "module",
+      "name": "src/backend/auth.js",
+      "summary": "In-memory auth session tracking and request validation",
+      "features": [
+        {
+          "summary": "Normalizes usernames, issues short-lived auth tokens, and guards request handlers that require a logged-in user",
+          "flow": ["e6"]
+        }
+      ],
+      "edges": ["e6"],
+      "critical": false,
+      "files": ["src/backend/auth.js"],
+      "children": []
+    },
+    {
+      "id": "module:session-store",
+      "type": "module",
+      "name": "src/backend/session-store.js",
+      "summary": "Session record normalization, listing, and referential cleanup helpers",
+      "features": [
+        {
+          "summary": "Normalizes session identifiers, reads persisted session summaries, and maintains the latest-session pointer after deletes",
+          "flow": ["e7", "e10"]
+        }
+      ],
+      "edges": ["e7", "e10"],
+      "critical": false,
+      "files": ["src/backend/session-store.js"],
+      "children": []
+    },
+    {
+      "id": "module:audio-store",
+      "type": "module",
+      "name": "src/backend/audio-store.js",
+      "summary": "Local audio binary and metadata persistence helpers",
+      "features": [
+        {
+          "summary": "Writes uploaded audio blobs, reads audio metadata, and deletes unreferenced audio assets",
+          "flow": ["e8", "e10"]
+        }
+      ],
+      "edges": ["e8", "e10"],
+      "critical": false,
+      "files": ["src/backend/audio-store.js"],
+      "children": []
+    },
+    {
+      "id": "module:remote-store",
+      "type": "module",
+      "name": "src/backend/remote-store.js",
+      "summary": "Remote session and audio transport helpers",
+      "features": [
+        {
+          "summary": "Wraps remote fetch logic for session summaries, session detail, session writes, deletes, and audio uploads",
+          "flow": ["e9"]
+        }
+      ],
+      "edges": ["e9"],
+      "critical": false,
+      "files": ["src/backend/remote-store.js"],
+      "children": []
+    },
+    {
+      "id": "io:file-url",
+      "type": "io",
+      "name": "URL.createObjectURL",
+      "summary": "In-memory object URL used for selected local audio file",
+      "features": [],
+      "edges": [],
+      "critical": false,
+      "files": [],
+      "children": []
+    },
+    {
+      "id": "io:session-file",
+      "type": "io",
+      "name": "data/session-latest.json",
+      "summary": "Project-local persisted session record including audio payload and playback state",
+      "features": [],
+      "edges": [],
+      "critical": false,
+      "files": ["data/session-latest.json"],
+      "children": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "kind": "control",
+      "from": "control:ui",
+      "to": "module:auth-storage",
+      "note": "UI loads browser auth state helper"
+    },
+    {
+      "id": "e2",
+      "kind": "control",
+      "from": "control:ui",
+      "to": "module:format-utils",
+      "note": "UI loads shared formatting and normalization helpers"
+    },
+    {
+      "id": "e3",
+      "kind": "control",
+      "from": "control:ui",
+      "to": "module:session-runtime",
+      "note": "UI loads session lifecycle helper"
+    },
+    {
+      "id": "e4",
+      "kind": "control",
+      "from": "control:ui",
+      "to": "module:frontend-runtime",
+      "note": "UI loads the full frontend runtime directly"
+    },
+    {
+      "id": "e11",
+      "kind": "control",
+      "from": "control:ui",
+      "to": "control:frontend-bootstrap",
+      "note": "UI loads compatibility bootstrap shim after the runtime"
+    },
+    {
+      "id": "e5",
+      "kind": "context",
+      "from": "module:session-backend",
+      "to": "module:backend-config",
+      "note": "Backend runtime configuration source"
+    },
+    {
+      "id": "e6",
+      "kind": "context",
+      "from": "module:session-backend",
+      "to": "module:backend-utils",
+      "note": "Backend request parsing and response helpers"
+    },
+    {
+      "id": "e7",
+      "kind": "context",
+      "from": "module:session-backend",
+      "to": "module:backend-auth",
+      "note": "Backend auth session and request validation layer"
+    },
+    {
+      "id": "e8",
+      "kind": "context",
+      "from": "module:session-backend",
+      "to": "module:session-store",
+      "note": "Backend session storage and cleanup helpers"
+    },
+    {
+      "id": "e9",
+      "kind": "context",
+      "from": "module:session-backend",
+      "to": "module:audio-store",
+      "note": "Backend audio blob and metadata helpers"
+    },
+    {
+      "id": "e10",
+      "kind": "context",
+      "from": "module:session-backend",
+      "to": "module:remote-store",
+      "note": "Backend remote transport helpers when SESSION_STORE=remote"
+    },
+    {
+      "id": "e11",
+      "kind": "io",
+      "from": "module:session-backend",
+      "to": "io:session-file",
+      "note": "Latest session pointer and persisted session files"
+    }
+  ],
+  "critical": true,
+  "files": [],
+  "children": []
 }
-
-
-
