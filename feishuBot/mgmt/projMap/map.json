@@ -1,141 +1,303 @@
-﻿{
-    "id":  "map:feishuBot",
-    "type":  "project-map",
-    "name":  "feishuBot",
-    "summary":  "Project map for the Feishu Codex relay",
-    "root":  "C:\\Users\\Qub\\feishuBot",
-    "updated":  "2026-03-23T12:33:09.4476454+08:00",
-    "nodes":  [
-                  {
-                      "id":  "node-root",
-                      "type":  "module",
-                      "name":  "Project Root",
-                      "summary":  "Workspace launcher and governance files",
-                      "features":  [
-                                       {
-                                           "summary":  "Launcher forwards to backend implementation",
-                                           "flow":  [
-                                                        "edge-root-backend"
-                                                    ]
-                                       }
-                                   ],
-                      "edges":  [
-                                    {
-                                        "id":  "edge-root-backend",
-                                        "kind":  "depends",
-                                        "from":  "node-root",
-                                        "to":  "node-backend"
-                                    }
-                                ],
-                      "critical":  true,
-                      "files":  [
-                                    "package.json",
-                                    "AGENTS.md",
-                                    ".gitignore",
-                                    "src/backend/index.js"
-                                ],
-                      "children":  [
-                                       "node-backend"
-                                   ]
-                  },
-                  {
-                      "id":  "node-backend",
-                      "type":  "module",
-                      "name":  "Backend Relay",
-                      "summary":  "Feishu event loop, session persistence, and Codex session management",
-                      "features":  [
-                                       {
-                                           "summary":  "Runs Codex turns and resumes persisted thread sessions",
-                                           "flow":  [
-                                                        "edge-backend-codex",
-                                                        "edge-backend-feishu"
-                                                    ]
-                                       }
-                                   ],
-                      "edges":  [
-                                    {
-                                        "id":  "edge-backend-codex",
-                                        "kind":  "io",
-                                        "from":  "node-backend",
-                                        "to":  "node-codex"
-                                    },
-                                    {
-                                        "id":  "edge-backend-feishu",
-                                        "kind":  "io",
-                                        "from":  "node-backend",
-                                        "to":  "node-feishu"
-                                    }
-                                ],
-                      "critical":  true,
-                      "files":  [
-                                    "src/backend/app.js",
-                                    "codex-chat-sessions.json"
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "node-codex",
-                      "type":  "module",
-                      "name":  "Codex CLI Integration",
-                      "summary":  "Resumable Codex command-line execution and session lookup",
-                      "features":  [
-
-                                   ],
-                      "edges":  [
-
-                                ],
-                      "critical":  true,
-                      "files":  [
-
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "node-feishu",
-                      "type":  "module",
-                      "name":  "Feishu Messaging",
-                      "summary":  "Lark client, send/upload, and incoming event handling",
-                      "features":  [
-
-                                   ],
-                      "edges":  [
-
-                                ],
-                      "critical":  true,
-                      "files":  [
-
-                                ],
-                      "children":  [
-
-                                   ]
-                  }
-              ],
-    "edges":  [
-                  {
-                      "id":  "edge-root-backend",
-                      "kind":  "depends",
-                      "from":  "node-root",
-                      "to":  "node-backend"
-                  },
-                  {
-                      "id":  "edge-backend-codex",
-                      "kind":  "io",
-                      "from":  "node-backend",
-                      "to":  "node-codex"
-                  },
-                  {
-                      "id":  "edge-backend-feishu",
-                      "kind":  "io",
-                      "from":  "node-backend",
-                      "to":  "node-feishu"
-                  }
-              ],
-    "children":  [
-                     "node-root",
-                     "node-backend"
-                 ]
+{
+  "id": "map:feishuBot",
+  "type": "project-map",
+  "name": "feishuBot",
+  "summary": "Project map for the Feishu Codex relay",
+  "root": "C:\\Users\\Qub\\feishuBot",
+  "updated": "2026-03-23T12:37:52.3727078+08:00",
+  "nodes": [
+    {
+      "id": "node-root",
+      "type": "module",
+      "name": "Project Root",
+      "summary": "Workspace launcher and governance files",
+      "features": [
+        {
+          "summary": "Launcher forwards to backend composition root",
+          "flow": [
+            "edge-root-app"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge-root-app",
+          "kind": "depends",
+          "from": "node-root",
+          "to": "node-app"
+        }
+      ],
+      "critical": true,
+      "files": [
+        "package.json",
+        "AGENTS.md",
+        ".gitignore",
+        "src/backend/index.js"
+      ],
+      "children": [
+        "node-app"
+      ]
+    },
+    {
+      "id": "node-app",
+      "type": "module",
+      "name": "Backend Composition Root",
+      "summary": "Loads env config and wires the relay modules together",
+      "features": [
+        {
+          "summary": "Bootstraps Feishu client, state store, transfer, Codex, and relay",
+          "flow": [
+            "edge-app-state",
+            "edge-app-transfer",
+            "edge-app-codex",
+            "edge-app-relay"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge-app-state",
+          "kind": "depends",
+          "from": "node-app",
+          "to": "node-state-store"
+        },
+        {
+          "id": "edge-app-transfer",
+          "kind": "depends",
+          "from": "node-app",
+          "to": "node-file-transfer"
+        },
+        {
+          "id": "edge-app-codex",
+          "kind": "depends",
+          "from": "node-app",
+          "to": "node-codex-runner"
+        },
+        {
+          "id": "edge-app-relay",
+          "kind": "depends",
+          "from": "node-app",
+          "to": "node-relay"
+        }
+      ],
+      "critical": true,
+      "files": [
+        "src/backend/app.js"
+      ],
+      "children": [
+        "node-state-store",
+        "node-file-transfer",
+        "node-codex-runner",
+        "node-relay"
+      ]
+    },
+    {
+      "id": "node-state-store",
+      "type": "module",
+      "name": "State Store",
+      "summary": "Persisted chat sessions, message logs, and session lookup helpers",
+      "features": [
+        {
+          "summary": "Tracks chat session state and resume candidates",
+          "flow": [
+            "edge-state-codex",
+            "edge-state-log"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge-state-codex",
+          "kind": "io",
+          "from": "node-state-store",
+          "to": "node-codex-runner"
+        },
+        {
+          "id": "edge-state-log",
+          "kind": "io",
+          "from": "node-state-store",
+          "to": "node-file-transfer"
+        }
+      ],
+      "critical": true,
+      "files": [
+        "src/backend/lib/state-store.js",
+        "codex-chat-sessions.json"
+      ],
+      "children": []
+    },
+    {
+      "id": "node-file-transfer",
+      "type": "module",
+      "name": "File Transfer",
+      "summary": "Feishu file upload/download and daily data-dir mirroring",
+      "features": [
+        {
+          "summary": "Downloads incoming files and mirrors outgoing files locally",
+          "flow": [
+            "edge-transfer-feishu"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge-transfer-feishu",
+          "kind": "io",
+          "from": "node-file-transfer",
+          "to": "node-relay"
+        }
+      ],
+      "critical": true,
+      "files": [
+        "src/backend/lib/file-transfer.js"
+      ],
+      "children": []
+    },
+    {
+      "id": "node-codex-runner",
+      "type": "module",
+      "name": "Codex Runner",
+      "summary": "CLI execution, session resume, and turn output handling",
+      "features": [
+        {
+          "summary": "Runs new and resumed Codex turns and captures thread ids",
+          "flow": [
+            "edge-codex-relay"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge-codex-relay",
+          "kind": "io",
+          "from": "node-codex-runner",
+          "to": "node-relay"
+        }
+      ],
+      "critical": true,
+      "files": [
+        "src/backend/lib/codex-runner.js"
+      ],
+      "children": []
+    },
+    {
+      "id": "node-relay",
+      "type": "module",
+      "name": "Relay Controller",
+      "summary": "Feishu event handling, command routing, and chat session lifecycle",
+      "features": [
+        {
+          "summary": "Routes messages to Codex, resume flow, rename handling, and file intake",
+          "flow": [
+            "edge-relay-state",
+            "edge-relay-transfer",
+            "edge-relay-codex"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge-relay-state",
+          "kind": "depends",
+          "from": "node-relay",
+          "to": "node-state-store"
+        },
+        {
+          "id": "edge-relay-transfer",
+          "kind": "depends",
+          "from": "node-relay",
+          "to": "node-file-transfer"
+        },
+        {
+          "id": "edge-relay-codex",
+          "kind": "depends",
+          "from": "node-relay",
+          "to": "node-codex-runner"
+        }
+      ],
+      "critical": true,
+      "files": [
+        "src/backend/lib/relay.js"
+      ],
+      "children": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-root-app",
+      "kind": "depends",
+      "from": "node-root",
+      "to": "node-app"
+    },
+    {
+      "id": "edge-app-state",
+      "kind": "depends",
+      "from": "node-app",
+      "to": "node-state-store"
+    },
+    {
+      "id": "edge-app-transfer",
+      "kind": "depends",
+      "from": "node-app",
+      "to": "node-file-transfer"
+    },
+    {
+      "id": "edge-app-codex",
+      "kind": "depends",
+      "from": "node-app",
+      "to": "node-codex-runner"
+    },
+    {
+      "id": "edge-app-relay",
+      "kind": "depends",
+      "from": "node-app",
+      "to": "node-relay"
+    },
+    {
+      "id": "edge-state-codex",
+      "kind": "io",
+      "from": "node-state-store",
+      "to": "node-codex-runner"
+    },
+    {
+      "id": "edge-state-log",
+      "kind": "io",
+      "from": "node-state-store",
+      "to": "node-file-transfer"
+    },
+    {
+      "id": "edge-transfer-feishu",
+      "kind": "io",
+      "from": "node-file-transfer",
+      "to": "node-relay"
+    },
+    {
+      "id": "edge-codex-relay",
+      "kind": "io",
+      "from": "node-codex-runner",
+      "to": "node-relay"
+    },
+    {
+      "id": "edge-relay-state",
+      "kind": "depends",
+      "from": "node-relay",
+      "to": "node-state-store"
+    },
+    {
+      "id": "edge-relay-transfer",
+      "kind": "depends",
+      "from": "node-relay",
+      "to": "node-file-transfer"
+    },
+    {
+      "id": "edge-relay-codex",
+      "kind": "depends",
+      "from": "node-relay",
+      "to": "node-codex-runner"
+    }
+  ],
+  "children": [
+    "node-root",
+    "node-app"
+  ]
 }
