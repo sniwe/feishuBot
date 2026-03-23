@@ -3491,7 +3491,7 @@
     card.style.setProperty("--subseg-card-depth", String(Math.max(0, depth)));
     card.classList.toggle("is-nested", depth > 0);
     card.classList.toggle("is-last-sibling", Boolean(isLastSibling) && depth > 0);
-    const bridgeLeft = depth > 0 ? -4 : 0;
+    const bridgeLeft = depth > 0 ? -9 : 0;
     const bridgeWidth = depth > 0 ? 4 : 0;
     card.style.setProperty("--subseg-card-line-left", String(bridgeLeft) + "px");
     card.style.setProperty("--subseg-card-bridge-left", String(bridgeLeft) + "px");
@@ -3511,7 +3511,7 @@
           }
           const guide = document.createElement("span");
           guide.className = "subseg-value-ancestor-guide";
-          const guideLeft = -4 - (10 * depthDelta);
+          const guideLeft = -9 - (10 * depthDelta);
           guide.style.left = String(guideLeft) + "px";
           guides.appendChild(guide);
         });
@@ -3524,6 +3524,7 @@
       const connectorBadge = document.createElement("span");
       connectorBadge.className = "subseg-value-connector-badge";
       connectorBadge.textContent = String(Math.floor(siblingOrder));
+      connectorBadge.style.left = "calc(var(--subseg-card-line-left, -9px) + (var(--subseg-card-bridge-width, 4px) / 2) + 1px)";
       card.appendChild(connectorBadge);
     }
     const inputShell = document.createElement("div");

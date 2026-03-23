@@ -1082,7 +1082,7 @@ h1, p { margin: 0; }
 
 .subseg-value-connector-badge {
   position: absolute;
-  left: calc(var(--subseg-card-line-left, -4px) + 2px);
+  left: calc(var(--subseg-card-line-left, -9px) + 3px);
   top: 50%;
   transform: translate(-50%, -50%);
   width: 9px;
