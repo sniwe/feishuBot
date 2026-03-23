@@ -1,9 +1,9 @@
 {
   "id": "ai-mp3-mmu2a3kg-h4jpfn",
   "owner": "rhys",
-  "savedAt": "2026-03-23T00:29:23.737Z",
-  "updatedAt": "2026-03-23T00:29:23.737Z",
-  "revision": 70,
+  "savedAt": "2026-03-23T00:33:12.308Z",
+  "updatedAt": "2026-03-23T00:33:12.308Z",
+  "revision": 72,
   "file": {
     "name": "AI的胡说八道，为什么比人类骗子更危险？.mp3",
     "type": "audio/mpeg",
@@ -61,6 +61,24 @@
           "children": [],
           "anchorStart": 0,
           "anchorEnd": 0
+        },
+        {
+          "nodeId": "card-mn2gcada-2",
+          "value": "so we are still in..",
+          "createdAt": "2026-03-23T00:33:03.358Z",
+          "history": [],
+          "children": [],
+          "anchorStart": null,
+          "anchorEnd": null
+        },
+        {
+          "nodeId": "card-mn2gcg95-3",
+          "value": "i wonder why it jumped out",
+          "createdAt": "2026-03-23T00:33:10.985Z",
+          "history": [],
+          "children": [],
+          "anchorStart": null,
+          "anchorEnd": null
         }
       ],
       "10.564|12.416": [
@@ -483,6 +501,65 @@
                 "children": [],
                 "anchorStart": 0,
                 "anchorEnd": 0
+              }
+            ]
+          },
+          {
+            "id": "timeline-mn2gcada-6",
+            "label": "card-created",
+            "createdAt": "2026-03-23T00:33:03.358Z",
+            "snapshot": [
+              {
+                "nodeId": "card-mn2g77l8-1",
+                "value": "interesting..",
+                "createdAt": "2026-03-23T00:29:06.476Z",
+                "history": [],
+                "children": [],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              },
+              {
+                "nodeId": "card-mn2gcada-2",
+                "value": "so we are still in..",
+                "createdAt": "2026-03-23T00:33:03.358Z",
+                "history": [],
+                "children": [],
+                "anchorStart": null,
+                "anchorEnd": null
+              }
+            ]
+          },
+          {
+            "id": "timeline-mn2gcg95-7",
+            "label": "card-created",
+            "createdAt": "2026-03-23T00:33:10.985Z",
+            "snapshot": [
+              {
+                "nodeId": "card-mn2g77l8-1",
+                "value": "interesting..",
+                "createdAt": "2026-03-23T00:29:06.476Z",
+                "history": [],
+                "children": [],
+                "anchorStart": 0,
+                "anchorEnd": 0
+              },
+              {
+                "nodeId": "card-mn2gcada-2",
+                "value": "so we are still in..",
+                "createdAt": "2026-03-23T00:33:03.358Z",
+                "history": [],
+                "children": [],
+                "anchorStart": null,
+                "anchorEnd": null
+              },
+              {
+                "nodeId": "card-mn2gcg95-3",
+                "value": "i wonder why it jumped out",
+                "createdAt": "2026-03-23T00:33:10.985Z",
+                "history": [],
+                "children": [],
+                "anchorStart": null,
+                "anchorEnd": null
               }
             ]
           }
