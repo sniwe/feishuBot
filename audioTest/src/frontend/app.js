@@ -3474,13 +3474,14 @@
         [entryIndex],
         0,
         entryIndex === (values.length - 1),
-        []
+        [],
+        entryIndex + 1
       );
     });
     scheduleGuideStepRender({ deps: {} });
   }
 
-  function renderSubSegValueCardNode(key, entry, path, depth, isLastSibling, ancestorGuideDepths) {
+  function renderSubSegValueCardNode(key, entry, path, depth, isLastSibling, ancestorGuideDepths, siblingOrder) {
     if (!subSegValueList || !entry || typeof entry !== "object") {
       return;
     }
@@ -3495,6 +3496,7 @@
     card.style.setProperty("--subseg-card-line-left", String(bridgeLeft) + "px");
     card.style.setProperty("--subseg-card-bridge-left", String(bridgeLeft) + "px");
     card.style.setProperty("--subseg-card-bridge-width", String(bridgeWidth) + "px");
+    card.style.setProperty("--subseg-card-indent-step", "10px");
     if (depth > 0 && Array.isArray(ancestorGuideDepths) && ancestorGuideDepths.length > 0) {
       const uniqueGuideDepths = ancestorGuideDepths.filter(function (guideDepth, idx, arr) {
         return Number.isFinite(guideDepth) && guideDepth > 0 && arr.indexOf(guideDepth) === idx;
@@ -3509,7 +3511,7 @@
           }
           const guide = document.createElement("span");
           guide.className = "subseg-value-ancestor-guide";
-          const guideLeft = -4 - (5 * depthDelta);
+          const guideLeft = -4 - (10 * depthDelta);
           guide.style.left = String(guideLeft) + "px";
           guides.appendChild(guide);
         });
@@ -3517,6 +3519,12 @@
           card.appendChild(guides);
         }
       }
+    }
+    if (depth > 0 && Number.isFinite(siblingOrder) && siblingOrder > 0) {
+      const connectorBadge = document.createElement("span");
+      connectorBadge.className = "subseg-value-connector-badge";
+      connectorBadge.textContent = String(Math.floor(siblingOrder));
+      card.appendChild(connectorBadge);
     }
     const inputShell = document.createElement("div");
     inputShell.className = "subseg-value-card-input-shell";
@@ -3657,7 +3665,8 @@
         item.childPath,
         depth + 1,
         visibleIndex === (visibleChildren.length - 1),
-        nextAncestorGuideDepths
+        nextAncestorGuideDepths,
+        visibleIndex + 1
       );
     });
   }
