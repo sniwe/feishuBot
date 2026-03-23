@@ -3965,7 +3965,7 @@
     inputEl.style.height = String(nextHeight) + "px";
     const reserveBelow = card.dataset.subsegHasFollowingContent === "1";
     const marginBottom = reserveBelow ? Math.max(0, nextHeight - 2) : 0;
-    const spineExtension = 0;
+    const spineExtension = marginBottom;
     card.style.marginBottom = String(marginBottom) + "px";
     card.style.setProperty("--subseg-card-spine-extension", String(spineExtension) + "px");
     card.style.setProperty("--subseg-card-tail-length", String(marginBottom) + "px");
