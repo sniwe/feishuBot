@@ -1,7 +1,7 @@
 ﻿{
     "id":  "projects-index",
     "root":  "C:\\Users\\Qub",
-    "updated":  "2026-03-23T12:25:47.1494480+08:00",
+    "updated":  "2026-03-23T12:26:20.1162183+08:00",
     "projects":  [
                      {
                          "id":  "toDo-test",
@@ -58,6 +58,30 @@
                          "mapPath":  "C:\\Users\\Qub\\oms\\mgmt\\projMap\\map.json",
                          "status":  "active",
                          "updated":  "2026-03-11T13:26:56.1858436+08:00",
+                         "projectType":  "application",
+                         "extraction":  {
+                                            "mode":  "native",
+                                            "sourceProjects":  [
+
+                                                               ],
+                                            "extractedAt":  null
+                                        },
+                         "sharing":  {
+                                         "exports":  [
+
+                                                     ],
+                                         "consumers":  [
+
+                                                       ]
+                                     }
+                     },
+                     {
+                         "id":  "feishuBot",
+                         "name":  "feishuBot",
+                         "projectRoot":  "C:\\Users\\Qub\\feishuBot",
+                         "mapPath":  "C:\\Users\\Qub\\feishuBot\\mgmt\\projMap\\map.json",
+                         "status":  "active",
+                         "updated":  "2026-03-23T12:26:19.9502608+08:00",
                          "projectType":  "application",
                          "extraction":  {
                                             "mode":  "native",
