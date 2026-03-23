@@ -3579,11 +3579,12 @@
     const cardBubble = document.createElement("span");
     cardBubble.className = "subseg-value-card-bubble";
     const cardBubbleStateKey = getSubSegCardRecallStateKey(key, pathKey);
-    const cardBubbleInput = document.createElement("input");
-    cardBubbleInput.type = "text";
+    const cardBubbleInput = document.createElement("textarea");
     cardBubbleInput.className = "subseg-value-card-bubble-input";
     cardBubbleInput.autocomplete = "off";
     cardBubbleInput.spellcheck = false;
+    cardBubbleInput.rows = 1;
+    cardBubbleInput.wrap = "soft";
     cardBubbleInput.dataset.subSegValueKey = key;
     cardBubbleInput.dataset.subSegValuePath = pathKey;
     cardBubbleInput.setAttribute("aria-label", "Card comment");
@@ -3959,9 +3960,11 @@
     const value = String(inputEl.value || "");
     const hasContent = Boolean(value.trim());
     const minWidth = 32;
+    const minHeight = 12;
     const cardWidth = card.getBoundingClientRect ? card.getBoundingClientRect().width : 0;
     const maxWidth = cardWidth > 0 ? Math.max(minWidth, Math.floor(cardWidth * 0.6)) : 240;
     let nextWidth = minWidth;
+    bubble.style.height = String(minHeight) + "px";
     if (hasContent) {
       const ctx = ensureSubSegTextMeasureContext();
       const computed = window.getComputedStyle(inputEl);
@@ -3974,10 +3977,27 @@
           computed.fontFamily
         ].filter(Boolean).join(" ");
         ctx.font = font;
-        const textWidth = ctx.measureText(value).width;
-        nextWidth = Math.min(maxWidth, Math.max(minWidth, Math.ceil(textWidth + 18)));
+        const lines = String(value).split(/\r?\n/);
+        const widestLine = lines.reduce(function (maxLineWidth, line) {
+          const lineWidth = ctx.measureText(line).width;
+          return Math.max(maxLineWidth, lineWidth);
+        }, 0);
+        nextWidth = Math.min(maxWidth, Math.max(minWidth, Math.ceil(widestLine + 18)));
+        inputEl.style.height = "auto";
+        const nextHeight = Math.max(minHeight, Math.ceil(inputEl.scrollHeight + 4));
+        bubble.style.height = String(nextHeight) + "px";
+        bubble.style.borderRadius = lines.length > 1 ? "12px" : "999px";
+        bubble.style.alignItems = lines.length > 1 ? "flex-start" : "center";
+        nextWidth = Math.min(maxWidth, Math.max(minWidth, Math.ceil(widestLine + 18)));
+      } else {
+        inputEl.style.height = "100%";
       }
     }
+    if (!hasContent) {
+      bubble.style.borderRadius = "999px";
+      bubble.style.alignItems = "center";
+    }
+    inputEl.style.height = "100%";
     bubble.style.width = String(nextWidth) + "px";
     bubble.classList.toggle("has-content", hasContent);
   }
