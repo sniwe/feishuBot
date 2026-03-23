@@ -3541,6 +3541,7 @@
     const isTimelineTraversal = isSubSegTimelineTraversalActiveForKey(key);
     const recallPosition = getCardRecallPosition(key, pathKey, entry);
     const isRecalling = recallPosition < getCardCurrentPosition(entry);
+    const isHistoryView = Boolean(isTimelineTraversal || isRecalling);
     const liveOverrideKey = getSubSegCardRecallStateKey(key, pathKey);
     const displayedValue = isTimelineTraversal
       ? String(entry.value || "")
@@ -3565,6 +3566,7 @@
     if (isRecalling) {
       input.classList.add("is-recalling");
     }
+    inputShell.classList.toggle("is-history-view", isHistoryView);
     if (!isTimelineTraversal) {
       input.addEventListener("input", handleSubSegCardInputLive);
       input.addEventListener("change", handleSubSegCardInputChange);
@@ -3645,7 +3647,7 @@
       });
     });
     subSegValueList.appendChild(card);
-    if (visibleChildren.length > 0) {
+    if (visibleChildren.length > 0 && !isHistoryView) {
       renderSubSegCardSelectionBubbles({
         ui: {
           selectionLayer,

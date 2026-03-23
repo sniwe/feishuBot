@@ -1168,6 +1168,21 @@ h1, p { margin: 0; }
   word-break: break-word;
 }
 
+.subseg-value-card-input-shell.is-history-view .subseg-value-card-display {
+  display: none;
+}
+
+.subseg-value-card-input-shell.is-history-view .subseg-value-selection-layer {
+  display: none;
+}
+
+.subseg-value-card-input-shell.is-history-view .subseg-value-card-input {
+  position: relative;
+  inset: auto;
+  z-index: 1;
+  color: inherit;
+}
+
 .subseg-value-card-input.is-recalling {
   color: #4b5f80;
   font-style: italic;

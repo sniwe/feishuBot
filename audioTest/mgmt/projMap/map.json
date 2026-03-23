@@ -4,16 +4,16 @@
     "name":  "audioTest",
     "summary":  "Toy browser audio checkpoint player with keyboard controls",
     "root":  "C:\\Users\\Qub\\audioTest",
-    "updated":  "2026-03-23T10:52:26.5152912+08:00",
+    "updated":  "2026-03-23T10:54:19.3133278+08:00",
     "nodes":  [
                   {
                       "id":  "control:ui",
                       "type":  "control",
                       "name":  "src/public/index.html",
-                      "summary":  "Two-phase UI with persisted-audio card library, upload trigger, and player with checkpoint/subSeg overlays, load-state indicator, custom playhead, and child-source substring annotations with compact numbered bubbles and elbow badges",
+                      "summary":  "Two-phase UI with persisted-audio card library, upload trigger, and player with checkpoint/subSeg overlays, load-state indicator, custom playhead, and child-source substring annotations with compact numbered bubbles, elbow badges, and a history-view fallback to native input display",
                       "features":  [
                                        {
-                                           "summary":  "Render persisted-audio card list with queued auto-save on upload/checkpoint/subSeg updates, keep uploads in phase one until persistence completes, disable card selection during save, show a player loading bar while audEp restore completes, bubble child-source substrings with compact ordered badges in the parent input card list, and mirror the same child order on nested connector elbows with 10px child indentation",
+                                           "summary":  "Render persisted-audio card list with queued auto-save on upload/checkpoint/subSeg updates, keep uploads in phase one until persistence completes, disable card selection during save, show a player loading bar while audEp restore completes, bubble child-source substrings with compact ordered badges in the parent input card list, mirror the same child order on nested connector elbows with 10px child indentation, and fall back to native input display while browsing recalled versions",
                                            "flow":  [
                                                         "e1"
                                                     ]
