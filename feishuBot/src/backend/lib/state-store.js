@@ -421,6 +421,7 @@ function createStateStore(ctx) {
         chatName: stored.chatName || latestThread?.chatName || "",
         currentThreadId: stored.threadId || latestThread?.threadId || "",
         pendingNewThread: false,
+        lastSenderOpenId: "",
         isTurnInFlight: false,
         activeCodexProcess: null,
         pendingUserTexts: [],

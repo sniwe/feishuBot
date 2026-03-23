@@ -8,6 +8,7 @@ function createRelayController(ctx) {
     fileTransfer,
     codexRunner,
     sendTextMessage,
+    sendDirectMessage,
   } = deps;
 
   function extractChatName(dataEvent) {
@@ -45,6 +46,54 @@ function createRelayController(ctx) {
     }
 
     return "";
+  }
+
+  function extractDirectMessageDirective(text) {
+    const lines = (text || "").split(/\r?\n/);
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        continue;
+      }
+
+      const match = trimmed.match(/^!?(?:\/)?dm\s+(\S+)\s+([\s\S]+)$/i);
+      if (!match || !match[1] || !match[2]) {
+        continue;
+      }
+
+      return {
+        recipient: match[1].trim(),
+        message: match[2].trim(),
+      };
+    }
+
+    return null;
+  }
+
+  async function applyDirectMessage(chatId, state, directive) {
+    const recipientToken = (directive?.recipient || "").trim();
+    const message = (directive?.message || "").trim();
+
+    if (!recipientToken || !message) {
+      await sendTextMessage(chatId, "Use `!dm <open_id|me|last> <message>`.");
+      return;
+    }
+
+    let openId = recipientToken;
+    if (/^(me|last|sender)$/i.test(recipientToken)) {
+      openId = state.lastSenderOpenId || "";
+    }
+
+    if (!openId) {
+      await sendTextMessage(chatId, "No direct-message recipient is available yet.");
+      return;
+    }
+
+    await sendDirectMessage(openId, message, {
+      source_chat_id: chatId,
+      direct_message: true,
+    });
+    await sendTextMessage(chatId, `Sent a direct message to ${recipientToken}.`);
   }
 
   async function applyChatRename(chatId, state, chatName) {
@@ -107,6 +156,12 @@ function createRelayController(ctx) {
     const renameTarget = extractRenameDirective(userText);
     if (renameTarget) {
       await applyChatRename(chatId, state, renameTarget);
+      return;
+    }
+
+    const directMessageDirective = extractDirectMessageDirective(userText);
+    if (directMessageDirective) {
+      await applyDirectMessage(chatId, state, directMessageDirective);
       return;
     }
 
@@ -281,6 +336,7 @@ function createRelayController(ctx) {
 
           const chatId = dataEvent.message.chat_id;
           const state = stateStore.getChatState(chatId);
+          state.lastSenderOpenId = dataEvent.sender?.sender_id?.open_id || state.lastSenderOpenId || "";
           const chatName = extractChatName(dataEvent);
           if (chatName) {
             stateStore.setChatDisplayName(chatId, state, chatName);
@@ -332,6 +388,7 @@ function createRelayController(ctx) {
   return {
     extractChatName,
     extractRenameDirective,
+    extractDirectMessageDirective,
     sendModeOptions,
     sendResumeChatOptions,
     handleUserText,
