@@ -3730,6 +3730,16 @@
       if (!range) {
         return;
       }
+      const rawSelectedText = displayedValue.slice(range.start, range.end);
+      const leadingTrim = rawSelectedText.match(/^\s*/);
+      const trailingTrim = rawSelectedText.match(/\s*$/);
+      const startOffset = leadingTrim ? leadingTrim[0].length : 0;
+      const endOffset = trailingTrim ? trailingTrim[0].length : 0;
+      const trimmedStart = range.start + startOffset;
+      const trimmedEnd = range.end - endOffset;
+      if (trimmedEnd <= trimmedStart) {
+        return;
+      }
       const mirror = document.createElement("div");
       mirror.className = "subseg-value-selection-mirror";
       mirror.style.font = [
@@ -3747,15 +3757,15 @@
 
       const before = document.createElement("span");
       before.className = "subseg-value-selection-mirror-text";
-      before.textContent = displayedValue.slice(0, range.start);
+      before.textContent = displayedValue.slice(0, trimmedStart);
 
       const selected = document.createElement("span");
       selected.className = "subseg-value-selection-mirror-selected";
-      selected.textContent = displayedValue.slice(range.start, range.end);
+      selected.textContent = displayedValue.slice(trimmedStart, trimmedEnd);
 
       const after = document.createElement("span");
       after.className = "subseg-value-selection-mirror-text";
-      after.textContent = displayedValue.slice(range.end);
+      after.textContent = displayedValue.slice(trimmedEnd);
 
       mirror.appendChild(before);
       mirror.appendChild(selected);

@@ -4,7 +4,7 @@
     "name":  "audioTest",
     "summary":  "Toy browser audio checkpoint player with keyboard controls",
     "root":  "C:\\Users\\Qub\\audioTest",
-    "updated":  "2026-03-23T11:05:09.0800359+08:00",
+    "updated":  "2026-03-23T11:12:53.1015800+08:00",
     "nodes":  [
                   {
                       "id":  "control:ui",
@@ -13,7 +13,7 @@
                       "summary":  "Two-phase UI with persisted-audio card library, upload trigger, and player with checkpoint/subSeg overlays, load-state indicator, custom playhead, and child-source substring annotations rendered with mirror-measured compact numbered bubbles, elbow badges, and whitespace-trimmed selection spans",
                       "features":  [
                                        {
-                                           "summary":  "Render persisted-audio card list with queued auto-save on upload/checkpoint/subSeg updates, keep uploads in phase one until persistence completes, disable card selection during save, show a player loading bar while audEp restore completes, bubble child-source substrings with mirror-measured compact ordered badges in the parent input card list, trim surrounding whitespace from each selection span, and mirror the same child order on nested connector elbows with 10px child indentation",
+                                           "summary":  "Render persisted-audio card list with queued auto-save on upload/checkpoint/subSeg updates, keep uploads in phase one until persistence completes, disable card selection during save, show a player loading bar while audEp restore completes, bubble child-source substrings with mirror-measured compact ordered badges in the parent input card list, trim surrounding whitespace from each selection span at render time, and mirror the same child order on nested connector elbows with 10px child indentation",
                                            "flow":  [
                                                         "e1"
                                                     ]
