@@ -6,6 +6,7 @@ function createRelayController(ctx) {
     path,
     stateStore,
     fileTransfer,
+    contactResolver,
     codexRunner,
     sendTextMessage,
     sendDirectMessage,
@@ -94,17 +95,16 @@ function createRelayController(ctx) {
       return;
     }
 
-    let openId = recipientToken;
+    let openId = "";
     if (/^(me|last|sender)$/i.test(recipientToken)) {
       openId = state.lastSenderOpenId || "";
-    }
-
-    if (!/^ou_[a-z0-9]+$/i.test(openId)) {
-      openId = "";
+    } else if (contactResolver && typeof contactResolver.resolveRecipientOpenId === "function") {
+      const resolved = await contactResolver.resolveRecipientOpenId(recipientToken);
+      openId = resolved?.openId || "";
     }
 
     if (!openId) {
-      await sendTextMessage(chatId, `I could not resolve "${recipientToken}" to a valid open_id yet. Use an open_id, or add a lookup cache.`);
+      await sendTextMessage(chatId, `I could not resolve "${recipientToken}" to a valid open_id yet. Use an open_id, email, or mobile number.`);
       return;
     }
 

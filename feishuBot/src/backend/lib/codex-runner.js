@@ -13,6 +13,7 @@ function createCodexRunner(ctx) {
     quoteForCmd,
     splitForFeishu,
     uploadFileToChat,
+    resolveRecipientOpenId,
     sendDirectMessage,
     sendTextMessage,
     setChatSessionId,
@@ -128,13 +129,11 @@ function createCodexRunner(ctx) {
         continue;
       }
 
-      let openId = recipientToken;
+      let openId = "";
       if (/^(me|last_sender|last|sender)$/i.test(recipientToken)) {
         openId = state.lastSenderOpenId || "";
-      }
-
-      if (!/^ou_[a-z0-9]+$/i.test(openId)) {
-        openId = "";
+      } else if (/^ou_[a-z0-9]+$/i.test(recipientToken)) {
+        openId = recipientToken;
       }
 
       return {
@@ -227,11 +226,17 @@ function createCodexRunner(ctx) {
       let messageText = finalMessage;
       const directMessageDirective = extractDirectMessageDirective ? extractDirectMessageDirective(finalMessage, state) : null;
       if (directMessageDirective) {
-        if (!directMessageDirective.openId) {
+        let resolvedOpenId = directMessageDirective.openId;
+        if (!resolvedOpenId && typeof resolveRecipientOpenId === "function") {
+          const resolved = await resolveRecipientOpenId(directMessageDirective.recipientToken);
+          resolvedOpenId = resolved?.openId || "";
+        }
+
+        if (!resolvedOpenId) {
           throw new Error(`Codex requested a DM to "${directMessageDirective.recipientToken}" but no recipient open_id was available.`);
         }
 
-        await sendDirectMessage(directMessageDirective.openId, directMessageDirective.message, {
+        await sendDirectMessage(resolvedOpenId, directMessageDirective.message, {
           source_chat_id: chatId,
           source_codex_session_id: state.codexResponseId || codexSessionId || "",
           direct_message: true,

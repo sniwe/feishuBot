@@ -6,6 +6,7 @@ const path = require("path");
 
 const { createStateStore } = require("./lib/state-store.js");
 const { createFileTransferService } = require("./lib/file-transfer.js");
+const { createContactResolver } = require("./lib/contact-resolver.js");
 const { createCodexRunner } = require("./lib/codex-runner.js");
 const { createRelayController } = require("./lib/relay.js");
 
@@ -27,6 +28,7 @@ Never output exactly the same text as USER_MESSAGE.
 If the user asks you to upload a local file, you must output a single line exactly in the form "UPLOAD_FILE: <absolute_path>" and nothing else on that line.
 If you need to send a direct message to a Feishu user, output a single line exactly in the form "DM_USER: <open_id|last_sender|me> | <message>" and nothing else on that line.
 You may also use the shorthand forms "@<recipient>: <message>" or "send a message to <recipient>: <message>" on a single line.
+Recipients may be an open_id, an email address, a mobile number, or the current sender alias.
 If USER_MESSAGE is vague, ask one concise clarifying question instead of echoing.`).trim();
 const CODEX_SESSION_INDEX_PATH = path.join(os.homedir(), ".codex", "session_index.jsonl");
 
@@ -77,6 +79,18 @@ const fileTransfer = createFileTransferService({
     getPersistedChatEntry: stateStore.getPersistedChatEntry,
   },
 });
+
+const contactResolver = createContactResolver({
+  data: {
+    cachePath: path.join(PROJECT_ROOT, "data", "contact-resolver-cache.json"),
+  },
+  deps: {
+    client,
+    fs,
+    path,
+  },
+});
+contactResolver.loadCache();
 
 async function sendMessage(receiveIdType, receiveId, text, meta = {}) {
   const isChatMessage = receiveIdType === "chat_id";
@@ -133,6 +147,7 @@ const codexRunner = createCodexRunner({
     quoteForCmd,
     splitForFeishu: stateStore.splitForFeishu,
     uploadFileToChat: fileTransfer.uploadFileToChat,
+    resolveRecipientOpenId: contactResolver.resolveRecipientOpenId,
     sendDirectMessage,
     sendTextMessage,
     setChatSessionId: stateStore.setChatSessionId,
@@ -149,6 +164,7 @@ const relay = createRelayController({
     path,
     stateStore,
     fileTransfer,
+    contactResolver,
     codexRunner,
     sendTextMessage,
     sendDirectMessage,

@@ -4,7 +4,7 @@
   "name": "feishuBot",
   "summary": "Project map for the Feishu Codex relay",
   "root": "C:\\Users\\Qub\\feishuBot",
-  "updated": "2026-03-23T15:06:41.5523976+08:00",
+  "updated": "2026-03-23T15:19:56.5793446+08:00",
   "nodes": [
     {
       "id": "node-root",
@@ -45,7 +45,7 @@
       "summary": "Loads env config and wires the relay modules together",
       "features": [
         {
-          "summary": "Bootstraps Feishu client, state store, transfer, Codex, and relay",
+          "summary": "Bootstraps Feishu client, state store, transfer, contact lookup, Codex, and relay",
           "flow": [
             "edge-app-state",
             "edge-app-transfer",
@@ -87,6 +87,7 @@
       "children": [
         "node-state-store",
         "node-file-transfer",
+        "node-contact-resolver",
         "node-codex-runner",
         "node-relay"
       ]
@@ -150,6 +151,41 @@
       "critical": true,
       "files": [
         "src/backend/lib/file-transfer.js"
+      ],
+      "children": []
+    },
+    {
+      "id": "node-contact-resolver",
+      "type": "module",
+      "name": "Contact Resolver",
+      "summary": "Maps recipient tokens to Feishu open_id values using the contact directory",
+      "features": [
+        {
+          "summary": "Resolves open_id, email, and mobile tokens for DM delivery",
+          "flow": [
+            "edge-contact-relay",
+            "edge-contact-codex"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge-contact-relay",
+          "kind": "depends",
+          "from": "node-contact-resolver",
+          "to": "node-relay"
+        },
+        {
+          "id": "edge-contact-codex",
+          "kind": "depends",
+          "from": "node-contact-resolver",
+          "to": "node-codex-runner"
+        }
+      ],
+      "critical": false,
+      "files": [
+        "src/backend/lib/contact-resolver.js",
+        "data/contact-resolver-cache.json"
       ],
       "children": []
     },
