@@ -3987,21 +3987,17 @@
         nextWidth = Math.min(maxWidth, Math.max(minWidth, Math.ceil(widestLine + 18)));
         inputEl.style.height = "auto";
         nextHeight = Math.max(minHeight, Math.ceil(inputEl.scrollHeight + 4));
-        bubble.style.borderRadius = lines.length > 1 ? "12px" : "999px";
         nextWidth = Math.min(maxWidth, Math.max(minWidth, Math.ceil(widestLine + 18)));
       } else {
         inputEl.style.height = String(minHeight) + "px";
       }
-    }
-    if (!hasContent) {
-      bubble.style.borderRadius = "999px";
     }
     bubble.style.height = String(nextHeight) + "px";
     inputEl.style.height = String(nextHeight) + "px";
     bubble.style.width = String(nextWidth) + "px";
     const reserveBelow = card.dataset.subsegHasFollowingContent === "1";
     const marginBottom = reserveBelow ? Math.max(0, nextHeight - 2) : 0;
-    const spineExtension = reserveBelow ? marginBottom : 0;
+    const spineExtension = reserveBelow ? Math.max(0, marginBottom - 7) : 0;
     card.style.marginBottom = String(marginBottom) + "px";
     card.style.setProperty("--subseg-card-spine-extension", String(spineExtension) + "px");
     bubble.classList.toggle("has-content", hasContent);
