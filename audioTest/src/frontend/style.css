@@ -910,7 +910,7 @@ h1, p { margin: 0; }
 
 .subseg-value-list {
   display: grid;
-  gap: 5px;
+  gap: 0;
 }
 
 .subseg-timeline {

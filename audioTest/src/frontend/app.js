@@ -3664,6 +3664,8 @@
         order: visibleChildren.length + 1
       });
     });
+    const hasFollowingContent = Boolean(!isLastSibling || visibleChildren.length > 0);
+    card.dataset.subsegHasFollowingContent = hasFollowingContent ? "1" : "0";
     subSegValueList.appendChild(card);
     syncSubSegCardBubbleWidth(cardBubbleInput);
     requestAnimationFrame(function () {
@@ -3997,6 +3999,11 @@
     bubble.style.height = String(nextHeight) + "px";
     inputEl.style.height = String(nextHeight) + "px";
     bubble.style.width = String(nextWidth) + "px";
+    const reserveBelow = card.dataset.subsegHasFollowingContent === "1";
+    const marginBottom = reserveBelow ? Math.max(0, nextHeight - 2) : 0;
+    const spineExtension = reserveBelow ? Math.max(0, nextHeight - 14) : 0;
+    card.style.marginBottom = String(marginBottom) + "px";
+    card.style.setProperty("--subseg-card-spine-extension", String(spineExtension) + "px");
     bubble.classList.toggle("has-content", hasContent);
   }
 
