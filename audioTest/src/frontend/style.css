@@ -1023,18 +1023,36 @@ h1, p { margin: 0; }
 
 .subseg-value-selection-layer {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
   overflow: visible;
   pointer-events: none;
   z-index: 2;
 }
 
+.subseg-value-selection-mirror {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  white-space: pre;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.subseg-value-selection-mirror-text,
+.subseg-value-selection-mirror-selected {
+  white-space: pre;
+}
+
+.subseg-value-selection-mirror-selected {
+  display: inline-block;
+}
+
 .subseg-value-selection-bubble {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 1.25em;
-  min-height: 18px;
   border: 1px solid rgba(67, 129, 212, 0.48);
   border-radius: 999px;
   background: rgba(113, 165, 244, 0.12);
@@ -1053,8 +1071,8 @@ h1, p { margin: 0; }
 
 .subseg-value-selection-badge {
   position: absolute;
-  top: -7px;
-  left: -7px;
+  top: -6px;
+  left: -6px;
   width: 14px;
   height: 14px;
   border: 1px solid rgba(67, 129, 212, 0.62);

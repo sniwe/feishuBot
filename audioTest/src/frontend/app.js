@@ -3676,17 +3676,6 @@
     return null;
   }
 
-  function getSubSegTextMeasureContext() {
-    if (!state.subSegTextMeasureCanvas) {
-      state.subSegTextMeasureCanvas = document.createElement("canvas");
-    }
-    if (!state.subSegTextMeasureCanvasContext) {
-      const context = state.subSegTextMeasureCanvas.getContext("2d");
-      state.subSegTextMeasureCanvasContext = context || null;
-    }
-    return state.subSegTextMeasureCanvasContext;
-  }
-
   function renderSubSegCardSelectionBubbles(ctx) {
     const { ui, data } = ctx;
     const selectionLayer = ui && ui.selectionLayer ? ui.selectionLayer : null;
@@ -3703,6 +3692,10 @@
     }
 
     const style = window.getComputedStyle(input);
+    const paddingLeft = Number.parseFloat(style.paddingLeft) || 0;
+    const paddingTop = Number.parseFloat(style.paddingTop) || 0;
+    const paddingRight = Number.parseFloat(style.paddingRight) || 0;
+    const paddingBottom = Number.parseFloat(style.paddingBottom) || 0;
     const font = [
       style ? style.fontStyle : "",
       style ? style.fontVariant : "",
@@ -3711,27 +3704,50 @@
       style ? style.fontSize : "",
       style ? style.fontFamily : ""
     ].filter(function (value) { return Boolean(String(value || "").trim()); }).join(" ");
-    const context = getSubSegTextMeasureContext();
-    if (!context) {
-      return;
-    }
-    context.font = font || "normal 0.78rem Segoe UI, Tahoma, sans-serif";
-
-    const paddingLeft = Number.parseFloat(style.paddingLeft) || 0;
 
     visibleChildren.forEach(function (item) {
       const range = item && item.resolvedSelection ? item.resolvedSelection : null;
       if (!range) {
         return;
       }
-      const startText = displayedValue.slice(0, range.start);
-      const selectedText = displayedValue.slice(range.start, range.end);
-      const left = paddingLeft + context.measureText(startText).width;
-      const width = Math.max(12, context.measureText(selectedText).width + 8);
+      const mirror = document.createElement("div");
+      mirror.className = "subseg-value-selection-mirror";
+      mirror.style.font = font || "normal 0.78rem Segoe UI, Tahoma, sans-serif";
+      mirror.style.paddingLeft = String(paddingLeft) + "px";
+      mirror.style.paddingTop = String(paddingTop) + "px";
+      mirror.style.paddingRight = String(paddingRight) + "px";
+      mirror.style.paddingBottom = String(paddingBottom) + "px";
+
+      const before = document.createElement("span");
+      before.className = "subseg-value-selection-mirror-text";
+      before.textContent = displayedValue.slice(0, range.start);
+
+      const selected = document.createElement("span");
+      selected.className = "subseg-value-selection-mirror-selected";
+      selected.textContent = displayedValue.slice(range.start, range.end);
+
+      const after = document.createElement("span");
+      after.className = "subseg-value-selection-mirror-text";
+      after.textContent = displayedValue.slice(range.end);
+
+      mirror.appendChild(before);
+      mirror.appendChild(selected);
+      mirror.appendChild(after);
+      selectionLayer.appendChild(mirror);
+
+      const mirrorRect = mirror.getBoundingClientRect();
+      const selectedRect = selected.getBoundingClientRect();
+      const left = Math.max(0, selectedRect.left - mirrorRect.left);
+      const top = Math.max(0, selectedRect.top - mirrorRect.top);
+      const width = Math.max(12, selectedRect.width);
+      const height = Math.max(16, selectedRect.height);
+
       const bubble = document.createElement("span");
       bubble.className = "subseg-value-selection-bubble";
-      bubble.style.left = String(Math.max(0, left - 2)) + "px";
-      bubble.style.width = String(Math.max(12, width)) + "px";
+      bubble.style.left = String(left - 2) + "px";
+      bubble.style.top = String(top - 1) + "px";
+      bubble.style.width = String(width + 4) + "px";
+      bubble.style.height = String(height + 2) + "px";
       bubble.style.setProperty("--subseg-bubble-order", String(item.order || 1));
       bubble.setAttribute("aria-hidden", "true");
       const badge = document.createElement("span");
@@ -3739,6 +3755,7 @@
       badge.textContent = String(item.order || 1);
       bubble.appendChild(badge);
       selectionLayer.appendChild(bubble);
+      selectionLayer.removeChild(mirror);
     });
   }
 
