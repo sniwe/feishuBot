@@ -3973,9 +3973,11 @@
     if (card.classList.contains("is-nested")) {
       const prevCard = card.previousElementSibling;
       if (prevCard && prevCard.classList && prevCard.classList.contains("subseg-value-card")) {
-        const prevBottom = prevCard.offsetTop + prevCard.offsetHeight;
-        const currentTop = card.offsetTop;
-        topExtension = Math.max(0, Math.floor(currentTop - prevBottom));
+        const prevRect = prevCard.getBoundingClientRect();
+        const currentRect = card.getBoundingClientRect();
+        const gapAbove = currentRect.top - prevRect.bottom;
+        // Add 1px overlap so sub-pixel rounding never leaves visible gaps.
+        topExtension = Math.max(0, Math.ceil(gapAbove) + 1);
       }
     }
     card.style.marginBottom = String(marginBottom) + "px";
