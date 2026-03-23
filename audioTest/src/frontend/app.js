@@ -92,6 +92,8 @@
     subSegCardInternalChangeGuards: {},
     subSegCardDeleteDialogKey: null,
     subSegValueNodeIdCounter: 0,
+    subSegTextMeasureCanvas: null,
+    subSegTextMeasureCanvasContext: null,
     subSegTimelines: {},
     subSegTimelineEventIdCounter: 0,
     subSegTimelineVisible: false,
@@ -3516,6 +3518,10 @@
         }
       }
     }
+    const inputShell = document.createElement("div");
+    inputShell.className = "subseg-value-card-input-shell";
+    const selectionLayer = document.createElement("div");
+    selectionLayer.className = "subseg-value-selection-layer";
     const input = document.createElement("input");
     input.type = "text";
     input.className = "subseg-value-card-input";
@@ -3543,7 +3549,6 @@
     } else {
       version.textContent = "current -0 (" + String(totalVersions) + " total) | " + formatSavedAt(entry && entry.createdAt ? entry.createdAt : "");
     }
-    card.appendChild(version);
     input.value = displayedValue;
     input.readOnly = Boolean(isRecalling || isTimelineTraversal);
     if (isRecalling) {
@@ -3553,7 +3558,10 @@
       input.addEventListener("input", handleSubSegCardInputLive);
       input.addEventListener("change", handleSubSegCardInputChange);
     }
-    card.appendChild(input);
+    inputShell.appendChild(selectionLayer);
+    inputShell.appendChild(input);
+    card.appendChild(version);
+    card.appendChild(inputShell);
 
     const deleteDialogKey = getSubSegCardRecallStateKey(key, pathKey);
     if (state.subSegCardDeleteDialogKey === deleteDialogKey) {
@@ -3589,7 +3597,6 @@
       card.appendChild(actions);
     }
 
-    subSegValueList.appendChild(card);
     entry.children = getSortedChildEntries(entry.children);
     const sortedChildren = entry.children;
     const nextAncestorGuideDepths = Array.isArray(ancestorGuideDepths)
@@ -3607,14 +3614,38 @@
       if (!childDisplayedValue) {
         return;
       }
+      const resolvedSelection = resolveSubSegCardSelectionRange(displayedValue, childEntry);
+      if (!resolvedSelection) {
+        return;
+      }
       if (String(displayedValue || "").indexOf(childDisplayedValue) < 0) {
         return;
       }
       visibleChildren.push({
         childEntry,
-        childPath
+        childPath,
+        childPathKey,
+        childDisplayedValue,
+        childRecallPosition,
+        resolvedSelection,
+        order: visibleChildren.length + 1
       });
     });
+    subSegValueList.appendChild(card);
+    if (visibleChildren.length > 0) {
+      renderSubSegCardSelectionBubbles({
+        ui: {
+          selectionLayer,
+          inputShell,
+          input
+        },
+        data: {
+          displayedValue,
+          visibleChildren
+        },
+        deps: {}
+      });
+    }
     visibleChildren.forEach(function (item, visibleIndex) {
       renderSubSegValueCardNode(
         key,
@@ -3624,6 +3655,90 @@
         visibleIndex === (visibleChildren.length - 1),
         nextAncestorGuideDepths
       );
+    });
+  }
+
+  function resolveSubSegCardSelectionRange(displayedValue, childEntry) {
+    const text = String(displayedValue || "");
+    const entryValue = String(childEntry && childEntry.value != null ? childEntry.value : "").trim();
+    const anchorStart = Number(childEntry && childEntry.anchorStart);
+    const anchorEnd = Number(childEntry && childEntry.anchorEnd);
+    if (Number.isFinite(anchorStart) && Number.isFinite(anchorEnd) && anchorEnd > anchorStart && anchorStart >= 0 && anchorEnd <= text.length) {
+      return { start: Math.floor(anchorStart), end: Math.floor(anchorEnd) };
+    }
+    if (!entryValue) {
+      return null;
+    }
+    const directIndex = text.indexOf(entryValue);
+    if (directIndex >= 0) {
+      return { start: directIndex, end: directIndex + entryValue.length };
+    }
+    return null;
+  }
+
+  function getSubSegTextMeasureContext() {
+    if (!state.subSegTextMeasureCanvas) {
+      state.subSegTextMeasureCanvas = document.createElement("canvas");
+    }
+    if (!state.subSegTextMeasureCanvasContext) {
+      const context = state.subSegTextMeasureCanvas.getContext("2d");
+      state.subSegTextMeasureCanvasContext = context || null;
+    }
+    return state.subSegTextMeasureCanvasContext;
+  }
+
+  function renderSubSegCardSelectionBubbles(ctx) {
+    const { ui, data } = ctx;
+    const selectionLayer = ui && ui.selectionLayer ? ui.selectionLayer : null;
+    const input = ui && ui.input ? ui.input : null;
+    const inputShell = ui && ui.inputShell ? ui.inputShell : null;
+    const displayedValue = String(data && data.displayedValue ? data.displayedValue : "");
+    const visibleChildren = Array.isArray(data && data.visibleChildren) ? data.visibleChildren : [];
+    if (!selectionLayer || !input || !inputShell) {
+      return;
+    }
+    selectionLayer.innerHTML = "";
+    if (!displayedValue || visibleChildren.length <= 0) {
+      return;
+    }
+
+    const style = window.getComputedStyle(input);
+    const font = [
+      style ? style.fontStyle : "",
+      style ? style.fontVariant : "",
+      style ? style.fontWeight : "",
+      style ? style.fontStretch : "",
+      style ? style.fontSize : "",
+      style ? style.fontFamily : ""
+    ].filter(function (value) { return Boolean(String(value || "").trim()); }).join(" ");
+    const context = getSubSegTextMeasureContext();
+    if (!context) {
+      return;
+    }
+    context.font = font || "normal 0.78rem Segoe UI, Tahoma, sans-serif";
+
+    const paddingLeft = Number.parseFloat(style.paddingLeft) || 0;
+
+    visibleChildren.forEach(function (item) {
+      const range = item && item.resolvedSelection ? item.resolvedSelection : null;
+      if (!range) {
+        return;
+      }
+      const startText = displayedValue.slice(0, range.start);
+      const selectedText = displayedValue.slice(range.start, range.end);
+      const left = paddingLeft + context.measureText(startText).width;
+      const width = Math.max(12, context.measureText(selectedText).width + 8);
+      const bubble = document.createElement("span");
+      bubble.className = "subseg-value-selection-bubble";
+      bubble.style.left = String(Math.max(0, left - 2)) + "px";
+      bubble.style.width = String(Math.max(12, width)) + "px";
+      bubble.style.setProperty("--subseg-bubble-order", String(item.order || 1));
+      bubble.setAttribute("aria-hidden", "true");
+      const badge = document.createElement("span");
+      badge.className = "subseg-value-selection-badge";
+      badge.textContent = String(item.order || 1);
+      bubble.appendChild(badge);
+      selectionLayer.appendChild(bubble);
     });
   }
 
