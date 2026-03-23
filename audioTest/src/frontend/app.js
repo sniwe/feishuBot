@@ -3674,16 +3674,38 @@
     const anchorStart = Number(childEntry && childEntry.anchorStart);
     const anchorEnd = Number(childEntry && childEntry.anchorEnd);
     if (Number.isFinite(anchorStart) && Number.isFinite(anchorEnd) && anchorEnd > anchorStart && anchorStart >= 0 && anchorEnd <= text.length) {
-      return { start: Math.floor(anchorStart), end: Math.floor(anchorEnd) };
+      return trimSubSegSelectionRange(text, { start: Math.floor(anchorStart), end: Math.floor(anchorEnd) });
     }
     if (!entryValue) {
       return null;
     }
     const directIndex = text.indexOf(entryValue);
     if (directIndex >= 0) {
-      return { start: directIndex, end: directIndex + entryValue.length };
+      return trimSubSegSelectionRange(text, { start: directIndex, end: directIndex + entryValue.length });
     }
     return null;
+  }
+
+  function trimSubSegSelectionRange(text, range) {
+    const source = String(text || "");
+    const resolved = range && Number.isFinite(range.start) && Number.isFinite(range.end)
+      ? { start: Math.max(0, Math.floor(range.start)), end: Math.max(0, Math.floor(range.end)) }
+      : null;
+    if (!resolved || resolved.end <= resolved.start) {
+      return null;
+    }
+    let start = resolved.start;
+    let end = Math.min(source.length, resolved.end);
+    while (start < end && /\s/.test(source.charAt(start))) {
+      start += 1;
+    }
+    while (end > start && /\s/.test(source.charAt(end - 1))) {
+      end -= 1;
+    }
+    if (end <= start) {
+      return null;
+    }
+    return { start, end };
   }
 
   function renderSubSegCardSelectionBubbles(ctx) {
@@ -3746,15 +3768,6 @@
       const top = Math.max(0, selectedRect.top - mirrorRect.top);
       const width = Math.max(12, selectedRect.width);
       const height = Math.max(16, selectedRect.height);
-
-      const domRange = document.createRange();
-      try {
-        domRange.setStart(selected.firstChild || selected, 0);
-        domRange.setEnd(selected.firstChild || selected, String(selected.textContent || "").length);
-      } catch {
-        selectionLayer.removeChild(mirror);
-        return;
-      }
 
       const bubble = document.createElement("span");
       bubble.className = "subseg-value-selection-bubble";
