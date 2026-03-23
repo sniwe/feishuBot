@@ -3566,7 +3566,6 @@
     if (isRecalling) {
       input.classList.add("is-recalling");
     }
-    inputShell.classList.toggle("is-history-view", isHistoryView);
     if (!isTimelineTraversal) {
       input.addEventListener("input", handleSubSegCardInputLive);
       input.addEventListener("change", handleSubSegCardInputChange);
@@ -3646,8 +3645,10 @@
         order: visibleChildren.length + 1
       });
     });
+    const useOverlayView = Boolean(!isHistoryView || visibleChildren.length > 0);
+    inputShell.classList.toggle("is-history-view", !useOverlayView);
     subSegValueList.appendChild(card);
-    if (visibleChildren.length > 0 && !isHistoryView) {
+    if (visibleChildren.length > 0 && useOverlayView) {
       renderSubSegCardSelectionBubbles({
         ui: {
           selectionLayer,
