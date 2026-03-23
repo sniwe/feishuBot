@@ -910,7 +910,7 @@ h1, p { margin: 0; }
 
 .subseg-value-list {
   display: grid;
-  gap: 6px;
+  gap: 12px;
 }
 
 .subseg-timeline {
@@ -1021,11 +1021,16 @@ h1, p { margin: 0; }
   bottom: -7px;
   width: 32px;
   height: 12px;
-  border: 1px solid rgba(7, 74, 71, 0.28);
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 5px;
+  border: 1px solid #074a47;
   border-radius: 999px;
-  background: rgba(11, 122, 117, 0.14);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.26);
-  pointer-events: none;
+  background: #0b7a75;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+  transition: width 120ms ease;
   z-index: 3;
 }
 
@@ -1034,7 +1039,28 @@ h1, p { margin: 0; }
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: 0 0 0 1px rgba(7, 74, 71, 0.06);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
+.subseg-value-card-bubble-input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #f7fffe;
+  font-family: inherit;
+  font-size: 0.58rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  caret-color: #f7fffe;
+}
+
+.subseg-value-card-bubble-input::placeholder {
+  color: rgba(247, 255, 254, 0.68);
 }
 
 .subseg-value-card-input-shell {

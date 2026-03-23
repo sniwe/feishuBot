@@ -90,6 +90,8 @@
     subSegCardLiveValueOverrides: {},
     subSegCardCommitTimerIds: {},
     subSegCardInternalChangeGuards: {},
+    subSegCardBubbleValues: {},
+    subSegCardBubbleCommitTimerIds: {},
     subSegCardDeleteDialogKey: null,
     subSegValueNodeIdCounter: 0,
     subSegTextMeasureCanvas: null,
@@ -394,6 +396,11 @@
       activeElement.classList &&
       activeElement.classList.contains("subseg-value-card-input")
     );
+    const isSubSegCardBubbleInputFocused = Boolean(
+      activeElement &&
+      activeElement.classList &&
+      activeElement.classList.contains("subseg-value-card-bubble-input")
+    );
     const isSubSegDeleteDialogButtonFocused = Boolean(
       activeElement &&
       activeElement.tagName === "BUTTON" &&
@@ -486,6 +493,10 @@
     }
 
     if (isSubSegDeleteDialogButtonFocused) {
+      return;
+    }
+
+    if (isSubSegCardBubbleInputFocused) {
       return;
     }
 
@@ -2768,6 +2779,8 @@
     state.subSegTimelineEventIdCounter = 0;
     state.subSegCardRecallPositions = {};
     state.subSegCardInternalChangeGuards = {};
+    state.subSegCardBubbleValues = {};
+    clearAllSubSegCardBubbleCommitTimers();
     state.subSegCardDeleteDialogKey = null;
     state.activeSubSegValueKey = null;
     resetSubSegTimelineUiState();
@@ -3565,8 +3578,26 @@
 
     const cardBubble = document.createElement("span");
     cardBubble.className = "subseg-value-card-bubble";
-    cardBubble.setAttribute("aria-hidden", "true");
+    const cardBubbleStateKey = getSubSegCardRecallStateKey(key, pathKey);
+    const cardBubbleInput = document.createElement("input");
+    cardBubbleInput.type = "text";
+    cardBubbleInput.className = "subseg-value-card-bubble-input";
+    cardBubbleInput.autocomplete = "off";
+    cardBubbleInput.spellcheck = false;
+    cardBubbleInput.dataset.subSegValueKey = key;
+    cardBubbleInput.dataset.subSegValuePath = pathKey;
+    cardBubbleInput.setAttribute("aria-label", "Card comment");
+    cardBubbleInput.value = Object.prototype.hasOwnProperty.call(state.subSegCardBubbleValues, cardBubbleStateKey)
+      ? String(state.subSegCardBubbleValues[cardBubbleStateKey] || "")
+      : "";
+    cardBubbleInput.addEventListener("input", handleSubSegCardBubbleInputLive);
+    cardBubbleInput.addEventListener("change", handleSubSegCardBubbleInputChange);
+    cardBubble.appendChild(cardBubbleInput);
     card.appendChild(cardBubble);
+    syncSubSegCardBubbleWidth(cardBubbleInput);
+    requestAnimationFrame(function () {
+      syncSubSegCardBubbleWidth(cardBubbleInput);
+    });
 
     const deleteDialogKey = getSubSegCardRecallStateKey(key, pathKey);
     if (state.subSegCardDeleteDialogKey === deleteDialogKey) {
@@ -3815,6 +3846,43 @@
     commitSubSegCardInputValue(inputEl, { rerender: false });
   }
 
+  function handleSubSegCardBubbleInputLive(event) {
+    const inputEl = event ? event.target : null;
+    const key = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValueKey || "" : "");
+    const pathKey = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValuePath || "" : "");
+    if (!key || !pathKey || !inputEl) {
+      return;
+    }
+    const stateKey = getSubSegCardRecallStateKey(key, pathKey);
+    const nextValue = String(inputEl.value || "");
+    if (nextValue) {
+      state.subSegCardBubbleValues[stateKey] = nextValue;
+    } else if (Object.prototype.hasOwnProperty.call(state.subSegCardBubbleValues, stateKey)) {
+      delete state.subSegCardBubbleValues[stateKey];
+    }
+    syncSubSegCardBubbleWidth(inputEl);
+    scheduleSubSegCardBubbleCommitDebounced(key, pathKey);
+  }
+
+  function handleSubSegCardBubbleInputChange(event) {
+    const inputEl = event ? event.target : null;
+    const key = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValueKey || "" : "");
+    const pathKey = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValuePath || "" : "");
+    if (!key || !pathKey || !inputEl) {
+      return;
+    }
+    const stateKey = getSubSegCardRecallStateKey(key, pathKey);
+    clearSubSegCardBubbleCommitTimerByStateKey(stateKey);
+    const nextValue = String(inputEl.value || "");
+    if (nextValue) {
+      state.subSegCardBubbleValues[stateKey] = nextValue;
+    } else if (Object.prototype.hasOwnProperty.call(state.subSegCardBubbleValues, stateKey)) {
+      delete state.subSegCardBubbleValues[stateKey];
+    }
+    syncSubSegCardBubbleWidth(inputEl);
+    enqueueAutoSave();
+  }
+
   function handleSubSegCardInputLive(event) {
     const inputEl = event ? event.target : null;
     const key = String(inputEl && inputEl.dataset ? inputEl.dataset.subSegValueKey || "" : "");
@@ -3840,6 +3908,78 @@
     requestAnimationFrame(function () {
       clearSubSegCardInternalChangeGuard(key, pathKey);
     });
+  }
+
+  function clearSubSegCardBubbleCommitTimerByStateKey(stateKey) {
+    const timerId = Number(state.subSegCardBubbleCommitTimerIds[stateKey]);
+    if (Number.isFinite(timerId) && timerId > 0) {
+      window.clearTimeout(timerId);
+    }
+    delete state.subSegCardBubbleCommitTimerIds[stateKey];
+  }
+
+  function clearAllSubSegCardBubbleCommitTimers() {
+    const keys = Object.keys(state.subSegCardBubbleCommitTimerIds || {});
+    keys.forEach(function (stateKey) {
+      clearSubSegCardBubbleCommitTimerByStateKey(stateKey);
+    });
+  }
+
+  function scheduleSubSegCardBubbleCommitDebounced(key, pathKey) {
+    if (!key || !pathKey) {
+      return;
+    }
+    const stateKey = getSubSegCardRecallStateKey(key, pathKey);
+    clearSubSegCardBubbleCommitTimerByStateKey(stateKey);
+    state.subSegCardBubbleCommitTimerIds[stateKey] = window.setTimeout(function () {
+      clearSubSegCardBubbleCommitTimerByStateKey(stateKey);
+      enqueueAutoSave();
+    }, 900);
+  }
+
+  function ensureSubSegTextMeasureContext() {
+    if (!state.subSegTextMeasureCanvas) {
+      state.subSegTextMeasureCanvas = document.createElement("canvas");
+    }
+    if (!state.subSegTextMeasureCanvasContext && state.subSegTextMeasureCanvas) {
+      state.subSegTextMeasureCanvasContext = state.subSegTextMeasureCanvas.getContext("2d");
+    }
+    return state.subSegTextMeasureCanvasContext;
+  }
+
+  function syncSubSegCardBubbleWidth(inputEl) {
+    if (!inputEl) {
+      return;
+    }
+    const bubble = inputEl.closest(".subseg-value-card-bubble");
+    const card = inputEl.closest(".subseg-value-card");
+    if (!bubble || !card) {
+      return;
+    }
+    const value = String(inputEl.value || "");
+    const hasContent = Boolean(value.trim());
+    const minWidth = 32;
+    const cardWidth = card.getBoundingClientRect ? card.getBoundingClientRect().width : 0;
+    const maxWidth = cardWidth > 0 ? Math.max(minWidth, Math.floor(cardWidth * 0.6)) : 240;
+    let nextWidth = minWidth;
+    if (hasContent) {
+      const ctx = ensureSubSegTextMeasureContext();
+      const computed = window.getComputedStyle(inputEl);
+      if (ctx && computed) {
+        const font = computed.font || [
+          computed.fontStyle,
+          computed.fontVariant,
+          computed.fontWeight,
+          computed.fontSize,
+          computed.fontFamily
+        ].filter(Boolean).join(" ");
+        ctx.font = font;
+        const textWidth = ctx.measureText(value).width;
+        nextWidth = Math.min(maxWidth, Math.max(minWidth, Math.ceil(textWidth + 18)));
+      }
+    }
+    bubble.style.width = String(nextWidth) + "px";
+    bubble.classList.toggle("has-content", hasContent);
   }
 
   function commitSubSegCardInputValue(inputEl, options) {
@@ -4352,6 +4492,18 @@
     guardKeys.forEach(function (k) {
       if (k === targetPrefix || k.startsWith(targetPrefix + ".")) {
         delete state.subSegCardInternalChangeGuards[k];
+      }
+    });
+    const bubbleKeys = Object.keys(state.subSegCardBubbleValues);
+    bubbleKeys.forEach(function (k) {
+      if (k === targetPrefix || k.startsWith(targetPrefix + ".")) {
+        delete state.subSegCardBubbleValues[k];
+      }
+    });
+    const bubbleTimerKeys = Object.keys(state.subSegCardBubbleCommitTimerIds);
+    bubbleTimerKeys.forEach(function (k) {
+      if (k === targetPrefix || k.startsWith(targetPrefix + ".")) {
+        clearSubSegCardBubbleCommitTimerByStateKey(k);
       }
     });
     const timerKeys = Object.keys(state.subSegCardCommitTimerIds);
@@ -4955,6 +5107,18 @@
           createdAt: getSubSegCreatedAtByKey(key) || nowIso,
           events: []
         };
+      }
+    });
+    return normalized;
+  }
+
+  function normalizeSubSegCardBubbleValues(rawValues) {
+    const source = rawValues && typeof rawValues === "object" ? rawValues : {};
+    const normalized = {};
+    Object.keys(source).forEach(function (key) {
+      const value = String(source[key] || "").trim();
+      if (value) {
+        normalized[key] = value;
       }
     });
     return normalized;
@@ -5636,6 +5800,7 @@
         }),
         subSegValueEntries: state.subSegValueEntries,
         subSegTimelines: state.subSegTimelines,
+        subSegCardBubbleValues: state.subSegCardBubbleValues,
         selectedSpanIndex: -1,
         currentTime: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
         wasPlaying: !audio.paused
@@ -5743,6 +5908,7 @@
     state.subSegs = normalizeSubSegs(savedPlayback.subSegs);
     state.subSegValueEntries = normalizeSubSegValueEntries(savedPlayback.subSegValueEntries);
     state.subSegTimelines = normalizeSubSegTimelines(savedPlayback.subSegTimelines, state.subSegValueEntries);
+    state.subSegCardBubbleValues = normalizeSubSegCardBubbleValues(savedPlayback.subSegCardBubbleValues);
     state.activeSubSegValueKey = null;
     resetSubSegTimelineUiState();
 
