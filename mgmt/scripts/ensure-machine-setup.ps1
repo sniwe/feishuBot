@@ -48,14 +48,24 @@ if (Test-Path -LiteralPath $flagPath) {
     try { $existing = Get-Content -LiteralPath $flagPath -Raw | ConvertFrom-Json } catch { $existing = $null }
 }
 
-$needsSetup = $Force -or $null -eq $existing -or -not (Test-AutoSyncConfigured -Mode $AutoSyncMode)
+$desiredMode = $AutoSyncMode
+if ($existing -and $existing.PSObject.Properties.Name -contains "auto_sync_mode") {
+    $existingMode = [string]$existing.auto_sync_mode
+    if ($existingMode -in @("task", "ahk", "none")) {
+        $desiredMode = $existingMode
+    }
+}
+
+$needsSetup = $Force -or $null -eq $existing -or -not (Test-AutoSyncConfigured -Mode $desiredMode)
 
 if ($needsSetup) {
-    & $bootstrapScript -GlobalMgmtDir $GLOBAL_MGMT_DIR | Out-Null
-    if ($AutoSyncMode -eq "task") {
-        & $taskInstaller -GlobalMgmtDir $GLOBAL_MGMT_DIR | Out-Null
-    } elseif ($AutoSyncMode -eq "ahk") {
-        & $ahkInstaller -GlobalMgmtDir $GLOBAL_MGMT_DIR -StartNow | Out-Null
+    if ($desiredMode -eq "task" -or $desiredMode -eq "ahk") {
+        & $bootstrapScript -GlobalMgmtDir $GLOBAL_MGMT_DIR | Out-Null
+        if ($desiredMode -eq "task") {
+            & $taskInstaller -GlobalMgmtDir $GLOBAL_MGMT_DIR | Out-Null
+        } elseif ($desiredMode -eq "ahk") {
+            & $ahkInstaller -GlobalMgmtDir $GLOBAL_MGMT_DIR -StartNow | Out-Null
+        }
     }
 
     $payload = [ordered]@{
@@ -64,7 +74,7 @@ if ($needsSetup) {
         user = $env:USERNAME
         user_root = $USER_ROOT
         global_mgmt_dir = $GLOBAL_MGMT_DIR
-        auto_sync_mode = $AutoSyncMode
+        auto_sync_mode = $desiredMode
         setup_completed_at = $nowIso
         force = [bool]$Force
     }
@@ -75,7 +85,7 @@ if ($needsSetup) {
     ok = $true
     machine = $machineName
     setup_required = [bool]$needsSetup
-    auto_sync_mode = $AutoSyncMode
+    auto_sync_mode = $desiredMode
     flag_path = $flagPath
     setup_verified_at = (Get-Date).ToString("o")
 } | ConvertTo-Json -Depth 6
