@@ -8,6 +8,7 @@ const { createStateStore } = require("./lib/state-store.js");
 const { createFileTransferService } = require("./lib/file-transfer.js");
 const { createContactResolver } = require("./lib/contact-resolver.js");
 const { createCodexRunner } = require("./lib/codex-runner.js");
+const { createCodexStatusPoller } = require("./lib/codex-status-poller.js");
 const { createRelayController } = require("./lib/relay.js");
 
 const PROJECT_ROOT = path.resolve(__dirname, "..", "..");
@@ -31,6 +32,7 @@ You may also use the shorthand forms "@<recipient>: <message>" or "send a messag
 Recipients may be an open_id, an email address, a mobile number, or the current sender alias.
 If USER_MESSAGE is vague, ask one concise clarifying question instead of echoing.`).trim();
 const CODEX_SESSION_INDEX_PATH = path.join(os.homedir(), ".codex", "session_index.jsonl");
+const CODEX_STATUS_PATH = path.join(PROJECT_ROOT, "mgmt", "projMap", "state", "codex-status.json");
 
 function quoteForCmd(arg) {
   if (!/[ \t"&<>|^]/.test(arg)) {
@@ -96,6 +98,15 @@ async function sendMessage(receiveIdType, receiveId, text, meta = {}) {
   const isChatMessage = receiveIdType === "chat_id";
   const state = isChatMessage ? stateStore.getChatState(receiveId) : null;
   const persistedEntry = isChatMessage ? stateStore.getPersistedChatEntry(receiveId) : { sessionId: "", chatName: "" };
+  const response = await client.im.v1.message.create({
+    params: { receive_id_type: receiveIdType },
+    data: {
+      receive_id: receiveId,
+      msg_type: "text",
+      content: JSON.stringify({ text }),
+    },
+  });
+
   stateStore.appendMessageLog({
     direction: "outgoing",
     chat_id: isChatMessage ? receiveId : "",
@@ -105,17 +116,11 @@ async function sendMessage(receiveIdType, receiveId, text, meta = {}) {
     chat_name: persistedEntry.chatName || "",
     destination_type: receiveIdType,
     destination_id: receiveId,
+    message_id: response?.data?.message_id || "",
     ...meta,
   });
 
-  await client.im.v1.message.create({
-    params: { receive_id_type: receiveIdType },
-    data: {
-      receive_id: receiveId,
-      msg_type: "text",
-      content: JSON.stringify({ text }),
-    },
-  });
+  return response?.data?.message_id || "";
 }
 
 async function sendTextMessage(chatId, text, meta = {}) {
@@ -126,6 +131,34 @@ async function sendDirectMessage(openId, text, meta = {}) {
   return sendMessage("open_id", openId, text, meta);
 }
 
+async function updateTextMessage(messageId, text) {
+  if (!messageId) {
+    return "";
+  }
+
+  await client.im.v1.message.update({
+    path: { message_id: messageId },
+    data: {
+      msg_type: "text",
+      content: JSON.stringify({ text }),
+    },
+  });
+
+  return messageId;
+}
+
+async function deleteTextMessage(messageId) {
+  if (!messageId) {
+    return "";
+  }
+
+  await client.im.v1.message.delete({
+    path: { message_id: messageId },
+  });
+
+  return messageId;
+}
+
 const codexRunner = createCodexRunner({
   data: {
     projectRoot: PROJECT_ROOT,
@@ -133,6 +166,7 @@ const codexRunner = createCodexRunner({
     codexModel: CODEX_MODEL,
     codexExtraArgs: CODEX_EXTRA_ARGS,
     codexRelayPrompt: CODEX_RELAY_PROMPT,
+    codexStatusPath: CODEX_STATUS_PATH,
   },
   deps: {
     spawn,
@@ -144,6 +178,7 @@ const codexRunner = createCodexRunner({
     codexModel: CODEX_MODEL,
     codexExtraArgs: CODEX_EXTRA_ARGS,
     codexRelayPrompt: CODEX_RELAY_PROMPT,
+    codexStatusPath: CODEX_STATUS_PATH,
     quoteForCmd,
     splitForFeishu: stateStore.splitForFeishu,
     uploadFileToChat: fileTransfer.uploadFileToChat,
@@ -172,6 +207,22 @@ const relay = createRelayController({
 });
 
 const eventDispatcher = relay.createEventDispatcher();
+const codexStatusPoller = createCodexStatusPoller({
+  data: {
+    statusPath: CODEX_STATUS_PATH,
+    intervalMs: 5000,
+  },
+  deps: {
+    fs,
+    path,
+    console,
+    sendTextMessage,
+    deleteTextMessage,
+    updateTextMessage,
+  },
+});
+
+codexStatusPoller.start();
 wsClient.start({ eventDispatcher });
 
 console.log("Feishu long connection starting...");

@@ -10,6 +10,7 @@ function createCodexRunner(ctx) {
     codexModel,
     codexExtraArgs,
     codexRelayPrompt,
+    codexStatusPath,
     quoteForCmd,
     splitForFeishu,
     uploadFileToChat,
@@ -26,6 +27,37 @@ function createCodexRunner(ctx) {
     const chatId = state.chatId || "";
     const senderOpenId = state.lastSenderOpenId || "";
     return `${codexRelayPrompt}\n\nCHAT_CONTEXT:\n- CHAT_ID: ${chatId}\n- LAST_SENDER_OPEN_ID: ${senderOpenId || "(unknown)"}\n\nUSER_MESSAGE: ${userText}\nASSISTANT_REPLY:`;
+  }
+
+  function writeCodexStatus(busy, extra = {}) {
+    if (!codexStatusPath) {
+      return;
+    }
+
+    const dirPath = path.dirname(codexStatusPath);
+    const tmpPath = `${codexStatusPath}.tmp`;
+    const payload = {
+      busy: Boolean(busy),
+      updatedAt: new Date().toISOString(),
+      ...extra,
+    };
+    const serialized = JSON.stringify(payload, null, 2);
+
+    fs.mkdirSync(dirPath, { recursive: true });
+    try {
+      fs.writeFileSync(tmpPath, serialized, "utf8");
+      fs.renameSync(tmpPath, codexStatusPath);
+    } catch {
+      fs.writeFileSync(codexStatusPath, serialized, "utf8");
+    } finally {
+      try {
+        if (fs.existsSync(tmpPath)) {
+          fs.rmSync(tmpPath, { force: true });
+        }
+      } catch {
+        // Best effort cleanup only.
+      }
+    }
   }
 
   function buildCodexArgs(outputPath) {
@@ -178,16 +210,38 @@ function createCodexRunner(ctx) {
     const prompt = buildCodexPrompt(userText, state);
     const codexSessionId = typeof state.codexResponseId === "string" ? state.codexResponseId.trim() : "";
     const codexArgs = codexSessionId ? buildCodexResumeArgs(codexSessionId, outputPath) : buildCodexArgs(outputPath);
-    const child = spawn("cmd.exe", ["/d", "/s", "/c", [codexCommand, ...codexArgs].map(quoteForCmd).join(" ")], {
-      cwd: projectRoot,
-      windowsHide: true,
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-    state.activeCodexProcess = child;
+    let child = null;
     let stderr = "";
     let stdout = "";
 
     try {
+      let statusMessageId = "";
+      try {
+        statusMessageId = await sendTextMessage(chatId, "Relayed & working (0s)", {
+          relay_status: true,
+          source_codex_session_id: codexSessionId || "",
+        });
+      } catch (statusErr) {
+        console.error("Failed to send Codex working status message:", statusErr.message);
+      }
+
+      state.relayStatusMessageId = statusMessageId || "";
+      state.relayStatusStartedAt = new Date().toISOString();
+
+      child = spawn("cmd.exe", ["/d", "/s", "/c", [codexCommand, ...codexArgs].map(quoteForCmd).join(" ")], {
+        cwd: projectRoot,
+        windowsHide: true,
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+      state.activeCodexProcess = child;
+      writeCodexStatus(true, {
+        chatId,
+        processId: child.pid || null,
+        codexSessionId: codexSessionId || "",
+        statusMessageId: state.relayStatusMessageId || "",
+        startedAt: state.relayStatusStartedAt || new Date().toISOString(),
+      });
+
       const exitCode = await new Promise((resolve, reject) => {
         child.once("error", reject);
         child.stdout.on("data", (chunk) => {
@@ -222,6 +276,19 @@ function createCodexRunner(ctx) {
         setChatSessionId(chatId, state, fallbackSessionId, state.chatName);
       }
       state.hasActiveSession = true;
+
+      writeCodexStatus(false, {
+        chatId,
+        processId: null,
+        codexSessionId: state.codexResponseId || codexSessionId || "",
+        statusMessageId: state.relayStatusMessageId || "",
+        startedAt: state.relayStatusStartedAt || "",
+      });
+      state.relayStatusMessageId = "";
+      state.relayStatusStartedAt = "";
+      if (state.isTurnInFlight) {
+        state.isTurnInFlight = false;
+      }
 
       let messageText = finalMessage;
       const directMessageDirective = extractDirectMessageDirective ? extractDirectMessageDirective(finalMessage, state) : null;
@@ -270,6 +337,14 @@ function createCodexRunner(ctx) {
         state.activeCodexProcess = null;
       }
 
+      writeCodexStatus(false, {
+        chatId,
+        processId: null,
+        codexSessionId: state.codexResponseId || codexSessionId || "",
+        statusMessageId: "",
+        startedAt: "",
+      });
+
       try {
         fs.rmSync(tempDir, { recursive: true, force: true });
       } catch (cleanupErr) {
@@ -287,6 +362,15 @@ function createCodexRunner(ctx) {
     state.currentThreadId = "";
     state.pendingNewThread = true;
     state.codexResponseId = null;
+    state.relayStatusMessageId = "";
+    state.relayStatusStartedAt = "";
+    writeCodexStatus(false, {
+      chatId,
+      processId: null,
+      codexSessionId: "",
+      statusMessageId: "",
+      startedAt: "",
+    });
 
     await sendTextMessage(chatId, "Started new Codex session. Send your message.");
   }
@@ -300,6 +384,15 @@ function createCodexRunner(ctx) {
     state.activeCodexProcess.kill();
     state.activeCodexProcess = null;
     state.isTurnInFlight = false;
+    state.relayStatusMessageId = "";
+    state.relayStatusStartedAt = "";
+    writeCodexStatus(false, {
+      chatId,
+      processId: null,
+      codexSessionId: state.codexResponseId || "",
+      statusMessageId: "",
+      startedAt: "",
+    });
     await sendTextMessage(chatId, "Cancelled current Codex request.");
   }
 
@@ -317,6 +410,16 @@ function createCodexRunner(ctx) {
     if (state.codexResponseId || state.currentThreadId) {
       setChatSessionId(chatId, state, state.codexResponseId, state.chatName);
     }
+    state.relayStatusMessageId = "";
+    state.relayStatusStartedAt = "";
+
+    writeCodexStatus(false, {
+      chatId,
+      processId: null,
+      codexSessionId: state.codexResponseId || "",
+      statusMessageId: "",
+      startedAt: "",
+    });
 
     await sendTextMessage(chatId, "Codex disarmed.");
   }

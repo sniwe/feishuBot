@@ -427,6 +427,10 @@ function createStateStore(ctx) {
         activeCodexProcess: null,
         pendingUserTexts: [],
         isDrainingQueue: false,
+        relayStatusMessageId: "",
+        relayStatusStartedAt: "",
+        queuedCodexTasks: [],
+        waitingForQueueSelection: false,
       });
     }
 

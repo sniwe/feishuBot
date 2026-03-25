@@ -1,6 +1,8 @@
 ﻿# codex-governed:start
 mgmt/projMap/threads/current-thread.json
 mgmt/projMap/state/thread-map-deltas.json
+mgmt/projMap/state/codex-status.json
+mgmt/projMap/state/codex-status.json.tmp
 codex-chat-sessions.json
 data/
 errFix/

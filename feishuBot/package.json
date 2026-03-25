@@ -4,6 +4,7 @@
   "main": "src/backend/index.js",
   "scripts": {
     "start": "node src/backend/index.js",
+    "codex:poll": "powershell -NoProfile -ExecutionPolicy Bypass -File src/backend/scripts/poll-codex-status.ps1",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

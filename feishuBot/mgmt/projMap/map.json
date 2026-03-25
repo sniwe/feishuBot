@@ -4,7 +4,7 @@
   "name": "feishuBot",
   "summary": "Project map for the Feishu Codex relay",
   "root": "C:\\Users\\Qub\\feishuBot",
-  "updated": "2026-03-23T15:21:00.9076477+08:00",
+  "updated": "2026-03-25T11:26:54.6895419+08:00",
   "nodes": [
     {
       "id": "node-root",
@@ -200,6 +200,30 @@
           "flow": [
             "edge-codex-relay"
           ]
+        },
+        {
+          "summary": "Persists busy/idle status for external pollers during Codex turn execution",
+          "flow": [
+            "edge-codex-relay"
+          ]
+        },
+        {
+          "summary": "Posts a live Feishu working message and refreshes it every 5 seconds until Codex completes",
+          "flow": [
+            "edge-codex-relay"
+          ]
+        },
+        {
+          "summary": "Rotates the live working message before Feishu edit limits are hit, preserving the visible timer",
+          "flow": [
+            "edge-codex-relay"
+          ]
+        },
+        {
+          "summary": "Queues in-flight user tasks and lets the user select, clear, or cancel queued items after Codex finishes",
+          "flow": [
+            "edge-codex-relay"
+          ]
         }
       ],
       "edges": [
@@ -212,7 +236,12 @@
       ],
       "critical": true,
       "files": [
-        "src/backend/lib/codex-runner.js"
+        "src/backend/lib/codex-runner.js",
+        "src/backend/lib/codex-status-poller.js",
+        "src/backend/lib/relay.js",
+        "src/backend/lib/state-store.js",
+        "src/backend/scripts/poll-codex-status.ps1",
+        "mgmt/projMap/state/codex-status.json"
       ],
       "children": []
     },

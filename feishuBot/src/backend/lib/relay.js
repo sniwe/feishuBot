@@ -158,6 +158,130 @@ function createRelayController(ctx) {
     await sendTextMessage(chatId, `Select a chat to resume:\n${options.join("\n")}`);
   }
 
+  function getQueuedCodexTasks(state) {
+    if (!Array.isArray(state.queuedCodexTasks)) {
+      state.queuedCodexTasks = [];
+    }
+
+    return state.queuedCodexTasks;
+  }
+
+  function queueCodexTask(state, text) {
+    const cleanedText = (text || "").trim();
+    if (!cleanedText) {
+      return null;
+    }
+
+    const task = {
+      text: cleanedText,
+      queuedAt: new Date().toISOString(),
+    };
+    getQueuedCodexTasks(state).push(task);
+    return task;
+  }
+
+  function clearQueuedCodexTaskAt(state, index) {
+    const tasks = getQueuedCodexTasks(state);
+    if (index < 0 || index >= tasks.length) {
+      return null;
+    }
+
+    const [removed] = tasks.splice(index, 1);
+    return removed || null;
+  }
+
+  function formatQueuedCodexTasks(state) {
+    const tasks = getQueuedCodexTasks(state);
+    const lines = ["Queued tasks:"];
+    tasks.forEach((task, index) => {
+      lines.push(`${index + 1}) ${task.text}`);
+    });
+    lines.push("cancel queue");
+    lines.push("clear item <n>");
+    lines.push("Reply with a number to hand that task item to Codex.");
+    return lines.join("\n");
+  }
+
+  async function sendQueuedCodexTaskSelection(chatId, state) {
+    const tasks = getQueuedCodexTasks(state);
+    if (!tasks.length) {
+      state.waitingForQueueSelection = false;
+      return;
+    }
+
+    state.waitingForQueueSelection = true;
+    await sendTextMessage(chatId, formatQueuedCodexTasks(state));
+  }
+
+  async function runQueuedCodexTask(chatId, state, taskIndex) {
+    const tasks = getQueuedCodexTasks(state);
+    if (taskIndex < 0 || taskIndex >= tasks.length) {
+      await sendTextMessage(chatId, "Reply with a valid queued task number.");
+      return;
+    }
+
+    const [selectedTask] = tasks.splice(taskIndex, 1);
+    if (!selectedTask) {
+      await sendTextMessage(chatId, "That queued task could not be found anymore.");
+      return;
+    }
+
+    state.waitingForQueueSelection = false;
+    await codexRunner.runCodexTurn(chatId, state, selectedTask.text);
+    if (getQueuedCodexTasks(state).length > 0) {
+      await sendQueuedCodexTaskSelection(chatId, state);
+    }
+  }
+
+  async function handleQueuedCodexSelection(chatId, state, userText) {
+    const normalizedText = (userText || "").trim().toLowerCase();
+    const tasks = getQueuedCodexTasks(state);
+
+    if (!tasks.length) {
+      state.waitingForQueueSelection = false;
+      return false;
+    }
+
+    if (normalizedText === "cancel queue") {
+      tasks.length = 0;
+      state.waitingForQueueSelection = false;
+      await sendTextMessage(chatId, "Cancelled queued tasks.");
+      return true;
+    }
+
+    const clearMatch = normalizedText.match(/^clear item\s+(\d+)$/i);
+    if (clearMatch) {
+      const clearIndex = Number.parseInt(clearMatch[1], 10) - 1;
+      if (!Number.isInteger(clearIndex) || clearIndex < 0 || clearIndex >= tasks.length) {
+        await sendTextMessage(chatId, "Reply with a valid queued task number to clear.");
+        return true;
+      }
+
+      const removed = clearQueuedCodexTaskAt(state, clearIndex);
+      if (!removed) {
+        await sendTextMessage(chatId, "That queued task could not be cleared.");
+        return true;
+      }
+
+      if (getQueuedCodexTasks(state).length > 0) {
+        await sendQueuedCodexTaskSelection(chatId, state);
+      } else {
+        state.waitingForQueueSelection = false;
+        await sendTextMessage(chatId, "Queued task removed.");
+      }
+      return true;
+    }
+
+    const selectedIndex = Number.parseInt(normalizedText, 10);
+    if (!Number.isInteger(selectedIndex) || selectedIndex < 1 || selectedIndex > tasks.length) {
+      await sendTextMessage(chatId, "Reply with a number, `cancel queue`, or `clear item <n>`.");
+      return true;
+    }
+
+    await runQueuedCodexTask(chatId, state, selectedIndex - 1);
+    return true;
+  }
+
   async function handleUserText(chatId, state, userText) {
     const normalizedText = userText.toLowerCase();
 
@@ -189,6 +313,8 @@ function createRelayController(ctx) {
       state.waitingForModeChoice = true;
       state.waitingForResumeChatSelection = false;
       state.resumeChatCandidates = [];
+      state.waitingForQueueSelection = false;
+      state.queuedCodexTasks = [];
       await sendModeOptions(chatId);
       return;
     }
@@ -198,6 +324,8 @@ function createRelayController(ctx) {
       state.waitingForModeChoice = false;
       state.waitingForResumeChatSelection = false;
       state.resumeChatCandidates = [];
+      state.waitingForQueueSelection = false;
+      state.queuedCodexTasks = [];
       await codexRunner.stopCodexSession(chatId, state);
       return;
     }
@@ -211,6 +339,13 @@ function createRelayController(ctx) {
       return;
     }
 
+    if (state.waitingForQueueSelection) {
+      const handledQueueSelection = await handleQueuedCodexSelection(chatId, state, userText);
+      if (handledQueueSelection) {
+        return;
+      }
+    }
+
     if (state.waitingForResumeChatSelection) {
       const selectedIndex = Number.parseInt(normalizedText, 10);
       if (!Number.isInteger(selectedIndex) || selectedIndex < 1 || selectedIndex > state.resumeChatCandidates.length) {
@@ -222,6 +357,8 @@ function createRelayController(ctx) {
       state.waitingForResumeChatSelection = false;
       state.resumeChatCandidates = [];
       state.waitingForModeChoice = false;
+      state.waitingForQueueSelection = false;
+      state.queuedCodexTasks = [];
       state.hasActiveSession = true;
       state.pendingNewThread = false;
       state.currentThreadId = selected.threadId || "";
@@ -239,11 +376,18 @@ function createRelayController(ctx) {
 
       if (normalizedText === "2") {
         state.waitingForModeChoice = false;
+        state.waitingForQueueSelection = false;
+        state.queuedCodexTasks = [];
         await codexRunner.startNewCodexSession(chatId, state);
         return;
       }
 
       await sendTextMessage(chatId, "Reply with 1 or 2.");
+      return;
+    }
+
+    if (state.isTurnInFlight) {
+      queueCodexTask(state, userText);
       return;
     }
 
@@ -254,6 +398,9 @@ function createRelayController(ctx) {
     }
 
     await codexRunner.runCodexTurn(chatId, state, userText);
+    if (getQueuedCodexTasks(state).length > 0) {
+      await sendQueuedCodexTaskSelection(chatId, state);
+    }
   }
 
   async function handleIncomingFileMessage(dataEvent, chatId, state) {
