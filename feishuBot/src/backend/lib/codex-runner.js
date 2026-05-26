@@ -199,6 +199,15 @@ function createCodexRunner(ctx) {
     return null;
   }
 
+  function isDirectContactToken(token) {
+    const cleanedToken = (token || "").trim();
+    return (
+      /^ou_[a-z0-9]+$/i.test(cleanedToken) ||
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanedToken) ||
+      /^\+?[0-9][0-9\s()-]{5,}[0-9]$/.test(cleanedToken)
+    );
+  }
+
   function stripDirectiveLines(text) {
     return (text || "")
       .split(/\r?\n/)
@@ -321,6 +330,7 @@ function createCodexRunner(ctx) {
       }
 
       let messageText = finalMessage;
+      let usedInChatTagFallback = false;
       const directMessageDirective = extractDirectMessageDirective ? extractDirectMessageDirective(finalMessage, state) : null;
       if (directMessageDirective) {
         let resolvedOpenId = directMessageDirective.openId;
@@ -330,6 +340,21 @@ function createCodexRunner(ctx) {
         }
 
         if (!resolvedOpenId) {
+          if (!isDirectContactToken(directMessageDirective.recipientToken)) {
+            await sendTextMessage(chatId, `@${directMessageDirective.recipientToken}: ${directMessageDirective.message}`, {
+              source_chat_id: chatId,
+              source_codex_session_id: state.codexResponseId || codexSessionId || "",
+              direct_message: true,
+              direct_message_fallback: true,
+              codex_directive: "DM_USER",
+            });
+            usedInChatTagFallback = true;
+            messageText = stripDirectiveLines(finalMessage);
+            if (!messageText) {
+              return;
+            }
+          }
+
           throw new Error(`Codex requested a DM to "${directMessageDirective.recipientToken}" but no recipient open_id was available.`);
         }
 
@@ -347,6 +372,9 @@ function createCodexRunner(ctx) {
       }
 
       messageText = stripDirectiveLines(finalMessage);
+      if (usedInChatTagFallback && !messageText) {
+        return;
+      }
       if (directMessageDirective && !messageText) {
         messageText = `Sent a direct message to ${directMessageDirective.recipientToken}.`;
       }

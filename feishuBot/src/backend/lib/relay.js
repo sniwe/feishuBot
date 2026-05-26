@@ -285,6 +285,8 @@ function createRelayController(ctx) {
     return (
       normalizedText === "1" ||
       normalizedText === "2" ||
+      normalizedText === "resume" ||
+      normalizedText === "new" ||
       normalizedText === "!codex on" ||
       normalizedText === "!codex off" ||
       normalizedText === "!codex cancel"
@@ -653,11 +655,17 @@ function createRelayController(ctx) {
         return;
       }
 
-      if (normalizedText === "2") {
+      if (normalizedText === "2" || normalizedText === "new") {
         state.waitingForModeChoice = false;
         state.waitingForQueueSelection = false;
         state.queuedCodexTasks = [];
         await codexRunner.startNewCodexSession(chatId, state);
+        return;
+      }
+
+      if (normalizedText === "resume") {
+        state.waitingForModeChoice = false;
+        await sendResumeChatOptions(chatId, state);
         return;
       }
 
