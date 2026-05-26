@@ -107,6 +107,64 @@ function makeFileTransfer() {
         return { text: String(content) };
       }
     },
+    extractUserTextFromMessage(messageType, contentObj) {
+      const type = (messageType || "").trim().toLowerCase();
+      if (!contentObj || typeof contentObj !== "object") {
+        return "";
+      }
+
+      function renderPostNode(node) {
+        if (!node || typeof node !== "object") {
+          return "";
+        }
+
+        if (typeof node.text === "string") {
+          return node.text;
+        }
+
+        const tag = typeof node.tag === "string" ? node.tag.trim().toLowerCase() : "";
+        if (tag === "at") {
+          const mentionName =
+            (typeof node.user_name === "string" && node.user_name.trim()) ||
+            (typeof node.user_id === "string" && node.user_id.trim()) ||
+            (typeof node.open_id === "string" && node.open_id.trim()) ||
+            "";
+          return mentionName ? `@${mentionName}` : "@";
+        }
+
+        return "";
+      }
+
+      if (type === "text") {
+        return typeof contentObj.text === "string" ? contentObj.text.trim() : "";
+      }
+
+      if (type === "post") {
+        const zhCn = contentObj.zh_cn;
+        const firstLocale = Object.values(contentObj).find((value) => value && typeof value === "object");
+        const localeBlock = zhCn && typeof zhCn === "object" ? zhCn : firstLocale;
+        const paragraphs = Array.isArray(localeBlock?.content) ? localeBlock.content : [];
+        const lines = [];
+
+        for (const paragraph of paragraphs) {
+          if (!Array.isArray(paragraph)) {
+            continue;
+          }
+
+          const line = paragraph
+            .map((node) => renderPostNode(node))
+            .join("")
+            .trim();
+          if (line) {
+            lines.push(line);
+          }
+        }
+
+        return lines.join("\n").trim();
+      }
+
+      return "";
+    },
     uploadFileToChat() {},
     downloadIncomingFileFromMessage() {},
     extractUploadDirective() {
@@ -377,6 +435,22 @@ test("bare self mention wakes local codex", async () => {
   assert.equal(alpha.codexCalls.length, 0);
 
   fs.rmSync(root, { recursive: true, force: true });
+});
+
+test("post mentions preserve explicit targets", () => {
+  const fileTransfer = makeFileTransfer();
+  const content = {
+    zh_cn: {
+      content: [
+        [
+          { tag: "at", user_name: "qub", user_id: "ou_test_qub" },
+          { text: " hi" },
+        ],
+      ],
+    },
+  };
+
+  assert.equal(fileTransfer.extractUserTextFromMessage("post", content), "@qub hi");
 });
 
 test("cluster mode ignores messages outside the hub chat", async () => {

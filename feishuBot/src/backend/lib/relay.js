@@ -147,7 +147,7 @@ function createRelayController(ctx) {
   }
 
   async function sendModeOptions(chatId) {
-    await sendTextMessage(chatId, `Codex armed [${localIdentity}].\n1) resume\n2) new`);
+    await sendTextMessage(chatId, `Codex armed.\nMachine: [${localIdentity}]\n1) resume\n2) new`);
   }
 
   async function sendResumeChatOptions(chatId, state) {

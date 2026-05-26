@@ -62,6 +62,28 @@ function createFileTransferService(ctx) {
       return "";
     }
 
+    function renderPostNode(node) {
+      if (!node || typeof node !== "object") {
+        return "";
+      }
+
+      if (typeof node.text === "string") {
+        return node.text;
+      }
+
+      const tag = typeof node.tag === "string" ? node.tag.trim().toLowerCase() : "";
+      if (tag === "at") {
+        const mentionName =
+          (typeof node.user_name === "string" && node.user_name.trim()) ||
+          (typeof node.user_id === "string" && node.user_id.trim()) ||
+          (typeof node.open_id === "string" && node.open_id.trim()) ||
+          "";
+        return mentionName ? `@${mentionName}` : "@";
+      }
+
+      return "";
+    }
+
     const zhCn = postContent.zh_cn;
     const firstLocale = Object.values(postContent).find((value) => value && typeof value === "object");
     const localeBlock = zhCn && typeof zhCn === "object" ? zhCn : firstLocale;
@@ -74,7 +96,7 @@ function createFileTransferService(ctx) {
       }
 
       const line = paragraph
-        .map((node) => (node && typeof node.text === "string" ? node.text : ""))
+        .map((node) => renderPostNode(node))
         .join("")
         .trim();
       if (line) {
