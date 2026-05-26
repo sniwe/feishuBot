@@ -22,6 +22,7 @@ function createCodexRunner(ctx) {
     lookupCodexSessionIdByThreadName,
     extractUploadDirective,
     clusterRuntime,
+    deleteTextMessage,
   } = deps;
   const skipGitRepoCheck = !/^(false|0|no|off)$/i.test((process.env.CODEX_SKIP_GIT_REPO_CHECK || "true").trim());
   const turnTimeoutMs = Number.isFinite(data.turnTimeoutMs) && data.turnTimeoutMs > 0 ? data.turnTimeoutMs : 5 * 60 * 1000;
@@ -352,14 +353,14 @@ function createCodexRunner(ctx) {
     let stdout = "";
     let timedOut = false;
     let turnTimeoutHandle = null;
+    let relayStatusMessageId = "";
     const machineProfile = getMachineProfile();
     const machineLabel = getMachineLabel(machineProfile);
     const workingIdentity = getWorkingIdentity(machineProfile);
 
     try {
-      let statusMessageId = "";
       try {
-        statusMessageId = await sendTextMessage(chatId, `Relayed & working [${workingIdentity}] (0s)`, {
+        relayStatusMessageId = await sendTextMessage(chatId, `Relayed & working [${workingIdentity}] (0s)`, {
           relay_status: true,
           source_codex_session_id: codexSessionId || "",
           machine_label: machineLabel,
@@ -371,7 +372,7 @@ function createCodexRunner(ctx) {
         console.error("Failed to send Codex working status message:", statusErr.message);
       }
 
-      state.relayStatusMessageId = statusMessageId || "";
+      state.relayStatusMessageId = relayStatusMessageId || "";
       state.relayStatusStartedAt = new Date().toISOString();
 
       child = spawn("cmd.exe", ["/d", "/s", "/c", [codexCommand, ...codexArgs].map(quoteForCmd).join(" ")], {
@@ -381,10 +382,10 @@ function createCodexRunner(ctx) {
       });
       state.activeCodexProcess = child;
         writeCodexStatus(true, {
-          chatId,
-          processId: child.pid || null,
-          codexSessionId: codexSessionId || "",
-          statusMessageId: state.relayStatusMessageId || "",
+        chatId,
+        processId: child.pid || null,
+        codexSessionId: codexSessionId || "",
+        statusMessageId: state.relayStatusMessageId || "",
         startedAt: state.relayStatusStartedAt || new Date().toISOString(),
         machineLabel,
         machineId: machineProfile.machineId || "",
@@ -570,6 +571,14 @@ function createCodexRunner(ctx) {
         machineAlias: machineProfile.alias || "",
       });
 
+      if (relayStatusMessageId && typeof deleteTextMessage === "function") {
+        try {
+          await deleteTextMessage(relayStatusMessageId);
+        } catch (deleteErr) {
+          console.error("Failed to delete Codex working message:", deleteErr.message);
+        }
+      }
+
       try {
         fs.rmSync(tempDir, { recursive: true, force: true });
       } catch (cleanupErr) {
@@ -601,6 +610,7 @@ function createCodexRunner(ctx) {
   }
 
   async function cancelTurn(chatId, state) {
+    const relayStatusMessageId = typeof state.relayStatusMessageId === "string" ? state.relayStatusMessageId.trim() : "";
     if (!state.activeCodexProcess) {
       await sendTextMessage(chatId, "No active Codex request to cancel.");
       return;
@@ -618,10 +628,20 @@ function createCodexRunner(ctx) {
       statusMessageId: "",
       startedAt: "",
     });
+
+    if (relayStatusMessageId && typeof deleteTextMessage === "function") {
+      try {
+        await deleteTextMessage(relayStatusMessageId);
+      } catch (deleteErr) {
+        console.error("Failed to delete Codex working message:", deleteErr.message);
+      }
+    }
+
     await sendTextMessage(chatId, "Cancelled current Codex request.");
   }
 
   async function stopCodexSession(chatId, state) {
+    const relayStatusMessageId = typeof state.relayStatusMessageId === "string" ? state.relayStatusMessageId.trim() : "";
     if (state.activeCodexProcess) {
       killProcessTree(state.activeCodexProcess?.pid, "stop");
     }
@@ -645,6 +665,14 @@ function createCodexRunner(ctx) {
       statusMessageId: "",
       startedAt: "",
     });
+
+    if (relayStatusMessageId && typeof deleteTextMessage === "function") {
+      try {
+        await deleteTextMessage(relayStatusMessageId);
+      } catch (deleteErr) {
+        console.error("Failed to delete Codex working message:", deleteErr.message);
+      }
+    }
 
     await sendTextMessage(chatId, `Codex disarmed [${getWorkingIdentity()}].`);
   }

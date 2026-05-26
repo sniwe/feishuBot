@@ -241,6 +241,7 @@ const codexRunner = createCodexRunner({
     lookupCodexSessionIdByThreadName: stateStore.lookupCodexSessionIdByThreadName,
     extractUploadDirective: fileTransfer.extractUploadDirective,
     clusterRuntime,
+    deleteTextMessage,
   },
 });
 
