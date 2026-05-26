@@ -22,6 +22,28 @@ function createRelayController(ctx) {
     }
   }
 
+  function resolveIncomingSender(dataEvent, state, payload = {}) {
+    const senderOpenId = dataEvent?.sender?.sender_id?.open_id || "";
+    const senderMachineFromOpenId = typeof clusterRuntime?.resolveSenderMachineByOpenId === "function"
+      ? clusterRuntime.resolveSenderMachineByOpenId(senderOpenId)
+      : null;
+    const payloadMachineId = typeof payload.machineId === "string" ? payload.machineId.trim() : "";
+    const senderMachineId = (senderMachineFromOpenId && typeof senderMachineFromOpenId.machineId === "string" && senderMachineFromOpenId.machineId.trim())
+      || payloadMachineId
+      || "";
+
+    if (state) {
+      state.lastSenderOpenId = senderOpenId || state.lastSenderOpenId || "";
+      state.lastSenderMachineId = senderMachineId || "";
+    }
+
+    return {
+      senderOpenId,
+      senderMachineId,
+      senderMachine: senderMachineFromOpenId || null,
+    };
+  }
+
   function extractChatName(dataEvent) {
     const candidates = [
       dataEvent?.message?.chat_name,
@@ -261,6 +283,7 @@ function createRelayController(ctx) {
 
     const machineId = typeof selfProfile.machineId === "string" ? selfProfile.machineId.trim() : "";
     const alias = typeof selfProfile.alias === "string" ? selfProfile.alias.trim() : "";
+    const mentionId = typeof selfProfile.mentionId === "string" ? selfProfile.mentionId.trim() : "";
     const shortMachineId = typeof clusterRuntime?.shortMachineId === "function"
       ? clusterRuntime.shortMachineId(machineId)
       : machineId.slice(0, 8);
@@ -268,6 +291,7 @@ function createRelayController(ctx) {
     return Boolean(
       (machineId && cleanedToken === machineId.toLowerCase()) ||
       (alias && cleanedToken === alias.toLowerCase()) ||
+      (mentionId && cleanedToken === mentionId.toLowerCase()) ||
       (shortMachineId && cleanedToken === shortMachineId.toLowerCase())
     );
   }
@@ -321,7 +345,7 @@ function createRelayController(ctx) {
     return true;
   }
 
-  async function handleClusterProtocolMessage(dataEvent, chatId, state, userText) {
+  async function handleClusterProtocolMessage(dataEvent, chatId, state, userText, senderInfo = {}) {
     if (!isClusterMode || !clusterRuntime || typeof clusterRuntime.parseProtocol !== "function") {
       return false;
     }
@@ -344,6 +368,7 @@ function createRelayController(ctx) {
     const selfProfile = typeof clusterRuntime.getProfile === "function" ? clusterRuntime.getProfile() : localProfile;
     const payload = protocol.payload && typeof protocol.payload === "object" ? protocol.payload : {};
     const senderMachineId = typeof payload.machineId === "string" ? payload.machineId.trim() : "";
+    const senderOpenId = typeof senderInfo.senderOpenId === "string" ? senderInfo.senderOpenId.trim() : dataEvent?.sender?.sender_id?.open_id || "";
     if (senderMachineId && selfProfile.machineId && senderMachineId === selfProfile.machineId) {
       logCluster("duplicate-ignore", {
         chatId,
@@ -355,7 +380,7 @@ function createRelayController(ctx) {
     }
 
     if (protocol.type === "hello") {
-      const result = clusterRuntime.recordHello(payload, { chatId });
+      const result = clusterRuntime.recordHello(payload, { chatId, senderOpenId });
       if (result.self) {
         return true;
       }
@@ -391,7 +416,7 @@ function createRelayController(ctx) {
     }
 
     if (protocol.type === "identity") {
-      const result = clusterRuntime.recordIdentity(payload, { chatId });
+      const result = clusterRuntime.recordIdentity(payload, { chatId, senderOpenId });
       if (result.self) {
         return true;
       }
@@ -406,7 +431,7 @@ function createRelayController(ctx) {
     }
 
     if (protocol.type === "goodbye") {
-      const result = clusterRuntime.recordGoodbye(payload, { chatId });
+      const result = clusterRuntime.recordGoodbye(payload, { chatId, senderOpenId });
       if (result.self) {
         return true;
       }
@@ -432,7 +457,10 @@ function createRelayController(ctx) {
           targetMachineId: selfProfile.machineId || "",
         });
         if (message) {
-          await handleUserText(chatId, state, message, dataEvent?.sender?.sender_id?.open_id || "");
+          resolveIncomingSender(dataEvent, state, {
+            machineId: payload.machineId || "",
+          });
+          await handleUserText(chatId, state, message);
         }
         return true;
       }
@@ -452,7 +480,7 @@ function createRelayController(ctx) {
     return true;
   }
 
-  async function handleClusterExplicitTarget(dataEvent, chatId, state, userText) {
+  async function handleClusterExplicitTarget(dataEvent, chatId, state, userText, senderInfo = {}) {
     if (!isClusterMode || !clusterRuntime || typeof clusterRuntime.parseTarget !== "function") {
       return false;
     }
@@ -484,6 +512,9 @@ function createRelayController(ctx) {
         state.queuedCodexTasks = [];
         state.hasActiveSession = true;
       }
+      resolveIncomingSender(dataEvent, state, {
+        machineId: senderInfo.senderMachineId || "",
+      });
       await handleUserText(chatId, state, nextMessage);
       return true;
     }
@@ -772,16 +803,31 @@ function createRelayController(ctx) {
 
           const contentObj = fileTransfer.parseMessageContent(dataEvent.message.content);
           const userText = fileTransfer.extractUserTextFromMessage(dataEvent.message.message_type, contentObj);
-          const protocolHandled = await handleClusterProtocolMessage(dataEvent, chatId, state, userText);
+          const senderOpenId = dataEvent.sender?.sender_id?.open_id || "";
+          const senderMachine = isClusterMode && typeof clusterRuntime.resolveSenderMachineByOpenId === "function"
+            ? clusterRuntime.resolveSenderMachineByOpenId(senderOpenId)
+            : null;
+          const senderMachineId = senderMachine && typeof senderMachine.machineId === "string" ? senderMachine.machineId.trim() : "";
+          const selfMachineId = typeof clusterRuntime?.getProfile === "function"
+            ? (clusterRuntime.getProfile().machineId || "")
+            : localProfile.machineId || "";
+          if (isClusterMode && senderMachineId && senderMachineId === selfMachineId) {
+            return;
+          }
+
+          const protocolHandled = await handleClusterProtocolMessage(dataEvent, chatId, state, userText, {
+            senderOpenId,
+            senderMachineId,
+          });
           if (protocolHandled) {
             return;
           }
 
-          if (senderType !== "user") {
-            return;
+          if (isClusterMode) {
+            resolveIncomingSender(dataEvent, state, {
+              machineId: senderMachineId || "",
+            });
           }
-
-          state.lastSenderOpenId = dataEvent.sender?.sender_id?.open_id || state.lastSenderOpenId || "";
 
           if (dataEvent.message.message_type === "file") {
             if (isClusterMode) {
@@ -821,7 +867,10 @@ function createRelayController(ctx) {
           }
 
           if (isClusterMode) {
-            const targeted = await handleClusterExplicitTarget(dataEvent, chatId, state, userText);
+            const targeted = await handleClusterExplicitTarget(dataEvent, chatId, state, userText, {
+              senderOpenId,
+              senderMachineId,
+            });
             if (targeted) {
               return;
             }
@@ -830,8 +879,12 @@ function createRelayController(ctx) {
               chatId,
               messageId: dataEvent.message.message_id || "",
               eventId: dataEvent.event_id || "",
-              reason: "unaddressed",
+              reason: senderType === "user" ? "unaddressed" : "unaddressed-bot",
             });
+            return;
+          }
+
+          if (senderType !== "user") {
             return;
           }
 

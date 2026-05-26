@@ -1,10 +1,17 @@
 const crypto = require("crypto");
 const os = require("os");
 const path = require("path");
+const { createRelayDirectory } = require("./relay-directory.js");
 
 function createClusterStateManager(ctx) {
   const { data = {}, deps } = ctx || {};
   const { fs, console } = deps;
+  const relayDirectory = deps.relayDirectory || createRelayDirectory({
+    data: {
+      directoryPath: data.directoryPath || "",
+    },
+    deps,
+  });
 
   const statePath = data.statePath;
   const clusterMode = (data.clusterMode || "multi").trim().toLowerCase();
@@ -44,6 +51,7 @@ function createClusterStateManager(ctx) {
       createdAt: existing.createdAt || startedAt,
       updatedAt: startedAt,
       knownPeers: existing.knownPeers && typeof existing.knownPeers === "object" ? existing.knownPeers : {},
+      senderMachines: existing.senderMachines && typeof existing.senderMachines === "object" ? existing.senderMachines : {},
       seenAnnounceIds: existing.seenAnnounceIds && typeof existing.seenAnnounceIds === "object" ? existing.seenAnnounceIds : {},
       seenEventIds: existing.seenEventIds && typeof existing.seenEventIds === "object" ? existing.seenEventIds : {},
       lastSeenAt: existing.lastSeenAt || "",
@@ -65,6 +73,7 @@ function createClusterStateManager(ctx) {
       createdAt: typeof existing.createdAt === "string" && existing.createdAt.trim() ? existing.createdAt.trim() : startedAt,
       updatedAt: startedAt,
       knownPeers: existing.knownPeers && typeof existing.knownPeers === "object" ? existing.knownPeers : {},
+      senderMachines: existing.senderMachines && typeof existing.senderMachines === "object" ? existing.senderMachines : {},
       seenAnnounceIds: existing.seenAnnounceIds && typeof existing.seenAnnounceIds === "object" ? existing.seenAnnounceIds : {},
       seenEventIds: existing.seenEventIds && typeof existing.seenEventIds === "object" ? existing.seenEventIds : {},
       lastSeenAt: typeof existing.lastSeenAt === "string" ? existing.lastSeenAt.trim() : "",
@@ -117,6 +126,7 @@ function createClusterStateManager(ctx) {
       machineId: current.machineId,
       alias: current.alias,
       mentionId: current.mentionId || "",
+      openId: current.mentionId || "",
       hostname: current.hostname,
       bootId: current.bootId,
       clusterMode: current.clusterMode,
@@ -201,6 +211,7 @@ function createClusterStateManager(ctx) {
       lastMessageType: typeof patch.messageType === "string" ? patch.messageType.trim() : existing.lastMessageType || "",
       sourceChatId: typeof patch.chatId === "string" ? patch.chatId.trim() : existing.sourceChatId || "",
       mentionId: typeof peer.mentionId === "string" ? peer.mentionId.trim() : existing.mentionId || "",
+      openId: typeof patch.senderOpenId === "string" ? patch.senderOpenId.trim() : typeof peer.openId === "string" ? peer.openId.trim() : existing.openId || "",
     };
 
     if (patch.messageType === "hello") {
@@ -225,6 +236,32 @@ function createClusterStateManager(ctx) {
     return nextPeer;
   }
 
+  function rememberSenderMachine(senderOpenId, machine) {
+    const cleanedOpenId = typeof senderOpenId === "string" ? senderOpenId.trim() : "";
+    const cleanedMachineId = typeof machine?.machineId === "string" ? machine.machineId.trim() : "";
+    if (!cleanedOpenId || !cleanedMachineId) {
+      return null;
+    }
+
+    const current = getState();
+    const now = new Date().toISOString();
+    const existing = current.senderMachines[cleanedOpenId] && typeof current.senderMachines[cleanedOpenId] === "object"
+      ? current.senderMachines[cleanedOpenId]
+      : {};
+    const nextSender = {
+      openId: cleanedOpenId,
+      machineId: cleanedMachineId,
+      alias: typeof machine.alias === "string" ? machine.alias.trim() : existing.alias || "",
+      mentionId: typeof machine.mentionId === "string" ? machine.mentionId.trim() : existing.mentionId || "",
+      updatedAt: now,
+      firstSeenAt: existing.firstSeenAt || now,
+    };
+
+    current.senderMachines[cleanedOpenId] = nextSender;
+    saveState();
+    return nextSender;
+  }
+
   function listPeers() {
     const current = getState();
     return Object.values(current.knownPeers || {}).filter(Boolean);
@@ -240,6 +277,25 @@ function createClusterStateManager(ctx) {
     return current.knownPeers[cleanedMachineId] || null;
   }
 
+  function getDirectoryMachines() {
+    if (!relayDirectory || typeof relayDirectory.getMachines !== "function") {
+      return [];
+    }
+
+    return relayDirectory.getMachines();
+  }
+
+  function getMachineRoster() {
+    if (!relayDirectory || typeof relayDirectory.buildMachineRoster !== "function") {
+      return [{ machineId: getState().machineId, alias: getState().alias, mentionId: getState().mentionId || "", openId: getState().mentionId || "", source: "self" }, ...listPeers()];
+    }
+
+    return relayDirectory.buildMachineRoster({
+      profile: getSelfProfile(),
+      peers: listPeers(),
+    });
+  }
+
   function hasSeenAnnounceId(announceId) {
     const cleanedAnnounceId = typeof announceId === "string" ? announceId.trim() : "";
     if (!cleanedAnnounceId) {
@@ -252,18 +308,77 @@ function createClusterStateManager(ctx) {
 
   function getMachineLabel(machineId) {
     const current = getState();
-    const peer = current.machineId === machineId ? getSelfProfile() : getPeer(machineId);
+    const roster = getMachineRoster();
+    const peer = roster.find((entry) => entry && typeof entry.machineId === "string" && entry.machineId === machineId) || (current.machineId === machineId ? getSelfProfile() : getPeer(machineId));
     if (!peer) {
       return "";
     }
 
-    const peers = listPeers();
-    const labelPeers = [{ machineId: current.machineId, alias: current.alias }, ...peers];
     const { formatMachineLabel } = require("./cluster-protocol.js");
     return formatMachineLabel(peer, {
       selfMachineId: current.machineId,
-      peers: labelPeers,
+      peers: roster,
     });
+  }
+
+  function resolveTarget(targetToken) {
+    if (relayDirectory && typeof relayDirectory.resolveTarget === "function") {
+      return relayDirectory.resolveTarget(targetToken, {
+        profile: getSelfProfile(),
+        directoryEntries: getDirectoryMachines(),
+        peers: listPeers(),
+      });
+    }
+
+    const { resolveTargetToken } = require("./cluster-protocol.js");
+    return resolveTargetToken(targetToken, {
+      profile: getSelfProfile(),
+      peers: listPeers(),
+    });
+  }
+
+  function resolveSenderMachineByOpenId(senderOpenId) {
+    const cleanedOpenId = typeof senderOpenId === "string" ? senderOpenId.trim() : "";
+    if (!cleanedOpenId) {
+      return null;
+    }
+
+    const current = getState();
+    const cached = current.senderMachines[cleanedOpenId];
+    if (cached && typeof cached === "object" && typeof cached.machineId === "string" && cached.machineId.trim()) {
+      const machineId = cached.machineId.trim();
+      const roster = getMachineRoster();
+      const record = roster.find((entry) => entry && entry.machineId === machineId) || getPeer(machineId) || (getSelfProfile().machineId === machineId ? getSelfProfile() : null);
+      return {
+        ...cached,
+        ...(record && typeof record === "object" ? record : {}),
+        machineId,
+      };
+    }
+
+    const result = relayDirectory && typeof relayDirectory.resolveOpenId === "function"
+      ? relayDirectory.resolveOpenId(cleanedOpenId, {
+          profile: getSelfProfile(),
+          directoryEntries: getDirectoryMachines(),
+          peers: listPeers(),
+        })
+      : null;
+    if (result && result.status === "match") {
+      rememberSenderMachine(cleanedOpenId, result);
+      return result;
+    }
+
+    const peer = listPeers().find((entry) => {
+      const openId = typeof entry?.openId === "string" ? entry.openId.trim() : "";
+      const mentionId = typeof entry?.mentionId === "string" ? entry.mentionId.trim() : "";
+      return openId === cleanedOpenId || mentionId === cleanedOpenId;
+    }) || null;
+    if (peer) {
+      rememberSenderMachine(cleanedOpenId, peer);
+      return peer;
+    }
+
+    return null;
   }
 
   function logClusterEvent(kind, details = {}) {
@@ -306,10 +421,15 @@ function createClusterStateManager(ctx) {
       current.seenAnnounceIds[announceId] = new Date().toISOString();
     }
 
+    if (typeof meta.senderOpenId === "string" && meta.senderOpenId.trim()) {
+      rememberSenderMachine(meta.senderOpenId, payload);
+    }
+
     const peer = upsertPeer(payload, {
       messageType: "hello",
       chatId: meta.chatId || "",
       replyToAnnounceId: announceId,
+      senderOpenId: meta.senderOpenId || "",
     });
 
     return {
@@ -330,10 +450,15 @@ function createClusterStateManager(ctx) {
       };
     }
 
+    if (typeof meta.senderOpenId === "string" && meta.senderOpenId.trim()) {
+      rememberSenderMachine(meta.senderOpenId, payload);
+    }
+
     const peer = upsertPeer(payload, {
       messageType: "identity",
       chatId: meta.chatId || "",
       replyToAnnounceId: payload.replyToAnnounceId || "",
+      senderOpenId: meta.senderOpenId || "",
     });
 
     return {
@@ -352,9 +477,14 @@ function createClusterStateManager(ctx) {
       };
     }
 
+    if (typeof meta.senderOpenId === "string" && meta.senderOpenId.trim()) {
+      rememberSenderMachine(meta.senderOpenId, payload);
+    }
+
     const peer = upsertPeer(payload, {
       messageType: "goodbye",
       chatId: meta.chatId || "",
+      senderOpenId: meta.senderOpenId || "",
     });
 
     return {
@@ -372,10 +502,15 @@ function createClusterStateManager(ctx) {
     markEventSeen,
     markAnnounceSeen,
     hasSeenAnnounceId,
+    getDirectoryMachines,
+    getMachineRoster,
     upsertPeer,
     listPeers,
     getPeer,
     getMachineLabel,
+    resolveTarget,
+    resolveSenderMachineByOpenId,
+    rememberSenderMachine,
     logClusterEvent,
     recordHello,
     recordIdentity,

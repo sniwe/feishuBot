@@ -7,7 +7,6 @@ const {
   formatMachineLabel,
   parseExplicitTarget,
   parseProtocolMessage,
-  resolveTargetToken,
   shortMachineId,
 } = require("./cluster-protocol.js");
 const { createClusterStateManager } = require("./cluster-state.js");
@@ -33,15 +32,31 @@ function createClusterRuntime(ctx) {
     return stateManager.listPeers();
   }
 
+  function getMachineRoster() {
+    return typeof stateManager.getMachineRoster === "function" ? stateManager.getMachineRoster() : [getProfile(), ...getPeers()];
+  }
+
   function formatSelfLabel() {
     return formatMachineLabel(getProfile(), {
       selfMachineId: getProfile().machineId,
-      peers: [getProfile(), ...getPeers()],
+      peers: getMachineRoster(),
     });
   }
 
   function getMachineLabel(machineId) {
     return stateManager.getMachineLabel(machineId);
+  }
+
+  function resolveSenderMachineByOpenId(senderOpenId) {
+    return typeof stateManager.resolveSenderMachineByOpenId === "function"
+      ? stateManager.resolveSenderMachineByOpenId(senderOpenId)
+      : null;
+  }
+
+  function rememberSenderMachine(senderOpenId, machine) {
+    return typeof stateManager.rememberSenderMachine === "function"
+      ? stateManager.rememberSenderMachine(senderOpenId, machine)
+      : null;
   }
 
   function buildHelloMessage() {
@@ -79,10 +94,12 @@ function createClusterRuntime(ctx) {
   }
 
   function resolveTarget(targetToken) {
-    return resolveTargetToken(targetToken, {
-      profile: getProfile(),
-      peers: getPeers(),
-    });
+    return typeof stateManager.resolveTarget === "function"
+      ? stateManager.resolveTarget(targetToken)
+      : {
+          status: "miss",
+          targetToken,
+        };
   }
 
   function parseProtocol(text) {
@@ -203,6 +220,9 @@ function createClusterRuntime(ctx) {
     markEventSeen,
     markAnnounceSeen,
     hasSeenAnnounceId,
+    getMachineRoster,
+    resolveSenderMachineByOpenId,
+    rememberSenderMachine,
     logEvent,
     buildHelloMessage,
     buildIdentityMessage,

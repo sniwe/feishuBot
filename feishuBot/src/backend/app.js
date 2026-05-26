@@ -12,6 +12,7 @@ const { createContactResolver } = require("./lib/contact-resolver.js");
 const { createCodexRunner } = require("./lib/codex-runner.js");
 const { createCodexStatusPoller } = require("./lib/codex-status-poller.js");
 const { createRelayController } = require("./lib/relay.js");
+const { createRelayDirectory } = require("./lib/relay-directory.js");
 
 const PROJECT_ROOT = path.resolve(__dirname, "..", "..");
 require("dotenv").config({ path: path.join(PROJECT_ROOT, ".env") });
@@ -30,11 +31,14 @@ Do not include tool logs, status lines, internal reasoning, or metadata.
 Never output exactly the same text as USER_MESSAGE.
 If the user asks you to upload a local file, you must output a single line exactly in the form "UPLOAD_FILE: <absolute_path>" and nothing else on that line.
 If you need to send a direct message to a Feishu user, output a single line exactly in the form "DM_USER: <open_id|last_sender|me> | <message>" and nothing else on that line.
-You may also use the shorthand forms "@<recipient>: <message>" or "send a message to <recipient>: <message>" on a single line.
-Recipients may be an open_id, an email address, a mobile number, or the current sender alias.
+If you need to talk to another bot in the shared codexRelay chat, output a single line exactly in the form "@<machine-id>: <message>" and nothing else on that line.
+For bot-to-bot replies, use the origin machine id as the target.
+You may also use the shorthand forms "@<recipient>: <message>" or "send a message to <recipient>: <message>" on a single line for human targets.
+Recipients may be a machine id, open_id, an email address, a mobile number, or the current sender alias.
 If USER_MESSAGE is vague, ask one concise clarifying question instead of echoing.`).trim();
 const CODEX_SESSION_INDEX_PATH = path.join(os.homedir(), ".codex", "session_index.jsonl");
 const CODEX_STATUS_PATH = path.join(PROJECT_ROOT, "mgmt", "projMap", "state", "codex-status.json");
+const MACHINE_DIRECTORY_PATH = path.join(PROJECT_ROOT, "mgmt", "projMap", "state", "machine-directory.json");
 const CLUSTER_MODE = (process.env.FEISHU_CLUSTER_MODE || "multi").trim().toLowerCase();
 const CLUSTER_CHAT_ID = (process.env.FEISHU_CLUSTER_CHAT_ID || "").trim();
 const MACHINE_ALIAS = (process.env.FEISHU_MACHINE_ALIAS || "").trim();
@@ -42,6 +46,7 @@ const MACHINE_ID = (process.env.FEISHU_MACHINE_ID || "").trim();
 const MACHINE_MENTION_ID = (process.env.FEISHU_MACHINE_MENTION_ID || process.env.FEISHU_MACHINE_OPEN_ID || "").trim();
 const ANNOUNCE_ON_START = !/^(false|0|no|off)$/i.test((process.env.FEISHU_ANNOUNCE_ON_START || "true").trim());
 const CLUSTER_STATE_PATH = path.join(os.homedir(), "mgmt", "state", "feishuBot-cluster-state.json");
+const CODEX_TURN_TIMEOUT_MS = Number(process.env.CODEX_TURN_TIMEOUT_MS || 30 * 60 * 1000);
 
 function quoteForCmd(arg) {
   if (!/[ \t"&<>|^]/.test(arg)) {
@@ -102,6 +107,18 @@ const contactResolver = createContactResolver({
   },
 });
 contactResolver.loadCache();
+
+const relayDirectory = createRelayDirectory({
+  data: {
+    directoryPath: MACHINE_DIRECTORY_PATH,
+  },
+  deps: {
+    fs,
+    path,
+    console,
+  },
+});
+relayDirectory.loadDirectory();
 
 async function sendMessage(receiveIdType, receiveId, text, meta = {}) {
   const isChatMessage = receiveIdType === "chat_id";
@@ -177,6 +194,7 @@ const clusterRuntime = createClusterRuntime({
     machineId: MACHINE_ID,
     machineMentionId: MACHINE_MENTION_ID,
     announceOnStart: ANNOUNCE_ON_START,
+    directoryPath: MACHINE_DIRECTORY_PATH,
   },
   deps: {
     fs,
@@ -185,9 +203,11 @@ const clusterRuntime = createClusterRuntime({
     crypto,
     console,
     sendTextMessage,
+    relayDirectory,
   },
 });
 const clusterProfile = clusterRuntime.getProfile();
+const localIdentity = (clusterProfile.alias || (typeof clusterRuntime?.formatSelfLabel === "function" ? clusterRuntime.formatSelfLabel() : "") || clusterProfile.machineId || "unknown").trim();
 
 const codexRunner = createCodexRunner({
   data: {
@@ -197,6 +217,7 @@ const codexRunner = createCodexRunner({
     codexExtraArgs: CODEX_EXTRA_ARGS,
     codexRelayPrompt: CODEX_RELAY_PROMPT,
     codexStatusPath: CODEX_STATUS_PATH,
+    turnTimeoutMs: CODEX_TURN_TIMEOUT_MS,
   },
   deps: {
     spawn,
@@ -254,6 +275,7 @@ const codexStatusPoller = createCodexStatusPoller({
     machineLabel: clusterRuntime.formatSelfLabel(),
     machineId: clusterProfile.machineId,
     machineAlias: clusterProfile.alias,
+    machineIdentity: localIdentity,
   },
 });
 

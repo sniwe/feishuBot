@@ -423,6 +423,7 @@ function createStateStore(ctx) {
         currentThreadId: stored.threadId || latestThread?.threadId || "",
         pendingNewThread: false,
         lastSenderOpenId: "",
+        lastSenderMachineId: "",
         isTurnInFlight: false,
         activeCodexProcess: null,
         pendingUserTexts: [],

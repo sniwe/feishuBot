@@ -4,7 +4,7 @@
     "name":  "feishuBot",
     "summary":  "Project map for the Feishu Codex relay",
     "root":  "C:\\Users\\Qub\\feishuBot",
-  "updated": "2026-05-26T14:31:20.5182832+08:00",
+  "updated": "2026-05-26T15:14:06.9479307+08:00",
     "nodes":  [
                   {
                       "id":  "node-root",
@@ -207,10 +207,10 @@
                       "id":  "node-cluster-runtime",
                       "type":  "module",
                       "name":  "Cluster Runtime",
-                      "summary":  "Owns local machine identity, peer ledger, and cluster message protocol helpers",
+                      "summary":  "Owns local machine identity, peer ledger, machine directory merge, and cluster message protocol helpers",
                       "features":  [
                                        {
-                                           "summary":  "Loads the machine profile, formats protocol messages, and resolves cluster targets",
+                                           "summary":  "Loads the machine profile, merges directory-backed machines with live peers, formats protocol messages, and resolves cluster targets",
                                            "flow":  [
                                                         "edge-cluster-relay",
                                                         "edge-cluster-codex"
@@ -235,7 +235,38 @@
                       "files":  [
                                     "src/backend/lib/cluster-protocol.js",
                                     "src/backend/lib/cluster-state.js",
-                                    "src/backend/lib/cluster-runtime.js"
+                                    "src/backend/lib/cluster-runtime.js",
+                                    "src/backend/lib/relay-directory.js"
+                                ],
+                      "children":  [
+                                       "node-relay-directory"
+                                   ]
+                  },
+                  {
+                      "id":  "node-relay-directory",
+                      "type":  "module",
+                      "name":  "Relay Machine Directory",
+                      "summary":  "Stable editable identities for bot peers in the shared relay chat",
+                      "features":  [
+                                       {
+                                           "summary":  "Loads directory machines, merges roster entries, and resolves machine-id relay targets",
+                                           "flow":  [
+                                                        "edge-cluster-directory"
+                                                    ]
+                                       }
+                                   ],
+                      "edges":  [
+                                    {
+                                        "id":  "edge-cluster-directory",
+                                        "kind":  "depends",
+                                        "from":  "node-cluster-runtime",
+                                        "to":  "node-relay-directory"
+                                    }
+                                ],
+                      "critical":  false,
+                      "files":  [
+                                    "src/backend/lib/relay-directory.js",
+                                    "mgmt/projMap/state/machine-directory.json"
                                 ],
                       "children":  [
 
@@ -306,7 +337,7 @@
                       "summary":  "Feishu event handling, command routing, and chat session lifecycle",
                       "features":  [
                                        {
-                                           "summary":  "Routes messages to Codex, resume flow, rename handling, direct messages, file intake, and cluster-targeted control",
+                                           "summary":  "Routes messages to Codex, resume flow, rename handling, direct messages, file intake, and cluster-targeted control with bot relay symmetry",
                                            "flow":  [
                                                         "edge-relay-state",
                                                         "edge-relay-transfer",
@@ -433,6 +464,12 @@
                       "kind":  "depends",
                       "from":  "node-cluster-runtime",
                       "to":  "node-codex-runner"
+                  },
+                  {
+                      "id":  "edge-cluster-directory",
+                      "kind":  "depends",
+                      "from":  "node-cluster-runtime",
+                      "to":  "node-relay-directory"
                   },
                   {
                       "id":  "edge-codex-relay",

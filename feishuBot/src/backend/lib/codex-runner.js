@@ -24,16 +24,75 @@ function createCodexRunner(ctx) {
     clusterRuntime,
   } = deps;
   const skipGitRepoCheck = !/^(false|0|no|off)$/i.test((process.env.CODEX_SKIP_GIT_REPO_CHECK || "true").trim());
-  const machineProfile = typeof clusterRuntime?.getProfile === "function" ? clusterRuntime.getProfile() : {};
-  const machineLabel = typeof clusterRuntime?.formatSelfLabel === "function"
-    ? clusterRuntime.formatSelfLabel()
-    : [machineProfile.alias, machineProfile.machineId ? `(${String(machineProfile.machineId).slice(0, 8)})` : ""].filter(Boolean).join(" ").trim();
-  const workingIdentity = (machineProfile.alias || machineLabel || machineProfile.machineId || "unknown").trim();
+  const turnTimeoutMs = Number.isFinite(data.turnTimeoutMs) && data.turnTimeoutMs > 0 ? data.turnTimeoutMs : 5 * 60 * 1000;
+  const isClusterMode = Boolean(clusterRuntime && typeof clusterRuntime.isEnabled === "function" && clusterRuntime.isEnabled());
+
+  function getMachineProfile() {
+    return typeof clusterRuntime?.getProfile === "function" ? clusterRuntime.getProfile() : {};
+  }
+
+  function getMachineLabel(profile = getMachineProfile()) {
+    if (typeof clusterRuntime?.formatSelfLabel === "function") {
+      const label = clusterRuntime.formatSelfLabel();
+      if (typeof label === "string" && label.trim()) {
+        return label.trim();
+      }
+    }
+
+    return [profile.alias, profile.machineId ? `(${String(profile.machineId).slice(0, 8)})` : ""].filter(Boolean).join(" ").trim();
+  }
+
+  function getWorkingIdentity(profile = getMachineProfile()) {
+    return (profile.alias || getMachineLabel(profile) || profile.machineId || "unknown").trim();
+  }
+
+  function compactMachineRoster(roster = []) {
+    return roster
+      .filter((entry) => entry && typeof entry === "object")
+      .map((entry) => {
+        const machineId = typeof entry.machineId === "string" ? entry.machineId.trim() : "";
+        if (!machineId) {
+          return "";
+        }
+
+        const alias = typeof entry.alias === "string" ? entry.alias.trim() : "";
+        const openId = typeof entry.openId === "string" ? entry.openId.trim() : "";
+        const source = typeof entry.source === "string" ? entry.source.trim() : "";
+        return [alias || machineId, machineId ? `(${machineId.slice(0, 8)})` : "", openId ? `open_id=${openId}` : "", source ? `[${source}]` : ""]
+          .filter(Boolean)
+          .join(" ");
+      })
+      .filter(Boolean);
+  }
+
+  function killProcessTree(pid, reason = "") {
+    const cleanedPid = Number(pid);
+    if (!Number.isInteger(cleanedPid) || cleanedPid <= 0) {
+      return;
+    }
+
+    try {
+      const killer = spawn("taskkill", ["/PID", String(cleanedPid), "/T", "/F"], {
+        windowsHide: true,
+        stdio: "ignore",
+      });
+      killer.on("error", (err) => {
+        console.error(`Failed to taskkill Codex process${reason ? ` (${reason})` : ""}:`, err.message);
+      });
+    } catch (err) {
+      console.error(`Failed to launch taskkill for Codex process${reason ? ` (${reason})` : ""}:`, err.message);
+    }
+  }
 
   function buildCodexPrompt(userText, state = {}) {
+    const machineProfile = getMachineProfile();
+    const machineLabel = getMachineLabel(machineProfile);
     const chatId = state.chatId || "";
     const senderOpenId = state.lastSenderOpenId || "";
-    return `${codexRelayPrompt}\n\nCHAT_CONTEXT:\n- MACHINE_LABEL: ${machineLabel || "(unknown)"}\n- MACHINE_ID: ${machineProfile.machineId || "(unknown)"}\n- MACHINE_ALIAS: ${machineProfile.alias || "(unknown)"}\n- CHAT_ID: ${chatId}\n- LAST_SENDER_OPEN_ID: ${senderOpenId || "(unknown)"}\n\nUSER_MESSAGE: ${userText}\nASSISTANT_REPLY:`;
+    const senderMachineId = state.lastSenderMachineId || "";
+    const roster = typeof clusterRuntime?.getMachineRoster === "function" ? clusterRuntime.getMachineRoster() : [];
+    const rosterLines = compactMachineRoster(roster);
+    return `${codexRelayPrompt}\n\nCHAT_CONTEXT:\n- MACHINE_LABEL: ${machineLabel || "(unknown)"}\n- MACHINE_ID: ${machineProfile.machineId || "(unknown)"}\n- MACHINE_ALIAS: ${machineProfile.alias || "(unknown)"}\n- CHAT_ID: ${chatId}\n- LAST_SENDER_OPEN_ID: ${senderOpenId || "(unknown)"}\n- LAST_SENDER_MACHINE_ID: ${senderMachineId || "(unknown)"}\n- KNOWN_MACHINE_ROSTER:\n${rosterLines.length ? rosterLines.map((line) => `  - ${line}`).join("\n") : "  - (none)"}\n\nUSER_MESSAGE: ${userText}\nASSISTANT_REPLY:`;
   }
 
   function writeCodexStatus(busy, extra = {}) {
@@ -41,6 +100,8 @@ function createCodexRunner(ctx) {
       return;
     }
 
+    const machineProfile = getMachineProfile();
+    const machineLabel = getMachineLabel(machineProfile);
     const dirPath = path.dirname(codexStatusPath);
     const tmpPath = `${codexStatusPath}.tmp`;
     const payload = {
@@ -200,6 +261,51 @@ function createCodexRunner(ctx) {
     return null;
   }
 
+  function extractRelayDirective(text, state = {}) {
+    if (!isClusterMode || !clusterRuntime || typeof clusterRuntime.resolveTarget !== "function") {
+      return null;
+    }
+
+    const lines = (text || "").split(/\r?\n/);
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        continue;
+      }
+
+      const match = trimmed.match(/^@(.+?)\s*:\s*([\s\S]+)$/i);
+      if (!match || !match[1] || !match[2]) {
+        continue;
+      }
+
+      const targetToken = match[1]
+        .trim()
+        .replace(/^["'`]+|["'`]+$/g, "")
+        .replace(/^@+/, "")
+        .replace(/^machine\s+/i, "")
+        .replace(/^to\s+/i, "");
+      const message = match[2].trim();
+      if (!targetToken || !message) {
+        continue;
+      }
+
+      const targetResolution = clusterRuntime.resolveTarget(targetToken);
+      if (targetResolution.status !== "match" || !targetResolution.machineId) {
+        continue;
+      }
+
+      return {
+        targetToken,
+        machineId: targetResolution.machineId,
+        alias: targetResolution.alias || "",
+        message,
+        raw: trimmed,
+      };
+    }
+
+    return null;
+  }
+
   function isDirectContactToken(token) {
     const cleanedToken = (token || "").trim();
     return (
@@ -244,6 +350,11 @@ function createCodexRunner(ctx) {
     let child = null;
     let stderr = "";
     let stdout = "";
+    let timedOut = false;
+    let turnTimeoutHandle = null;
+    const machineProfile = getMachineProfile();
+    const machineLabel = getMachineLabel(machineProfile);
+    const workingIdentity = getWorkingIdentity(machineProfile);
 
     try {
       let statusMessageId = "";
@@ -269,11 +380,11 @@ function createCodexRunner(ctx) {
         stdio: ["pipe", "pipe", "pipe"],
       });
       state.activeCodexProcess = child;
-      writeCodexStatus(true, {
-        chatId,
-        processId: child.pid || null,
-        codexSessionId: codexSessionId || "",
-        statusMessageId: state.relayStatusMessageId || "",
+        writeCodexStatus(true, {
+          chatId,
+          processId: child.pid || null,
+          codexSessionId: codexSessionId || "",
+          statusMessageId: state.relayStatusMessageId || "",
         startedAt: state.relayStatusStartedAt || new Date().toISOString(),
         machineLabel,
         machineId: machineProfile.machineId || "",
@@ -290,7 +401,26 @@ function createCodexRunner(ctx) {
         });
         child.once("close", resolve);
         child.stdin.end(prompt);
+        turnTimeoutHandle = setTimeout(() => {
+          timedOut = true;
+          try {
+            killProcessTree(child?.pid, "timeout");
+          } catch (killErr) {
+            console.error("Failed to kill timed-out Codex process:", killErr.message);
+          }
+          reject(new Error(`Codex timed out after ${Math.round(turnTimeoutMs / 60000)} minutes.`));
+        }, turnTimeoutMs);
+        if (turnTimeoutHandle && typeof turnTimeoutHandle.unref === "function") {
+          turnTimeoutHandle.unref();
+        }
       });
+      if (turnTimeoutHandle) {
+        clearTimeout(turnTimeoutHandle);
+      }
+
+      if (timedOut) {
+        throw new Error(`Codex timed out after ${Math.round(turnTimeoutMs / 60000)} minutes.`);
+      }
 
       const fileText = fs.existsSync(outputPath) ? fs.readFileSync(outputPath, "utf8") : "";
       const finalMessage = extractLastUsefulText(fileText) || extractLastUsefulText(stdout) || extractLastUsefulText(stderr);
@@ -333,7 +463,23 @@ function createCodexRunner(ctx) {
 
       let messageText = finalMessage;
       let usedInChatTagFallback = false;
-      const directMessageDirective = extractDirectMessageDirective ? extractDirectMessageDirective(finalMessage, state) : null;
+      const relayDirective = extractRelayDirective ? extractRelayDirective(finalMessage, state) : null;
+      if (relayDirective) {
+        await sendTextMessage(chatId, `@${relayDirective.machineId}: ${relayDirective.message}`, {
+          source_chat_id: chatId,
+          source_codex_session_id: state.codexResponseId || codexSessionId || "",
+          direct_message: false,
+          relay_target_machine_id: relayDirective.machineId,
+          relay_target_machine_alias: relayDirective.alias || "",
+          codex_directive: "RELAY_MACHINE",
+        });
+        messageText = stripDirectiveLines(finalMessage);
+        if (!messageText) {
+          return;
+        }
+      }
+
+      const directMessageDirective = relayDirective ? null : extractDirectMessageDirective ? extractDirectMessageDirective(finalMessage, state) : null;
       if (directMessageDirective) {
         let resolvedOpenId = directMessageDirective.openId;
         if (!resolvedOpenId && typeof resolveRecipientOpenId === "function") {
@@ -385,6 +531,9 @@ function createCodexRunner(ctx) {
         await sendTextMessage(chatId, chunk);
       }
     } catch (err) {
+      if (turnTimeoutHandle) {
+        clearTimeout(turnTimeoutHandle);
+      }
       if (err && err.signal === "SIGTERM") {
         return;
       }
@@ -392,6 +541,9 @@ function createCodexRunner(ctx) {
       console.error("Codex request error:", err);
       await sendTextMessage(chatId, `Failed to run Codex: ${err.message}`);
     } finally {
+      if (turnTimeoutHandle) {
+        clearTimeout(turnTimeoutHandle);
+      }
       state.isTurnInFlight = false;
       if (state.activeCodexProcess === child) {
         state.activeCodexProcess = null;
@@ -435,7 +587,7 @@ function createCodexRunner(ctx) {
       startedAt: "",
     });
 
-    await sendTextMessage(chatId, `Started new Codex session [${workingIdentity}]. Send your message.`);
+    await sendTextMessage(chatId, `Started new Codex session [${getWorkingIdentity()}]. Send your message.`);
   }
 
   async function cancelTurn(chatId, state) {
@@ -444,7 +596,7 @@ function createCodexRunner(ctx) {
       return;
     }
 
-    state.activeCodexProcess.kill();
+    killProcessTree(state.activeCodexProcess?.pid, "cancel");
     state.activeCodexProcess = null;
     state.isTurnInFlight = false;
     state.relayStatusMessageId = "";
@@ -461,7 +613,7 @@ function createCodexRunner(ctx) {
 
   async function stopCodexSession(chatId, state) {
     if (state.activeCodexProcess) {
-      state.activeCodexProcess.kill();
+      killProcessTree(state.activeCodexProcess?.pid, "stop");
     }
 
     state.hasActiveSession = false;
@@ -484,18 +636,19 @@ function createCodexRunner(ctx) {
       startedAt: "",
     });
 
-    await sendTextMessage(chatId, `Codex disarmed [${workingIdentity}].`);
+    await sendTextMessage(chatId, `Codex disarmed [${getWorkingIdentity()}].`);
   }
 
-  return {
-    buildCodexPrompt,
-    buildCodexArgs,
-    buildCodexResumeArgs,
-    extractLastUsefulText,
-    extractDirectMessageDirective,
-    runCodexTurn,
-    startNewCodexSession,
-    cancelTurn,
+      return {
+        buildCodexPrompt,
+        buildCodexArgs,
+        buildCodexResumeArgs,
+        extractLastUsefulText,
+        extractRelayDirective,
+        extractDirectMessageDirective,
+        runCodexTurn,
+        startNewCodexSession,
+        cancelTurn,
     stopCodexSession,
   };
 }
