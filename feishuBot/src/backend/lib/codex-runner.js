@@ -23,6 +23,7 @@ function createCodexRunner(ctx) {
     extractUploadDirective,
     clusterRuntime,
   } = deps;
+  const skipGitRepoCheck = !/^(false|0|no|off)$/i.test((process.env.CODEX_SKIP_GIT_REPO_CHECK || "true").trim());
   const machineProfile = typeof clusterRuntime?.getProfile === "function" ? clusterRuntime.getProfile() : {};
   const machineLabel = typeof clusterRuntime?.formatSelfLabel === "function"
     ? clusterRuntime.formatSelfLabel()
@@ -69,7 +70,13 @@ function createCodexRunner(ctx) {
   }
 
   function buildCodexArgs(outputPath) {
-    const args = ["exec", "--json", "--sandbox", "danger-full-access", "--cd", projectRoot, "--output-last-message", outputPath];
+    const args = ["exec", "--json", "--sandbox", "danger-full-access", "--cd", projectRoot];
+
+    if (skipGitRepoCheck) {
+      args.push("--skip-git-repo-check");
+    }
+
+    args.push("--output-last-message", outputPath);
 
     if (codexModel) {
       args.push("--model", codexModel);
@@ -86,7 +93,13 @@ function createCodexRunner(ctx) {
   }
 
   function buildCodexResumeArgs(sessionId, outputPath) {
-    const args = ["exec", "resume", "--json", "--output-last-message", outputPath];
+    const args = ["exec", "resume", "--json"];
+
+    if (skipGitRepoCheck) {
+      args.push("--skip-git-repo-check");
+    }
+
+    args.push("--output-last-message", outputPath);
 
     if (codexModel) {
       args.push("--model", codexModel);
