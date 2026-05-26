@@ -14,12 +14,19 @@
       "features": [
         {
           "summary": "Render the app interface",
-          "flow": ["e1"]
+          "flow": [
+            "e1"
+          ]
         }
       ],
-      "edges": ["e1"],
+      "edges": [
+        "e1"
+      ],
       "critical": true,
-      "files": ["src/public/index.html", "src/frontend/style.css"],
+      "files": [
+        "src/public/index.html",
+        "src/frontend/style.css"
+      ],
       "children": []
     },
     {
@@ -30,12 +37,22 @@
       "features": [
         {
           "summary": "Load and save tasks with GET/PUT /api/tasks",
-          "flow": ["e2", "e3", "e4"]
+          "flow": [
+            "e2",
+            "e3",
+            "e4"
+          ]
         }
       ],
-      "edges": ["e2", "e3", "e4"],
+      "edges": [
+        "e2",
+        "e3",
+        "e4"
+      ],
       "critical": true,
-      "files": ["src/frontend/app.js"],
+      "files": [
+        "src/frontend/app.js"
+      ],
       "children": []
     },
     {
@@ -46,12 +63,22 @@
       "features": [
         {
           "summary": "Persist tasks to backend data file",
-          "flow": ["e5", "e6", "e7"]
+          "flow": [
+            "e5",
+            "e6",
+            "e7"
+          ]
         }
       ],
-      "edges": ["e5", "e6", "e7"],
+      "edges": [
+        "e5",
+        "e6",
+        "e7"
+      ],
       "critical": true,
-      "files": ["src/backend/server.js"],
+      "files": [
+        "src/backend/server.js"
+      ],
       "children": []
     },
     {
@@ -62,7 +89,9 @@
       "features": [],
       "edges": [],
       "critical": false,
-      "files": ["src/backend/data/tasks.json"],
+      "files": [
+        "src/backend/data/tasks.json"
+      ],
       "children": []
     }
   ],
@@ -72,7 +101,7 @@
       "kind": "control",
       "from": "control:ui",
       "to": "module:frontend-app",
-      "note": "UI loads frontend logic"
+      "note": "UI load frontend logic"
     },
     {
       "id": "e2",
@@ -93,14 +122,14 @@
       "kind": "control",
       "from": "module:frontend-app",
       "to": "module:frontend-app",
-      "note": "add/edit/toggle/delete transitions"
+      "note": "Add/edit/toggle/delete flows"
     },
     {
       "id": "e5",
       "kind": "control",
       "from": "module:backend-server",
       "to": "control:ui",
-      "note": "Serve static app files"
+      "note": "Serve static app"
     },
     {
       "id": "e6",

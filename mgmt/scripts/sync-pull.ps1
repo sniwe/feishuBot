@@ -8,7 +8,30 @@ $ErrorActionPreference = "Stop"
 
 $GLOBAL_MGMT_DIR = Split-Path -Parent $PSScriptRoot
 $DEFAULT_REPO_ROOT = Split-Path -Parent $GLOBAL_MGMT_DIR
-$REPO_ROOT = if ([string]::IsNullOrWhiteSpace($RepoRoot)) { $DEFAULT_REPO_ROOT } else { [IO.Path]::GetFullPath($RepoRoot) }
+
+function Resolve-RepoRoot {
+    param(
+        [Parameter()][string]$ExplicitRepoRoot,
+        [Parameter()][string]$FallbackRepoRoot
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($ExplicitRepoRoot)) {
+        return [IO.Path]::GetFullPath($ExplicitRepoRoot)
+    }
+
+    try {
+        $gitRoot = & git rev-parse --show-toplevel 2>$null
+        if (-not [string]::IsNullOrWhiteSpace(($gitRoot | Out-String))) {
+            return [IO.Path]::GetFullPath(($gitRoot | Out-String).Trim())
+        }
+    } catch {
+        # Ignore and fall back below.
+    }
+
+    return [IO.Path]::GetFullPath($FallbackRepoRoot)
+}
+
+$REPO_ROOT = Resolve-RepoRoot -ExplicitRepoRoot $RepoRoot -FallbackRepoRoot $DEFAULT_REPO_ROOT
 
 if (!(Test-Path -LiteralPath (Join-Path $REPO_ROOT ".git"))) {
     throw "Not a git repo root: $REPO_ROOT"

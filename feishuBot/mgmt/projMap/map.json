@@ -4,7 +4,7 @@
     "name":  "feishuBot",
     "summary":  "Project map for the Feishu Codex relay",
     "root":  "C:\\Users\\Qub\\feishuBot",
-    "updated":  "2026-05-25T22:43:16.2606096-07:00",
+    "updated": "2026-05-26T13:54:00.6662479+08:00",
     "nodes":  [
                   {
                       "id":  "node-root",

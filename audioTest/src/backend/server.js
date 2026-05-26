@@ -5,6 +5,7 @@ const path = require("node:path");
 
 const config = require("./config");
 const { parseRequestUrl, sendJson, readJsonBody, readBodyBuffer, streamFile, streamAudioBinary } = require("./utils");
+const { createRuntimeLogStore } = require("./runtime-log-store");
 const { AUTH_SESSIONS, createAuthSession, requireAuthUser, handlePostAuthPing, normalizeUsername } = require("./auth");
 const {
   normalizeSessionId,
@@ -35,6 +36,9 @@ const {
   withRemoteUserHeaders
 } = require("./remote-store");
 
+let runtimeLogStore = null;
+let serverLogTarget = null;
+
 startServer({ data: {}, deps: { fs, fsp, http, path } }).catch(function (error) {
   console.error(error);
   process.exit(1);
@@ -47,6 +51,18 @@ async function startServer(ctx) {
     await deps.fsp.mkdir(config.SESSIONS_DIR, { recursive: true });
     await deps.fsp.mkdir(config.AUDIO_DIR, { recursive: true });
   }
+
+  runtimeLogStore = createRuntimeLogStore({ deps: { fsp: deps.fsp } });
+  serverLogTarget = await runtimeLogStore.allocateRuntimeTarget({
+    data: {
+      runtimeId: "server-" + String(process.pid),
+      label: "server",
+      date: new Date()
+    },
+    deps: {}
+  });
+  runtimeLogStore.createConsoleTee({ data: { target: serverLogTarget, consoleRef: console }, deps: {} });
+  console.info("[audioTest] server log target ready", serverLogTarget);
 
   const server = deps.http.createServer(function (req, res) {
     routeRequest({ data: { req, res }, deps: { fs: deps.fs, fsp: deps.fsp, path: deps.path } }).catch(function (error) {
@@ -61,11 +77,67 @@ async function startServer(ctx) {
   console.log("audioTest server listening on http://localhost:" + config.PORT);
 }
 
+function logServerEvent(ctx) {
+  const { data = {} } = ctx || {};
+  if (data.req && !shouldLogServerEvents(data.req)) {
+    return;
+  }
+  if (!runtimeLogStore || !serverLogTarget) {
+    return;
+  }
+  void runtimeLogStore.appendEntry({
+    data: {
+      runtimeId: serverLogTarget.runtimeId,
+      entry: {
+        ts: new Date(),
+        source: String(data.source || "server"),
+        level: String(data.level || "info"),
+        kind: String(data.kind || "action"),
+        label: String(data.label || ""),
+        detail: data.detail || {}
+      }
+    },
+    deps: {}
+  });
+}
+
+function shouldLogServerEvents(req) {
+  const cookie = String(req && req.headers && req.headers.cookie ? req.headers.cookie : "");
+  if (!cookie) {
+    return true;
+  }
+  return !/(?:^|;\s*)audioTest\.stateActionLoggingEnabled=(?:0|false)(?:;|$)/i.test(cookie);
+}
+
 async function routeRequest(ctx) {
   const { data, deps } = ctx;
   const { req, res } = data;
   const requestUrl = parseRequestUrl({ data: { rawUrl: req.url }, deps: {} });
   const requestPath = requestUrl.pathname;
+  if (shouldLogServerEvents(req)) {
+    logServerEvent({
+      data: {
+        req,
+        source: "request",
+        level: "info",
+        kind: "action",
+        label: req.method + " " + requestPath,
+        detail: {
+          url: req.url
+        }
+      }
+    });
+  }
+
+  if (req.method === "POST" && requestPath === "/api/runtime-log/start") {
+    await handlePostRuntimeLogStart({ data: { req, res }, deps });
+    return;
+  }
+
+  if (req.method === "POST" && requestPath === "/api/runtime-log/entry-batch") {
+    await handlePostRuntimeLogEntryBatch({ data: { req, res }, deps });
+    return;
+  }
 
   if (req.method === "GET" && requestPath === "/api/sessions") {
     await handleGetSessions({ data: { req, res }, deps });
@@ -122,6 +194,83 @@ async function routeRequest(ctx) {
   }
 
   sendJson({ data: { res, status: 405, payload: { error: "method_not_allowed" } }, deps: {} });
+}
+
+async function handlePostRuntimeLogStart(ctx) {
+  const { data, deps } = ctx;
+  const { req, res } = data;
+
+  let payload;
+  try {
+    payload = await readJsonBody({ data: { req }, deps: {} });
+  } catch (error) {
+    sendJson({ data: { res, status: 400, payload: { error: "invalid_json", detail: String(error && error.message ? error.message : error) } }, deps: {} });
+    return;
+  }
+
+  if (!runtimeLogStore) {
+    sendJson({ data: { res, status: 503, payload: { error: "runtime_log_unavailable" } }, deps: {} });
+    return;
+  }
+
+  const target = await runtimeLogStore.allocateRuntimeTarget({
+    data: {
+      runtimeId: String(payload.runtimeId || "").trim() || undefined,
+      label: String(payload.runtimeKind || "frontend").trim() || "frontend",
+      date: new Date(),
+      forceNewTarget: payload.forceNewTarget === true,
+      bootId: String(payload.bootId || "").trim()
+    },
+    deps: {}
+  });
+
+  logServerEvent({
+    data: {
+      req,
+      source: "runtime-log",
+      level: "info",
+      kind: "action",
+      label: "runtime-log:start",
+      detail: {
+        runtimeKind: String(payload.runtimeKind || "frontend"),
+        location: String(payload.location || ""),
+        userAgent: String(payload.userAgent || ""),
+        target
+      }
+    }
+  });
+
+  sendJson({ data: { res, status: 200, payload: { runtimeId: target.runtimeId, target } }, deps: {} });
+}
+
+async function handlePostRuntimeLogEntryBatch(ctx) {
+  const { data, deps } = ctx;
+  const { req, res } = data;
+
+  let payload;
+  try {
+    payload = await readJsonBody({ data: { req }, deps: {} });
+  } catch (error) {
+    sendJson({ data: { res, status: 400, payload: { error: "invalid_json", detail: String(error && error.message ? error.message : error) } }, deps: {} });
+    return;
+  }
+
+  const runtimeId = String(payload.runtimeId || "").trim();
+  const entries = Array.isArray(payload.entries) ? payload.entries : [];
+  if (!runtimeId || !entries.length || !runtimeLogStore) {
+    sendJson({ data: { res, status: 400, payload: { error: "invalid_payload" } }, deps: {} });
+    return;
+  }
+
+  await runtimeLogStore.appendLines({
+    data: {
+      runtimeId,
+      entries
+    },
+    deps: {}
+  });
+
+  sendJson({ data: { res, status: 200, payload: { ok: true } }, deps: {} });
 }
 
 async function handleGetSessions(ctx) {
@@ -219,6 +368,23 @@ async function handlePostSession(ctx) {
     sendJson({ data: { res, status: 400, payload: { error: "invalid_payload" } }, deps: {} });
     return;
   }
+
+  logServerEvent({
+    data: {
+      req,
+      source: "session",
+      level: "info",
+      kind: "state",
+      label: "session:save",
+      detail: {
+        username: authUser,
+        sessionId: String(payload.sessionId || ""),
+        fileName: payload.file && payload.file.name ? String(payload.file.name) : "",
+        baseRevision: payload.baseRevision,
+        playbackKeys: Object.keys(payload.playback || {})
+      }
+    }
+  });
 
   if (config.IS_REMOTE_STORAGE) {
     const saved = await saveRemoteSession({ data: { payload, username: authUser }, deps: {} });
@@ -347,6 +513,19 @@ async function handlePostLogin(ctx) {
     return;
   }
 
+  logServerEvent({
+    data: {
+      req,
+      source: "auth",
+      level: "info",
+      kind: "action",
+      label: "login:attempt",
+      detail: {
+        username
+      }
+    }
+  });
+
   const expectedPassword = config.USER_CREDENTIALS[username];
   if (!expectedPassword || password !== expectedPassword) {
     sendJson({ data: { res, status: 401, payload: { ok: false, error: "invalid_credentials" } }, deps: {} });
@@ -383,6 +562,20 @@ async function handleDeleteSession(ctx) {
     sendJson({ data: { res, status: 400, payload: { error: "invalid_session_id" } }, deps: {} });
     return;
   }
+
+  logServerEvent({
+    data: {
+      req,
+      source: "session",
+      level: "warn",
+      kind: "state",
+      label: "session:delete",
+      detail: {
+        username: authUser,
+        sessionId: resolvedSessionId
+      }
+    }
+  });
 
   if (config.IS_REMOTE_STORAGE) {
     const deleted = await deleteRemoteSession({ data: { sessionId: resolvedSessionId, username: authUser }, deps: {} });
@@ -454,6 +647,23 @@ async function handlePostAudio(ctx) {
   const resolvedMimeType = String(mimeType || req.headers["content-type"] || "application/octet-stream").slice(0, 120);
   const resolvedFileName = String(fileName || "audio.bin").slice(0, 255);
   const resolvedLastModified = Number(lastModified || Date.now());
+
+  logServerEvent({
+    data: {
+      req,
+      source: "audio",
+      level: "info",
+      kind: "action",
+      label: "audio:upload",
+      detail: {
+        username: authUser,
+        fileName: resolvedFileName,
+        mimeType: resolvedMimeType,
+        lastModified: resolvedLastModified,
+        byteLength: req && req.headers && req.headers["content-length"] ? Number(req.headers["content-length"]) : null
+      }
+    }
+  });
 
   await deps.fsp.mkdir(config.AUDIO_DIR, { recursive: true });
   await deps.fsp.writeFile(binaryPath, bodyBuffer);

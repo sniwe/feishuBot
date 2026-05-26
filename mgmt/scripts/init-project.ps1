@@ -229,5 +229,6 @@ if (!(Test-Path -LiteralPath $genPs1)) {
 
 & (Join-Path $GLOBAL_MGMT_DIR 'scripts\registry-upsert.ps1') -ProjectRoot $ProjectRoot -ProjectId $ProjectId -Name $Name -Status active -ProjectType $ProjectType -ExtractionMode native -Exports $Exports -Consumers $Consumers -GlobalMgmtDir $GLOBAL_MGMT_DIR | Out-Null
 & (Join-Path $GLOBAL_MGMT_DIR 'scripts\map-sync.ps1') -GlobalMgmtDir $GLOBAL_MGMT_DIR | Out-Null
+& (Join-Path $GLOBAL_MGMT_DIR 'scripts\install-queue-maintenance-task.ps1') -GlobalMgmtDir $GLOBAL_MGMT_DIR | Out-Null
 
 Write-Output ("Initialized project: {0}" -f $ProjectRoot)

@@ -183,9 +183,8 @@
           return { start: seg.start, end: seg.end, createdAt: seg.createdAt || new Date().toISOString() };
         }),
         subSegValueEntries: state.subSegValueEntries,
-        subSegTimelines: state.subSegTimelines,
-        subSegCardBubbleValues: state.subSegCardBubbleValues,
-        selectedSpanIndex: -1,
+        audSegNoteEntries: state.audSegNoteEntries,
+        selectedSpanIndex: Number.isInteger(state.selectedSpanIndex) ? state.selectedSpanIndex : -1,
         currentTime: Number.isFinite(audio.currentTime) ? audio.currentTime : 0,
         wasPlaying: !audio.paused
       },

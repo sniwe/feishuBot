@@ -1,172 +1,146 @@
-﻿{
-    "id":  "map:toy-map-app",
-    "type":  "project-map",
-    "name":  "Toy Map App",
-    "summary":  "Minimal toy app to validate map generation flow",
-    "root":  "C:\\Users\\Qub\\mgmt\\toy-map-app",
-    "updated":  "2026-03-08T12:51:15.3414342+08:00",
-    "nodes":  [
-                  {
-                      "id":  "control:app",
-                      "type":  "control",
-                      "name":  "app.js",
-                      "summary":  "Builds ctx and runs toy flow",
-                      "features":  [
-                                       {
-                                           "summary":  "Execute app and print result",
-                                           "flow":  [
-                                                        "e1",
-                                                        "e5"
-                                                    ]
-                                       }
-                                   ],
-                      "edges":  [
-                                    "e1",
-                                    "e4",
-                                    "e5"
-                                ],
-                      "critical":  true,
-                      "files":  [
-                                    "app.js"
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "module:src-index",
-                      "type":  "module",
-                      "name":  "src/index.js",
-                      "summary":  "Orchestrates math and greeting modules",
-                      "features":  [
-                                       {
-                                           "summary":  "Compose sum and greeting",
-                                           "flow":  [
-                                                        "e2",
-                                                        "e3"
-                                                    ]
-                                       }
-                                   ],
-                      "edges":  [
-                                    "e2",
-                                    "e3"
-                                ],
-                      "critical":  true,
-                      "files":  [
-                                    "src/index.js"
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "module:math-add",
-                      "type":  "module",
-                      "name":  "src/modules/math/add.js",
-                      "summary":  "Returns sum from ctx.data",
-                      "features":  [
-                                       {
-                                           "summary":  "Add two numbers",
-                                           "flow":  [
-
-                                                    ]
-                                       }
-                                   ],
-                      "edges":  [
-
-                                ],
-                      "critical":  false,
-                      "files":  [
-                                    "src/modules/math/add.js",
-                                    "src/modules/math/index.js"
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "module:greeting-build",
-                      "type":  "module",
-                      "name":  "src/modules/greeting/buildGreeting.js",
-                      "summary":  "Builds greeting message using deps.nowIso optionally",
-                      "features":  [
-                                       {
-                                           "summary":  "Format greeting message",
-                                           "flow":  [
-
-                                                    ]
-                                       }
-                                   ],
-                      "edges":  [
-
-                                ],
-                      "critical":  false,
-                      "files":  [
-                                    "src/modules/greeting/buildGreeting.js",
-                                    "src/modules/greeting/index.js"
-                                ],
-                      "children":  [
-
-                                   ]
-                  },
-                  {
-                      "id":  "io:console",
-                      "type":  "io",
-                      "name":  "console",
-                      "summary":  "Stdout logging sink",
-                      "features":  [
-
-                                   ],
-                      "edges":  [
-
-                                ],
-                      "critical":  false,
-                      "files":  [
-
-                                ],
-                      "children":  [
-
-                                   ]
-                  }
-              ],
-    "edges":  [
-                  {
-                      "id":  "e1",
-                      "kind":  "control",
-                      "from":  "control:app",
-                      "to":  "module:src-index",
-                      "note":  "entrypoint invokes orchestration module"
-                  },
-                  {
-                      "id":  "e2",
-                      "kind":  "depends",
-                      "from":  "module:src-index",
-                      "to":  "module:math-add",
-                      "note":  "runToyApp computes sum"
-                  },
-                  {
-                      "id":  "e3",
-                      "kind":  "depends",
-                      "from":  "module:src-index",
-                      "to":  "module:greeting-build",
-                      "note":  "runToyApp builds greeting"
-                  },
-                  {
-                      "id":  "e4",
-                      "kind":  "context",
-                      "from":  "control:app",
-                      "to":  "module:src-index",
-                      "via":  "ctx.data + ctx.deps"
-                  },
-                  {
-                      "id":  "e5",
-                      "kind":  "io",
-                      "from":  "control:app",
-                      "to":  "io:console",
-                      "via":  "ctx.deps.log"
-                  }
-              ],
-    "children":  [
-
-                 ]
+{
+  "id": "map:toy-map-app",
+  "type": "project-map",
+  "name": "Toy Map App",
+  "summary": "Minimal toy app to validate map generation flow",
+  "root": "C:\\Users\\Qub\\mgmt\\toy-map-app",
+  "updated": "2026-03-08T12:51:15.3414342+08:00",
+  "nodes": [
+    {
+      "id": "control:app",
+      "type": "control",
+      "name": "app.js",
+      "summary": "Builds ctx and runs toy flow",
+      "features": [
+        {
+          "summary": "Execute app and print result",
+          "flow": [
+            "e1",
+            "e5"
+          ]
+        }
+      ],
+      "edges": [
+        "e1",
+        "e4",
+        "e5"
+      ],
+      "critical": true,
+      "files": [
+        "app.js"
+      ],
+      "children": []
+    },
+    {
+      "id": "module:src-index",
+      "type": "module",
+      "name": "src/index.js",
+      "summary": "Orchestrates math and greeting modules",
+      "features": [
+        {
+          "summary": "Compose sum and greeting",
+          "flow": [
+            "e2",
+            "e3"
+          ]
+        }
+      ],
+      "edges": [
+        "e2",
+        "e3"
+      ],
+      "critical": true,
+      "files": [
+        "src/index.js"
+      ],
+      "children": []
+    },
+    {
+      "id": "module:math-add",
+      "type": "module",
+      "name": "src/modules/math/add.js",
+      "summary": "Returns sum from ctx.data",
+      "features": [
+        {
+          "summary": "Add two numbers",
+          "flow": []
+        }
+      ],
+      "edges": [],
+      "critical": false,
+      "files": [
+        "src/modules/math/add.js",
+        "src/modules/math/index.js"
+      ],
+      "children": []
+    },
+    {
+      "id": "module:greeting-build",
+      "type": "module",
+      "name": "src/modules/greeting/buildGreeting.js",
+      "summary": "Builds greeting message using deps.nowIso optionally",
+      "features": [
+        {
+          "summary": "Format greeting message",
+          "flow": []
+        }
+      ],
+      "edges": [],
+      "critical": false,
+      "files": [
+        "src/modules/greeting/buildGreeting.js",
+        "src/modules/greeting/index.js"
+      ],
+      "children": []
+    },
+    {
+      "id": "io:console",
+      "type": "io",
+      "name": "console",
+      "summary": "Stdout logging sink",
+      "features": [],
+      "edges": [],
+      "critical": false,
+      "files": [],
+      "children": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "kind": "control",
+      "from": "control:app",
+      "to": "module:src-index",
+      "note": "Entrypoint call orchestration module"
+    },
+    {
+      "id": "e2",
+      "kind": "depends",
+      "from": "module:src-index",
+      "to": "module:math-add",
+      "note": "runToyApp compute sum"
+    },
+    {
+      "id": "e3",
+      "kind": "depends",
+      "from": "module:src-index",
+      "to": "module:greeting-build",
+      "note": "runToyApp build greeting"
+    },
+    {
+      "id": "e4",
+      "kind": "context",
+      "from": "control:app",
+      "to": "module:src-index",
+      "via": "ctx.data + ctx.deps"
+    },
+    {
+      "id": "e5",
+      "kind": "io",
+      "from": "control:app",
+      "to": "io:console",
+      "via": "ctx.deps.log"
+    }
+  ],
+  "children": []
 }

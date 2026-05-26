@@ -1,11 +1,11 @@
-﻿# AGENTS.md
+# AGENTS.md
 
 ## Scope and Path Variables
 
-Use dynamic roots so instructions are portable.
+Use dynamic roots. Keep portable.
 
 - `USER_ROOT`: user home directory (default `C:\Users\Qub`)
-- `WORKSPACE_ROOT`: active project root (current working project)
+- `WORKSPACE_ROOT`: project root (current project)
 - `MGMT_DIR`: `${WORKSPACE_ROOT}\mgmt`
 - `PROJMAP_DIR`: `${MGMT_DIR}\projMap` (default project-scoped management package)
 - `SRC_DIR`: `${WORKSPACE_ROOT}\src`
@@ -17,13 +17,42 @@ Use dynamic roots so instructions are portable.
 
 Resolve paths from these variables first, then from explicit user-provided absolute paths.
 
+## Default Response Style
+
+- Use `caveman` skill in `full` mode by default for all thread replies unless user asks for another style.
+- Treat an incoming thread message exactly `test` as an explicit `caveman` full trigger.
+
 ## Default Project AGENTS Generation
 
-For every new project, generate a project-scoped `AGENTS.md` at:
+For new project, make project `AGENTS.md` at:
 
 - `${WORKSPACE_ROOT}\AGENTS.md`
 
-This project-scoped file must be created by default as a modified derivative of this global file, with project-specific path bindings and instructions adjusted to `${WORKSPACE_ROOT}` and `${MGMT_DIR}` while preserving global standards and precedence.
+Make project copy of this file. Bind paths to `${WORKSPACE_ROOT}` and `${MGMT_DIR}`. Keep global rules.
+
+Project `AGENTS.md` must also init mgmt queue folders under `${MGMT_DIR}`:
+
+- `${MGMT_DIR}\toDo\`
+- `${MGMT_DIR}\errFix\`
+- `${MGMT_DIR}\DLs\`
+- `${MGMT_DIR}\logs\`
+
+`toDo` and `errFix` must always contain at least one blank `.txt` file. Use ordinal file names starting at `1.txt` and continue in sequence. If a previously created file gains content, create the next ordinal file as a new blank `.txt` so a blank sentinel is always present.
+
+`toDo` blocks nest by blank lines. Use tabs for children. Nested lines continue parent block.
+
+- `${MGMT_DIR}\toDo\done\` is the manual spot for done `toDo` items.
+- `${MGMT_DIR}\errFix\fixed\` is the manual spot for done `errFix` items.
+- `${MGMT_DIR}\DLs\` mirrors download files for the current day and referenced download paths, sorted newest-first by the queue maintenance worker and renamed `dl-1.ext`, `dl-2.ext`, ... in ordinal order while preserving each file's original extension.
+- `${MGMT_DIR}\logs\` stores runtime console logs grouped by capture date and ordinal runtime instance.
+
+Runtime log rules:
+
+- Log all user actions, state shifts, and script changes.
+- Mirror same log stream to `${MGMT_DIR}\logs\YYMMDD\N.txt`.
+- Create active log file in day dir. Keep append-only.
+- If same-day restart, use next ordinal.
+- Hard refresh or `Ctrl+F5` means new run. Start new log target.
 
 Default project packaging under `${MGMT_DIR}`:
 
@@ -41,17 +70,17 @@ Default project source packaging under `${SRC_DIR}`:
 
 Project file placement constraint:
 
-- All project files and directories must be placed under `${BACKEND_DIR}`, `${FRONTEND_DIR}`, or `${PUBLIC_DIR}` unless they are management assets under `${MGMT_DIR}` or the project-scoped `${WORKSPACE_ROOT}\AGENTS.md`.
-- During initialization and propagation, coerce any non-exempt project paths into one of the three `${SRC_DIR}` subdirectories.
+- Put project files under `${BACKEND_DIR}`, `${FRONTEND_DIR}`, or `${PUBLIC_DIR}`. Only skip for `${MGMT_DIR}` assets or project `${WORKSPACE_ROOT}\AGENTS.md`.
+- During init and propagation, move non-exempt paths into `${SRC_DIR}`.
 
 
 Project `.gitignore` governance:
 
-- Project-scoped `${WORKSPACE_ROOT}\AGENTS.md` files must create and automatically maintain `${WORKSPACE_ROOT}\.gitignore`.
-- The maintained `.gitignore` must cover project-scope unwieldy, generated, and private/sensitive artifacts (for example local caches, large transient outputs, machine-local secrets, and runtime state files) while preserving intentional tracked source and management files.
-- During initialization and propagation, update `.gitignore` idempotently (no duplicate entries, preserve project-specific rules outside governed sections).
+- Project `${WORKSPACE_ROOT}\AGENTS.md` must create and keep `${WORKSPACE_ROOT}\.gitignore`.
+- Keep `.gitignore` on big junk, generated stuff, secrets, runtime state. Keep tracked source and mgmt files.
+- During init and propagation, update `.gitignore` same way every time. No dupes.
 
-Project-scope management bootstrap under `${PROJMAP_DIR}` must include:
+Project bootstrap under `${PROJMAP_DIR}` needs:
 
 - `threads\README.md`
 - `threads\resolve-init-thread.ps1`
@@ -64,7 +93,7 @@ Project-scope management bootstrap under `${PROJMAP_DIR}` must include:
 - `scripts\generate-map.ps1`
 - `scripts\track-map-update.js`
 
-Project-scoped `mgmt\README.md` should document this package as:
+Project `mgmt\README.md` should say:
 
 - canonical map at `${PROJMAP_DIR}\map.json`
 - thread discovery/cache in `${PROJMAP_DIR}\threads\`
@@ -122,13 +151,14 @@ These markdown sources define one combined operating model:
   - destructure `const { data = {}, ui = {}, deps } = ctx`
 - Route side effects through `ctx.deps` only.
 - If a dependency is missing, provide a brief dep proposal before coding.
+- Log all runtime-visible actions to console and `${MGMT_DIR}\logs\YYMMDD\N.txt` when local logger exists.
 
 ### 2) Project Map (`map.json`)
 
 When code changes in a project:
 
 - Update `${PROJMAP_DIR}\map.json` by default.
-- Ensure top-level `updated` is refreshed (ISO timestamp).
+- Refresh top-level `updated` (ISO time).
 - Node shape:
   - `id`, `type`, `name`, `summary`, `features`, `edges`, `critical`, `files`, `children`
 - `features` entries include:
@@ -136,48 +166,50 @@ When code changes in a project:
   - `flow` (ordered edge id list)
 - `edges` entries include:
   - `id`, `kind`, `from`, `to`, optional `via`, optional `note`
-- Do not use `dependsOn` or `contextLinks`.
+- No `dependsOn` or `contextLinks`.
 
 ### 3) Meta Map and Registry
 
-For workspace-level updates:
+For workspace updates:
 
 - Maintain `${GLOBAL_MGMT_DIR}\projects-index.json` as authoritative project list.
 - Maintain `${GLOBAL_MGMT_DIR}\meta-map.json` (preferred) or existing configured file.
-- Only summarize project maps in meta map; do not inline full source maps.
+- Summarize project maps only. No full source maps.
 - Keep `sources` statuses for malformed/missing maps and continue processing.
 
 ### 4) Thread Bootstrap (`::init`)
 
 On user command `::init`:
 
-- Read local current datetime.
-- Resolve session day directory under `${SESSIONS_ROOT}`.
-- Scan recent rollout files by `LastWriteTime` descending.
-- Parse first `session_meta` and extract `payload.id` as `thread_id`.
+- Read local datetime.
+- Resolve session day dir under `${SESSIONS_ROOT}`.
+- Scan rollout files by `LastWriteTime` desc.
+- Parse first `session_meta`. Get `payload.id` as `thread_id`.
 - Write cache at `${PROJMAP_DIR}\threads\current-thread.json` with:
   - `thread_id`
   - `turn_index` initialized (typically `0` for bootstrap)
   - timestamp and selected source file metadata
-- Use `${PROJMAP_DIR}\threads\resolve-init-thread.ps1` as default resolver script location.
+- Use `${PROJMAP_DIR}\threads\resolve-init-thread.ps1` as default resolver.
+- Ensure project-local initialization enforces the `${MGMT_DIR}\toDo\` and `${MGMT_DIR}\errFix\` ordinal blank-file rules defined above, including the `${MGMT_DIR}\toDo\done\` and `${MGMT_DIR}\errFix\fixed\` subdir guidance.
+- Ensure project-local initialization also maintains `${MGMT_DIR}\DLs\` as the mirrored Downloads staging area, populated from files in `${USER_ROOT}\Downloads` whose created date is the current date and from any referenced download paths found anywhere under `${MGMT_DIR}\toDo\` or `${MGMT_DIR}\errFix\`, with mirrored files renamed `dl-1.ext`, `dl-2.ext`, ... in newest-first ordinal order while preserving each file's original extension.
 
 ### 5) Project Refactor Bootstrap (`::refactor`)
 
 On user command `::refactor`:
 
 - Trigger scope is project-local only.
-- Run refactor only for the current project's `${SRC_DIR}`.
+- Run refactor only for current project `${SRC_DIR}`.
 - Do not trigger cross-project refactor from a project-scoped AGENTS workflow.
-- Scope refactor operations to `${SRC_DIR}` only unless explicitly directed otherwise.
+- Keep refactor in `${SRC_DIR}` unless asked otherwise.
 - Optimize code for modular organization while preserving the existing `${BACKEND_DIR}`, `${FRONTEND_DIR}`, and `${PUBLIC_DIR}` structure.
 - Apply branch/leaf node atomicity: leaf modules should implement one small concern with minimal surface area.
 - Prefer small, concern-separated files and nested subdirectories over monolithic modules.
 - Module code may use arbitrary nesting depth when it improves clarity and separation of concerns.
-- Preserve all pre-defined constraints during refactor, including:
+- Keep all refactor constraints, including:
   - Context Object Pattern function contracts from `context_obj_pattern.md`
   - side effects routed through `ctx.deps`
   - project file placement constraints under `${SRC_DIR}` (except `${MGMT_DIR}` and `${WORKSPACE_ROOT}\AGENTS.md`)
-- After refactor edits, update `${PROJMAP_DIR}\map.json` and refresh top-level `updated` timestamp.
+- After refactor, update `${PROJMAP_DIR}\map.json` and top `updated`.
 
 ### 6) Automatic Sync Governance
 
@@ -188,9 +220,13 @@ After each successful file edit, trigger non-blocking project-level background s
 - Sync entrypoint:
   - use canonical ${GLOBAL_MGMT_DIR}\scripts\sync-push.ps1 (or a project-local wrapper if explicitly configured).
 - Runtime behavior:
-  - run in background and do not block current task execution.
-  - avoid launching duplicate concurrent sync jobs for the same project workspace.
-  - on sync failure, continue local workflow and surface concise failure state for the next retry.
+  - Run in background. Do not block task.
+  - No duplicate sync jobs for same workspace.
+  - If sync fail, keep going. Save short failure state for next retry.
+- Queue maintenance behavior:
+  - when the project is active in VS Code, the queue worker mirrors matching files from `${USER_ROOT}\Downloads` into `${MGMT_DIR}\DLs\`.
+  - files are included if their creation date is today or if any path under `${USER_ROOT}\Downloads` is referenced anywhere inside files under `${MGMT_DIR}\toDo\` or `${MGMT_DIR}\errFix\`.
+  - mirrored items are sorted newest-first in `${MGMT_DIR}\DLs\`, renamed `dl-1.ext`, `dl-2.ext`, ... by ordinal position while preserving each file's original extension, and refreshed idempotently.
 ## Operational Precedence
 
 When instructions overlap, apply in this order:

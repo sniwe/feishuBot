@@ -1,6 +1,8 @@
 const path = require("node:path");
 
 const PROJECT_ROOT = path.resolve(__dirname, "..", "..");
+const MGMT_DIR = path.join(PROJECT_ROOT, "mgmt");
+const LOGS_DIR = path.join(MGMT_DIR, "logs");
 const PUBLIC_DIR = path.join(PROJECT_ROOT, "src", "public");
 const FRONTEND_DIR = path.join(PROJECT_ROOT, "src", "frontend");
 const DATA_DIR = path.join(PROJECT_ROOT, "data");
@@ -9,7 +11,9 @@ const AUDIO_DIR = path.join(DATA_DIR, "audio");
 const SESSION_PATH = path.join(DATA_DIR, "session-latest.json");
 const PORT = Number(process.env.PORT || 8787);
 const MAX_BODY_SIZE = 1024 * 1024 * 500;
-const LOGIN_TTL_MS = Number(process.env.LOGIN_IDLE_TTL_MS || (5 * 60 * 1000));
+const LOGIN_IDLE_TIMEOUT_DISABLED = /^(1|true|yes|on)$/i.test(String(process.env.DISABLE_LOGIN_IDLE_TIMEOUT || ""));
+const LOGIN_TTL_MS_VALUE = Number(process.env.LOGIN_IDLE_TTL_MS ?? (5 * 60 * 1000));
+const LOGIN_TTL_MS = LOGIN_IDLE_TIMEOUT_DISABLED ? 0 : (Number.isFinite(LOGIN_TTL_MS_VALUE) ? LOGIN_TTL_MS_VALUE : (5 * 60 * 1000));
 const STORAGE_PROVIDER = String(process.env.SESSION_STORE || "local").trim().toLowerCase();
 const REMOTE_BASE_URL = String(process.env.REMOTE_BASE_URL || "https://braggadocian-osteometrical-petronila.ngrok-free.dev").trim().replace(/\/+$/g, "");
 const REMOTE_TIMEOUT_MS = Number(process.env.REMOTE_TIMEOUT_MS || 60000);
@@ -24,6 +28,8 @@ const USER_CREDENTIALS = {
 
 module.exports = {
   PROJECT_ROOT,
+  MGMT_DIR,
+  LOGS_DIR,
   PUBLIC_DIR,
   FRONTEND_DIR,
   DATA_DIR,
@@ -32,6 +38,7 @@ module.exports = {
   SESSION_PATH,
   PORT,
   MAX_BODY_SIZE,
+  LOGIN_IDLE_TIMEOUT_DISABLED,
   LOGIN_TTL_MS,
   STORAGE_PROVIDER,
   REMOTE_BASE_URL,

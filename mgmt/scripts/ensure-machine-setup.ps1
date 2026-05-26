@@ -43,6 +43,19 @@ function Test-AutoSyncConfigured {
     return $false
 }
 
+function Remove-AutoSyncArtifacts {
+    param([string]$GlobalMgmtDir)
+
+    $taskName = "CodexRepoAutoSync"
+    $startupDir = [Environment]::GetFolderPath("Startup")
+    $startupLnk = Join-Path $startupDir "Repo Auto Sync.lnk"
+
+    cmd /c "schtasks /Delete /TN ""$taskName"" /F >nul 2>&1" | Out-Null
+    if (Test-Path -LiteralPath $startupLnk) {
+        Remove-Item -LiteralPath $startupLnk -Force -ErrorAction SilentlyContinue
+    }
+}
+
 $existing = $null
 if (Test-Path -LiteralPath $flagPath) {
     try { $existing = Get-Content -LiteralPath $flagPath -Raw | ConvertFrom-Json } catch { $existing = $null }
@@ -54,6 +67,11 @@ if ($existing -and $existing.PSObject.Properties.Name -contains "auto_sync_mode"
     if ($existingMode -in @("task", "ahk", "none")) {
         $desiredMode = $existingMode
     }
+}
+
+$shouldDisableAutoSync = $desiredMode -eq "none"
+if ($shouldDisableAutoSync) {
+    Remove-AutoSyncArtifacts -GlobalMgmtDir $GLOBAL_MGMT_DIR
 }
 
 $needsSetup = $Force -or $null -eq $existing -or -not (Test-AutoSyncConfigured -Mode $desiredMode)
@@ -68,6 +86,20 @@ if ($needsSetup) {
         }
     }
 
+    $payload = [ordered]@{
+        id = "machine-setup"
+        machine = $machineName
+        user = $env:USERNAME
+        user_root = $USER_ROOT
+        global_mgmt_dir = $GLOBAL_MGMT_DIR
+        auto_sync_mode = $desiredMode
+        setup_completed_at = $nowIso
+        force = [bool]$Force
+    }
+    $payload | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $flagPath -Encoding UTF8
+}
+
+if ($shouldDisableAutoSync -and -not $needsSetup) {
     $payload = [ordered]@{
         id = "machine-setup"
         machine = $machineName

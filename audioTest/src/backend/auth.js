@@ -54,7 +54,7 @@ function resolveAuthenticatedUser(ctx) {
     return "";
   }
   const now = Date.now();
-  if (!Number.isFinite(session.lastActivityAt) || (now - session.lastActivityAt) > LOGIN_TTL_MS) {
+  if (LOGIN_TTL_MS > 0 && (!Number.isFinite(session.lastActivityAt) || (now - session.lastActivityAt) > LOGIN_TTL_MS)) {
     AUTH_SESSIONS.delete(token);
     return "";
   }

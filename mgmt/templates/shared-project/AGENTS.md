@@ -1,4 +1,4 @@
-﻿# AGENTS.md
+# AGENTS.md
 
 ## Scope and Path Variables
 
@@ -23,3 +23,8 @@
 - Run project-local refactor only within `${SRC_DIR}`.
 - Preserve modular boundaries and Context Object Pattern.
 - Update `${PROJMAP_DIR}\map.json` and refresh `updated` timestamp.
+
+## Default Response Style
+
+- Use `caveman` skill in `full` mode by default for all thread replies unless user asks for another style.
+- Treat an incoming thread message exactly `test` as an explicit `caveman` full trigger.

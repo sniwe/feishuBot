@@ -1,1 +1,10 @@
-{"name":"audiotest","private":true,"version":"1.0.0","scripts":{"start":"node src/backend/server.js","migrate:remote":"node src/backend/migrate-local-to-remote.js"}}
+{
+  "name": "audiotest",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node src/backend/server.js",
+    "migrate:remote": "node src/backend/migrate-local-to-remote.js",
+    "launch:bridge": "powershell -NoProfile -ExecutionPolicy Bypass -File mgmt/scripts/launch-audio-bridge.ps1"
+  }
+}

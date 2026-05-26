@@ -1,11 +1,11 @@
-﻿# AGENTS.md
+# AGENTS.md
 
 ## Scope and Path Variables
 
-Use dynamic roots so instructions are portable.
+Use dynamic roots. Keep portable.
 
 - `USER_ROOT`: user home directory (example on this machine: `C:\Users\Qub`)
-- `WORKSPACE_ROOT`: active project root (current working project)
+- `WORKSPACE_ROOT`: project root (current project)
 - `MGMT_DIR`: `${WORKSPACE_ROOT}\mgmt`
 - `PROJMAP_DIR`: `${MGMT_DIR}\projMap` (default project-scoped management package)
 - `SRC_DIR`: `${WORKSPACE_ROOT}\src`
@@ -17,26 +17,55 @@ Use dynamic roots so instructions are portable.
 
 Resolve paths from these variables first, then from explicit user-provided absolute paths.
 
+## Default Response Style
+
+- Use `caveman` skill in `full` mode by default for all thread replies unless user asks for another style.
+- Treat an incoming thread message exactly `test` as an explicit `caveman` full trigger.
+
 ## Machine Setup Gate
 
-Before executing any other workflow instructions, verify machine setup state and auto-sync installation.
+First, verify machine setup and auto-sync.
 
 - Required preflight command:
   - `${GLOBAL_MGMT_DIR}\scripts\ensure-machine-setup.ps1`
 - Default policy:
-  - if setup flag is missing/invalid for current machine, run setup automatically before continuing.
-  - persist machine-local setup state in `${GLOBAL_MGMT_DIR}\state\machine-setup.<COMPUTERNAME>.json`.
-- Default auto-sync mode for setup gate is `task` (Task Scheduler). `ahk` remains supported when explicitly requested.
+  - if setup flag bad, run setup before continue.
+  - save machine setup state in `${GLOBAL_MGMT_DIR}\state\machine-setup.<COMPUTERNAME>.json`.
+- Auto-sync default `task`. `ahk` only when asked.
 
 ## Default Project AGENTS Generation
 
-For every new project, generate a project-scoped `AGENTS.md` at:
+For new project, make project `AGENTS.md` at:
 
 - `${WORKSPACE_ROOT}\AGENTS.md`
 
-This project-scoped file must be created by default as a modified derivative of this global file, with project-specific path bindings and instructions adjusted to `${WORKSPACE_ROOT}` and `${MGMT_DIR}` while preserving global standards and precedence.
+Make project copy of this file. Bind paths to `${WORKSPACE_ROOT}` and `${MGMT_DIR}`. Keep global rules.
 
-When generating project-scoped `${WORKSPACE_ROOT}\AGENTS.md` files, do not include global bootstrap command guidance. Omit global-only command sections/references (including `::mapSync`, `::propUpd`, `::gitSync`, `::ingest`, and any `${USER_ROOT}`-scope behavior under `::refactor`) from the generated project-scoped derivative.
+No global bootstrap commands in project file. Skip `::mapSync`, `::propUpd`, `::gitSync`, `::ingest`, and `${USER_ROOT}`-scope `::refactor` bits.
+
+Project `AGENTS.md` must also init mgmt queue folders under `${MGMT_DIR}`:
+
+- `${MGMT_DIR}\toDo\`
+- `${MGMT_DIR}\errFix\`
+- `${MGMT_DIR}\logs\`
+
+`toDo` and `errFix` must always contain at least one blank `.txt` file. Use ordinal file names starting at `1.txt` and continue in sequence. If a previously created file gains content, create the next ordinal file as a new blank `.txt` so a blank sentinel is always present.
+
+`toDo` blocks nest by blank lines. Use tabs for children. Nested lines continue parent block.
+
+- `${MGMT_DIR}\toDo\done\` is the manual spot for done `toDo` items.
+- `${MGMT_DIR}\errFix\fixed\` is the manual spot for done `errFix` items.
+- `${MGMT_DIR}\logs\` stores runtime console logs grouped by capture date and ordinal runtime instance.
+
+`logs\` use `YYMMDD` dirs. One ordinal `.txt` per run.
+
+Runtime log rules:
+
+- Log all user actions, state shifts, and script changes.
+- Mirror same log stream to `${MGMT_DIR}\logs\YYMMDD\N.txt`.
+- Create active log file in day dir. Keep append-only.
+- If same-day restart, use next ordinal.
+- Hard refresh or `Ctrl+F5` means new run. Start new log target.
 
 Default project packaging under `${MGMT_DIR}`:
 
@@ -54,14 +83,14 @@ Default project source packaging under `${SRC_DIR}`:
 
 Project file placement constraint:
 
-- All project files and directories must be placed under `${BACKEND_DIR}`, `${FRONTEND_DIR}`, or `${PUBLIC_DIR}` unless they are management assets under `${MGMT_DIR}` or the project-scoped `${WORKSPACE_ROOT}\AGENTS.md`.
-- During initialization and propagation, coerce any non-exempt project paths into one of the three `${SRC_DIR}` subdirectories.
+- Put project files under `${BACKEND_DIR}`, `${FRONTEND_DIR}`, or `${PUBLIC_DIR}`. Only skip for `${MGMT_DIR}` assets or project `${WORKSPACE_ROOT}\AGENTS.md`.
+- During init and propagation, move non-exempt paths into `${SRC_DIR}`.
 
 Project `.gitignore` governance:
 
-- Project-scoped `${WORKSPACE_ROOT}\AGENTS.md` files must create and automatically maintain `${WORKSPACE_ROOT}\.gitignore`.
-- The maintained `.gitignore` must cover project-scope unwieldy, generated, and private/sensitive artifacts (for example local caches, large transient outputs, machine-local secrets, and runtime state files) while preserving intentional tracked source and management files.
-- During initialization and propagation, update `.gitignore` idempotently (no duplicate entries, preserve project-specific rules outside governed sections).
+- Project `${WORKSPACE_ROOT}\AGENTS.md` must create and keep `${WORKSPACE_ROOT}\.gitignore`.
+- Keep `.gitignore` on big junk, generated stuff, secrets, runtime state. Keep tracked source and mgmt files.
+- During init and propagation, update `.gitignore` same way every time. No dupes.
 
 Project-root task runner governance:
 
@@ -69,7 +98,7 @@ Project-root task runner governance:
 - Provide forwarding scripts at project root for operational commands so they work from `${WORKSPACE_ROOT}` (example: map `launch:oms` to `${SRC_DIR}\backend\ingest\oms` when that package and script exist).
 - Keep forwarding scripts idempotent during initialization/refactor/propagation and avoid duplicate script keys.
 
-Project-scope management bootstrap under `${PROJMAP_DIR}` must include:
+Project bootstrap under `${PROJMAP_DIR}` needs:
 
 - `threads\README.md`
 - `threads\resolve-init-thread.ps1`
@@ -82,7 +111,7 @@ Project-scope management bootstrap under `${PROJMAP_DIR}` must include:
 - `scripts\generate-map.ps1`
 - `scripts\track-map-update.js`
 
-Project-scoped `mgmt\README.md` should document this package as:
+Project `mgmt\README.md` should say:
 
 - canonical map at `${PROJMAP_DIR}\map.json`
 - thread discovery/cache in `${PROJMAP_DIR}\threads\`
@@ -92,15 +121,15 @@ Project-scoped `mgmt\README.md` should document this package as:
 
 Automatic global indexing on project initialization:
 
-- Whenever a new project is initialized, immediately upsert it into `${GLOBAL_MGMT_DIR}\projects-index.json`.
-- Required registry fields for the new project entry:
+- When init new project, upsert it into `${GLOBAL_MGMT_DIR}\projects-index.json`.
+- Need fields:
   - `id` (stable, derived from project folder name unless user specifies another id)
   - `name`
   - `projectRoot` (absolute)
   - `mapPath` (absolute, default `${WORKSPACE_ROOT}\mgmt\projMap\map.json`)
   - `status` (`active`)
   - `updated` (ISO timestamp)
-- After registry upsert, run `::mapSync` in the same initialization flow.
+- After upsert, run `::mapSync` same flow.
 - Result: each newly initialized project is indexed immediately for all later `::mapSync` runs.
 - New projects are immediately eligible for `::propUpd` governance checks and propagation.
 
@@ -154,13 +183,14 @@ These markdown sources define one combined operating model:
   - destructure `const { data = {}, ui = {}, deps } = ctx`
 - Route side effects through `ctx.deps` only.
 - If a dependency is missing, provide a brief dep proposal before coding.
+- Log all runtime-visible actions to console and `${MGMT_DIR}\logs\YYMMDD\N.txt` when local logger exists.
 
 ### 2) Project Map (`map.json`)
 
 When code changes in a project:
 
 - Update `${PROJMAP_DIR}\map.json` by default.
-- Ensure top-level `updated` is refreshed (ISO timestamp).
+- Refresh top-level `updated` (ISO time).
 - Node shape:
   - `id`, `type`, `name`, `summary`, `features`, `edges`, `critical`, `files`, `children`
 - `features` entries include:
@@ -168,30 +198,32 @@ When code changes in a project:
   - `flow` (ordered edge id list)
 - `edges` entries include:
   - `id`, `kind`, `from`, `to`, optional `via`, optional `note`
-- Do not use `dependsOn` or `contextLinks`.
+- No `dependsOn` or `contextLinks`.
 
 ### 3) Meta Map and Registry
 
-For workspace-level updates:
+For workspace updates:
 
 - Maintain `${GLOBAL_MGMT_DIR}\projects-index.json` as authoritative project list.
 - Maintain `${GLOBAL_MGMT_DIR}\meta-map.json` (preferred) or existing configured file.
-- Only summarize project maps in meta map; do not inline full source maps.
+- Summarize project maps only. No full source maps.
 - Keep `sources` statuses for malformed/missing maps and continue processing.
 
 ### 4) Thread Bootstrap (`::init`)
 
 On user command `::init`:
 
-- Read local current datetime.
-- Resolve session day directory under `${SESSIONS_ROOT}`.
-- Scan recent rollout files by `LastWriteTime` descending.
-- Parse first `session_meta` and extract `payload.id` as `thread_id`.
+- Read local datetime.
+- Resolve session day dir under `${SESSIONS_ROOT}`.
+- Scan rollout files by `LastWriteTime` desc.
+- Parse first `session_meta`. Get `payload.id` as `thread_id`.
 - Write cache at `${PROJMAP_DIR}\threads\current-thread.json` with:
   - `thread_id`
   - `turn_index` initialized (typically `0` for bootstrap)
   - timestamp and selected source file metadata
-- Use `${PROJMAP_DIR}\threads\resolve-init-thread.ps1` as default resolver script location.
+- Use `${PROJMAP_DIR}\threads\resolve-init-thread.ps1` as default resolver.
+- Init or refresh project `${WORKSPACE_ROOT}\AGENTS.md` from global copy. Include `${MGMT_DIR}\toDo\` and `${MGMT_DIR}\errFix\` blank-file rules.
+- Project init also needs `${MGMT_DIR}\toDo\done\` and `${MGMT_DIR}\errFix\fixed\` move rules.
 - After thread bootstrap, verify workspace-root run-script forwarding is present for discovered nested launch packages so root-level commands remain valid (including `launch:oms` when `${SRC_DIR}\backend\ingest\oms\package.json` exposes that script).
 
 ### 5) Global Map Sync Bootstrap (`::mapSync`)
@@ -220,7 +252,7 @@ On user command `::mapSync`:
 - Add `indexes` edges from each source descriptor to its project node.
 - Keep malformed/missing maps in `sources` with status (`parse_error` or `missing`) and continue processing.
 - Refresh top-level `updated` and `stats` on every successful sync.
-- This command is also invoked automatically after new-project initialization registry upsert.
+- This command also runs after new-project registry upsert.
 - For cloned environments on new machines, use `${GLOBAL_MGMT_DIR}\scripts\bootstrap-machine.ps1` to rebase registry paths before first sync.
 
 ### 6) Project Propagation Bootstrap (`::propUpd`)
@@ -264,23 +296,23 @@ On user command `::propUpd`:
 On user command `::refactor`:
 
 - Trigger scope is determined by current directory:
-  - If invoked from `${USER_ROOT}`, treat as global bootstrap and refactor across all active projects in `${GLOBAL_MGMT_DIR}\projects-index.json`.
-  - If invoked from within a specific project root (`${WORKSPACE_ROOT}`), run project-local bootstrap and refactor only that project's `${SRC_DIR}`.
-  - Do not trigger cross-project refactor when current directory is a project root.
-- Scope refactor operations to `${SRC_DIR}` only unless explicitly directed otherwise.
+  - If run from `${USER_ROOT}`, treat as global bootstrap across active projects.
+  - If run inside a project root, do project-local bootstrap only.
+  - No cross-project refactor from project root.
+- Keep refactor in `${SRC_DIR}` unless asked otherwise.
 - Optimize code for modular organization while preserving the existing `${BACKEND_DIR}`, `${FRONTEND_DIR}`, and `${PUBLIC_DIR}` structure.
 - Apply branch/leaf node atomicity: leaf modules should implement one small concern with minimal surface area.
 - Prefer small, concern-separated files and nested subdirectories over monolithic modules.
 - Module code may use arbitrary nesting depth when it improves clarity and separation of concerns.
-- Preserve all pre-defined constraints during refactor, including:
+- Keep all refactor constraints, including:
   - Context Object Pattern function contracts from `context_obj_pattern.md`
   - side effects routed through `ctx.deps`
   - project file placement constraints under `${SRC_DIR}` (except `${MGMT_DIR}` and `${WORKSPACE_ROOT}\AGENTS.md`)
 - Preserve and/or regenerate `${WORKSPACE_ROOT}\package.json` forwarding scripts for nested operational entrypoints so commands stay runnable from project root after structural changes (including `launch:oms` when applicable).
 - Global `::refactor` orchestration should use `${GLOBAL_MGMT_DIR}\scripts\refactor-global.ps1`.
-- Default execution mode is assessment-only (dry-run) and must emit `${GLOBAL_MGMT_DIR}\refactor-global-report.json` without mutating project files.
-- Apply mode is explicit and plan-driven (via `-Apply` with optional `-PlanPath`); plan entries should include extraction targets and migration details (`sourceProjectId`, `targetProjectId`, `targetProjectRoot`, optional `exports`, optional `consumers`, optional `modulePaths`).
-- During global assessment, perform balanced best-practice evaluation of modular boundaries and identify candidate reusable components for extraction into shared projects.
+- Default mode: dry-run. Emit `${GLOBAL_MGMT_DIR}\refactor-global-report.json`. No file changes.
+- Apply mode is explicit and plan-driven. Plan entries need extraction targets and migration details.
+- During global assessment, check module boundaries and find reusable pieces.
 - When extraction is approved in apply mode:
   - initialize new project(s) through `${GLOBAL_MGMT_DIR}\scripts\init-project.ps1`
   - upsert/update registry entries through `${GLOBAL_MGMT_DIR}\scripts\registry-upsert.ps1`
@@ -290,18 +322,18 @@ On user command `::refactor`:
   - migrate planned module paths into the shared project boundary and preserve clear ownership/contracts
   - update affected project dependencies/contracts to consume extracted boundaries
   - run `${GLOBAL_MGMT_DIR}\scripts\map-sync.ps1` once at end of successful apply sequence.
-- After refactor edits, update `${PROJMAP_DIR}\map.json` and refresh top-level `updated` timestamp.
+- After refactor, update `${PROJMAP_DIR}\map.json` and top `updated`.
 
 ### 8) Automatic Sync Governance
 
-After each successful file edit, trigger non-blocking background sync.
+After each file edit, kick non-blocking background sync.
 
 - Global scope (${USER_ROOT} context):
   - invoke ${GLOBAL_MGMT_DIR}\scripts\sync-push.ps1 in background after edits to governed files.
   - default should be non-blocking and not interrupt current task flow.
 - Project scope (${WORKSPACE_ROOT} context):
   - trigger project-level background sync after edits to project files (${SRC_DIR}, ${MGMT_DIR}, ${WORKSPACE_ROOT}\AGENTS.md, ${WORKSPACE_ROOT}\.gitignore).
-  - use canonical sync entrypoint ${GLOBAL_MGMT_DIR}\scripts\sync-push.ps1 (or project-local wrapper when present).
+  - Use canonical sync entrypoint `${GLOBAL_MGMT_DIR}\scripts\sync-push.ps1` or project wrapper.
 - Safety constraints:
   - preserve idempotency and avoid duplicate concurrent sync jobs for the same workspace.
   - if background sync fails, continue local task and record concise failure reason for next sync attempt.
@@ -311,7 +343,7 @@ After each successful file edit, trigger non-blocking background sync.
 On user command `::gitSync`:
 
 - Run canonical bidirectional sync entrypoint `${GLOBAL_MGMT_DIR}\scripts\auto-sync-tick.ps1`.
-- Behavior must be pull-first to ingest remote updates before local publish:
+- Pull first. Then publish.
   - `git pull --rebase --autostash`
   - detect local managed changes
   - stage/commit managed changes only
@@ -321,25 +353,25 @@ On user command `::gitSync`:
   - `${USER_ROOT}\.gitignore`
   - `${GLOBAL_MGMT_DIR}\`
   - active project roots from `${GLOBAL_MGMT_DIR}\projects-index.json`
-- Must use lock-guarding to avoid overlapping runs on the same machine/session.
+- Use lock guard. No overlap.
 - `::gitSync` should be safe to run repeatedly and should perform no mutations when there are no managed changes.
-- If pull encounters conflicts, preserve local changes safely (stash/autostash), emit concise conflict diagnostics, and do not discard user edits.
+- If pull conflict, stash safe. Report short conflict. Keep user edits.
 
 ### 10) Global Project Ingest Bootstrap (`::ingest`)
 
 On user command `::ingest`:
 
-- Require an explicit source directory path that points to a project not currently tracked in `${GLOBAL_MGMT_DIR}\projects-index.json`.
-- Resolve and validate the source path as absolute; fail with a clear error if missing/invalid or already tracked.
-- Build a project-understanding snapshot before mutation:
+- Need explicit source dir path for untracked project.
+- Resolve source path absolute. Fail clear if missing, bad, or tracked.
+- Build project snapshot before change:
   - recursive file inventory (with common heavy/build/cache directories excluded)
   - extension/language distribution
   - bucketed target plan across `${BACKEND_DIR}`, `${FRONTEND_DIR}`, `${PUBLIC_DIR}`
-- Initialize a new governed project boundary using `${GLOBAL_MGMT_DIR}\scripts\init-project.ps1` so the result conforms to current project initialization and tracking rules.
-- Ingest source files into the initialized project under `${SRC_DIR}` only, preserving relative structure under bucketed ingest paths.
-- Write ingest report artifacts under project management state (for example `${PROJMAP_DIR}\state\ingest-report.json`) summarizing source analysis and copied file counts.
-- Ensure the new project is upserted into `${GLOBAL_MGMT_DIR}\projects-index.json` and included in `${GLOBAL_MGMT_DIR}\meta-map.json` through normal init/map-sync flow.
-- Scope: global-only bootstrap command; do not include `::ingest` sections in project-scoped generated `AGENTS.md`.
+- Init new governed project boundary with `${GLOBAL_MGMT_DIR}\scripts\init-project.ps1`.
+- Ingest source files into `${SRC_DIR}` only. Keep relative shape.
+- Write ingest report in project state, like `${PROJMAP_DIR}\state\ingest-report.json`.
+- Upsert new project into `${GLOBAL_MGMT_DIR}\projects-index.json` and `${GLOBAL_MGMT_DIR}\meta-map.json` through normal init/map-sync.
+- Global-only bootstrap. No `::ingest` in project `AGENTS.md`.
 
 ## Operational Precedence
 

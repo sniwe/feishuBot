@@ -8,6 +8,7 @@
     "../frontend/modules/auth-storage.js",
     "../frontend/modules/format-utils.js",
     "../frontend/modules/session-runtime.js",
+    "../frontend/modules/runtime-logger.js",
     "../frontend/modules/app-runtime.js"
   ];
   var index = 0;

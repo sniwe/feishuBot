@@ -125,11 +125,27 @@ $GLOBAL_MGMT_DIR = if ([string]::IsNullOrWhiteSpace($GlobalMgmtDir)) {
 } else {
     [IO.Path]::GetFullPath($GlobalMgmtDir)
 }
-$REPO_ROOT = if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
-    Split-Path -Parent $GLOBAL_MGMT_DIR
-} else {
-    [IO.Path]::GetFullPath($RepoRoot)
+
+function Resolve-RepoRoot {
+    param(
+        [Parameter()][string]$ExplicitRepoRoot
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($ExplicitRepoRoot)) {
+        return [IO.Path]::GetFullPath($ExplicitRepoRoot)
+    }
+
+    try {
+        $gitRoot = & git rev-parse --show-toplevel 2>$null
+        if (-not [string]::IsNullOrWhiteSpace($gitRoot)) {
+            return [IO.Path]::GetFullPath([string]$gitRoot)
+        }
+    } catch {}
+
+    return Split-Path -Parent $GLOBAL_MGMT_DIR
 }
+
+$REPO_ROOT = Resolve-RepoRoot -ExplicitRepoRoot $RepoRoot
 
 if (!(Test-Path -LiteralPath (Join-Path $REPO_ROOT ".git"))) {
     throw "Not a git repository root: $REPO_ROOT"

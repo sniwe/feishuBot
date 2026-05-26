@@ -11,7 +11,9 @@ This directory contains global governance, indexing, initialization, propagation
 - `scripts\ingest-project.ps1`: ingest an untracked external project into a new governed project boundary
 - `scripts\refactor-global.ps1`: global `::refactor` dry-run/apply orchestration
 - `scripts\sync-pull.ps1`: pull latest + run bootstrap refresh
-- `scripts\sync-push.ps1`: pull/rebase + bootstrap + commit + push
+- `scripts\sync-push.ps1`: bootstrap + commit + push, no pull
+- `scripts\queue-maintenance-loop.ps1`: hidden 5-second queue sentinel maintenance loop
+- `scripts\install-queue-maintenance-task.ps1`: installs the hidden background queue maintenance task
 
 ## First Run On A New Machine
 
@@ -103,3 +105,11 @@ Reason recommended:
 - survives user-session edge cases better than an AHK loop
 - no dependency on AHK runtime process stability
 - simpler operational visibility in Task Scheduler
+
+## Queue Sentinel Maintenance
+
+Runs a hidden 5-second loop that keeps `mgmt\toDo\` and `mgmt\errFix\` populated with the next blank ordinal file, backfills missing `mgmt\toDo\done\N.json` snapshots from the current `mgmt\projMap\map.json` for completed `N.txt` items, leaves `mgmt\toDo\done\` and `mgmt\errFix\fixed\` completion files untouched after move, and only attempts `sync-pull` for tracked projects currently open in VS Code:
+
+```powershell
+& .\scripts\install-queue-maintenance-task.ps1
+```

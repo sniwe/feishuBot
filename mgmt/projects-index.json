@@ -1,7 +1,7 @@
 ﻿{
     "id":  "projects-index",
     "root":  "C:\\Users\\Qub",
-    "updated":  "2026-03-25T18:52:51.0335781+08:00",
+    "updated":  "2026-05-26T10:06:44.6882187+08:00",
     "projects":  [
                      {
                          "id":  "toDo-test",
@@ -82,6 +82,54 @@
                          "mapPath":  "C:\\Users\\Qub\\feishuBot\\mgmt\\projMap\\map.json",
                          "status":  "active",
                          "updated":  "2026-03-23T12:26:19.9502608+08:00",
+                         "projectType":  "application",
+                         "extraction":  {
+                                            "mode":  "native",
+                                            "sourceProjects":  [
+
+                                                               ],
+                                            "extractedAt":  null
+                                        },
+                         "sharing":  {
+                                         "exports":  [
+
+                                                     ],
+                                         "consumers":  [
+
+                                                       ]
+                                     }
+                     },
+                     {
+                         "id":  "roraPhoto",
+                         "name":  "roraPhoto",
+                         "projectRoot":  "C:\\Users\\Qub\\roraPhoto",
+                         "mapPath":  "C:\\Users\\Qub\\roraPhoto\\mgmt\\projMap\\map.json",
+                         "status":  "active",
+                         "updated":  "2026-03-28T11:57:02.8539292+08:00",
+                         "projectType":  "application",
+                         "extraction":  {
+                                            "mode":  "native",
+                                            "sourceProjects":  [
+
+                                                               ],
+                                            "extractedAt":  null
+                                        },
+                         "sharing":  {
+                                         "exports":  [
+
+                                                     ],
+                                         "consumers":  [
+
+                                                       ]
+                                     }
+                     },
+                     {
+                         "id":  "combiLog",
+                         "name":  "combiLog",
+                         "projectRoot":  "C:\\Users\\Qub\\combiLog",
+                         "mapPath":  "C:\\Users\\Qub\\combiLog\\mgmt\\projMap\\map.json",
+                         "status":  "active",
+                         "updated":  "2026-05-09T17:37:29.7734884+08:00",
                          "projectType":  "application",
                          "extraction":  {
                                             "mode":  "native",

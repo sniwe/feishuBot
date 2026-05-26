@@ -14,6 +14,7 @@ function createRelayController(ctx) {
   } = deps;
   const isClusterMode = Boolean(clusterRuntime && typeof clusterRuntime.isEnabled === "function" && clusterRuntime.isEnabled());
   const localProfile = typeof clusterRuntime?.getProfile === "function" ? clusterRuntime.getProfile() : {};
+  const localIdentity = (localProfile.alias || (typeof clusterRuntime?.formatSelfLabel === "function" ? clusterRuntime.formatSelfLabel() : "") || localProfile.machineId || "unknown").trim();
 
   function logCluster(kind, details = {}) {
     if (clusterRuntime && typeof clusterRuntime.logEvent === "function") {
@@ -146,7 +147,7 @@ function createRelayController(ctx) {
   }
 
   async function sendModeOptions(chatId) {
-    await sendTextMessage(chatId, "Codex armed.\n1) resume\n2) new");
+    await sendTextMessage(chatId, `Codex armed [${localIdentity}].\n1) resume\n2) new`);
   }
 
   async function sendResumeChatOptions(chatId, state) {

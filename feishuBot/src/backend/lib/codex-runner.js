@@ -28,6 +28,7 @@ function createCodexRunner(ctx) {
   const machineLabel = typeof clusterRuntime?.formatSelfLabel === "function"
     ? clusterRuntime.formatSelfLabel()
     : [machineProfile.alias, machineProfile.machineId ? `(${String(machineProfile.machineId).slice(0, 8)})` : ""].filter(Boolean).join(" ").trim();
+  const workingIdentity = (machineProfile.alias || machineLabel || machineProfile.machineId || "unknown").trim();
 
   function buildCodexPrompt(userText, state = {}) {
     const chatId = state.chatId || "";
@@ -247,10 +248,11 @@ function createCodexRunner(ctx) {
     try {
       let statusMessageId = "";
       try {
-        statusMessageId = await sendTextMessage(chatId, `Relayed & working${machineLabel ? ` [${machineLabel}]` : ""} (0s)`, {
+        statusMessageId = await sendTextMessage(chatId, `Relayed & working [${workingIdentity}] (0s)`, {
           relay_status: true,
           source_codex_session_id: codexSessionId || "",
           machine_label: machineLabel,
+          machine_identity: workingIdentity,
           machine_id: machineProfile.machineId || "",
           machine_alias: machineProfile.alias || "",
         });
@@ -433,7 +435,7 @@ function createCodexRunner(ctx) {
       startedAt: "",
     });
 
-    await sendTextMessage(chatId, "Started new Codex session. Send your message.");
+    await sendTextMessage(chatId, `Started new Codex session [${workingIdentity}]. Send your message.`);
   }
 
   async function cancelTurn(chatId, state) {
@@ -482,7 +484,7 @@ function createCodexRunner(ctx) {
       startedAt: "",
     });
 
-    await sendTextMessage(chatId, "Codex disarmed.");
+    await sendTextMessage(chatId, `Codex disarmed [${workingIdentity}].`);
   }
 
   return {

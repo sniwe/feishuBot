@@ -4,6 +4,7 @@ param(
     [string]$ExplorerPath = "C:\Users\Qub",
     [string]$Qv2rayPath = "C:\Program Files\qv2ray\qv2ray.exe",
     [string]$CmdWorkingDirectory = "",
+    [string]$VsCodeWorkspacePath = "",
     [int]$InitialDelayMs = 2500,
     [bool]$InstallNetworkRecovery = $true,
     [string]$RecoveryTaskName = "Qv2rayNetworkRecovery",
@@ -37,7 +38,17 @@ $resolvedCmdWorkingDirectory = if ([string]::IsNullOrWhiteSpace($CmdWorkingDirec
 } else {
     [IO.Path]::GetFullPath($CmdWorkingDirectory)
 }
-$taskArgs = "-NoLogo -NonInteractive -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File ""$layoutScript"" -ExplorerPath ""$ExplorerPath"" -Qv2rayPath ""$Qv2rayPath"" -CmdWorkingDirectory ""$resolvedCmdWorkingDirectory"" -InitialDelayMs $InitialDelayMs"
+$resolvedVsCodeWorkspacePath = if ([string]::IsNullOrWhiteSpace($VsCodeWorkspacePath)) {
+    $defaultWorkspacePath = "C:\chinLog"
+    if (Test-Path -LiteralPath $defaultWorkspacePath -PathType Container) {
+        $defaultWorkspacePath
+    } else {
+        $ExplorerPath
+    }
+} else {
+    [IO.Path]::GetFullPath($VsCodeWorkspacePath)
+}
+$taskArgs = "-NoLogo -NonInteractive -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File ""$layoutScript"" -ExplorerPath ""$ExplorerPath"" -Qv2rayPath ""$Qv2rayPath"" -CmdWorkingDirectory ""$resolvedCmdWorkingDirectory"" -VsCodeWorkspacePath ""$resolvedVsCodeWorkspacePath"" -InitialDelayMs $InitialDelayMs"
 $taskXmlPath = Join-Path $env:TEMP ("{0}.xml" -f [guid]::NewGuid().ToString("N"))
 $taskXml = @"
 <?xml version="1.0" encoding="UTF-16"?>
@@ -108,6 +119,7 @@ if ($InstallNetworkRecovery) {
     explorer_path = [IO.Path]::GetFullPath($ExplorerPath)
     qv2ray_path = [IO.Path]::GetFullPath($Qv2rayPath)
     cmd_working_directory = $resolvedCmdWorkingDirectory
+    vscode_workspace_path = $resolvedVsCodeWorkspacePath
     initial_delay_ms = $InitialDelayMs
     network_recovery_task = $recoveryResult
 } | ConvertTo-Json -Depth 5

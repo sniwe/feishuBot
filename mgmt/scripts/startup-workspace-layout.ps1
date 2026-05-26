@@ -16,6 +16,7 @@ param(
     [int]$CodexPostStartDotRetryDelayMs = 900,
     [bool]$EnableAlternateLeftGroups = $true,
     [string]$VsCodePath = "",
+    [string]$VsCodeWorkspacePath = "",
     [string]$WeChatPath = "",
     [string]$ChromePath = "",
     [int]$AlternateGroupPauseMs = 700,
@@ -674,6 +675,16 @@ $resolvedVsCodePath = if ([string]::IsNullOrWhiteSpace($VsCodePath)) {
 } else {
     [IO.Path]::GetFullPath($VsCodePath)
 }
+$resolvedVsCodeWorkspacePath = if ([string]::IsNullOrWhiteSpace($VsCodeWorkspacePath)) {
+    $defaultWorkspacePath = "C:\chinLog"
+    if (Test-Path -LiteralPath $defaultWorkspacePath -PathType Container) {
+        $defaultWorkspacePath
+    } else {
+        $ExplorerPath
+    }
+} else {
+    [IO.Path]::GetFullPath($VsCodeWorkspacePath)
+}
 $resolvedWeChatPath = if ([string]::IsNullOrWhiteSpace($WeChatPath)) {
     Resolve-FirstPathCandidate -Candidates @(
         (Join-PathIfPresent -BasePath ${env:ProgramFiles(x86)} -ChildPath "Tencent\WeChat\WeChat.exe"),
@@ -702,6 +713,8 @@ $lowerHeight = $workingArea.Height - $upperHeight
 
 $qv2rayHandle = [IntPtr]::Zero
 $qv2rayLaunchWarning = $null
+$vscodeHandle = [IntPtr]::Zero
+$vscodeLaunchWarning = $null
 $codexPostStartDotSent = $false
 $codexPostStartDotWarning = $null
 $codexPromptArgumentUsed = $false
@@ -718,13 +731,6 @@ if ($EnableAlternateLeftGroups) {
     }
 
     $alternateSpecs = @(
-        [pscustomobject]@{
-            id = "vscode"
-            process_name = "Code"
-            app_path = $resolvedVsCodePath
-            args = @("--new-window")
-            force_new_window = $true
-        },
         [pscustomobject]@{
             id = "wechat"
             process_name = $weChatProcessName
@@ -801,6 +807,15 @@ try {
 } catch {
     $qv2rayLaunchWarning = $_.Exception.Message
 }
+
+if (-not [string]::IsNullOrWhiteSpace($resolvedVsCodePath)) {
+    try {
+        $vscodeHandle = Ensure-AppWindowHandle -AppPath $resolvedVsCodePath -ProcessName "Code" -ArgumentList @("--new-window", $resolvedVsCodeWorkspacePath) -ForceNewWindow $true -TimeoutSeconds $WindowTimeoutSeconds
+    } catch {
+        $vscodeLaunchWarning = $_.Exception.Message
+    }
+}
+
 Start-Sleep -Milliseconds 400
 Start-Process -FilePath "explorer.exe" -ArgumentList "`"$ExplorerPath`"" | Out-Null
 Start-Sleep -Milliseconds 400
@@ -888,10 +903,15 @@ if ($isCodexStartupCommand -and -not $codexPromptArgumentUsed) {
         codex_poststart_text = $CodexPostStartText
         codex_submit_keys = $CodexSubmitKeys
     }
+    vscode_startup = [ordered]@{
+        window_found = [bool]($vscodeHandle -ne [IntPtr]::Zero)
+        warning = $vscodeLaunchWarning
+    }
     alternate_groups = [ordered]@{
         enabled = [bool]$EnableAlternateLeftGroups
         results = $alternateGroupResults
     }
+    vscode_workspace_path = $resolvedVsCodeWorkspacePath
     snap_attempted = $true
     snap_result = [ordered]@{
         qv2ray = $snapQv2rayOk
@@ -902,5 +922,6 @@ if ($isCodexStartupCommand -and -not $codexPromptArgumentUsed) {
         left = "qv2ray"
         right_top = "explorer"
         right_bottom = "cmd"
+        grouped = @("vscode", "explorer", "cmd")
     }
 } | ConvertTo-Json -Depth 6

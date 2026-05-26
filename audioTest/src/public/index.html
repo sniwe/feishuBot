@@ -22,18 +22,53 @@
       <p id="login-status" class="login-status"></p>
     </section>
 
-    <section id="library-view" class="library-view">
+    <section id="library-view" class="library-view hidden">
       <div class="library-head-row">
         <div class="library-head-left">
-          <button id="guide-button-list" class="guide-button" type="button" aria-label="Start guide mode">Guide</button>
-          <button id="logout-button" class="logout-button" type="button" aria-label="Log out" title="Log out">Logout</button>
+          <button id="modules-button" class="logout-button hidden" type="button" aria-label="Back to modules">Back</button>
+          <button id="guide-button-list" class="guide-button hidden" type="button" aria-label="Start guide mode">Guide</button>
         </div>
-        <button id="upload-button" class="upload-button" type="button" aria-label="Upload audio" title="Upload audio">Upload</button>
+        <div class="library-head-right">
+          <div class="settings-popover-wrap">
+            <button
+              id="settings-button"
+              class="settings-button hidden"
+              type="button"
+              aria-label="Open settings"
+              aria-expanded="false"
+              aria-controls="settings-popover"
+              title="Settings"
+            >⚙</button>
+            <div id="settings-popover" class="settings-popover hidden" role="dialog" aria-label="Settings">
+              <div class="settings-popover-list" role="list">
+                <label class="settings-popover-item" role="listitem" for="settings-logging-checkbox">
+                  <input id="settings-logging-checkbox" type="checkbox" checked />
+                  <span>state &amp; action logging</span>
+                </label>
+                <label class="settings-popover-item" role="listitem" for="settings-idle-auto-logout-checkbox">
+                  <input id="settings-idle-auto-logout-checkbox" type="checkbox" checked />
+                  <span>idle auto-logout</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <button id="upload-button" class="upload-button hidden" type="button" aria-label="Upload audio" title="Upload audio">Upload</button>
+        </div>
       </div>
-      <p id="save-status" class="save-status"></p>
-      <section class="library" aria-live="polite">
-        <div id="audio-cards" class="audio-cards"></div>
-        <p id="empty-state" class="empty-state">No persisted audio files yet.</p>
+      <section id="module-dashboard" class="module-dashboard">
+        <div class="module-dashboard-head">
+          <button id="logout-button" class="logout-button hidden" type="button" aria-label="Log out" title="Log out">Logout</button>
+        </div>
+        <p class="module-dashboard-kicker">Post-login modules</p>
+        <p id="module-status" class="save-status"></p>
+        <div id="module-grid" class="module-grid"></div>
+      </section>
+      <section id="ingest-panel" class="ingest-panel hidden">
+        <p id="save-status" class="save-status"></p>
+        <section class="library" aria-live="polite">
+          <div id="audio-cards" class="audio-cards"></div>
+          <p id="empty-state" class="empty-state">No persisted audio files yet.</p>
+        </section>
       </section>
     </section>
 
@@ -41,20 +76,21 @@
       <div class="player-head">
         <button id="back-button" class="back-button" type="button" aria-label="Back to audio list">Back</button>
         <button id="guide-button-player" class="guide-button" type="button" aria-label="Start guide mode">Guide</button>
+        <button id="clear-subsegs-button" class="clear-subsegs-button hidden" type="button" aria-label="Clear subSegs for selected audSeg" title="Clear subSegs">clear subSegs</button>
       </div>
-      <section class="player" aria-live="polite">
-        <audio id="audio" preload="metadata"></audio>
-        <div id="player-loading" class="player-loading hidden" aria-live="polite">
-          <span class="player-loading-title">Loading audEp...</span>
-          <div class="card-progress">
-            <span class="card-progress-bar is-indeterminate"></span>
-            <span class="card-progress-label">Restoring checkpoints and subSegs</span>
-          </div>
+      <p id="file-name" class="file-name"></p>
+      <div id="player-loading" class="player-loading hidden" aria-live="polite">
+        <span class="player-loading-title">Loading audEp...</span>
+        <div class="card-progress">
+          <span class="card-progress-bar is-indeterminate"></span>
+          <span class="card-progress-label">Restoring checkpoints and subSegs</span>
         </div>
-        <p id="file-name" class="file-name"></p>
+      </div>
+      <section class="player" aria-live="polite" tabindex="0" aria-label="Audio episode player">
+        <audio id="audio" preload="metadata"></audio>
         <div class="progress-wrap" role="group" aria-label="Playback progress">
           <div id="progress-track-main" class="progress-track">
-            <input id="progress" type="range" min="0" max="1000" value="0" disabled />
+            <input id="progress" type="range" min="0" max="1000" value="0" disabled tabindex="-1" />
             <div id="selected-span-overlay" class="selected-span-overlay" aria-hidden="true"></div>
             <div id="subseg-overlays" class="subseg-overlays" aria-hidden="true"></div>
             <div id="checkpoint-markers" class="checkpoint-markers" aria-hidden="true"></div>
@@ -68,9 +104,18 @@
             </div>
           </div>
         </div>
+        <div
+          id="audseg-note-editor"
+          class="audseg-note-editor hidden"
+          contenteditable="true"
+          role="textbox"
+          aria-multiline="true"
+          spellcheck="true"
+          tabindex="0"
+        ></div>
         <div id="target-progress-wrap" class="progress-wrap hidden" role="group" aria-label="Target audSeg progress">
           <div class="progress-track target-progress-track">
-            <input id="target-progress" type="range" min="0" max="1000" value="0" disabled />
+            <input id="target-progress" type="range" min="0" max="1000" value="0" disabled tabindex="-1" />
             <div id="target-span-overlay" class="selected-span-overlay target-span-overlay" aria-hidden="true"></div>
             <div id="target-subseg-active-fill" class="target-subseg-active-fill" aria-hidden="true"></div>
             <div id="target-checkpoint-markers" class="checkpoint-markers target-checkpoint-markers" aria-hidden="true"></div>
@@ -81,16 +126,15 @@
           </div>
         </div>
         <div id="subseg-value-panel" class="subseg-value-panel hidden" aria-live="polite">
-          <form id="subseg-value-form" class="subseg-value-form">
-            <input id="subseg-value-input" class="subseg-value-input" type="text" placeholder="Enter value..." autocomplete="off" />
-          </form>
-          <div id="subseg-timeline" class="subseg-timeline hidden" aria-live="polite">
-            <div class="subseg-timeline-head">
-              <span id="subseg-timeline-start" class="subseg-timeline-start">start</span>
-              <span id="subseg-timeline-end" class="subseg-timeline-end">end</span>
-            </div>
-            <div id="subseg-timeline-track" class="subseg-timeline-track"></div>
-          </div>
+          <div
+            id="subseg-value-input"
+            class="audseg-note-editor subseg-value-draft-card hidden"
+            contenteditable="true"
+            role="textbox"
+            aria-multiline="true"
+            spellcheck="true"
+            tabindex="0"
+          ></div>
           <div id="subseg-value-list" class="subseg-value-list"></div>
         </div>
         <div id="delete-confirm-dialog" class="delete-confirm-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="delete-confirm-text">
@@ -102,6 +146,7 @@
         </div>
       </section>
     </section>
+    <div id="page-toolbar" class="page-toolbar" aria-hidden="true"></div>
     <div id="guide-overlay" class="guide-overlay hidden" aria-live="polite">
       <div id="guide-spotlight" class="guide-spotlight" aria-hidden="true"></div>
       <div id="guide-tooltip" class="guide-tooltip" role="dialog" aria-modal="false" aria-label="Guide mode">
