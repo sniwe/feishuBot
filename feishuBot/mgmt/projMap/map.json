@@ -49,6 +49,7 @@
           "flow": [
             "edge-app-state",
             "edge-app-transfer",
+            "edge-app-cluster",
             "edge-app-codex",
             "edge-app-relay"
           ]
@@ -66,6 +67,12 @@
           "kind": "depends",
           "from": "node-app",
           "to": "node-file-transfer"
+        },
+        {
+          "id": "edge-app-cluster",
+          "kind": "depends",
+          "from": "node-app",
+          "to": "node-cluster-runtime"
         },
         {
           "id": "edge-app-codex",
@@ -88,6 +95,7 @@
         "node-state-store",
         "node-file-transfer",
         "node-contact-resolver",
+        "node-cluster-runtime",
         "node-codex-runner",
         "node-relay"
       ]
@@ -190,6 +198,42 @@
       "children": []
     },
     {
+      "id": "node-cluster-runtime",
+      "type": "module",
+      "name": "Cluster Runtime",
+      "summary": "Owns local machine identity, peer ledger, and cluster message protocol helpers",
+      "features": [
+        {
+          "summary": "Loads the machine profile, formats protocol messages, and resolves cluster targets",
+          "flow": [
+            "edge-cluster-relay",
+            "edge-cluster-codex"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge-cluster-relay",
+          "kind": "depends",
+          "from": "node-cluster-runtime",
+          "to": "node-relay"
+        },
+        {
+          "id": "edge-cluster-codex",
+          "kind": "depends",
+          "from": "node-cluster-runtime",
+          "to": "node-codex-runner"
+        }
+      ],
+      "critical": true,
+      "files": [
+        "src/backend/lib/cluster-protocol.js",
+        "src/backend/lib/cluster-state.js",
+        "src/backend/lib/cluster-runtime.js"
+      ],
+      "children": []
+    },
+    {
       "id": "node-codex-runner",
       "type": "module",
       "name": "Codex Runner",
@@ -252,7 +296,7 @@
       "summary": "Feishu event handling, command routing, and chat session lifecycle",
       "features": [
         {
-          "summary": "Routes messages to Codex, resume flow, rename handling, direct messages, and file intake",
+          "summary": "Routes messages to Codex, resume flow, rename handling, direct messages, file intake, and cluster-targeted control",
           "flow": [
             "edge-relay-state",
             "edge-relay-transfer",
@@ -313,6 +357,12 @@
       "to": "node-file-transfer"
     },
     {
+      "id": "edge-app-cluster",
+      "kind": "depends",
+      "from": "node-app",
+      "to": "node-cluster-runtime"
+    },
+    {
       "id": "edge-app-contact",
       "kind": "depends",
       "from": "node-app",
@@ -359,6 +409,18 @@
       "kind": "io",
       "from": "node-file-transfer",
       "to": "node-relay"
+    },
+    {
+      "id": "edge-cluster-relay",
+      "kind": "depends",
+      "from": "node-cluster-runtime",
+      "to": "node-relay"
+    },
+    {
+      "id": "edge-cluster-codex",
+      "kind": "depends",
+      "from": "node-cluster-runtime",
+      "to": "node-codex-runner"
     },
     {
       "id": "edge-codex-relay",

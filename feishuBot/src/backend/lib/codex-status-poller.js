@@ -4,6 +4,7 @@ function createCodexStatusPoller(ctx) {
   const statusPath = data.statusPath;
   const intervalMs = Number.isFinite(data.intervalMs) ? data.intervalMs : 5000;
   const maxEditsPerMessage = Number.isFinite(data.maxEditsPerMessage) ? data.maxEditsPerMessage : 3;
+  const machineLabel = typeof data.machineLabel === "string" ? data.machineLabel.trim() : "";
   let timer = null;
 
   function formatWorkingText(startedAt) {
@@ -11,7 +12,7 @@ function createCodexStatusPoller(ctx) {
     const elapsedMs = Number.isFinite(startedTime) ? Math.max(0, Date.now() - startedTime) : 0;
     const elapsedTicks = Math.floor(elapsedMs / intervalMs);
     const elapsedSeconds = elapsedTicks * Math.max(1, Math.round(intervalMs / 1000));
-    return `Relayed & working (${elapsedSeconds}s)`;
+    return `Relayed & working${machineLabel ? ` [${machineLabel}]` : ""} (${elapsedSeconds}s)`;
   }
 
   function readStatus() {

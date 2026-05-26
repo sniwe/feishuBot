@@ -21,12 +21,17 @@ function createCodexRunner(ctx) {
     extractThreadStartedId,
     lookupCodexSessionIdByThreadName,
     extractUploadDirective,
+    clusterRuntime,
   } = deps;
+  const machineProfile = typeof clusterRuntime?.getProfile === "function" ? clusterRuntime.getProfile() : {};
+  const machineLabel = typeof clusterRuntime?.formatSelfLabel === "function"
+    ? clusterRuntime.formatSelfLabel()
+    : [machineProfile.alias, machineProfile.machineId ? `(${String(machineProfile.machineId).slice(0, 8)})` : ""].filter(Boolean).join(" ").trim();
 
   function buildCodexPrompt(userText, state = {}) {
     const chatId = state.chatId || "";
     const senderOpenId = state.lastSenderOpenId || "";
-    return `${codexRelayPrompt}\n\nCHAT_CONTEXT:\n- CHAT_ID: ${chatId}\n- LAST_SENDER_OPEN_ID: ${senderOpenId || "(unknown)"}\n\nUSER_MESSAGE: ${userText}\nASSISTANT_REPLY:`;
+    return `${codexRelayPrompt}\n\nCHAT_CONTEXT:\n- MACHINE_LABEL: ${machineLabel || "(unknown)"}\n- MACHINE_ID: ${machineProfile.machineId || "(unknown)"}\n- MACHINE_ALIAS: ${machineProfile.alias || "(unknown)"}\n- CHAT_ID: ${chatId}\n- LAST_SENDER_OPEN_ID: ${senderOpenId || "(unknown)"}\n\nUSER_MESSAGE: ${userText}\nASSISTANT_REPLY:`;
   }
 
   function writeCodexStatus(busy, extra = {}) {
@@ -39,6 +44,9 @@ function createCodexRunner(ctx) {
     const payload = {
       busy: Boolean(busy),
       updatedAt: new Date().toISOString(),
+      machineLabel,
+      machineId: machineProfile.machineId || "",
+      machineAlias: machineProfile.alias || "",
       ...extra,
     };
     const serialized = JSON.stringify(payload, null, 2);
@@ -217,9 +225,12 @@ function createCodexRunner(ctx) {
     try {
       let statusMessageId = "";
       try {
-        statusMessageId = await sendTextMessage(chatId, "Relayed & working (0s)", {
+        statusMessageId = await sendTextMessage(chatId, `Relayed & working${machineLabel ? ` [${machineLabel}]` : ""} (0s)`, {
           relay_status: true,
           source_codex_session_id: codexSessionId || "",
+          machine_label: machineLabel,
+          machine_id: machineProfile.machineId || "",
+          machine_alias: machineProfile.alias || "",
         });
       } catch (statusErr) {
         console.error("Failed to send Codex working status message:", statusErr.message);
@@ -240,6 +251,9 @@ function createCodexRunner(ctx) {
         codexSessionId: codexSessionId || "",
         statusMessageId: state.relayStatusMessageId || "",
         startedAt: state.relayStatusStartedAt || new Date().toISOString(),
+        machineLabel,
+        machineId: machineProfile.machineId || "",
+        machineAlias: machineProfile.alias || "",
       });
 
       const exitCode = await new Promise((resolve, reject) => {
@@ -283,6 +297,9 @@ function createCodexRunner(ctx) {
         codexSessionId: state.codexResponseId || codexSessionId || "",
         statusMessageId: state.relayStatusMessageId || "",
         startedAt: state.relayStatusStartedAt || "",
+        machineLabel,
+        machineId: machineProfile.machineId || "",
+        machineAlias: machineProfile.alias || "",
       });
       state.relayStatusMessageId = "";
       state.relayStatusStartedAt = "";
@@ -343,6 +360,9 @@ function createCodexRunner(ctx) {
         codexSessionId: state.codexResponseId || codexSessionId || "",
         statusMessageId: "",
         startedAt: "",
+        machineLabel,
+        machineId: machineProfile.machineId || "",
+        machineAlias: machineProfile.alias || "",
       });
 
       try {

@@ -3,7 +3,9 @@ const { spawn } = require("child_process");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const crypto = require("crypto");
 
+const { createClusterRuntime } = require("./lib/cluster-runtime.js");
 const { createStateStore } = require("./lib/state-store.js");
 const { createFileTransferService } = require("./lib/file-transfer.js");
 const { createContactResolver } = require("./lib/contact-resolver.js");
@@ -33,6 +35,12 @@ Recipients may be an open_id, an email address, a mobile number, or the current 
 If USER_MESSAGE is vague, ask one concise clarifying question instead of echoing.`).trim();
 const CODEX_SESSION_INDEX_PATH = path.join(os.homedir(), ".codex", "session_index.jsonl");
 const CODEX_STATUS_PATH = path.join(PROJECT_ROOT, "mgmt", "projMap", "state", "codex-status.json");
+const CLUSTER_MODE = (process.env.FEISHU_CLUSTER_MODE || "multi").trim().toLowerCase();
+const CLUSTER_CHAT_ID = (process.env.FEISHU_CLUSTER_CHAT_ID || "").trim();
+const MACHINE_ALIAS = (process.env.FEISHU_MACHINE_ALIAS || "").trim();
+const MACHINE_ID = (process.env.FEISHU_MACHINE_ID || "").trim();
+const ANNOUNCE_ON_START = !/^(false|0|no|off)$/i.test((process.env.FEISHU_ANNOUNCE_ON_START || "true").trim());
+const CLUSTER_STATE_PATH = path.join(os.homedir(), "mgmt", "state", "feishuBot-cluster-state.json");
 
 function quoteForCmd(arg) {
   if (!/[ \t"&<>|^]/.test(arg)) {
@@ -159,6 +167,26 @@ async function deleteTextMessage(messageId) {
   return messageId;
 }
 
+const clusterRuntime = createClusterRuntime({
+  data: {
+    statePath: CLUSTER_STATE_PATH,
+    clusterMode: CLUSTER_MODE,
+    clusterChatId: CLUSTER_CHAT_ID,
+    machineAlias: MACHINE_ALIAS,
+    machineId: MACHINE_ID,
+    announceOnStart: ANNOUNCE_ON_START,
+  },
+  deps: {
+    fs,
+    os,
+    path,
+    crypto,
+    console,
+    sendTextMessage,
+  },
+});
+const clusterProfile = clusterRuntime.getProfile();
+
 const codexRunner = createCodexRunner({
   data: {
     projectRoot: PROJECT_ROOT,
@@ -189,6 +217,7 @@ const codexRunner = createCodexRunner({
     extractThreadStartedId: stateStore.extractThreadStartedId,
     lookupCodexSessionIdByThreadName: stateStore.lookupCodexSessionIdByThreadName,
     extractUploadDirective: fileTransfer.extractUploadDirective,
+    clusterRuntime,
   },
 });
 
@@ -203,6 +232,7 @@ const relay = createRelayController({
     codexRunner,
     sendTextMessage,
     sendDirectMessage,
+    clusterRuntime,
   },
 });
 
@@ -219,10 +249,42 @@ const codexStatusPoller = createCodexStatusPoller({
     sendTextMessage,
     deleteTextMessage,
     updateTextMessage,
+    machineLabel: clusterRuntime.formatSelfLabel(),
+    machineId: clusterProfile.machineId,
+    machineAlias: clusterProfile.alias,
   },
 });
 
 codexStatusPoller.start();
 wsClient.start({ eventDispatcher });
+void clusterRuntime.announceHello(clusterProfile.clusterChatId || CLUSTER_CHAT_ID).catch((err) => {
+  console.error("Failed to send cluster hello:", err.message);
+});
+
+let shutdownStarted = false;
+async function gracefulShutdown(reason) {
+  if (shutdownStarted) {
+    return;
+  }
+
+  shutdownStarted = true;
+  try {
+    await clusterRuntime.announceGoodbye(clusterProfile.clusterChatId || CLUSTER_CHAT_ID, reason);
+  } catch (err) {
+    console.error("Failed to send cluster goodbye:", err.message);
+  }
+}
+
+process.once("SIGINT", () => {
+  void gracefulShutdown("SIGINT").finally(() => {
+    process.exit(0);
+  });
+});
+
+process.once("SIGTERM", () => {
+  void gracefulShutdown("SIGTERM").finally(() => {
+    process.exit(0);
+  });
+});
 
 console.log("Feishu long connection starting...");
