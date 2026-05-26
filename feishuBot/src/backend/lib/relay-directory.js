@@ -39,6 +39,7 @@ function createRelayDirectory(ctx) {
       alias: typeof cleaned.alias === "string" ? cleaned.alias.trim() : typeof fallback.alias === "string" ? fallback.alias.trim() : "",
       mentionId: typeof cleaned.mentionId === "string" ? cleaned.mentionId.trim() : typeof cleaned.openId === "string" ? cleaned.openId.trim() : typeof fallback.mentionId === "string" ? fallback.mentionId.trim() : "",
       openId: typeof cleaned.openId === "string" ? cleaned.openId.trim() : typeof fallback.openId === "string" ? fallback.openId.trim() : "",
+      userId: typeof cleaned.userId === "string" ? cleaned.userId.trim() : typeof fallback.userId === "string" ? fallback.userId.trim() : "",
       relayChatId: typeof cleaned.relayChatId === "string" ? cleaned.relayChatId.trim() : typeof fallback.relayChatId === "string" ? fallback.relayChatId.trim() : "",
       status: typeof cleaned.status === "string" && cleaned.status.trim() ? cleaned.status.trim() : typeof fallback.status === "string" && fallback.status.trim() ? fallback.status.trim() : "active",
       notes: typeof cleaned.notes === "string" ? cleaned.notes.trim() : typeof fallback.notes === "string" ? fallback.notes.trim() : "",
@@ -154,6 +155,7 @@ function createRelayDirectory(ctx) {
       alias: typeof entry.alias === "string" ? entry.alias.trim() : "",
       mentionId: typeof entry.mentionId === "string" ? entry.mentionId.trim() : "",
       openId: typeof entry.openId === "string" ? entry.openId.trim() : "",
+      userId: typeof entry.userId === "string" ? entry.userId.trim() : "",
       relayChatId: typeof entry.relayChatId === "string" ? entry.relayChatId.trim() : "",
       status: typeof entry.status === "string" ? entry.status.trim() : "",
       notes: typeof entry.notes === "string" ? entry.notes.trim() : "",
@@ -230,6 +232,7 @@ function createRelayDirectory(ctx) {
       alias: typeof entry?.alias === "string" ? entry.alias.trim() : "",
       mentionId: typeof entry?.mentionId === "string" ? entry.mentionId.trim() : "",
       openId: typeof entry?.openId === "string" ? entry.openId.trim() : "",
+      userId: typeof entry?.userId === "string" ? entry.userId.trim() : "",
       relayChatId: typeof entry?.relayChatId === "string" ? entry.relayChatId.trim() : "",
     };
   }
@@ -239,7 +242,7 @@ function createRelayDirectory(ctx) {
     const profile = ctx.profile && typeof ctx.profile === "object" ? ctx.profile : {};
     const selfMachineId = typeof profile.machineId === "string" ? profile.machineId.trim() : "";
     const selfAlias = typeof profile.alias === "string" ? profile.alias.trim() : "";
-    const selfMentionId = typeof profile.mentionId === "string" ? profile.mentionId.trim() : typeof profile.openId === "string" ? profile.openId.trim() : "";
+    const selfMentionId = typeof profile.mentionId === "string" ? profile.mentionId.trim() : typeof profile.openId === "string" ? profile.openId.trim() : typeof profile.userId === "string" ? profile.userId.trim() : "";
     const directoryEntries = Array.isArray(ctx.directoryEntries) ? ctx.directoryEntries : getMachines();
     const peers = Array.isArray(ctx.peers) ? ctx.peers : [];
 
@@ -278,11 +281,19 @@ function createRelayDirectory(ctx) {
 
     const cleanedLower = cleanedToken.toLowerCase();
     const directoryAliasMatches = resolveByField(directoryEntries, "alias", cleanedLower);
-    const directoryMentionMatches = dedupeMatches(resolveByField(directoryEntries, "mentionId", cleanedLower).concat(resolveByField(directoryEntries, "openId", cleanedLower)));
+    const directoryMentionMatches = dedupeMatches(
+      resolveByField(directoryEntries, "mentionId", cleanedLower)
+        .concat(resolveByField(directoryEntries, "openId", cleanedLower))
+        .concat(resolveByField(directoryEntries, "userId", cleanedLower))
+    );
     const directoryMachineMatches = resolveByField(directoryEntries, "machineId", cleanedLower);
 
     const peerAliasMatches = resolveByField(peers, "alias", cleanedLower);
-    const peerMentionMatches = dedupeMatches(resolveByField(peers, "mentionId", cleanedLower).concat(resolveByField(peers, "openId", cleanedLower)));
+    const peerMentionMatches = dedupeMatches(
+      resolveByField(peers, "mentionId", cleanedLower)
+        .concat(resolveByField(peers, "openId", cleanedLower))
+        .concat(resolveByField(peers, "userId", cleanedLower))
+    );
     const peerMachineMatches = resolveByField(peers, "machineId", cleanedLower);
 
     if (selfAlias && cleanedLower === selfAlias.toLowerCase()) {
@@ -332,6 +343,7 @@ function createRelayDirectory(ctx) {
         alias: match.alias,
         mentionId: match.mentionId || match.openId,
         openId: match.openId,
+        userId: match.userId,
         relayChatId: match.relayChatId,
         entry: match,
       };
@@ -356,6 +368,7 @@ function createRelayDirectory(ctx) {
         alias: match.alias,
         mentionId: match.mentionId || match.openId,
         openId: match.openId,
+        userId: match.userId,
         relayChatId: match.relayChatId,
         entry: match,
       };
@@ -380,6 +393,7 @@ function createRelayDirectory(ctx) {
         alias: match.alias,
         mentionId: match.mentionId || match.openId,
         openId: match.openId,
+        userId: match.userId,
         relayChatId: match.relayChatId,
         peer: match,
       };
@@ -404,6 +418,7 @@ function createRelayDirectory(ctx) {
         alias: match.alias,
         mentionId: match.mentionId || match.openId,
         openId: match.openId,
+        userId: match.userId,
         relayChatId: match.relayChatId,
         peer: match,
       };
@@ -460,7 +475,7 @@ function createRelayDirectory(ctx) {
     const profile = ctx.profile && typeof ctx.profile === "object" ? ctx.profile : {};
     const selfMachineId = typeof profile.machineId === "string" ? profile.machineId.trim() : "";
     const selfAlias = typeof profile.alias === "string" ? profile.alias.trim() : "";
-    const selfMentionId = typeof profile.mentionId === "string" ? profile.mentionId.trim() : typeof profile.openId === "string" ? profile.openId.trim() : "";
+    const selfMentionId = typeof profile.mentionId === "string" ? profile.mentionId.trim() : typeof profile.openId === "string" ? profile.openId.trim() : typeof profile.userId === "string" ? profile.userId.trim() : "";
     const directoryEntries = Array.isArray(ctx.directoryEntries) ? ctx.directoryEntries : getMachines();
     const peers = Array.isArray(ctx.peers) ? ctx.peers : [];
 
@@ -487,6 +502,7 @@ function createRelayDirectory(ctx) {
         alias: match.alias,
         mentionId: match.mentionId || match.openId,
         openId: match.openId,
+        userId: match.userId,
         relayChatId: match.relayChatId,
         entry: match,
       };
@@ -512,6 +528,7 @@ function createRelayDirectory(ctx) {
         alias: match.alias,
         mentionId: match.mentionId || match.openId,
         openId: match.openId,
+        userId: match.userId,
         relayChatId: match.relayChatId,
         peer: match,
       };

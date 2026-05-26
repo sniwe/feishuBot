@@ -74,9 +74,10 @@ function createFileTransferService(ctx) {
       const tag = typeof node.tag === "string" ? node.tag.trim().toLowerCase() : "";
       if (tag === "at") {
         const mentionName =
-          (typeof node.user_name === "string" && node.user_name.trim()) ||
-          (typeof node.user_id === "string" && node.user_id.trim()) ||
           (typeof node.open_id === "string" && node.open_id.trim()) ||
+          (typeof node.user_id === "string" && node.user_id.trim()) ||
+          (typeof node.id === "string" && node.id.trim()) ||
+          (typeof node.user_name === "string" && node.user_name.trim()) ||
           "";
         return mentionName ? `@${mentionName}` : "@";
       }

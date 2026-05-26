@@ -4,7 +4,7 @@
     "name":  "feishuBot",
     "summary":  "Project map for the Feishu Codex relay",
     "root":  "C:\\Users\\Qub\\feishuBot",
-  "updated": "2026-05-26T15:14:06.9479307+08:00",
+  "updated": "2026-05-26T18:17:19.3718117+08:00",
     "nodes":  [
                   {
                       "id":  "node-root",
@@ -45,7 +45,7 @@
                       "summary":  "Loads env config and wires the relay modules together",
                       "features":  [
                                        {
-                                           "summary":  "Bootstraps Feishu client, state store, transfer, contact lookup, Codex, and relay",
+                                           "summary":  "Bootstraps Feishu client, state store, transfer, contact lookup, Codex, relay, and sweep monitor",
                                            "flow":  [
                                                         "edge-app-state",
                                                         "edge-app-transfer",
@@ -89,7 +89,8 @@
                                 ],
                       "critical":  true,
                       "files":  [
-                                    "src/backend/app.js"
+                                    "src/backend/app.js",
+                                    "src/backend/lib/relay-sweeper.js"
                                 ],
                       "children":  [
                                        "node-state-store",
@@ -337,7 +338,7 @@
                       "summary":  "Feishu event handling, command routing, and chat session lifecycle",
                       "features":  [
                                        {
-                                           "summary":  "Routes messages to Codex, resume flow, rename handling, direct messages, file intake, and cluster-targeted control with bot relay symmetry",
+                                           "summary":  "Routes messages to Codex, resume flow, rename handling, direct messages, file intake, cluster-targeted control, and relay sweep recovery",
                                            "flow":  [
                                                         "edge-relay-state",
                                                         "edge-relay-transfer",
@@ -373,7 +374,8 @@
                                 ],
                       "critical":  true,
                       "files":  [
-                                    "src/backend/lib/relay.js"
+                                    "src/backend/lib/relay.js",
+                                    "src/backend/lib/relay-sweeper.js"
                                 ],
                       "children":  [
 

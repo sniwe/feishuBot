@@ -132,25 +132,47 @@ function createCodexRunner(ctx) {
     }
   }
 
+  function sanitizeCodexExtraArgs(extraArgs) {
+    const tokens = typeof extraArgs === "string" ? extraArgs.split(/\s+/).filter(Boolean) : [];
+    const cleaned = [];
+    let skipValue = false;
+
+    for (const token of tokens) {
+      if (skipValue) {
+        skipValue = false;
+        continue;
+      }
+
+      if (/^(--sandbox|--cd|--launch)(=.+)?$/i.test(token) || /^-C(=.+)?$/i.test(token)) {
+        if (!/=/.test(token)) {
+          skipValue = true;
+        }
+        continue;
+      }
+
+      cleaned.push(token);
+    }
+
+    return cleaned;
+  }
+
   function buildCodexArgs(outputPath) {
-    const args = ["exec", "--json", "--sandbox", "danger-full-access", "--cd", projectRoot];
+    const args = ["exec", "--json"];
 
     if (skipGitRepoCheck) {
       args.push("--skip-git-repo-check");
     }
-
-    args.push("--output-last-message", outputPath);
 
     if (codexModel) {
       args.push("--model", codexModel);
     }
 
     if (codexExtraArgs) {
-      for (const chunk of codexExtraArgs.split(/\s+/).filter(Boolean)) {
-        args.push(chunk);
-      }
+      args.push(...sanitizeCodexExtraArgs(codexExtraArgs));
     }
 
+    args.push("--sandbox", "danger-full-access", "--cd", projectRoot);
+    args.push("--output-last-message", outputPath);
     args.push("-");
     return args;
   }
@@ -162,18 +184,16 @@ function createCodexRunner(ctx) {
       args.push("--skip-git-repo-check");
     }
 
-    args.push("--output-last-message", outputPath);
-
     if (codexModel) {
       args.push("--model", codexModel);
     }
 
     if (codexExtraArgs) {
-      for (const chunk of codexExtraArgs.split(/\s+/).filter(Boolean)) {
-        args.push(chunk);
-      }
+      args.push(...sanitizeCodexExtraArgs(codexExtraArgs));
     }
 
+    args.push("--sandbox", "danger-full-access", "--cd", projectRoot);
+    args.push("--output-last-message", outputPath);
     args.push(sessionId);
     args.push("-");
     return args;

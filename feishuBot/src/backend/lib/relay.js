@@ -855,138 +855,195 @@ function createRelayController(ctx) {
     }
   }
 
+  function buildRelayEventFromListItem(item = {}) {
+    const messageId = typeof item.message_id === "string" ? item.message_id.trim() : "";
+    const chatId = typeof item.chat_id === "string" ? item.chat_id.trim() : "";
+    const messageType = typeof item.msg_type === "string" && item.msg_type.trim() ? item.msg_type.trim() : "text";
+    const content = typeof item.body?.content === "string" ? item.body.content : "";
+    const senderOpenId = typeof item.sender?.id === "string" ? item.sender.id.trim() : "";
+    const senderType = typeof item.sender?.sender_type === "string" ? item.sender.sender_type.trim() : "";
+    const senderIdType = typeof item.sender?.id_type === "string" ? item.sender.id_type.trim() : "";
+
+    return {
+      event_id: messageId ? `sweep:${messageId}` : "",
+      message: {
+        chat_id: chatId,
+        message_id: messageId,
+        message_type: messageType,
+        content,
+      },
+      sender: {
+        sender_type: senderType,
+        sender_id: {
+          open_id: senderOpenId,
+          id_type: senderIdType,
+        },
+      },
+      chat: {
+        name: "",
+      },
+      sweep: true,
+    };
+  }
+
+  function isTargetedRelayMessage(userText) {
+    if (!userText) {
+      return false;
+    }
+
+    return Boolean(
+      (clusterRuntime && typeof clusterRuntime.parseProtocol === "function" && clusterRuntime.parseProtocol(userText)) ||
+      (clusterRuntime && typeof clusterRuntime.parseTarget === "function" && clusterRuntime.parseTarget(userText))
+    );
+  }
+
+  async function handleRelayDataEvent(dataEvent, options = {}) {
+    try {
+      if (options.logReceipt !== false) {
+        console.log("Received event:", JSON.stringify(dataEvent, null, 2));
+      }
+
+      if (!dataEvent?.message) {
+        return false;
+      }
+
+      const senderType = dataEvent?.sender?.sender_type || "";
+      const chatId = dataEvent.message.chat_id;
+      if (isClusterMode && !clusterRuntime.shouldProcessChat(chatId)) {
+        logCluster("hub-miss", {
+          chatId,
+          messageId: dataEvent.message.message_id || "",
+          eventId: dataEvent.event_id || "",
+        });
+        return false;
+      }
+
+      const state = stateStore.getChatState(chatId);
+      const chatName = extractChatName(dataEvent);
+      if (chatName) {
+        stateStore.setChatDisplayName(chatId, state, chatName);
+      }
+
+      const eventTtlMs = Number.isFinite(options.eventTtlMs) && options.eventTtlMs > 0 ? options.eventTtlMs : undefined;
+      const eventKeys = [dataEvent.message.message_id, dataEvent.event_id].filter((key) => typeof key === "string" && key.trim());
+      if (eventKeys.some((eventKey) => stateStore.markRecentEventKey(eventKey, eventTtlMs))) {
+        logCluster("duplicate-ignore", {
+          chatId,
+          messageId: dataEvent.message.message_id || "",
+          eventId: dataEvent.event_id || "",
+          reason: "recent-event-key",
+          source: options.source || "live",
+        });
+        return false;
+      }
+
+      const contentObj = fileTransfer.parseMessageContent(dataEvent.message.content);
+      const userText = fileTransfer.extractUserTextFromMessage(dataEvent.message.message_type, contentObj);
+      const senderOpenId = dataEvent.sender?.sender_id?.open_id || "";
+      const senderMachine = isClusterMode && typeof clusterRuntime.resolveSenderMachineByOpenId === "function"
+        ? clusterRuntime.resolveSenderMachineByOpenId(senderOpenId)
+        : null;
+      const senderMachineId = senderMachine && typeof senderMachine.machineId === "string" ? senderMachine.machineId.trim() : "";
+      const selfMachineId = typeof clusterRuntime?.getProfile === "function"
+        ? (clusterRuntime.getProfile().machineId || "")
+        : localProfile.machineId || "";
+      if (isClusterMode && senderMachineId && senderMachineId === selfMachineId) {
+        return true;
+      }
+
+      const protocolHandled = await handleClusterProtocolMessage(dataEvent, chatId, state, userText, {
+        senderOpenId,
+        senderMachineId,
+      });
+      if (protocolHandled) {
+        return true;
+      }
+
+      if (isClusterMode) {
+        resolveIncomingSender(dataEvent, state, {
+          machineId: senderMachineId || "",
+        });
+      }
+
+      if (dataEvent.message.message_type === "file") {
+        if (isClusterMode) {
+          logCluster("target-miss", {
+            chatId,
+            messageId: dataEvent.message.message_id || "",
+            eventId: dataEvent.event_id || "",
+            reason: "file-message-not-supported",
+          });
+          return true;
+        }
+
+        await handleIncomingFileMessage(dataEvent, chatId, state);
+        return true;
+      }
+
+      if (dataEvent.message.message_type !== "text" && dataEvent.message.message_type !== "post") {
+        return false;
+      }
+
+      const persistedEntry = stateStore.getPersistedChatEntry(chatId);
+      stateStore.appendMessageLog({
+        direction: "incoming",
+        chat_id: chatId,
+        event_id: dataEvent.event_id || "",
+        message_id: dataEvent.message.message_id || "",
+        message_type: dataEvent.message.message_type || "",
+        text: userText,
+        sender_type: dataEvent.sender?.sender_type || "",
+        sender_open_id: dataEvent.sender?.sender_id?.open_id || "",
+        codex_session_id: state.codexResponseId || persistedEntry.sessionId || "",
+        chat_name: extractChatName(dataEvent) || persistedEntry.chatName || "",
+      });
+
+      if (!userText) {
+        return false;
+      }
+
+      if (isClusterMode) {
+        const targeted = await handleClusterExplicitTarget(dataEvent, chatId, state, userText, {
+          senderOpenId,
+          senderMachineId,
+        });
+        if (targeted) {
+          return true;
+        }
+
+        logCluster("target-miss", {
+          chatId,
+          messageId: dataEvent.message.message_id || "",
+          eventId: dataEvent.event_id || "",
+          reason: senderType === "user" ? "unaddressed" : "unaddressed-bot",
+          source: options.source || "live",
+        });
+        return true;
+      }
+
+      if (senderType !== "user") {
+        return true;
+      }
+
+      state.pendingUserTexts.push(userText);
+      await drainUserTextQueue(chatId, state);
+      return true;
+    } catch (err) {
+      console.error("Handler error:", err);
+      return false;
+    }
+  }
+
   function createEventDispatcher() {
     return new Lark.EventDispatcher({}).register({
       "im.message.message_read_v1": async () => {
         return;
       },
       "im.message.receive_v1": async (dataEvent) => {
-        try {
-          console.log("Received event:", JSON.stringify(dataEvent, null, 2));
-
-          if (!dataEvent?.message) {
-            return;
-          }
-
-          const senderType = dataEvent?.sender?.sender_type || "";
-          const chatId = dataEvent.message.chat_id;
-          if (isClusterMode && !clusterRuntime.shouldProcessChat(chatId)) {
-            logCluster("hub-miss", {
-              chatId,
-              messageId: dataEvent.message.message_id || "",
-              eventId: dataEvent.event_id || "",
-            });
-            return;
-          }
-
-          const state = stateStore.getChatState(chatId);
-          const chatName = extractChatName(dataEvent);
-          if (chatName) {
-            stateStore.setChatDisplayName(chatId, state, chatName);
-          }
-          const eventKey = dataEvent.event_id || dataEvent.message.message_id;
-          if (stateStore.markRecentEventKey(eventKey)) {
-            logCluster("duplicate-ignore", {
-              chatId,
-              messageId: dataEvent.message.message_id || "",
-              eventId: dataEvent.event_id || "",
-              reason: "recent-event-key",
-            });
-            return;
-          }
-
-          const contentObj = fileTransfer.parseMessageContent(dataEvent.message.content);
-          const userText = fileTransfer.extractUserTextFromMessage(dataEvent.message.message_type, contentObj);
-          const senderOpenId = dataEvent.sender?.sender_id?.open_id || "";
-          const senderMachine = isClusterMode && typeof clusterRuntime.resolveSenderMachineByOpenId === "function"
-            ? clusterRuntime.resolveSenderMachineByOpenId(senderOpenId)
-            : null;
-          const senderMachineId = senderMachine && typeof senderMachine.machineId === "string" ? senderMachine.machineId.trim() : "";
-          const selfMachineId = typeof clusterRuntime?.getProfile === "function"
-            ? (clusterRuntime.getProfile().machineId || "")
-            : localProfile.machineId || "";
-          if (isClusterMode && senderMachineId && senderMachineId === selfMachineId) {
-            return;
-          }
-
-          const protocolHandled = await handleClusterProtocolMessage(dataEvent, chatId, state, userText, {
-            senderOpenId,
-            senderMachineId,
-          });
-          if (protocolHandled) {
-            return;
-          }
-
-          if (isClusterMode) {
-            resolveIncomingSender(dataEvent, state, {
-              machineId: senderMachineId || "",
-            });
-          }
-
-          if (dataEvent.message.message_type === "file") {
-            if (isClusterMode) {
-              logCluster("target-miss", {
-                chatId,
-                messageId: dataEvent.message.message_id || "",
-                eventId: dataEvent.event_id || "",
-                reason: "file-message-not-supported",
-              });
-              return;
-            }
-
-            await handleIncomingFileMessage(dataEvent, chatId, state);
-            return;
-          }
-
-          if (dataEvent.message.message_type !== "text" && dataEvent.message.message_type !== "post") {
-            return;
-          }
-
-          const persistedEntry = stateStore.getPersistedChatEntry(chatId);
-          stateStore.appendMessageLog({
-            direction: "incoming",
-            chat_id: chatId,
-            event_id: dataEvent.event_id || "",
-            message_id: dataEvent.message.message_id || "",
-            message_type: dataEvent.message.message_type || "",
-            text: userText,
-            sender_type: dataEvent.sender?.sender_type || "",
-            sender_open_id: dataEvent.sender?.sender_id?.open_id || "",
-            codex_session_id: state.codexResponseId || persistedEntry.sessionId || "",
-            chat_name: extractChatName(dataEvent) || persistedEntry.chatName || "",
-          });
-
-          if (!userText) {
-            return;
-          }
-
-          if (isClusterMode) {
-            const targeted = await handleClusterExplicitTarget(dataEvent, chatId, state, userText, {
-              senderOpenId,
-              senderMachineId,
-            });
-            if (targeted) {
-              return;
-            }
-
-            logCluster("target-miss", {
-              chatId,
-              messageId: dataEvent.message.message_id || "",
-              eventId: dataEvent.event_id || "",
-              reason: senderType === "user" ? "unaddressed" : "unaddressed-bot",
-            });
-            return;
-          }
-
-          if (senderType !== "user") {
-            return;
-          }
-
-          state.pendingUserTexts.push(userText);
-          await drainUserTextQueue(chatId, state);
-        } catch (err) {
-          console.error("Handler error:", err);
-        }
+        await handleRelayDataEvent(dataEvent, {
+          source: "live",
+          logReceipt: true,
+        });
       },
     });
   }
@@ -995,6 +1052,9 @@ function createRelayController(ctx) {
     extractChatName,
     extractRenameDirective,
     extractDirectMessageDirective,
+    buildRelayEventFromListItem,
+    isTargetedRelayMessage,
+    handleRelayDataEvent,
     sendModeOptions,
     sendResumeChatOptions,
     handleUserText,

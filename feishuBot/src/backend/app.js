@@ -13,6 +13,7 @@ const { createCodexRunner } = require("./lib/codex-runner.js");
 const { createCodexStatusPoller } = require("./lib/codex-status-poller.js");
 const { createRelayController } = require("./lib/relay.js");
 const { createRelayDirectory } = require("./lib/relay-directory.js");
+const { createRelaySweeper } = require("./lib/relay-sweeper.js");
 
 const PROJECT_ROOT = path.resolve(__dirname, "..", "..");
 require("dotenv").config({ path: path.join(PROJECT_ROOT, ".env") });
@@ -261,6 +262,20 @@ const relay = createRelayController({
 });
 
 const eventDispatcher = relay.createEventDispatcher();
+const relaySweeper = createRelaySweeper({
+  data: {
+    relayChatId: clusterProfile.clusterChatId || CLUSTER_CHAT_ID,
+    intervalMs: Number(process.env.FEISHU_RELAY_SWEEP_INTERVAL_MS || 15000),
+    lookbackMs: Number(process.env.FEISHU_RELAY_SWEEP_LOOKBACK_MS || 5 * 60 * 1000),
+  },
+  deps: {
+    client,
+    stateStore,
+    fileTransfer,
+    relayController: relay,
+    console,
+  },
+});
 const codexStatusPoller = createCodexStatusPoller({
   data: {
     statusPath: CODEX_STATUS_PATH,
@@ -345,6 +360,7 @@ async function clearStaleCodexStatus() {
 void (async () => {
   await clearStaleCodexStatus();
   codexStatusPoller.start();
+  relaySweeper.start();
   wsClient.start({ eventDispatcher });
   void clusterRuntime.announceHello(clusterProfile.clusterChatId || CLUSTER_CHAT_ID).catch((err) => {
     console.error("Failed to send cluster hello:", err.message);
@@ -363,6 +379,7 @@ async function gracefulShutdown(reason) {
   } catch (err) {
     console.error("Failed to send cluster goodbye:", err.message);
   }
+  relaySweeper.stop();
 }
 
 process.once("SIGINT", () => {

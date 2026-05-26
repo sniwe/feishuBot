@@ -382,7 +382,8 @@ function createClusterStateManager(ctx) {
     const peer = listPeers().find((entry) => {
       const openId = typeof entry?.openId === "string" ? entry.openId.trim() : "";
       const mentionId = typeof entry?.mentionId === "string" ? entry.mentionId.trim() : "";
-      return openId === cleanedOpenId || mentionId === cleanedOpenId;
+      const userId = typeof entry?.userId === "string" ? entry.userId.trim() : "";
+      return openId === cleanedOpenId || mentionId === cleanedOpenId || userId === cleanedOpenId;
     }) || null;
     if (peer) {
       rememberSenderMachine(cleanedOpenId, peer);

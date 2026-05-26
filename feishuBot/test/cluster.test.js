@@ -125,9 +125,10 @@ function makeFileTransfer() {
         const tag = typeof node.tag === "string" ? node.tag.trim().toLowerCase() : "";
         if (tag === "at") {
           const mentionName =
-            (typeof node.user_name === "string" && node.user_name.trim()) ||
-            (typeof node.user_id === "string" && node.user_id.trim()) ||
             (typeof node.open_id === "string" && node.open_id.trim()) ||
+            (typeof node.user_id === "string" && node.user_id.trim()) ||
+            (typeof node.id === "string" && node.id.trim()) ||
+            (typeof node.user_name === "string" && node.user_name.trim()) ||
             "";
           return mentionName ? `@${mentionName}` : "@";
         }
@@ -527,6 +528,22 @@ test("post mentions preserve explicit targets", () => {
     zh_cn: {
       content: [
         [
+          { tag: "at", user_name: "qub", user_id: "ou_test_qub", open_id: "ou_test_qub_open" },
+          { text: " hi" },
+        ],
+      ],
+    },
+  };
+
+  assert.equal(fileTransfer.extractUserTextFromMessage("post", content), "@ou_test_qub_open hi");
+});
+
+test("post mentions fall back to user ids when open ids are missing", () => {
+  const fileTransfer = makeFileTransfer();
+  const content = {
+    zh_cn: {
+      content: [
+        [
           { tag: "at", user_name: "qub", user_id: "ou_test_qub" },
           { text: " hi" },
         ],
@@ -534,7 +551,7 @@ test("post mentions preserve explicit targets", () => {
     },
   };
 
-  assert.equal(fileTransfer.extractUserTextFromMessage("post", content), "@qub hi");
+  assert.equal(fileTransfer.extractUserTextFromMessage("post", content), "@ou_test_qub hi");
 });
 
 test("cluster mode ignores messages outside the hub chat", async () => {

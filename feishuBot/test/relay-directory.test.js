@@ -99,3 +99,30 @@ test("relay directory resolves sender open ids back to machine ids", () => {
   assert.equal(resolution.machineId, "bot-directory");
   assert.equal(resolution.openId, "ou_dir");
 });
+
+test("relay directory resolves user ids as stable mention ids", () => {
+  const tempDir = makeTempDir("feishuBot-relay-directory-");
+  const directoryPath = path.join(tempDir, "machine-directory.json");
+  const relayDirectory = createRelayDirectory({
+    data: { directoryPath },
+    deps: { fs, path, console },
+  });
+
+  relayDirectory.upsertMachine({
+    machineId: "bot-directory",
+    alias: "atlas",
+    userId: "u_dir",
+    relayChatId: "chat-1",
+    status: "active",
+  });
+
+  const resolution = relayDirectory.resolveTarget("u_dir", {
+    profile: { machineId: "bot-self", alias: "self" },
+    directoryEntries: relayDirectory.getMachines(),
+    peers: [],
+  });
+
+  assert.equal(resolution.status, "match");
+  assert.equal(resolution.machineId, "bot-directory");
+  assert.equal(resolution.userId, "u_dir");
+});

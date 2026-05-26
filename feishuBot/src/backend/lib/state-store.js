@@ -371,16 +371,16 @@ function createStateStore(ctx) {
     }
   }
 
-  function markRecentEventKey(eventKey) {
+  function markRecentEventKey(eventKey, ttlMs = 10 * 60 * 1000) {
     if (!eventKey) {
       return false;
     }
 
     const now = Date.now();
-    const ttlMs = 10 * 60 * 1000;
+    const cleanedTtlMs = Number.isFinite(ttlMs) && ttlMs > 0 ? ttlMs : 10 * 60 * 1000;
 
     for (const [key, seenAt] of recentEventKeys.entries()) {
-      if (now - seenAt > ttlMs) {
+      if (now - seenAt > cleanedTtlMs) {
         recentEventKeys.delete(key);
       }
     }

@@ -86,6 +86,70 @@ test("codex runner recognizes machine relay directives before human DM directive
   assert.match(prompt, /bot-peer/);
 });
 
+test("codex runner forces full sandbox and strips conflicting launch flags", () => {
+  const runner = createCodexRunner({
+    data: {
+      projectRoot: "C:\\tmp\\project",
+      codexCommand: "codex",
+      codexModel: "gpt-5.3-codex",
+      codexExtraArgs: "--sandbox workspace-write --cd C:\\alt --launch local --flag keep",
+      codexRelayPrompt: "relay prompt",
+      codexStatusPath: "",
+      turnTimeoutMs: 1000,
+    },
+    deps: {
+      spawn: () => {
+        throw new Error("spawn not expected");
+      },
+      fs: require("fs"),
+      os: require("os"),
+      path: require("path"),
+      projectRoot: "C:\\tmp\\project",
+      codexCommand: "codex",
+      codexModel: "gpt-5.3-codex",
+      codexExtraArgs: "--sandbox workspace-write --cd C:\\alt --launch local --flag keep",
+      codexRelayPrompt: "relay prompt",
+      codexStatusPath: "",
+      quoteForCmd: (value) => value,
+      splitForFeishu: (text) => [text],
+      uploadFileToChat: async () => "",
+      resolveRecipientOpenId: async () => ({ openId: "ou_human" }),
+      sendDirectMessage: async () => "",
+      sendTextMessage: async () => "",
+      setChatSessionId: () => {},
+      extractThreadStartedId: () => "",
+      lookupCodexSessionIdByThreadName: () => "",
+      extractUploadDirective: () => "",
+      clusterRuntime: {
+        isEnabled: () => false,
+        getProfile: () => ({ machineId: "bot-self", alias: "self" }),
+      },
+    },
+  });
+
+  const args = runner.buildCodexArgs("C:\\tmp\\last-message.txt");
+  const resumeArgs = runner.buildCodexResumeArgs("session-1", "C:\\tmp\\last-message.txt");
+
+  assert.deepEqual(
+    args.filter((token) => token === "--sandbox" || token === "danger-full-access" || token === "--cd" || token === "C:\\tmp\\project"),
+    ["--sandbox", "danger-full-access", "--cd", "C:\\tmp\\project"],
+  );
+  assert.ok(!args.includes("workspace-write"));
+  assert.ok(!args.includes("C:\\alt"));
+  assert.ok(!args.includes("--launch"));
+  assert.ok(args.includes("--flag"));
+  assert.ok(args.includes("keep"));
+
+  assert.deepEqual(
+    resumeArgs.filter((token) => token === "--sandbox" || token === "danger-full-access" || token === "--cd" || token === "C:\\tmp\\project"),
+    ["--sandbox", "danger-full-access", "--cd", "C:\\tmp\\project"],
+  );
+  assert.ok(!resumeArgs.includes("workspace-write"));
+  assert.ok(!resumeArgs.includes("C:\\alt"));
+  assert.ok(!resumeArgs.includes("--launch"));
+  assert.ok(resumeArgs.includes("session-1"));
+});
+
 test("self-target relay output renders as normal answer text", async () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "feishuBot-codex-runner-"));
   const messages = [];
