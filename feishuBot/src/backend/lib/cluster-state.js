@@ -12,6 +12,7 @@ function createClusterStateManager(ctx) {
   const clusterChatId = typeof data.clusterChatId === "string" ? data.clusterChatId.trim() : "";
   const envMachineId = typeof data.machineId === "string" ? data.machineId.trim() : "";
   const envAlias = typeof data.machineAlias === "string" ? data.machineAlias.trim() : "";
+  const envMentionId = typeof data.machineMentionId === "string" ? data.machineMentionId.trim() : "";
   const hostname = typeof data.hostname === "string" ? data.hostname.trim() : os.hostname();
   const startedAt = new Date().toISOString();
   const bootId = crypto.randomUUID();
@@ -34,6 +35,7 @@ function createClusterStateManager(ctx) {
       version: 1,
       machineId,
       alias,
+      mentionId: envMentionId || existing.mentionId || "",
       hostname,
       bootId,
       clusterMode,
@@ -54,6 +56,7 @@ function createClusterStateManager(ctx) {
       version: Number(existing.version) || 1,
       machineId: envMachineId || (typeof existing.machineId === "string" ? existing.machineId.trim() : "") || crypto.randomUUID(),
       alias: envAlias || (typeof existing.alias === "string" ? existing.alias.trim() : "") || hostname || "",
+      mentionId: envMentionId || (typeof existing.mentionId === "string" ? existing.mentionId.trim() : ""),
       hostname: typeof existing.hostname === "string" && existing.hostname.trim() ? existing.hostname.trim() : hostname,
       bootId,
       clusterMode: clusterMode || (typeof existing.clusterMode === "string" ? existing.clusterMode.trim().toLowerCase() : "multi"),
@@ -113,6 +116,7 @@ function createClusterStateManager(ctx) {
     return {
       machineId: current.machineId,
       alias: current.alias,
+      mentionId: current.mentionId || "",
       hostname: current.hostname,
       bootId: current.bootId,
       clusterMode: current.clusterMode,
@@ -196,6 +200,7 @@ function createClusterStateManager(ctx) {
       lastReplyToAnnounceId: typeof patch.replyToAnnounceId === "string" ? patch.replyToAnnounceId.trim() : existing.lastReplyToAnnounceId || "",
       lastMessageType: typeof patch.messageType === "string" ? patch.messageType.trim() : existing.lastMessageType || "",
       sourceChatId: typeof patch.chatId === "string" ? patch.chatId.trim() : existing.sourceChatId || "",
+      mentionId: typeof peer.mentionId === "string" ? peer.mentionId.trim() : existing.mentionId || "",
     };
 
     if (patch.messageType === "hello") {

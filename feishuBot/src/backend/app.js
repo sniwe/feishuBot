@@ -39,6 +39,7 @@ const CLUSTER_MODE = (process.env.FEISHU_CLUSTER_MODE || "multi").trim().toLower
 const CLUSTER_CHAT_ID = (process.env.FEISHU_CLUSTER_CHAT_ID || "").trim();
 const MACHINE_ALIAS = (process.env.FEISHU_MACHINE_ALIAS || "").trim();
 const MACHINE_ID = (process.env.FEISHU_MACHINE_ID || "").trim();
+const MACHINE_MENTION_ID = (process.env.FEISHU_MACHINE_MENTION_ID || process.env.FEISHU_MACHINE_OPEN_ID || "").trim();
 const ANNOUNCE_ON_START = !/^(false|0|no|off)$/i.test((process.env.FEISHU_ANNOUNCE_ON_START || "true").trim());
 const CLUSTER_STATE_PATH = path.join(os.homedir(), "mgmt", "state", "feishuBot-cluster-state.json");
 
@@ -174,6 +175,7 @@ const clusterRuntime = createClusterRuntime({
     clusterChatId: CLUSTER_CHAT_ID,
     machineAlias: MACHINE_ALIAS,
     machineId: MACHINE_ID,
+    machineMentionId: MACHINE_MENTION_ID,
     announceOnStart: ANNOUNCE_ON_START,
   },
   deps: {

@@ -229,7 +229,7 @@ function createBus() {
   };
 }
 
-function createHarness({ name, alias, machineId, bus, statePath, clusterChatId = "hub" }) {
+function createHarness({ name, alias, machineId, mentionId = "", bus, statePath, clusterChatId = "hub" }) {
   const stateStore = makeStateStore();
   const fileTransfer = makeFileTransfer();
   const contactResolver = makeContactResolver();
@@ -275,6 +275,7 @@ function createHarness({ name, alias, machineId, bus, statePath, clusterChatId =
       clusterChatId,
       machineAlias: alias,
       machineId,
+      machineMentionId: mentionId,
       announceOnStart: true,
     },
     deps: {
@@ -405,6 +406,52 @@ test("targeted user messages only run on the addressed machine", async () => {
   assert.equal(bravo.codexCalls.length, 1);
   assert.equal(bravo.codexCalls[0].text, "ping");
   assert.equal(alpha.sentMessages.some((entry) => /Use @alias: message/.test(entry.text)), false);
+
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test("targeted user messages resolve machine mention ids", async () => {
+  const root = makeTempDir();
+  const bus = createBus();
+
+  const alpha = createHarness({
+    name: "alpha",
+    alias: "alpha",
+    machineId: "aaaa1111-aaaa-1111-aaaa-111111111111",
+    mentionId: "ou_alpha_target",
+    bus,
+    statePath: path.join(root, "alpha-state.json"),
+  });
+  const bravo = createHarness({
+    name: "bravo",
+    alias: "bravo",
+    machineId: "bbbb2222-bbbb-2222-bbbb-222222222222",
+    mentionId: "ou_bravo_target",
+    bus,
+    statePath: path.join(root, "bravo-state.json"),
+  });
+
+  await alpha.clusterRuntime.announceHello("hub");
+  alpha.sentMessages.length = 0;
+  bravo.sentMessages.length = 0;
+  alpha.codexCalls.length = 0;
+  bravo.codexCalls.length = 0;
+
+  alpha.stateStore.getChatState("hub").isArmed = true;
+  alpha.stateStore.getChatState("hub").hasActiveSession = true;
+  bravo.stateStore.getChatState("hub").isArmed = true;
+  bravo.stateStore.getChatState("hub").hasActiveSession = true;
+
+  await bus.broadcast({
+    senderName: "human",
+    chatId: "hub",
+    text: "@ou_bravo_target: ping",
+    senderType: "user",
+  });
+
+  assert.equal(alpha.codexCalls.length, 0);
+  assert.equal(bravo.codexCalls.length, 1);
+  assert.equal(bravo.codexCalls[0].text, "ping");
 
   fs.rmSync(root, { recursive: true, force: true });
 });

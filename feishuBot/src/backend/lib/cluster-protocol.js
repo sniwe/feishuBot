@@ -126,6 +126,7 @@ function resolveTargetToken(token, ctx = {}) {
   const profile = ctx.profile && typeof ctx.profile === "object" ? ctx.profile : {};
   const selfMachineId = normalizeMachineToken(profile.machineId || "");
   const selfAlias = normalizeMachineToken(profile.alias || "");
+  const selfMentionId = normalizeMachineToken(profile.mentionId || profile.openId || "");
   const peers = Array.isArray(ctx.peers) ? ctx.peers : [];
 
   if (!cleanedToken) {
@@ -144,8 +145,19 @@ function resolveTargetToken(token, ctx = {}) {
     };
   }
 
+  if (selfMentionId && cleanedToken === selfMentionId) {
+    return {
+      status: "match",
+      scope: "self",
+      machineId: selfMachineId,
+      alias: selfAlias,
+      mentionId: selfMentionId,
+    };
+  }
+
   const cleanedLower = cleanedToken.toLowerCase();
   const aliasPeers = peers.filter((peer) => normalizeMachineToken(peer?.alias).toLowerCase() === cleanedLower);
+  const mentionPeers = peers.filter((peer) => normalizeMachineToken(peer?.mentionId || peer?.openId || "").toLowerCase() === cleanedLower);
   if (selfAlias && cleanedLower === selfAlias.toLowerCase()) {
     const duplicateAliasPeers = peers.filter((peer) => normalizeMachineToken(peer?.alias).toLowerCase() === selfAlias.toLowerCase());
     if (duplicateAliasPeers.length > 1) {
@@ -190,6 +202,30 @@ function resolveTargetToken(token, ctx = {}) {
     };
   }
 
+  if (mentionPeers.length === 1) {
+    return {
+      status: "match",
+      scope: "peer",
+      machineId: normalizeMachineToken(mentionPeers[0].machineId),
+      alias: normalizeMachineToken(mentionPeers[0].alias),
+      mentionId: normalizeMachineToken(mentionPeers[0].mentionId || mentionPeers[0].openId || ""),
+      peer: mentionPeers[0],
+    };
+  }
+
+  if (mentionPeers.length > 1) {
+    return {
+      status: "ambiguous",
+      reason: "mention-collision",
+      targetToken: cleanedToken,
+      candidates: mentionPeers.map((peer) => ({
+        machineId: normalizeMachineToken(peer?.machineId),
+        alias: normalizeMachineToken(peer?.alias),
+        mentionId: normalizeMachineToken(peer?.mentionId || peer?.openId || ""),
+      })),
+    };
+  }
+
   const exactPeer = peers.find((peer) => normalizeMachineToken(peer?.machineId) === cleanedToken);
   if (exactPeer) {
     return {
@@ -197,6 +233,7 @@ function resolveTargetToken(token, ctx = {}) {
       scope: "peer",
       machineId: normalizeMachineToken(exactPeer.machineId),
       alias: normalizeMachineToken(exactPeer.alias),
+      mentionId: normalizeMachineToken(exactPeer.mentionId || exactPeer.openId || ""),
       peer: exactPeer,
     };
   }
@@ -212,6 +249,7 @@ function buildHelloPayload(profile) {
   return {
     machineId: normalizeMachineToken(cleaned.machineId),
     alias: normalizeMachineToken(cleaned.alias),
+    mentionId: normalizeMachineToken(cleaned.mentionId || cleaned.openId),
     hostname: normalizeMachineToken(cleaned.hostname),
     bootId: normalizeMachineToken(cleaned.bootId),
     announceId: normalizeMachineToken(cleaned.announceId),
@@ -225,6 +263,7 @@ function buildIdentityPayload(profile, context = {}) {
   return {
     machineId: normalizeMachineToken(cleaned.machineId),
     alias: normalizeMachineToken(cleaned.alias),
+    mentionId: normalizeMachineToken(cleaned.mentionId || cleaned.openId),
     hostname: normalizeMachineToken(cleaned.hostname),
     bootId: normalizeMachineToken(cleaned.bootId),
     replyToAnnounceId: normalizeMachineToken(context.replyToAnnounceId),
@@ -237,6 +276,7 @@ function buildGoodbyePayload(profile, context = {}) {
   return {
     machineId: normalizeMachineToken(cleaned.machineId),
     alias: normalizeMachineToken(cleaned.alias),
+    mentionId: normalizeMachineToken(cleaned.mentionId || cleaned.openId),
     hostname: normalizeMachineToken(cleaned.hostname),
     bootId: normalizeMachineToken(cleaned.bootId),
     reason: normalizeMachineToken(context.reason),
