@@ -770,7 +770,7 @@ function createRelayController(ctx) {
           }
 
           const contentObj = fileTransfer.parseMessageContent(dataEvent.message.content);
-          const userText = (contentObj.text || "").trim();
+          const userText = fileTransfer.extractUserTextFromMessage(dataEvent.message.message_type, contentObj);
           const protocolHandled = await handleClusterProtocolMessage(dataEvent, chatId, state, userText);
           if (protocolHandled) {
             return;
@@ -797,7 +797,7 @@ function createRelayController(ctx) {
             return;
           }
 
-          if (dataEvent.message.message_type !== "text") {
+          if (dataEvent.message.message_type !== "text" && dataEvent.message.message_type !== "post") {
             return;
           }
 

@@ -57,6 +57,51 @@ function createFileTransferService(ctx) {
     }
   }
 
+  function flattenPostContent(postContent) {
+    if (!postContent || typeof postContent !== "object") {
+      return "";
+    }
+
+    const zhCn = postContent.zh_cn;
+    const firstLocale = Object.values(postContent).find((value) => value && typeof value === "object");
+    const localeBlock = zhCn && typeof zhCn === "object" ? zhCn : firstLocale;
+    const paragraphs = Array.isArray(localeBlock?.content) ? localeBlock.content : [];
+    const lines = [];
+
+    for (const paragraph of paragraphs) {
+      if (!Array.isArray(paragraph)) {
+        continue;
+      }
+
+      const line = paragraph
+        .map((node) => (node && typeof node.text === "string" ? node.text : ""))
+        .join("")
+        .trim();
+      if (line) {
+        lines.push(line);
+      }
+    }
+
+    return lines.join("\n").trim();
+  }
+
+  function extractUserTextFromMessage(messageType, contentObj) {
+    const type = (messageType || "").trim().toLowerCase();
+    if (!contentObj || typeof contentObj !== "object") {
+      return "";
+    }
+
+    if (type === "text") {
+      return typeof contentObj.text === "string" ? contentObj.text.trim() : "";
+    }
+
+    if (type === "post") {
+      return flattenPostContent(contentObj).trim();
+    }
+
+    return "";
+  }
+
   async function downloadIncomingFileFromMessage(messageId, fileKey, fileName) {
     if (!messageId || !fileKey) {
       throw new Error("Missing message_id or file_key for file download.");
@@ -185,6 +230,7 @@ function createFileTransferService(ctx) {
     resolveUploadPath,
     inferImFileType,
     parseMessageContent,
+    extractUserTextFromMessage,
     downloadIncomingFileFromMessage,
     makeUniqueFilePath,
     saveOutgoingFileToDailyDataDir,

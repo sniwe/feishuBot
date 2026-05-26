@@ -1,460 +1,472 @@
 {
-  "id": "map:feishuBot",
-  "type": "project-map",
-  "name": "feishuBot",
-  "summary": "Project map for the Feishu Codex relay",
-  "root": "C:\\Users\\Qub\\feishuBot",
-  "updated": "2026-05-26T13:16:39.5817810+08:00",
-  "nodes": [
-    {
-      "id": "node-root",
-      "type": "module",
-      "name": "Project Root",
-      "summary": "Workspace launcher and governance files",
-      "features": [
-        {
-          "summary": "Launcher forwards to backend composition root",
-          "flow": [
-            "edge-root-app"
-          ]
-        }
-      ],
-      "edges": [
-        {
-          "id": "edge-root-app",
-          "kind": "depends",
-          "from": "node-root",
-          "to": "node-app"
-        }
-      ],
-      "critical": true,
-      "files": [
-        "package.json",
-        "AGENTS.md",
-        ".gitignore",
-        "src/backend/index.js"
-      ],
-      "children": [
-        "node-app"
-      ]
-    },
-    {
-      "id": "node-app",
-      "type": "module",
-      "name": "Backend Composition Root",
-      "summary": "Loads env config and wires the relay modules together",
-      "features": [
-        {
-          "summary": "Bootstraps Feishu client, state store, transfer, contact lookup, Codex, and relay",
-          "flow": [
-            "edge-app-state",
-            "edge-app-transfer",
-            "edge-app-cluster",
-            "edge-app-codex",
-            "edge-app-relay"
-          ]
-        }
-      ],
-      "edges": [
-        {
-          "id": "edge-app-state",
-          "kind": "depends",
-          "from": "node-app",
-          "to": "node-state-store"
-        },
-        {
-          "id": "edge-app-transfer",
-          "kind": "depends",
-          "from": "node-app",
-          "to": "node-file-transfer"
-        },
-        {
-          "id": "edge-app-cluster",
-          "kind": "depends",
-          "from": "node-app",
-          "to": "node-cluster-runtime"
-        },
-        {
-          "id": "edge-app-codex",
-          "kind": "depends",
-          "from": "node-app",
-          "to": "node-codex-runner"
-        },
-        {
-          "id": "edge-app-relay",
-          "kind": "depends",
-          "from": "node-app",
-          "to": "node-relay"
-        }
-      ],
-      "critical": true,
-      "files": [
-        "src/backend/app.js"
-      ],
-      "children": [
-        "node-state-store",
-        "node-file-transfer",
-        "node-contact-resolver",
-        "node-cluster-runtime",
-        "node-codex-runner",
-        "node-relay"
-      ]
-    },
-    {
-      "id": "node-state-store",
-      "type": "module",
-      "name": "State Store",
-      "summary": "Persisted chat sessions, message logs, and session lookup helpers",
-      "features": [
-        {
-          "summary": "Tracks chat session state and resume candidates",
-          "flow": [
-            "edge-state-codex",
-            "edge-state-log"
-          ]
-        }
-      ],
-      "edges": [
-        {
-          "id": "edge-state-codex",
-          "kind": "io",
-          "from": "node-state-store",
-          "to": "node-codex-runner"
-        },
-        {
-          "id": "edge-state-log",
-          "kind": "io",
-          "from": "node-state-store",
-          "to": "node-file-transfer"
-        }
-      ],
-      "critical": true,
-      "files": [
-        "src/backend/lib/state-store.js",
-        "codex-chat-sessions.json"
-      ],
-      "children": []
-    },
-    {
-      "id": "node-file-transfer",
-      "type": "module",
-      "name": "File Transfer",
-      "summary": "Feishu file upload/download and daily data-dir mirroring",
-      "features": [
-        {
-          "summary": "Downloads incoming files and mirrors outgoing files locally",
-          "flow": [
-            "edge-transfer-feishu"
-          ]
-        }
-      ],
-      "edges": [
-        {
-          "id": "edge-transfer-feishu",
-          "kind": "io",
-          "from": "node-file-transfer",
-          "to": "node-relay"
-        }
-      ],
-      "critical": true,
-      "files": [
-        "src/backend/lib/file-transfer.js"
-      ],
-      "children": []
-    },
-    {
-      "id": "node-contact-resolver",
-      "type": "module",
-      "name": "Contact Resolver",
-      "summary": "Maps recipient tokens to Feishu open_id values using the contact directory",
-      "features": [
-        {
-          "summary": "Resolves open_id, email, and mobile tokens for DM delivery",
-          "flow": [
-            "edge-contact-relay",
-            "edge-contact-codex"
-          ]
-        }
-      ],
-      "edges": [
-        {
-          "id": "edge-contact-relay",
-          "kind": "depends",
-          "from": "node-contact-resolver",
-          "to": "node-relay"
-        },
-        {
-          "id": "edge-contact-codex",
-          "kind": "depends",
-          "from": "node-contact-resolver",
-          "to": "node-codex-runner"
-        }
-      ],
-      "critical": false,
-      "files": [
-        "src/backend/lib/contact-resolver.js",
-        "data/contact-resolver-cache.json"
-      ],
-      "children": []
-    },
-    {
-      "id": "node-cluster-runtime",
-      "type": "module",
-      "name": "Cluster Runtime",
-      "summary": "Owns local machine identity, peer ledger, and cluster message protocol helpers",
-      "features": [
-        {
-          "summary": "Loads the machine profile, formats protocol messages, and resolves cluster targets",
-          "flow": [
-            "edge-cluster-relay",
-            "edge-cluster-codex"
-          ]
-        }
-      ],
-      "edges": [
-        {
-          "id": "edge-cluster-relay",
-          "kind": "depends",
-          "from": "node-cluster-runtime",
-          "to": "node-relay"
-        },
-        {
-          "id": "edge-cluster-codex",
-          "kind": "depends",
-          "from": "node-cluster-runtime",
-          "to": "node-codex-runner"
-        }
-      ],
-      "critical": true,
-      "files": [
-        "src/backend/lib/cluster-protocol.js",
-        "src/backend/lib/cluster-state.js",
-        "src/backend/lib/cluster-runtime.js"
-      ],
-      "children": []
-    },
-    {
-      "id": "node-codex-runner",
-      "type": "module",
-      "name": "Codex Runner",
-      "summary": "CLI execution, session resume, and turn output handling",
-      "features": [
-        {
-          "summary": "Runs new and resumed Codex turns, captures thread ids, and applies Codex DM/file directives",
-          "flow": [
-            "edge-codex-relay"
-          ]
-        },
-        {
-          "summary": "Persists busy/idle status for external pollers during Codex turn execution",
-          "flow": [
-            "edge-codex-relay"
-          ]
-        },
-        {
-          "summary": "Posts a live Feishu working message and refreshes it every 5 seconds until Codex completes",
-          "flow": [
-            "edge-codex-relay"
-          ]
-        },
-        {
-          "summary": "Rotates the live working message before Feishu edit limits are hit, preserving the visible timer",
-          "flow": [
-            "edge-codex-relay"
-          ]
-        },
-        {
-          "summary": "Queues in-flight user tasks and lets the user select, clear, or cancel queued items after Codex finishes",
-          "flow": [
-            "edge-codex-relay"
-          ]
-        }
-      ],
-      "edges": [
-        {
-          "id": "edge-codex-relay",
-          "kind": "io",
-          "from": "node-codex-runner",
-          "to": "node-relay"
-        }
-      ],
-      "critical": true,
-      "files": [
-        "src/backend/lib/codex-runner.js",
-        "src/backend/lib/codex-status-poller.js",
-        "src/backend/lib/relay.js",
-        "src/backend/lib/state-store.js",
-        "src/backend/scripts/poll-codex-status.ps1",
-        "mgmt/projMap/state/codex-status.json"
-      ],
-      "children": []
-    },
-    {
-      "id": "node-relay",
-      "type": "module",
-      "name": "Relay Controller",
-      "summary": "Feishu event handling, command routing, and chat session lifecycle",
-      "features": [
-        {
-          "summary": "Routes messages to Codex, resume flow, rename handling, direct messages, file intake, and cluster-targeted control",
-          "flow": [
-            "edge-relay-state",
-            "edge-relay-transfer",
-            "edge-relay-codex"
-          ]
-        }
-      ],
-      "edges": [
-        {
-          "id": "edge-relay-state",
-          "kind": "depends",
-          "from": "node-relay",
-          "to": "node-state-store"
-        },
-        {
-          "id": "edge-relay-contact",
-          "kind": "depends",
-          "from": "node-relay",
-          "to": "node-contact-resolver"
-        },
-        {
-          "id": "edge-relay-transfer",
-          "kind": "depends",
-          "from": "node-relay",
-          "to": "node-file-transfer"
-        },
-        {
-          "id": "edge-relay-codex",
-          "kind": "depends",
-          "from": "node-relay",
-          "to": "node-codex-runner"
-        }
-      ],
-      "critical": true,
-      "files": [
-        "src/backend/lib/relay.js"
-      ],
-      "children": []
-    }
-  ],
-  "edges": [
-    {
-      "id": "edge-root-app",
-      "kind": "depends",
-      "from": "node-root",
-      "to": "node-app"
-    },
-    {
-      "id": "edge-app-state",
-      "kind": "depends",
-      "from": "node-app",
-      "to": "node-state-store"
-    },
-    {
-      "id": "edge-app-transfer",
-      "kind": "depends",
-      "from": "node-app",
-      "to": "node-file-transfer"
-    },
-    {
-      "id": "edge-app-cluster",
-      "kind": "depends",
-      "from": "node-app",
-      "to": "node-cluster-runtime"
-    },
-    {
-      "id": "edge-app-contact",
-      "kind": "depends",
-      "from": "node-app",
-      "to": "node-contact-resolver"
-    },
-    {
-      "id": "edge-app-codex",
-      "kind": "depends",
-      "from": "node-app",
-      "to": "node-codex-runner"
-    },
-    {
-      "id": "edge-app-relay",
-      "kind": "depends",
-      "from": "node-app",
-      "to": "node-relay"
-    },
-    {
-      "id": "edge-state-codex",
-      "kind": "io",
-      "from": "node-state-store",
-      "to": "node-codex-runner"
-    },
-    {
-      "id": "edge-state-log",
-      "kind": "io",
-      "from": "node-state-store",
-      "to": "node-file-transfer"
-    },
-    {
-      "id": "edge-contact-relay",
-      "kind": "depends",
-      "from": "node-contact-resolver",
-      "to": "node-relay"
-    },
-    {
-      "id": "edge-contact-codex",
-      "kind": "depends",
-      "from": "node-contact-resolver",
-      "to": "node-codex-runner"
-    },
-    {
-      "id": "edge-transfer-feishu",
-      "kind": "io",
-      "from": "node-file-transfer",
-      "to": "node-relay"
-    },
-    {
-      "id": "edge-cluster-relay",
-      "kind": "depends",
-      "from": "node-cluster-runtime",
-      "to": "node-relay"
-    },
-    {
-      "id": "edge-cluster-codex",
-      "kind": "depends",
-      "from": "node-cluster-runtime",
-      "to": "node-codex-runner"
-    },
-    {
-      "id": "edge-codex-relay",
-      "kind": "io",
-      "from": "node-codex-runner",
-      "to": "node-relay"
-    },
-    {
-      "id": "edge-relay-state",
-      "kind": "depends",
-      "from": "node-relay",
-      "to": "node-state-store"
-    },
-    {
-      "id": "edge-relay-contact",
-      "kind": "depends",
-      "from": "node-relay",
-      "to": "node-contact-resolver"
-    },
-    {
-      "id": "edge-relay-transfer",
-      "kind": "depends",
-      "from": "node-relay",
-      "to": "node-file-transfer"
-    },
-    {
-      "id": "edge-relay-codex",
-      "kind": "depends",
-      "from": "node-relay",
-      "to": "node-codex-runner"
-    }
-  ],
-  "children": [
-    "node-root",
-    "node-app"
-  ]
+    "id":  "map:feishuBot",
+    "type":  "project-map",
+    "name":  "feishuBot",
+    "summary":  "Project map for the Feishu Codex relay",
+    "root":  "C:\\Users\\Qub\\feishuBot",
+    "updated":  "2026-05-25T22:43:16.2606096-07:00",
+    "nodes":  [
+                  {
+                      "id":  "node-root",
+                      "type":  "module",
+                      "name":  "Project Root",
+                      "summary":  "Workspace launcher and governance files",
+                      "features":  [
+                                       {
+                                           "summary":  "Launcher forwards to backend composition root",
+                                           "flow":  [
+                                                        "edge-root-app"
+                                                    ]
+                                       }
+                                   ],
+                      "edges":  [
+                                    {
+                                        "id":  "edge-root-app",
+                                        "kind":  "depends",
+                                        "from":  "node-root",
+                                        "to":  "node-app"
+                                    }
+                                ],
+                      "critical":  true,
+                      "files":  [
+                                    "package.json",
+                                    "AGENTS.md",
+                                    ".gitignore",
+                                    "src/backend/index.js"
+                                ],
+                      "children":  [
+                                       "node-app"
+                                   ]
+                  },
+                  {
+                      "id":  "node-app",
+                      "type":  "module",
+                      "name":  "Backend Composition Root",
+                      "summary":  "Loads env config and wires the relay modules together",
+                      "features":  [
+                                       {
+                                           "summary":  "Bootstraps Feishu client, state store, transfer, contact lookup, Codex, and relay",
+                                           "flow":  [
+                                                        "edge-app-state",
+                                                        "edge-app-transfer",
+                                                        "edge-app-cluster",
+                                                        "edge-app-codex",
+                                                        "edge-app-relay"
+                                                    ]
+                                       }
+                                   ],
+                      "edges":  [
+                                    {
+                                        "id":  "edge-app-state",
+                                        "kind":  "depends",
+                                        "from":  "node-app",
+                                        "to":  "node-state-store"
+                                    },
+                                    {
+                                        "id":  "edge-app-transfer",
+                                        "kind":  "depends",
+                                        "from":  "node-app",
+                                        "to":  "node-file-transfer"
+                                    },
+                                    {
+                                        "id":  "edge-app-cluster",
+                                        "kind":  "depends",
+                                        "from":  "node-app",
+                                        "to":  "node-cluster-runtime"
+                                    },
+                                    {
+                                        "id":  "edge-app-codex",
+                                        "kind":  "depends",
+                                        "from":  "node-app",
+                                        "to":  "node-codex-runner"
+                                    },
+                                    {
+                                        "id":  "edge-app-relay",
+                                        "kind":  "depends",
+                                        "from":  "node-app",
+                                        "to":  "node-relay"
+                                    }
+                                ],
+                      "critical":  true,
+                      "files":  [
+                                    "src/backend/app.js"
+                                ],
+                      "children":  [
+                                       "node-state-store",
+                                       "node-file-transfer",
+                                       "node-contact-resolver",
+                                       "node-cluster-runtime",
+                                       "node-codex-runner",
+                                       "node-relay"
+                                   ]
+                  },
+                  {
+                      "id":  "node-state-store",
+                      "type":  "module",
+                      "name":  "State Store",
+                      "summary":  "Persisted chat sessions, message logs, and session lookup helpers",
+                      "features":  [
+                                       {
+                                           "summary":  "Tracks chat session state and resume candidates",
+                                           "flow":  [
+                                                        "edge-state-codex",
+                                                        "edge-state-log"
+                                                    ]
+                                       }
+                                   ],
+                      "edges":  [
+                                    {
+                                        "id":  "edge-state-codex",
+                                        "kind":  "io",
+                                        "from":  "node-state-store",
+                                        "to":  "node-codex-runner"
+                                    },
+                                    {
+                                        "id":  "edge-state-log",
+                                        "kind":  "io",
+                                        "from":  "node-state-store",
+                                        "to":  "node-file-transfer"
+                                    }
+                                ],
+                      "critical":  true,
+                      "files":  [
+                                    "src/backend/lib/state-store.js",
+                                    "codex-chat-sessions.json"
+                                ],
+                      "children":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "node-file-transfer",
+                      "type":  "module",
+                      "name":  "File Transfer",
+                      "summary":  "Feishu file upload/download and daily data-dir mirroring",
+                      "features":  [
+                                       {
+                                           "summary":  "Downloads incoming files and mirrors outgoing files locally",
+                                           "flow":  [
+                                                        "edge-transfer-feishu"
+                                                    ]
+                                       }
+                                   ],
+                      "edges":  [
+                                    {
+                                        "id":  "edge-transfer-feishu",
+                                        "kind":  "io",
+                                        "from":  "node-file-transfer",
+                                        "to":  "node-relay"
+                                    }
+                                ],
+                      "critical":  true,
+                      "files":  [
+                                    "src/backend/lib/file-transfer.js"
+                                ],
+                      "children":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "node-contact-resolver",
+                      "type":  "module",
+                      "name":  "Contact Resolver",
+                      "summary":  "Maps recipient tokens to Feishu open_id values using the contact directory",
+                      "features":  [
+                                       {
+                                           "summary":  "Resolves open_id, email, and mobile tokens for DM delivery",
+                                           "flow":  [
+                                                        "edge-contact-relay",
+                                                        "edge-contact-codex"
+                                                    ]
+                                       }
+                                   ],
+                      "edges":  [
+                                    {
+                                        "id":  "edge-contact-relay",
+                                        "kind":  "depends",
+                                        "from":  "node-contact-resolver",
+                                        "to":  "node-relay"
+                                    },
+                                    {
+                                        "id":  "edge-contact-codex",
+                                        "kind":  "depends",
+                                        "from":  "node-contact-resolver",
+                                        "to":  "node-codex-runner"
+                                    }
+                                ],
+                      "critical":  false,
+                      "files":  [
+                                    "src/backend/lib/contact-resolver.js",
+                                    "data/contact-resolver-cache.json"
+                                ],
+                      "children":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "node-cluster-runtime",
+                      "type":  "module",
+                      "name":  "Cluster Runtime",
+                      "summary":  "Owns local machine identity, peer ledger, and cluster message protocol helpers",
+                      "features":  [
+                                       {
+                                           "summary":  "Loads the machine profile, formats protocol messages, and resolves cluster targets",
+                                           "flow":  [
+                                                        "edge-cluster-relay",
+                                                        "edge-cluster-codex"
+                                                    ]
+                                       }
+                                   ],
+                      "edges":  [
+                                    {
+                                        "id":  "edge-cluster-relay",
+                                        "kind":  "depends",
+                                        "from":  "node-cluster-runtime",
+                                        "to":  "node-relay"
+                                    },
+                                    {
+                                        "id":  "edge-cluster-codex",
+                                        "kind":  "depends",
+                                        "from":  "node-cluster-runtime",
+                                        "to":  "node-codex-runner"
+                                    }
+                                ],
+                      "critical":  true,
+                      "files":  [
+                                    "src/backend/lib/cluster-protocol.js",
+                                    "src/backend/lib/cluster-state.js",
+                                    "src/backend/lib/cluster-runtime.js"
+                                ],
+                      "children":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "node-codex-runner",
+                      "type":  "module",
+                      "name":  "Codex Runner",
+                      "summary":  "CLI execution, session resume, and turn output handling",
+                      "features":  [
+                                       {
+                                           "summary":  "Runs new and resumed Codex turns, captures thread ids, and applies Codex DM/file directives",
+                                           "flow":  [
+                                                        "edge-codex-relay"
+                                                    ]
+                                       },
+                                       {
+                                           "summary":  "Persists busy/idle status for external pollers during Codex turn execution",
+                                           "flow":  [
+                                                        "edge-codex-relay"
+                                                    ]
+                                       },
+                                       {
+                                           "summary":  "Posts a live Feishu working message and refreshes it every 5 seconds until Codex completes",
+                                           "flow":  [
+                                                        "edge-codex-relay"
+                                                    ]
+                                       },
+                                       {
+                                           "summary":  "Rotates the live working message before Feishu edit limits are hit, preserving the visible timer",
+                                           "flow":  [
+                                                        "edge-codex-relay"
+                                                    ]
+                                       },
+                                       {
+                                           "summary":  "Queues in-flight user tasks and lets the user select, clear, or cancel queued items after Codex finishes",
+                                           "flow":  [
+                                                        "edge-codex-relay"
+                                                    ]
+                                       }
+                                   ],
+                      "edges":  [
+                                    {
+                                        "id":  "edge-codex-relay",
+                                        "kind":  "io",
+                                        "from":  "node-codex-runner",
+                                        "to":  "node-relay"
+                                    }
+                                ],
+                      "critical":  true,
+                      "files":  [
+                                    "src/backend/lib/codex-runner.js",
+                                    "src/backend/lib/codex-status-poller.js",
+                                    "src/backend/lib/relay.js",
+                                    "src/backend/lib/state-store.js",
+                                    "src/backend/scripts/poll-codex-status.ps1",
+                                    "mgmt/projMap/state/codex-status.json"
+                                ],
+                      "children":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "node-relay",
+                      "type":  "module",
+                      "name":  "Relay Controller",
+                      "summary":  "Feishu event handling, command routing, and chat session lifecycle",
+                      "features":  [
+                                       {
+                                           "summary":  "Routes messages to Codex, resume flow, rename handling, direct messages, file intake, and cluster-targeted control",
+                                           "flow":  [
+                                                        "edge-relay-state",
+                                                        "edge-relay-transfer",
+                                                        "edge-relay-codex"
+                                                    ]
+                                       }
+                                   ],
+                      "edges":  [
+                                    {
+                                        "id":  "edge-relay-state",
+                                        "kind":  "depends",
+                                        "from":  "node-relay",
+                                        "to":  "node-state-store"
+                                    },
+                                    {
+                                        "id":  "edge-relay-contact",
+                                        "kind":  "depends",
+                                        "from":  "node-relay",
+                                        "to":  "node-contact-resolver"
+                                    },
+                                    {
+                                        "id":  "edge-relay-transfer",
+                                        "kind":  "depends",
+                                        "from":  "node-relay",
+                                        "to":  "node-file-transfer"
+                                    },
+                                    {
+                                        "id":  "edge-relay-codex",
+                                        "kind":  "depends",
+                                        "from":  "node-relay",
+                                        "to":  "node-codex-runner"
+                                    }
+                                ],
+                      "critical":  true,
+                      "files":  [
+                                    "src/backend/lib/relay.js"
+                                ],
+                      "children":  [
+
+                                   ]
+                  }
+              ],
+    "edges":  [
+                  {
+                      "id":  "edge-root-app",
+                      "kind":  "depends",
+                      "from":  "node-root",
+                      "to":  "node-app"
+                  },
+                  {
+                      "id":  "edge-app-state",
+                      "kind":  "depends",
+                      "from":  "node-app",
+                      "to":  "node-state-store"
+                  },
+                  {
+                      "id":  "edge-app-transfer",
+                      "kind":  "depends",
+                      "from":  "node-app",
+                      "to":  "node-file-transfer"
+                  },
+                  {
+                      "id":  "edge-app-cluster",
+                      "kind":  "depends",
+                      "from":  "node-app",
+                      "to":  "node-cluster-runtime"
+                  },
+                  {
+                      "id":  "edge-app-contact",
+                      "kind":  "depends",
+                      "from":  "node-app",
+                      "to":  "node-contact-resolver"
+                  },
+                  {
+                      "id":  "edge-app-codex",
+                      "kind":  "depends",
+                      "from":  "node-app",
+                      "to":  "node-codex-runner"
+                  },
+                  {
+                      "id":  "edge-app-relay",
+                      "kind":  "depends",
+                      "from":  "node-app",
+                      "to":  "node-relay"
+                  },
+                  {
+                      "id":  "edge-state-codex",
+                      "kind":  "io",
+                      "from":  "node-state-store",
+                      "to":  "node-codex-runner"
+                  },
+                  {
+                      "id":  "edge-state-log",
+                      "kind":  "io",
+                      "from":  "node-state-store",
+                      "to":  "node-file-transfer"
+                  },
+                  {
+                      "id":  "edge-contact-relay",
+                      "kind":  "depends",
+                      "from":  "node-contact-resolver",
+                      "to":  "node-relay"
+                  },
+                  {
+                      "id":  "edge-contact-codex",
+                      "kind":  "depends",
+                      "from":  "node-contact-resolver",
+                      "to":  "node-codex-runner"
+                  },
+                  {
+                      "id":  "edge-transfer-feishu",
+                      "kind":  "io",
+                      "from":  "node-file-transfer",
+                      "to":  "node-relay"
+                  },
+                  {
+                      "id":  "edge-cluster-relay",
+                      "kind":  "depends",
+                      "from":  "node-cluster-runtime",
+                      "to":  "node-relay"
+                  },
+                  {
+                      "id":  "edge-cluster-codex",
+                      "kind":  "depends",
+                      "from":  "node-cluster-runtime",
+                      "to":  "node-codex-runner"
+                  },
+                  {
+                      "id":  "edge-codex-relay",
+                      "kind":  "io",
+                      "from":  "node-codex-runner",
+                      "to":  "node-relay"
+                  },
+                  {
+                      "id":  "edge-relay-state",
+                      "kind":  "depends",
+                      "from":  "node-relay",
+                      "to":  "node-state-store"
+                  },
+                  {
+                      "id":  "edge-relay-contact",
+                      "kind":  "depends",
+                      "from":  "node-relay",
+                      "to":  "node-contact-resolver"
+                  },
+                  {
+                      "id":  "edge-relay-transfer",
+                      "kind":  "depends",
+                      "from":  "node-relay",
+                      "to":  "node-file-transfer"
+                  },
+                  {
+                      "id":  "edge-relay-codex",
+                      "kind":  "depends",
+                      "from":  "node-relay",
+                      "to":  "node-codex-runner"
+                  }
+              ],
+    "children":  [
+                     "node-root",
+                     "node-app"
+                 ]
 }
