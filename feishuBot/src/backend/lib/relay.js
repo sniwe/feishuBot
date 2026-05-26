@@ -15,10 +15,6 @@ function createRelayController(ctx) {
   const isClusterMode = Boolean(clusterRuntime && typeof clusterRuntime.isEnabled === "function" && clusterRuntime.isEnabled());
   const localProfile = typeof clusterRuntime?.getProfile === "function" ? clusterRuntime.getProfile() : {};
 
-  function buildTargetHelpText() {
-    return "Use @alias: message, !to alias message, or @machineId: message.";
-  }
-
   function logCluster(kind, details = {}) {
     if (clusterRuntime && typeof clusterRuntime.logEvent === "function") {
       clusterRuntime.logEvent(kind, details);
@@ -537,7 +533,6 @@ function createRelayController(ctx) {
         targetToken: target.targetToken,
         reason: "alias-collision",
       });
-      await sendTextMessage(chatId, `${buildTargetHelpText()} Use machineId when aliases collide.`);
       return true;
     }
 
@@ -549,7 +544,6 @@ function createRelayController(ctx) {
         targetToken: target.targetToken,
         reason: targetResolution.reason || targetResolution.status,
       });
-      await sendTextMessage(chatId, buildTargetHelpText());
       return true;
     }
 
