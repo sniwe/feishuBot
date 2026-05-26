@@ -243,6 +243,73 @@ function createRelayController(ctx) {
     }
   }
 
+  function markClusterFocus(state, senderOpenId) {
+    const cleanedSenderOpenId = (senderOpenId || "").trim();
+    if (!cleanedSenderOpenId) {
+      return;
+    }
+
+    state.clusterFocusOpenId = cleanedSenderOpenId;
+    state.clusterFocusUpdatedAt = new Date().toISOString();
+  }
+
+  function shouldAcceptClusterFollowUp(state, senderOpenId) {
+    const cleanedSenderOpenId = (senderOpenId || "").trim();
+    if (!cleanedSenderOpenId) {
+      return false;
+    }
+
+    if (state.waitingForModeChoice || state.waitingForResumeChatSelection || state.waitingForQueueSelection) {
+      return true;
+    }
+
+    if (!state.hasActiveSession || !state.isArmed) {
+      return false;
+    }
+
+    const focusedSender = (state.clusterFocusOpenId || "").trim();
+    if (!focusedSender || focusedSender !== cleanedSenderOpenId) {
+      return false;
+    }
+
+    const focusUpdatedAt = Date.parse(state.clusterFocusUpdatedAt || "") || 0;
+    if (!focusUpdatedAt) {
+      return true;
+    }
+
+    return (Date.now() - focusUpdatedAt) <= 30 * 60 * 1000;
+  }
+
+  function isSelectionLikeClusterMessage(text) {
+    const normalizedText = (text || "").trim().toLowerCase();
+    return (
+      normalizedText === "1" ||
+      normalizedText === "2" ||
+      normalizedText === "!codex on" ||
+      normalizedText === "!codex off" ||
+      normalizedText === "!codex cancel"
+    );
+  }
+
+  function isSelfAddressedTargetToken(targetToken, selfProfile = {}) {
+    const cleanedToken = (targetToken || "").trim().toLowerCase();
+    if (!cleanedToken) {
+      return false;
+    }
+
+    const machineId = typeof selfProfile.machineId === "string" ? selfProfile.machineId.trim() : "";
+    const alias = typeof selfProfile.alias === "string" ? selfProfile.alias.trim() : "";
+    const shortMachineId = typeof clusterRuntime?.shortMachineId === "function"
+      ? clusterRuntime.shortMachineId(machineId)
+      : machineId.slice(0, 8);
+
+    return Boolean(
+      (machineId && cleanedToken === machineId.toLowerCase()) ||
+      (alias && cleanedToken === alias.toLowerCase()) ||
+      (shortMachineId && cleanedToken === shortMachineId.toLowerCase())
+    );
+  }
+
   async function handleQueuedCodexSelection(chatId, state, userText) {
     const normalizedText = (userText || "").trim().toLowerCase();
     const tasks = getQueuedCodexTasks(state);
@@ -428,21 +495,34 @@ function createRelayController(ctx) {
       return false;
     }
 
+    const selfProfile = typeof clusterRuntime.getProfile === "function" ? clusterRuntime.getProfile() : localProfile;
     const target = clusterRuntime.parseTarget(userText);
     if (!target) {
       return false;
     }
 
     const targetResolution = clusterRuntime.resolveTarget(target.targetToken);
-    if (targetResolution.status === "match" && targetResolution.scope === "self") {
+    const isSelfTarget = targetResolution.status === "match" && targetResolution.scope === "self" || isSelfAddressedTargetToken(target.targetToken, selfProfile);
+    if (isSelfTarget) {
       logCluster("target-match", {
         chatId,
         messageId: dataEvent?.message?.message_id || "",
         eventId: dataEvent?.event_id || "",
         targetToken: target.targetToken,
-        targetMachineId: targetResolution.machineId || "",
+        targetMachineId: targetResolution.machineId || selfProfile.machineId || "",
+        fallbackSelfTarget: targetResolution.status !== "match" || targetResolution.scope !== "self",
       });
+      markClusterFocus(state, dataEvent?.sender?.sender_id?.open_id || "");
       const nextMessage = (target.message || "").trim() || "!codex on";
+      if (nextMessage && !isSelectionLikeClusterMessage(nextMessage)) {
+        state.isArmed = true;
+        state.waitingForModeChoice = false;
+        state.waitingForResumeChatSelection = false;
+        state.waitingForQueueSelection = false;
+        state.resumeChatCandidates = [];
+        state.queuedCodexTasks = [];
+        state.hasActiveSession = true;
+      }
       await handleUserText(chatId, state, nextMessage);
       return true;
     }
@@ -778,6 +858,11 @@ function createRelayController(ctx) {
           if (isClusterMode) {
             const targeted = await handleClusterExplicitTarget(dataEvent, chatId, state, userText);
             if (targeted) {
+              return;
+            }
+
+            if (shouldAcceptClusterFollowUp(state, dataEvent?.sender?.sender_id?.open_id || "")) {
+              await handleUserText(chatId, state, userText);
               return;
             }
 
