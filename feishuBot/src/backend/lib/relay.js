@@ -468,7 +468,7 @@ function createRelayController(ctx) {
           targetMachineId: selfProfile.machineId || "",
         });
         if (message) {
-          await handleUserText(chatId, state, message);
+          await handleUserText(chatId, state, message, dataEvent?.sender?.sender_id?.open_id || "");
         }
         return true;
       }
@@ -521,7 +521,7 @@ function createRelayController(ctx) {
         state.queuedCodexTasks = [];
         state.hasActiveSession = true;
       }
-      await handleUserText(chatId, state, nextMessage);
+      await handleUserText(chatId, state, nextMessage, dataEvent?.sender?.sender_id?.open_id || "");
       return true;
     }
 
@@ -557,7 +557,7 @@ function createRelayController(ctx) {
     return true;
   }
 
-  async function handleUserText(chatId, state, userText) {
+  async function handleUserText(chatId, state, userText, senderOpenId = "") {
     const normalizedText = userText.toLowerCase();
 
     if (normalizedText.startsWith("!upload ")) {
@@ -590,6 +590,7 @@ function createRelayController(ctx) {
       state.resumeChatCandidates = [];
       state.waitingForQueueSelection = false;
       state.queuedCodexTasks = [];
+      markClusterFocus(state, senderOpenId);
       await sendModeOptions(chatId);
       return;
     }
@@ -637,6 +638,7 @@ function createRelayController(ctx) {
       state.hasActiveSession = true;
       state.pendingNewThread = false;
       state.currentThreadId = selected.threadId || "";
+      markClusterFocus(state, senderOpenId);
       stateStore.setChatSessionId(chatId, state, selected.sessionId, selected.chatName);
       await sendTextMessage(chatId, `Resumed Codex session from "${selected.chatName}". Send your message.`);
       return;
@@ -654,6 +656,7 @@ function createRelayController(ctx) {
         state.waitingForQueueSelection = false;
         state.queuedCodexTasks = [];
         await codexRunner.startNewCodexSession(chatId, state);
+        markClusterFocus(state, senderOpenId);
         return;
       }
 
@@ -864,7 +867,7 @@ function createRelayController(ctx) {
             }
 
             if (shouldAcceptClusterFollowUp(state, dataEvent?.sender?.sender_id?.open_id || "")) {
-              await handleUserText(chatId, state, userText);
+              await handleUserText(chatId, state, userText, dataEvent?.sender?.sender_id?.open_id || "");
               return;
             }
 
