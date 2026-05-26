@@ -464,29 +464,35 @@ function createCodexRunner(ctx) {
 
       let messageText = finalMessage;
       let usedInChatTagFallback = false;
+      let handledSelfRelayDirective = false;
       const relayDirective = extractRelayDirective ? extractRelayDirective(finalMessage, state) : null;
       if (relayDirective) {
         const relayTargetResolution = clusterRuntime && typeof clusterRuntime.resolveTarget === "function"
           ? clusterRuntime.resolveTarget(relayDirective.targetToken)
           : { status: "miss", targetToken: relayDirective.targetToken };
-        const relayTargetToken = relayTargetResolution.status === "match" && relayTargetResolution.machineId
-          ? relayTargetResolution.machineId
-          : relayDirective.targetToken;
+        if (relayTargetResolution.status === "match" && relayTargetResolution.scope === "self") {
+          messageText = stripDirectiveLines(finalMessage) || relayDirective.message;
+          handledSelfRelayDirective = true;
+        } else {
+          const relayTargetToken = relayTargetResolution.status === "match" && relayTargetResolution.machineId
+            ? relayTargetResolution.machineId
+            : relayDirective.targetToken;
 
-        await sendTextMessage(chatId, `@${relayTargetToken}: ${relayDirective.message}`, {
-          source_chat_id: chatId,
-          source_codex_session_id: state.codexResponseId || codexSessionId || "",
-          direct_message: false,
-          relay_target_token: relayDirective.targetToken,
-          relay_target_machine_id: relayTargetResolution.machineId || "",
-          relay_target_machine_alias: relayTargetResolution.alias || "",
-          relay_target_mention_id: relayTargetResolution.mentionId || "",
-          relay_target_relay_chat_id: relayTargetResolution.relayChatId || "",
-          codex_directive: "RELAY_MACHINE",
-        });
-        messageText = stripDirectiveLines(finalMessage);
-        if (!messageText) {
-          return;
+          await sendTextMessage(chatId, `@${relayTargetToken}: ${relayDirective.message}`, {
+            source_chat_id: chatId,
+            source_codex_session_id: state.codexResponseId || codexSessionId || "",
+            direct_message: false,
+            relay_target_token: relayDirective.targetToken,
+            relay_target_machine_id: relayTargetResolution.machineId || "",
+            relay_target_machine_alias: relayTargetResolution.alias || "",
+            relay_target_mention_id: relayTargetResolution.mentionId || "",
+            relay_target_relay_chat_id: relayTargetResolution.relayChatId || "",
+            codex_directive: "RELAY_MACHINE",
+          });
+          messageText = stripDirectiveLines(finalMessage);
+          if (!messageText) {
+            return;
+          }
         }
       }
 
@@ -530,7 +536,9 @@ function createCodexRunner(ctx) {
         await uploadFileToChat(chatId, uploadDirective);
       }
 
-      messageText = stripDirectiveLines(finalMessage);
+      if (!handledSelfRelayDirective) {
+        messageText = stripDirectiveLines(finalMessage);
+      }
       if (usedInChatTagFallback && !messageText) {
         return;
       }
