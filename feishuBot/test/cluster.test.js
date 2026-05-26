@@ -365,14 +365,17 @@ test("hello handshake records peers and replies once", async () => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
-test("targeted user messages only run on the addressed machine", async () => {
+test("peer-targeted messages forward to the peer relay chat", async () => {
   const root = makeTempDir();
   const bus = createBus();
+  const alphaRelayChatId = "alpha-relay";
+  const bravoRelayChatId = "bravo-relay";
 
   const alpha = createHarness({
     name: "alpha",
     alias: "alpha",
     machineId: "aaaa1111-aaaa-1111-aaaa-111111111111",
+    clusterChatId: alphaRelayChatId,
     bus,
     statePath: path.join(root, "alpha-state.json"),
   });
@@ -380,24 +383,31 @@ test("targeted user messages only run on the addressed machine", async () => {
     name: "bravo",
     alias: "bravo",
     machineId: "bbbb2222-bbbb-2222-bbbb-222222222222",
+    clusterChatId: bravoRelayChatId,
     bus,
     statePath: path.join(root, "bravo-state.json"),
   });
 
-  await alpha.clusterRuntime.announceHello("hub");
+  alpha.clusterRuntime.recordHello({
+    machineId: bravo.machineId,
+    alias: bravo.alias,
+    mentionId: "ou_bravo",
+    hostname: "bravo-host",
+    bootId: "boot-bravo",
+    announceId: "announce-bravo",
+  }, {
+    chatId: bravoRelayChatId,
+    senderOpenId: "ou_bravo",
+  });
+
   alpha.sentMessages.length = 0;
   bravo.sentMessages.length = 0;
   alpha.codexCalls.length = 0;
   bravo.codexCalls.length = 0;
 
-  alpha.stateStore.getChatState("hub").isArmed = true;
-  alpha.stateStore.getChatState("hub").hasActiveSession = true;
-  bravo.stateStore.getChatState("hub").isArmed = true;
-  bravo.stateStore.getChatState("hub").hasActiveSession = true;
-
   await bus.broadcast({
     senderName: "human",
-    chatId: "hub",
+    chatId: alphaRelayChatId,
     text: "@bravo: ping",
     senderType: "user",
   });
@@ -405,7 +415,15 @@ test("targeted user messages only run on the addressed machine", async () => {
   assert.equal(alpha.codexCalls.length, 0);
   assert.equal(bravo.codexCalls.length, 1);
   assert.equal(bravo.codexCalls[0].text, "ping");
-  assert.equal(alpha.sentMessages.some((entry) => /Use @alias: message/.test(entry.text)), false);
+  assert.equal(
+    alpha.sentMessages.some((entry) =>
+      entry.chatId === bravoRelayChatId &&
+      entry.meta &&
+      entry.meta.relay_forwarded === true &&
+      entry.meta.relay_forward_target_machine_id === bravo.machineId,
+    ),
+    true,
+  );
 
   fs.rmSync(root, { recursive: true, force: true });
 });
@@ -413,12 +431,15 @@ test("targeted user messages only run on the addressed machine", async () => {
 test("targeted user messages resolve machine mention ids", async () => {
   const root = makeTempDir();
   const bus = createBus();
+  const alphaRelayChatId = "alpha-relay";
+  const bravoRelayChatId = "bravo-relay";
 
   const alpha = createHarness({
     name: "alpha",
     alias: "alpha",
     machineId: "aaaa1111-aaaa-1111-aaaa-111111111111",
     mentionId: "ou_alpha_target",
+    clusterChatId: alphaRelayChatId,
     bus,
     statePath: path.join(root, "alpha-state.json"),
   });
@@ -427,24 +448,31 @@ test("targeted user messages resolve machine mention ids", async () => {
     alias: "bravo",
     machineId: "bbbb2222-bbbb-2222-bbbb-222222222222",
     mentionId: "ou_bravo_target",
+    clusterChatId: bravoRelayChatId,
     bus,
     statePath: path.join(root, "bravo-state.json"),
   });
 
-  await alpha.clusterRuntime.announceHello("hub");
+  alpha.clusterRuntime.recordHello({
+    machineId: bravo.machineId,
+    alias: bravo.alias,
+    mentionId: "ou_bravo_target",
+    hostname: "bravo-host",
+    bootId: "boot-bravo",
+    announceId: "announce-bravo",
+  }, {
+    chatId: bravoRelayChatId,
+    senderOpenId: "ou_bravo_target",
+  });
+
   alpha.sentMessages.length = 0;
   bravo.sentMessages.length = 0;
   alpha.codexCalls.length = 0;
   bravo.codexCalls.length = 0;
 
-  alpha.stateStore.getChatState("hub").isArmed = true;
-  alpha.stateStore.getChatState("hub").hasActiveSession = true;
-  bravo.stateStore.getChatState("hub").isArmed = true;
-  bravo.stateStore.getChatState("hub").hasActiveSession = true;
-
   await bus.broadcast({
     senderName: "human",
-    chatId: "hub",
+    chatId: alphaRelayChatId,
     text: "@ou_bravo_target: ping",
     senderType: "user",
   });
@@ -452,6 +480,15 @@ test("targeted user messages resolve machine mention ids", async () => {
   assert.equal(alpha.codexCalls.length, 0);
   assert.equal(bravo.codexCalls.length, 1);
   assert.equal(bravo.codexCalls[0].text, "ping");
+  assert.equal(
+    alpha.sentMessages.some((entry) =>
+      entry.chatId === bravoRelayChatId &&
+      entry.meta &&
+      entry.meta.relay_forwarded === true &&
+      entry.meta.relay_forward_target_mention_id === "ou_bravo_target",
+    ),
+    true,
+  );
 
   fs.rmSync(root, { recursive: true, force: true });
 });

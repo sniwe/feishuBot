@@ -210,6 +210,7 @@ function createClusterStateManager(ctx) {
       lastReplyToAnnounceId: typeof patch.replyToAnnounceId === "string" ? patch.replyToAnnounceId.trim() : existing.lastReplyToAnnounceId || "",
       lastMessageType: typeof patch.messageType === "string" ? patch.messageType.trim() : existing.lastMessageType || "",
       sourceChatId: typeof patch.chatId === "string" ? patch.chatId.trim() : existing.sourceChatId || "",
+      relayChatId: typeof patch.relayChatId === "string" ? patch.relayChatId.trim() : typeof patch.chatId === "string" ? patch.chatId.trim() : existing.relayChatId || "",
       mentionId: typeof peer.mentionId === "string" ? peer.mentionId.trim() : existing.mentionId || "",
       openId: typeof patch.senderOpenId === "string" ? patch.senderOpenId.trim() : typeof peer.openId === "string" ? peer.openId.trim() : existing.openId || "",
     };
@@ -232,6 +233,16 @@ function createClusterStateManager(ctx) {
 
     current.knownPeers[machineId] = nextPeer;
     current.lastSeenAt = now;
+
+    if (relayDirectory && typeof relayDirectory.upsertMachine === "function") {
+      relayDirectory.upsertMachine(nextPeer, {
+        chatId: nextPeer.sourceChatId || "",
+        relayChatId: nextPeer.relayChatId || "",
+        senderOpenId: nextPeer.openId || "",
+        messageType: nextPeer.lastMessageType || "",
+      });
+    }
+
     saveState();
     return nextPeer;
   }
@@ -428,6 +439,7 @@ function createClusterStateManager(ctx) {
     const peer = upsertPeer(payload, {
       messageType: "hello",
       chatId: meta.chatId || "",
+      relayChatId: meta.chatId || "",
       replyToAnnounceId: announceId,
       senderOpenId: meta.senderOpenId || "",
     });
@@ -457,6 +469,7 @@ function createClusterStateManager(ctx) {
     const peer = upsertPeer(payload, {
       messageType: "identity",
       chatId: meta.chatId || "",
+      relayChatId: meta.chatId || "",
       replyToAnnounceId: payload.replyToAnnounceId || "",
       senderOpenId: meta.senderOpenId || "",
     });
@@ -484,6 +497,7 @@ function createClusterStateManager(ctx) {
     const peer = upsertPeer(payload, {
       messageType: "goodbye",
       chatId: meta.chatId || "",
+      relayChatId: meta.chatId || "",
       senderOpenId: meta.senderOpenId || "",
     });
 

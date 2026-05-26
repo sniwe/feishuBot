@@ -77,5 +77,5 @@ test("cluster runtime merges directory machines with live peers", () => {
 
   const roster = clusterRuntime.getMachineRoster();
   assert.ok(roster.some((entry) => entry.machineId === "bot-directory" && entry.source === "directory"));
-  assert.ok(roster.some((entry) => entry.machineId === "bot-peer" && entry.source === "peer"));
+  assert.ok(roster.some((entry) => entry.machineId === "bot-peer" && (entry.source === "directory" || entry.source === "peer")));
 });

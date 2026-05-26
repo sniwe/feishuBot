@@ -296,6 +296,69 @@ function createRelayController(ctx) {
     );
   }
 
+  function getRelayForwardSenderOpenId(profile = {}) {
+    return (
+      (typeof profile.openId === "string" && profile.openId.trim()) ||
+      (typeof profile.mentionId === "string" && profile.mentionId.trim()) ||
+      ""
+    );
+  }
+
+  async function forwardPeerTarget(dataEvent, chatId, targetResolution, targetToken, message, meta = {}) {
+    const relayChatId = typeof targetResolution?.relayChatId === "string"
+      ? targetResolution.relayChatId.trim()
+      : typeof targetResolution?.entry?.relayChatId === "string"
+        ? targetResolution.entry.relayChatId.trim()
+        : typeof targetResolution?.peer?.relayChatId === "string"
+          ? targetResolution.peer.relayChatId.trim()
+          : "";
+
+    if (!relayChatId) {
+      logCluster("target-miss", {
+        chatId,
+        messageId: dataEvent?.message?.message_id || "",
+        eventId: dataEvent?.event_id || "",
+        targetToken,
+        targetMachineId: targetResolution?.machineId || "",
+        reason: "missing-relay-chat",
+      });
+      return true;
+    }
+
+    const selfProfile = typeof clusterRuntime.getProfile === "function" ? clusterRuntime.getProfile() : localProfile;
+    const relayTargetToken = targetResolution?.machineId || targetToken;
+    const relayMessage = `@${relayTargetToken}: ${message}`;
+    const relayMeta = {
+      source_chat_id: chatId,
+      relay_forwarded: true,
+      relay_forward_path: "peer",
+      relay_forward_source_chat_id: chatId,
+      relay_forward_target_token: targetToken,
+      relay_forward_target_machine_id: targetResolution?.machineId || "",
+      relay_forward_target_alias: targetResolution?.alias || "",
+      relay_forward_target_mention_id: targetResolution?.mentionId || "",
+      relay_forward_target_open_id: targetResolution?.openId || "",
+      relay_forward_target_relay_chat_id: relayChatId,
+      relay_forwarded_by_machine_id: selfProfile.machineId || "",
+      relay_forwarded_by_alias: selfProfile.alias || "",
+      sender_open_id: getRelayForwardSenderOpenId(selfProfile),
+      ...meta,
+    };
+
+    await sendTextMessage(relayChatId, relayMessage, relayMeta);
+    logCluster("target-forward", {
+      chatId,
+      relayChatId,
+      targetToken,
+      targetMachineId: targetResolution?.machineId || "",
+      targetAlias: targetResolution?.alias || "",
+      targetMentionId: targetResolution?.mentionId || "",
+      targetOpenId: targetResolution?.openId || "",
+      path: "peer",
+    });
+    return true;
+  }
+
   async function handleQueuedCodexSelection(chatId, state, userText) {
     const normalizedText = (userText || "").trim().toLowerCase();
     const tasks = getQueuedCodexTasks(state);
@@ -465,6 +528,24 @@ function createRelayController(ctx) {
         return true;
       }
 
+      if (targetResolution.status === "match" && targetResolution.scope !== "self") {
+        if (!message) {
+          logCluster("target-miss", {
+            chatId,
+            senderMachineId: payload.machineId || "",
+            targetToken,
+            reason: "empty-message",
+          });
+          return true;
+        }
+
+        return forwardPeerTarget(dataEvent, chatId, targetResolution, targetToken, message, {
+          source_protocol: "target",
+          source_machine_id: payload.machineId || "",
+          source_alias: payload.alias || "",
+        });
+      }
+
       if (targetResolution.status === "ambiguous" || targetResolution.status === "miss" || targetResolution.status === "invalid") {
         logCluster("target-miss", {
           chatId,
@@ -519,6 +600,26 @@ function createRelayController(ctx) {
       return true;
     }
 
+    if (targetResolution.status === "match" && targetResolution.scope !== "self") {
+      if (!target.message) {
+        logCluster("target-miss", {
+          chatId,
+          messageId: dataEvent?.message?.message_id || "",
+          eventId: dataEvent?.event_id || "",
+          targetToken: target.targetToken,
+          reason: "empty-message",
+        });
+        return true;
+      }
+
+      return forwardPeerTarget(dataEvent, chatId, targetResolution, target.targetToken, target.message, {
+        source_message_id: dataEvent?.message?.message_id || "",
+        source_event_id: dataEvent?.event_id || "",
+        source_sender_machine_id: senderInfo.senderMachineId || "",
+        source_sender_open_id: senderInfo.senderOpenId || "",
+      });
+    }
+
     if (targetResolution.status === "ambiguous") {
       logCluster("target-miss", {
         chatId,
@@ -541,13 +642,6 @@ function createRelayController(ctx) {
       return true;
     }
 
-    logCluster("target-miss", {
-      chatId,
-      messageId: dataEvent?.message?.message_id || "",
-      eventId: dataEvent?.event_id || "",
-      targetToken: target.targetToken,
-      reason: "other-machine",
-    });
     return true;
   }
 

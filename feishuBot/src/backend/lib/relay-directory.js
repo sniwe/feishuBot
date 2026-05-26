@@ -258,6 +258,8 @@ function createRelayDirectory(ctx) {
         machineId: selfMachineId,
         alias: selfAlias,
         mentionId: selfMentionId,
+        openId: selfMentionId,
+        relayChatId: typeof profile.clusterChatId === "string" ? profile.clusterChatId.trim() : "",
       };
     }
 
@@ -269,6 +271,8 @@ function createRelayDirectory(ctx) {
         machineId: selfMachineId,
         alias: selfAlias,
         mentionId: selfMentionId,
+        openId: selfMentionId,
+        relayChatId: typeof profile.clusterChatId === "string" ? profile.clusterChatId.trim() : "",
       };
     }
 
@@ -288,6 +292,9 @@ function createRelayDirectory(ctx) {
         source: "self",
         machineId: selfMachineId,
         alias: selfAlias,
+        mentionId: selfMentionId,
+        openId: selfMentionId,
+        relayChatId: typeof profile.clusterChatId === "string" ? profile.clusterChatId.trim() : "",
       };
     }
 

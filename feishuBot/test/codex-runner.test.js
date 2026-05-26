@@ -64,7 +64,10 @@ test("codex runner recognizes machine relay directives before human DM directive
 
   const relayDirective = runner.extractRelayDirective("@atlas: answer the ping", {});
   assert.ok(relayDirective);
+  assert.equal(relayDirective.targetToken, "atlas");
   assert.equal(relayDirective.machineId, "bot-peer");
+  assert.equal(relayDirective.message, "answer the ping");
+  assert.equal(relayDirective.raw, "@atlas: answer the ping");
 
   const noRelayDirective = runner.extractRelayDirective("@ou_human: answer the ping", {});
   assert.equal(noRelayDirective, null);

@@ -465,12 +465,22 @@ function createCodexRunner(ctx) {
       let usedInChatTagFallback = false;
       const relayDirective = extractRelayDirective ? extractRelayDirective(finalMessage, state) : null;
       if (relayDirective) {
-        await sendTextMessage(chatId, `@${relayDirective.machineId}: ${relayDirective.message}`, {
+        const relayTargetResolution = clusterRuntime && typeof clusterRuntime.resolveTarget === "function"
+          ? clusterRuntime.resolveTarget(relayDirective.targetToken)
+          : { status: "miss", targetToken: relayDirective.targetToken };
+        const relayTargetToken = relayTargetResolution.status === "match" && relayTargetResolution.machineId
+          ? relayTargetResolution.machineId
+          : relayDirective.targetToken;
+
+        await sendTextMessage(chatId, `@${relayTargetToken}: ${relayDirective.message}`, {
           source_chat_id: chatId,
           source_codex_session_id: state.codexResponseId || codexSessionId || "",
           direct_message: false,
-          relay_target_machine_id: relayDirective.machineId,
-          relay_target_machine_alias: relayDirective.alias || "",
+          relay_target_token: relayDirective.targetToken,
+          relay_target_machine_id: relayTargetResolution.machineId || "",
+          relay_target_machine_alias: relayTargetResolution.alias || "",
+          relay_target_mention_id: relayTargetResolution.mentionId || "",
+          relay_target_relay_chat_id: relayTargetResolution.relayChatId || "",
           codex_directive: "RELAY_MACHINE",
         });
         messageText = stripDirectiveLines(finalMessage);

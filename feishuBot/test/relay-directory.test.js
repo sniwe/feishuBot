@@ -39,6 +39,40 @@ test("relay directory resolves directory machines before peer collisions", () =>
   assert.equal(resolution.machineId, "bot-directory");
 });
 
+test("relay directory resolves peer machines with relay chat metadata", () => {
+  const tempDir = makeTempDir("feishuBot-relay-directory-");
+  const directoryPath = path.join(tempDir, "machine-directory.json");
+  const relayDirectory = createRelayDirectory({
+    data: { directoryPath },
+    deps: { fs, path, console },
+  });
+
+  relayDirectory.upsertMachine({
+    machineId: "bot-peer",
+    alias: "atlas",
+    mentionId: "ou_peer",
+    openId: "ou_peer",
+    relayChatId: "chat-peer",
+    status: "active",
+  });
+
+  const resolution = relayDirectory.resolveTarget("atlas", {
+    profile: { machineId: "bot-self", alias: "self", mentionId: "ou_self", clusterChatId: "chat-self" },
+    directoryEntries: [],
+    peers: [
+      { machineId: "bot-peer", alias: "atlas", mentionId: "ou_peer", openId: "ou_peer", relayChatId: "chat-peer" },
+    ],
+  });
+
+  assert.equal(resolution.status, "match");
+  assert.equal(resolution.scope, "peer");
+  assert.equal(resolution.machineId, "bot-peer");
+  assert.equal(resolution.alias, "atlas");
+  assert.equal(resolution.mentionId, "ou_peer");
+  assert.equal(resolution.openId, "ou_peer");
+  assert.equal(resolution.relayChatId, "chat-peer");
+});
+
 test("relay directory resolves sender open ids back to machine ids", () => {
   const tempDir = makeTempDir("feishuBot-relay-directory-");
   const directoryPath = path.join(tempDir, "machine-directory.json");
