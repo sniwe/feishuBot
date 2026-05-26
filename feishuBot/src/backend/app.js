@@ -255,11 +255,76 @@ const codexStatusPoller = createCodexStatusPoller({
   },
 });
 
-codexStatusPoller.start();
-wsClient.start({ eventDispatcher });
-void clusterRuntime.announceHello(clusterProfile.clusterChatId || CLUSTER_CHAT_ID).catch((err) => {
-  console.error("Failed to send cluster hello:", err.message);
-});
+function isProcessAlive(pid) {
+  const cleanedPid = Number(pid);
+  if (!Number.isInteger(cleanedPid) || cleanedPid <= 0) {
+    return false;
+  }
+
+  try {
+    process.kill(cleanedPid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function clearStaleCodexStatus() {
+  if (!fs.existsSync(CODEX_STATUS_PATH)) {
+    return;
+  }
+
+  let status = null;
+  try {
+    status = JSON.parse(fs.readFileSync(CODEX_STATUS_PATH, "utf8"));
+  } catch (err) {
+    console.error("Failed to read Codex status file:", err.message);
+    return;
+  }
+
+  if (!status?.busy) {
+    return;
+  }
+
+  if (isProcessAlive(status.processId)) {
+    return;
+  }
+
+  const clearedStatus = {
+    ...status,
+    busy: false,
+    processId: null,
+    codexSessionId: "",
+    statusMessageId: "",
+    startedAt: "",
+    statusEditCount: 0,
+    updatedAt: new Date().toISOString(),
+  };
+
+  try {
+    fs.writeFileSync(CODEX_STATUS_PATH, JSON.stringify(clearedStatus, null, 2), "utf8");
+  } catch (err) {
+    console.error("Failed to clear stale Codex status:", err.message);
+    return;
+  }
+
+  if (status.statusMessageId) {
+    try {
+      await deleteTextMessage(status.statusMessageId);
+    } catch (err) {
+      console.error("Failed to delete stale Codex working message:", err.message);
+    }
+  }
+}
+
+void (async () => {
+  await clearStaleCodexStatus();
+  codexStatusPoller.start();
+  wsClient.start({ eventDispatcher });
+  void clusterRuntime.announceHello(clusterProfile.clusterChatId || CLUSTER_CHAT_ID).catch((err) => {
+    console.error("Failed to send cluster hello:", err.message);
+  });
+})();
 
 let shutdownStarted = false;
 async function gracefulShutdown(reason) {
